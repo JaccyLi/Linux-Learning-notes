@@ -459,8 +459,39 @@ exit
 [root@centos7 ~]$echo $$                        # 此时$$记录1848
 1848
 ```
-> # [()] 圆括号可以用来执行其包括的一组命令，各个命令使用分号；隔开
+> # [()] 圆括号
+
+**1.圆括号可以用来执行其包括的一组命令，各个命令使用分号；隔开**
 ```bash
 [root@centos7 ~]$(a=hello; echo $a)
 hello
+```
+- 注意；结构(command1;command2)中，shell会生成一个子shell进程来运行括号内的多个命令。括号内的变量(子shell中)不被括号外的命令读取，父进程(父shell)无法读取子进程的变量。
+
+```bash
+a=123
+( a=321; )            
+echo "a = $a"   # a = 123
+# "a" 可视为本地变量.
+```
+
+**2.圆括号用于初始化数组**
+```bash
+Array=(element1 element2 element3)
+```
+
+> # [{xxx,yyy,zzz,...}] 花括号展开
+**1.有如下用法**
+```bash
+echo \"{These,words,are,quoted}\"   # " 添加前缀和后缀(prefix and suffix)
+# "These" "words" "are" "quoted"
+cat {file1,file2,file3} > combined_file
+# 链接三个文件 file1, file2, and file3 成一个文件combined_file.
+cp file22.{txt,backup}
+# Copies "file22.txt" to "file22.backup"
+```
+**2.使用花括号展开时如果包含空格需要转义**
+```bash
+[root@centos7 /data/test]$echo {file1,file2}\ :{\ A," B",' C'}
+file1 : A file1 : B file1 : C file2 : A file2 : B file2 : C
 ```
