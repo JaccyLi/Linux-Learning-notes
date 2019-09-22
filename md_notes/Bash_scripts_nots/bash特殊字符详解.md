@@ -294,7 +294,7 @@ drwxr-xr-x. 2 root root    6 Aug 24 13:06 Videos
 [root@centos7 ~]$
 ```
 > #  [asterisk] * 星号通配符
-**1.星号在文件名通配操作中扮演通配符的角色，表示匹配某文件夹下的所有文件名**
+**1.星号在文件名通配操作中扮演通配符的角色，表示匹配某文件夹下的所有文件名；与其他具体字符结合表示匹配0个或者多个任意字符**
 ```bash
 [root@centos7 /data]$ echo *
 c_program py_scripts rpmPacksges scripts test test_scripts ttt.sh
@@ -358,11 +358,88 @@ filelist.bash4
 #   var0=21
 # fi
 ```
-3.在参数替换表达式中，问号表示某变量是否已经存在
+**3.在参数替换表达式中，问号表示某变量是否已经存在**
 ```bash
 ${paramseter?err_msg}, ${parameter:?err_msg}
 # 如果parameter已经存在，就使用其；否则打印err_msg退出脚本，并且退出状态为1
-# 上面两种写法几乎同等，后面写法中的冒号表示如果
-If parameter set, use it, else print err_msg and abort the script with an exit status of 1.
-Both forms nearly equivalent. The : makes a difference only when parameter has been declared
-and is null, as above.
+# 上面两种写法几乎同等，后面写法中的冒号表示只有当parameter已经被声明且为空时(null)就使用
+```
+**4.作为通配符，在文件名通配中表示匹配任何当个字符；在扩展正则表达式中表示匹配其前面的某单个字符。**
+> # [$] 变量替换符(获取一个变量所存储的内容)
+```bash
+[root@centos7 /data/globbing]$var1=123
+[root@centos7 /data/globbing]$var2=hello
+[root@centos7 /data/globbing]$echo $var1; echo $var2
+123
+hello
+```
+> # [$] end-of-line 在正则达式中表匹配文本的行结束位置，常用于锚定；在linux系统中文本文件的行结束符也是\$
+```bash
+[root@centos7 /data/globbing]$ls |grep '.*[0-9]$'  # 表示匹配以数字结尾的文件名
+10file.1
+10file.2
+1SdsflDSLFsdf677671
+1SdsflDSLFsdf677672
+{a-z}dsf3adsf1
+DSdsflDSLFsdf677671
+[root@centos7 /data/globbing]$ls |grep '.*[a-zA-Z]$'   # 表示匹配以字母结尾的文件名
+10file.txt
+1SdsflDSLFsdf67767A
+1SdsflDSLFsdf67767B
+a123321a
+A123321A
+a123321b
+```
+```bash
+[root@centos7 /data/globbing]$echo hello > 10file.1
+[root@centos7 /data/globbing]$cat -A 10file.1
+hello$                                            # cat -A 查看文本的不可打印字符，包括tab键和行结束符$等。
+```
+> # [${}] 参数替换符,获取花括号中的变量所存储的内容；几乎和\$等同，在某些情况下使用\${}(例如：使用字符串连接不同的变量所存储的内容)
+
+```bash
+[root@centos7 /data/globbing]$echo $USER      # 环境变量USER，保存有当前用户的用户名，使用$USER获取
+root
+[root@centos7 /data/globbing]$echo ${USER}    # 此处功能同$
+root
+[root@centos7 /data/globbing]$your_id=${USER}-on-${HOSTNAME}    # 此处使用'-on-' 将USER和HOSTNAME存储的内容连接起来；获取它们的内容必须用${}
+[root@centos7 /data/globbing]$echo "$your_id"
+root-on-centos7.magedu.steve                 # 连接后的结果
+```
+> # [$' ... ']
+- 该结构将展开单个或多个被转义的8进制或者16进制的值并转换为ASCII码或者Unicode字符：
+```bash
+[steve@centos7 ~]$echo $'\x21'
+!
+[steve@centos7 ~]$echo $'\x22'                # 十六进制x22代表ASCII码中的双引号 "
+"
+[steve@centos7 ~]$echo $'\037'
+
+```
+
+> # [$*, $@] 位置参数，存储所有的位置参数，有区别
+- $* 将所有位置参数视为单个字符串
+- $@ 每个位置参数存储为单独引用的字符串，分开对待每个位置参数
+  
+> # [$?] 该环境变量存储退出状态；可以是命令、函数或者脚本的退出状态
+- 脚本的退出状态为脚本中最后一条命令的退出状态
+- 函数退出状态也为最后一条命令的退出状态
+- 一般成功执行退出状态为0；命令执行失败退出状态为1-255之间的整数.
+```bash
+[root@centos7 /data/test]$cat exit_status.sh 
+#!/bin/bash
+echo hello
+echo $?    # 打印hello成功，放回的退出状态值为0.
+lskdf      # Unrecognized command.
+echo $?    # 无该命令命令，执行失败，退出状态非0.
+echo
+exit 113   # 脚本结束后使用echo $? 查看，脚本退出状态为113.
+[root@centos7 /data/test]$bash exit_status.sh 
+hello
+0
+exit_status.sh: line 4: lskdf: command not found
+127
+[root@centos7 /data/test]$echo $?
+113
+```
+
