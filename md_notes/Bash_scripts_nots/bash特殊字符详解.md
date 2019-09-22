@@ -34,6 +34,11 @@ echo The \# here does not begin a comment.
 echo The # here begins a comment.
 echo ${PATH#*:}       # 参数替换，不是注释
 echo $(( 2#101011 ))  # 数制转换，不是注释
+
+[root@centos7 /data/test]$echo ${PATH#*:} 
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+[root@centos7 /data/test]$echo ${PATH}    
+/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
 ``` 
 **6.标准的单双引用符号和转义符号("'\/)都能转义#号**
 
@@ -442,4 +447,20 @@ exit_status.sh: line 4: lskdf: command not found
 [root@centos7 /data/test]$echo $?
 113
 ```
+> # [$$] 为PID变量，存储其出现在的脚本所属的进程的进程号
 
+```bash
+[root@centos7 ~]$pstree -p |grep sshd.*bash
+           |-sshd(1164)---sshd(1842)---bash(1848)---bash(6007)-+-grep(6043)
+[root@centos7 ~]$echo $$                        # 当前所在bash进程为6007
+6007
+[root@centos7 ~]$exit                           # 退出6007号bash进程
+exit
+[root@centos7 ~]$echo $$                        # 此时$$记录1848
+1848
+```
+> # [()] 圆括号可以用来执行其包括的一组命令，各个命令使用分号；隔开
+```bash
+[root@centos7 ~]$(a=hello; echo $a)
+hello
+```
