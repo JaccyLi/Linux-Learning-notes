@@ -1,0 +1,132 @@
+> whatis : 简单列出命令的作用，并给出该命令的man章节
+依赖于数据库，系统新安装后自行建立的数据库；手动生成可以使用makewhatis(centos6)或者mandb(centos7)
+
+> type 判断内部还是外部命令
+> > 内部命令 help command
+> > 外部命令 whatis --> command --help --> man -f -k ...
+
+
+> .bash_history
+用户退出后系统会把内存中的命令历史存储到其中
+
+
+whatis  --> 命令所在章节
+whereis --> 命令和doc所在地
+which   --> 显示外部命令所在路径
+
+
+date -d '-2 day' +%u
+
+
+man 1 man  
+1：用户命令 
+2：系统调用 
+3：C库调用 
+4：设备文件及特殊文件 
+5：配置文件格式 
+6：游戏 
+7：杂项 
+8：管理类的命令 
+9：Linux 内核API  
+
+
+相似的特殊字符
+
+$(command)=`command`
+$var=${var}
+
+
+touch access_`date -d '-1 day' +%F`.log
+
+
+bash的快捷键 
+
+Ctrl + a 
+		光标移到命令行首，相当于Home 
+Ctrl + e 
+		光标移到命令行尾，相当于End 
+Ctrl + f 
+		光标向右移动一个字符 
+Ctrl + b 
+		光标向左移动一个字符 
+Alt + f 
+		光标向右移动一个单词尾 
+Alt + b 
+		光标向左移动一个单词首 
+Ctrl + xx 
+		光标在命令行首和光标之间移动 
+Ctrl + u 
+		从光标处删除至命令行首 
+Ctrl + k 
+		从光标处删除至命令行尾 
+Alt + r      
+		删除当前整行 
+
+Ctrl + w 
+		从光标处向左删除至单词首 
+Alt + d 
+		从光标处向右删除至单词尾 
+Ctrl + d 
+		删除光标处的一个字符 
+Ctrl + h 
+		删除光标前的一个字符 
+Ctrl + y 
+		将删除的字符粘贴至光标后 
+Alt + c 
+		从光标处开始向右更改为首字母大写的单词 
+Alt + u 
+		从光标处开始，将右边一个单词更改为大写 
+Alt + l 
+		从光标处开始，将右边一个单词更改为小写 
+Ctrl + t 
+		交换光标处和之前的字符位置 
+Alt + t 
+	交换光标处和之前的单词位置 
+Alt + N 
+		提示输入指定字符后，重复显示该字符N次 
+注意：Alt组合快捷键经常和其它软件冲突 
+
+
+
+字符设备：顺序访问
+块设备：随机访问
+
+basename  /PATH/TO/FILE
+FILE
+
+dirname   /PATH/TO/FILE
+/PATH/TO
+
+
+PS1=\[\e[37;40m\][\[\e[1;32;40m\]\u\[\e[1;32;40m\]@\h\[\e[1;36;40m\]\w\[\e[0m\]]$
+
+
+
+文件的三个时间戳： 
+
+access time 
+访问时间，atime，读取文件内容    
+注意：访问时间间隔一天以上，访问文件后才会更新访问时间
+
+modify time 
+修改时间, mtime，改变文件内容（数据）
+
+change time 
+改变时间, ctime，元数据发生改变 
+
+
+查看三个时间：stat file1
+
+
+ls -d /etc/*/   #查看所有文件夹，包括子文件夹
+
+
+
+screen -S show
+
+
+绝对路径
+相对路径
+
+
+
