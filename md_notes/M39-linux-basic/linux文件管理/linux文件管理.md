@@ -7,6 +7,7 @@
 ![linux文件目录结构](png/2019-09-24-10-06-37.png)
 
 ## 2.linux文件系统简述
+
 - linux系统下文件和目录被组织成一个单根倒置的树状结构
 文件系统从根目录下开始，用“/”表示
 - 根文件系统(rootfs)：root filesystem
@@ -20,6 +21,7 @@ FHS: (Filesystem Hierarchy Standard) 该标准由文件系统层级标准组定�
 - FHS:该标准提供了一些在类unix系统下如何安排文件和目录的一些指导和要求；目的在于支持应用程序、系统管理工具、开发工具和脚本的互操作性及为这些系统所提供的文档的一致性。
 
 [FHS-pdf](http://www.pathname.com/fhs/)
+
 ## 3.linux下的文件命令规则
 
 - 文件名最长255个字节  
@@ -72,6 +74,7 @@ FHS: (Filesystem Hierarchy Standard) 该标准由文件系统层级标准组定�
 /selinux | security enhanced Linux，selinux相关的安全策略等信息的存储位置
 
 ## 5.Linux下文件种类及各类文件存放地
+
 - 文件类型
 
 符号 | 文件类型
@@ -83,7 +86,9 @@ c | 字符设备
 l | 符号链接文件
 p | 管道文件pipe
 s | 套接字文件socket
+
 - 下面例子中第一列第一个字符表示文件类型，如"-rw-------."中开头的"-"表示普通字符
+
 ```bash
 [root@centos7 ~]$ll
 total 112
@@ -114,7 +119,9 @@ drwxr-xr-x. 2 root root     6 Sep 20 15:05 Videos
 帮助文件 | /usr/share/man, /usr/share/doc, /usr/local/share/man, /usr/local/share/doc
 
 > # 二.linux系统下文件的创建和目录的导航等操作
+> 
 ## 1.当前工作目录相关的操作
+
 - 每个shell和系统进程都有一个当前的工作目录，用户登录后默认在自己的家目录，如:/home/alice
 - 术语CWD:current work directory  当前工作路径
 - 显示当前shell CWD的绝对路径使用：
@@ -134,7 +141,7 @@ pwd: printing working directory
 ```bash
 [root@centos7 ~]$basename /etc/sysconfig/network-scripts
 network-scripts
-[root@centos7 ~]$dirname /etc/sysconfig/network-scripts 
+[root@centos7 ~]$dirname /etc/sysconfig/network-scripts
 /etc/sysconfig
 ```
 
@@ -146,7 +153,7 @@ network-scripts
 切换至父目录： cd ..  
 切换至当前用户主目录： cd  
 切换至以前的工作目录： cd -  
-选项：-P    #使用真实的物理文件路径，不跟随符号链接文件    
+选项：-P    #使用真实的物理文件路径，不跟随符号链接文件
 相关的环境变量：  
 PWD：当前目录路径  
 OLDPWD：上一次目录路径  
@@ -233,26 +240,28 @@ Change: 2019-09-23 17:42:43.857543588 +0800
 [:xdigit:] | 十六进制字符
 
 ## 7.通配符练习
+
 ```bash
 1、显示/var目录下所有以l开头，以一个小写字母结尾，且中间出现至少一位数字的文件或目录
-    ls -a /var/l*[0-9]*[[:lower:]]
+    ls -d /var/l*[0-9]*[[:lower:]]
 2、显示/etc目录下以任意一位数字开头，且以非数字结尾的文件或目录
-    ls -a /etc/[[:digit:]]*[^[:digit:]]
+    ls -d /etc/[[:digit:]]*[^[:digit:]]
 3、显示/etc/目录下以非字母开头，后面跟了一个字母及其它任意长度任意字符的文件或目录
-    ls -a /etc/[^[:alpha:]][[:alpha:]]*
+    ls -d /etc/[^[:alpha:]][[:alpha:]]*
 4、显示/etc/目录下所有以rc开头，并后面是0-6之间的数字，其它为任意字符的文件或目录
-    ls -a /etc/rc[0-6]* -d
+    ls -d /etc/rc[0-6]*
 5、显示/etc目录下，所有以.d结尾的文件或目录
-    ls -a /etc/*.d -d
+    ls /etc/*.d -d
 6、显示/etc目录下，所有.conf结尾，且以m,n,r,p开头的文件或目录
-    ls /etc/[mnpr]*.conf
+    ls /etc/[mnpr]*.conf -d
 7、只显示/root下的隐藏文件和目录
-    ls -d .[^.]*
+    ls -d /root/.* (ls -d .[^.]*)
 8、只显示/etc下的非隐藏目录
     ls /etc/*/ -d
 ```
 
 ## 8.使用touch命令创建文件和更改文件的时间戳
+
 - touch命令  
 格式：touch [OPTION]... FILE...  
         -a 仅改变 atime和ctime  
@@ -260,14 +269,28 @@ Change: 2019-09-23 17:42:43.857543588 +0800
         -t [[CC]YY]MMDDhhmm[.ss]  
 指定atime和mtime的时间戳时加-c选项表示如果文件不存在则不新建文件
 
-
 > # 三.复制、转移和删除文件
- 
-> # 四.软和硬链接
 
 
+> # 四.练习
+
+```bash
+(1)每天将/etc/目录下所有文件，备份到/data独立的子目录下，并要求子目录格式为 backupYYYY-mm-dd，备 份过程可见
+    cp -a -v /etc /data/backup`date +%Y`
+
+(2)创建/data/rootdir目录，并复制/root下所有文件到该目录内，要求保留原有权限 mkdir /data/rootdir
+    mkdir /data/rootdir ; cp -av /root /data/rootdir
+
+(3) 如何创建/testdir/dir1/x, /testdir/dir1/y, /testdir/dir1/x/a, /testdir/dir1/x/b, /testdir/dir1/y/a, /testdir/dir1/y/b
+    mkdir -pv /testdir/dir1/{x,y}/{a,b}
+
+(4) 如何创建/testdir/dir2/x, /testdir/dir2/y, /testdir/dir2/x/a,/testdir/dir2/x/b
+    mkdir -pv /testdir/dir2/{x/{a,b},y}
+
+(5) 如何创建/testdir/dir3, /testdir/dir4, /testdir/dir5, /testdir/dir5/dir6, /testdir/dir5/dir7
+    mkdir -pv /testdir/dir{3,4,5/dir{6,7}}
+
+```
 
 
-
-
-
+> # 五.软和硬链接
