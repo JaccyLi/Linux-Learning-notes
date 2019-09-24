@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>计算机基础.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86">计算机基础知识</h1>
+<hr>
+<h2 id="%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F">操作系统</h2>
+<h3 id="os-operating-system%EF%BC%8C%E6%98%AF%E4%B8%80%E7%A7%8D%E9%80%9A%E7%94%A8%E7%9B%AE%E7%9A%84%E7%9A%84%E8%BD%AF%E4%BB%B6%E7%A8%8B%E5%BA%8F%EF%BC%8C%E6%9C%89%E5%A6%82%E4%B8%8B%E5%8A%9F%E8%83%BD%EF%BC%9A">OS: Operating System，是一种通用目的的软件程序，有如下功能：</h3>
+<ul>
+<li>硬件驱动 , 进程管理</li>
+<li>内存管理 , 网络管理</li>
+<li>安全管理 , 文件管理</li>
+</ul>
+<div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/8MU6UCp*x3Gm61zIYpDhH019moRikGDjJbHI2XkdhOA!/b/dL8AAAAAAAAA&bo=BAHWAAAAAAADB*E!&rf=viewer_4" height="240" width="280" >
+\</div>
+<hr>
+<h2 id="os%E5%88%86%E7%B1%BB">OS分类</h2>
+<ul>
+<li>服务器OS：RHEL(Red Hat Enterprise Linux)，CentOS，Windows Server，AIX</li>
+<li>桌面OS：Windows 10，Mac OS，Fedora</li>
+<li>移动设备OS：Andriod，IOS，AliOS(阿里云OS)，HarmonyOS(华为基于物联网的操作系统，据余承东说几乎能运行在所有硬件平台)</li>
+</ul>
+<h2 id="%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%BC%94%E5%8F%98">操作系统的演变</h2>
+<ul>
+<li>单用户系统</li>
+<li>批处理系统：提高系统运行效率</li>
+</ul>
+<ul>
+<li>多道程序系统：程序控制CPU处理顺序</li>
+<li>分时系统：提高系统利用率，操作系统控制CPU处理顺序</li>
+<li>个人计算机：每人用户对应一个系统，廉价，方便，易用</li>
+<li>分布式计算：每个用户对应多个系统，云计算，大数据处理</li>
+</ul>
+<hr>
+<ul>
+<li>
+<h2 id="interface-%E6%8E%A5%E5%8F%A3">interface 接口</h2>
+<p><strong>接口</strong>：interface，来源于电气工程学科，指的是插座与插头的连接口，起到将电与电器连接起为的功能。后来延伸到软件工程里指<strong>软件包向外提供的功能模块的函数接口</strong>。所以接口是用来连接两个系统、起到进行信号转换和一些屏蔽细节的作用。</p>
+<p>操作系统通过接口的方式，建立了用户与计算机硬件的沟通方式。用户通过<strong>调用操作系统的接口</strong>来使用计算机的各种计算服务。</p>
+<p><strong>操作系统一般会提供两个重要的接口来满足用户的一些一般性的使用需求：</strong></p>
+<p><strong>命令行</strong>：实际是一个叫shell的终端程序提供的功能，该程序底层的实质还是调用一些操作系统提供的函数</p>
+<p><strong>窗口界面</strong>：窗口界面通过编写的窗口程序接收来自操作系统消息队列的一些鼠标、键盘动作，进而做出一些响应</p>
+</li>
+</ul>
+<hr>
+<h2 id="%E5%BC%80%E5%8F%91%E6%8E%A5%E5%8F%A3%E6%A0%87%E5%87%86">开发接口标准</h2>
+<ul>
+<li>
+<h3 id="abi-application-binary-interface-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E4%B8%8E%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%8E%A5%E5%8F%A3">ABI: Application Binary Interface  应用程序与操作系统的二进制接口</h3>
+<ul>
+<li>ABI描述了应用程序与OS之间的底层接口,允许编译好的目标代码在使用兼容ABI的操作系统中无需改动就能运行。</li>
+<li><strong>运行程序格式：</strong></li>
+</ul>
+<ul>
+<li>
+<p>Windows: PE(portable executable）格式， .dll(dynamic link library)，.lib</p>
+</li>
+<li>
+<p>Linux: ELF(Executable and Linking Format)格式,  .so(shared object),  .a</p>
+</li>
+</ul>
+</li>
+<li>
+<h3 id="api%EF%BC%9Aapplication-programming-interface-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E7%BC%96%E7%A8%8B%E6%8E%A5%E5%8F%A3">API：Application Programming Interface 应用程序编程接口</h3>
+<ul>
+<li>API定义了源代码和库之间的接口，因此同样的源代码可以在支持这个API的任何系统中编译</li>
+</ul>
+</li>
+<li>
+<h3 id="posix-portable-operating-system-interface-%E5%8F%AF%E7%A7%BB%E6%A4%8D%E7%9A%84%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8E%A5%E5%8F%A3">POSIX: Portable Operating System Interface 可移植的操作系统接口</h3>
+<ul>
+<li>EEE在操作系统上定义的一系列API标准
+POSIX兼容的程序可在其它POSIX操作系统编译执行</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="%E7%94%A8%E6%88%B7%E6%80%81%E5%92%8C%E5%86%85%E6%A0%B8%E6%80%81">用户态和内核态</h2>
+<ul>
+<li>计算机硬件资源都是操作系统内核进行管理的，目前操作系统都是基于多任务、多用户的。如果每个用户进程都可以随便访问操作系统内核的模块，改变状态，那整个操作系统的稳定性、安全性都大大降低；所以有用户态和内核态之分。</li>
+</ul>
+ <div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/QEOazKAZ78uOn1Kn74D*R3HF8F02sml75LKDXbt0Itg!/b/dFYBAAAAAAAA&bo=iAEUAQAAAAADB74!&rf=viewer_4" height="260" width="390" >
+\</div>
+<ul>
+<li>
+<ul>
+<li>为了将内核程序与用户程序隔离开，在硬件层面上提供了一次机制，将<strong>程序执行的状态分为了不同的级别</strong>，从0到3，数字越小，访问级别越高。<strong>0代表内核态</strong>，在该特权级别下，所有内存上的数据都是可见的，可访问的。<strong>3代表用户态</strong>，在这个特权级下，程序只能访问一部分的内存区域，只能执行一些限定的指令。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8system-call">系统调用system call</h2>
+<ul>
+<li>对于非一般性使用需求，操作系统提供了一系列的函数调用给软件开发者，由软件开发者来实现一些用户需要的功能。这些函数调用由于是操作系统内核提供的，为了有别于一般的函数调用，被称为系统调用。比如使用C语言进行软件开发时，经常用的printf函数，它的内部实际就是通过write这个系统调用，让操作系统内核把字符打印在屏幕上的。</li>
+</ul>
+<div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/kEwrGzC0VCg8zElPnpAivMWdtf46KfwGfu8ZDCc9lNE!/b/dE4BAAAAAAAA&bo=WAL8AAAAAAADF5Q!&rf=viewer_4" height="260" width="390" >
+\</div>
+<ul>
+<li>
+<h2 id="library-function%E5%92%8Csystem-call-%E5%BA%93%E5%87%BD%E6%95%B0%E5%92%8C%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%A4%BA%E6%84%8F">Library function和system call 库函数和系统调用示意</h2>
+</li>
+</ul>
+<div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/YC0VklYXsm8Rc5rXZNdDpMDs7T.FOdswO3Lv*gMCXZM!/b/dLYAAAAAAAAA&bo=dgKbAQAAAAADB8w!&rf=viewer_4" height="500" width="800" >
+\</div>
+<hr>
+<ul>
+<li>
+<h2 id="%E7%94%A8%E6%88%B7%E7%A9%BA%E9%97%B4%E5%92%8C%E5%86%85%E6%A0%B8%E7%A9%BA%E9%97%B4">用户空间和内核空间</h2>
+</li>
+<li>
+<h4 id="%E7%94%A8%E6%88%B7%E7%A9%BA%E9%97%B4%EF%BC%9Auser-space">用户空间：User space</h4>
+<ul>
+<li>为用户程序的运行空间。为了安全，它们是隔离的，即使用户的程序崩溃，内核也不受影响；在用户空间只能执行简单的运算，不能直接调用系统资源，必须通过系统接口（ system call），才能向内核发出指令。</li>
+</ul>
+</li>
+<li>
+<h4 id="%E5%86%85%E6%A0%B8%E7%A9%BA%E9%97%B4%EF%BC%9Akernel-space">内核空间：Kernel space</h4>
+<ul>
+<li>是 Linux 内核的运行空间；可以执行任意命令，调用系统的一切硬件资源。</li>
+</ul>
+</li>
+<li>
+<h4 id="%E7%A4%BA%E4%BE%8B%EF%BC%9A">示例：</h4>
+</li>
+</ul>
+<pre class="hljs"><code><div>    str = “www.magedu.com&quot;   // 用户空间 
+    x = x + 100              // 用户空间
+    file.write(str)          // 切换到内核空间,与磁盘交互 
+    y = x + 200              // 切换回用户空间
+    #说明：
+    第一行和第二行都是简单的赋值运算，在 User space 执行。
+    第三行需要写入文件，就要切换到 Kernel space，因为用户不能直接写文件，
+    必须通过内核安排。第四行又是赋值运算，就切换回 User space 
+</div></code></pre>
+<ul>
+<li>
+<h2 id="%E7%94%A8%E6%88%B7%E7%A9%BA%E9%97%B4%E5%92%8C%E5%86%85%E6%A0%B8%E7%A9%BA%E9%97%B4%E4%BA%A4%E4%BA%92%E7%A4%BA%E6%84%8F%E5%9B%BE">用户空间和内核空间交互示意图</h2>
+</li>
+</ul>
+<div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/WpF0Uv5NhRXPcG7idiUPz2.wgZh0M9VMjKMi289KHqo!/b/dIMAAAAAAAAA&bo=XgKuAQAAAAADB9E!&rf=viewer_4" height="500" width="900" >
+\</div>
+<hr>
+<ul>
+<li>
+<h2 id="unix%E5%8E%86%E5%8F%B2%E7%A4%BA%E6%84%8F">UNIX历史示意</h2>
+</li>
+</ul>
+<div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/9K2qaVMwh0pbwaoPhZDiHnUctUXnKKapzwlEZdyCP5I!/b/dAgBAAAAAAAA&bo=0AK7AQAAAAADB0o!&rf=viewer_4" height="500" width="800" >
+\</div>
+<ul>
+<li>
+<ul>
+<li>1965前后 Multics
+<ul>
+<li>贝尔实验室,麻省理工和通用电气联合开发Multics系统</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>1969 Unix雏形UNICS
+<ul>
+<li>Ken Thompson 汇编语言 B语言</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>1973 正式命名为Unix
+<ul>
+<li>Dennis Ritchie C语言</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>1977 BSD
+<ul>
+<li>Berkeley Software Distribution  伯克利大学</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>1979 System V架构 版权声明
+<ul>
+<li>HP-UNIX IBM AIX “不对学生提供源码” 收回版权</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>1984年 Minix操作系统
+<ul>
+<li>ndrew S. Tanenbaum荷兰阿姆斯特丹自由大学计算机科学系</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="linux%E8%B5%B7%E6%BA%90">Linux起源</h2>
+<ul>
+<li>991年的10月5日，Torvalds在comp.os.minix新闻组上发布消息，正式向外宣布他自行编写的完全自由免费的内核诞生（Freeminix-like kernel sources for 386-AT） —  FREAX（含义是怪诞的、怪物、异想天开）</li>
+<li>类Unix的内核，在GPL下发布</li>
+<li>官网：www.kernel.org</li>
+<li>Linux操作系统：完整的类UNIX操作系统 Linux内核+ GNU工具  如：CentOS,Ubuntu,Android</li>
+</ul>
+<h2 id="linux%E5%9B%A2%E9%98%9F">Linux团队</h2>
+<div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/fULiA4FOs0dnQNCTyikPc2r6zgayRIzUIhaX3uRgfho!/b/dEkBAAAAAAAA&bo=pwO.AQAAAAADBzk!&rf=viewer_4" height="640" width="1200" >
+\</div>
+<ul>
+<li>
+<h2 id="linux%E5%8F%91%E8%A1%8C%E7%89%88">Linux发行版</h2>
+</li>
+</ul>
+<pre class="hljs"><code><div>	slackware：SUSE Linux Enterprise Server (SLES) , OpenSuse桌面
+	debian:ubuntu，deepin（深度），mint 
+	redhat：RHEL: RedHat Enterprise Linux, 每18个月发行一个新版本  
+	CentOS：兼容RHEL的格式 
+	中标麒麟：中标软件 
+	Fedora：每6个月发行一个新版本 
+	ArchLinux：轻量简洁，遵循K.I.S.S.原则（ keep it simple and stupid ），Manjaro
+	Gentoo：极致性能，不提供传统意义的安装程序，下载源代码在本机上编译安装软件
+	LFS：Linux From scratch 自制Linux
+	Android：kernel+busybox（工具集）+java虚拟机
+	Linux 分支参考网站：http://futurist.se/gldt/
+	Linux发行版排名: https://distrowatch.com/dwres.php?resource=popularity
+</div></code></pre>
+<h2 id="linux%E5%86%85%E6%A0%B8%E7%89%88%E6%9C%AC%E5%8F%B7">Linux内核版本号</h2>
+<div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/Y5qIKqRI.x41XTTM5C2BfaTPY73LnK0ynusmtL8*Pp0!/b/dL8AAAAAAAAA&bo=CQc0AwAAAAADBxs!&rf=viewer_4" height="400" width="900" >
+\</div>
+<ul>
+<li>
+<h2 id="linux-%E5%8F%91%E8%A1%8C%E7%89%88">Linux 发行版</h2>
+</li>
+<li>
+<h4 id="linux%E5%8F%91%E8%A1%8C%E7%89%88%E7%9A%84%E5%90%8D%E7%A7%B0%E5%92%8C%E7%89%88%E6%9C%AC%E5%8F%B7%E6%98%AF%E7%94%B1%E5%8F%91%E8%A1%8C%E7%89%88%E7%9A%84%E7%BB%B4%E6%8A%A4%E8%80%85%E5%86%B3%E5%AE%9A%E7%9A%84">Linux发行版的名称和版本号是由发行版的维护者决定的</h4>
+<ul>
+<li>RedHat Enterprise Linux 7.5 由Red Hat公司发布</li>
+<li>SUSE Linux Enterprise Server 12 SP2 由Novell公司发布</li>
+<li>Debian Linux 9 由Debian维护社区发布</li>
+<li>Android 8.0 由Google公司发布</li>
+</ul>
+</li>
+</ul>
+<div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/b0EptXGsIiLOyu2mL76Sito.Obn2sPvuhTr3rM3EZaQ!/b/dFQBAAAAAAAA&bo=uwK2AgAAAAADBy8!&rf=viewer_4" height="250" width="300" >
+\</div>
+<ul>
+<li>
+<h2 id="%E5%BC%80%E6%BA%90%E5%8D%8F%E8%AE%AE%E5%8F%8A%E5%8D%8F%E8%AE%AE%E6%9D%A1%E4%BB%B6%E7%A4%BA%E6%84%8F">开源协议及协议条件示意</h2>
+</li>
+</ul>
+<pre class="hljs"><code><div>世界上的开源许可证，大概有上百种
+GPLv2, GPLv3, LGPL(lesser) ：通用公共许可 copyleft
+Apache: apache
+BSD: bsd
+Mozilla
+MIT
+</div></code></pre>
+<div align="center">
+<img src="http://m.qpic.cn/psb?/V10QpgQo0yu5f5/XzMWjW5zWtfu38QeeFub00udDKGzEmfbwF6kQ14D34Q!/b/dLsAAAAAAAAA&bo=KQUfAwAAAAADBxI!&rf=viewer_4" height="800" width="1300" >
+\</div>
+<ul>
+<li>
+<h2 id="linux%E5%93%B2%E5%AD%A6%E6%80%9D%E6%83%B3">Linux哲学思想</h2>
+</li>
+</ul>
+<ul>
+<li>一切都是一个文件（包括硬件）</li>
+<li>小型，单一用途的程序</li>
+<li>链接程序，共同完成复杂的任务</li>
+<li>避免令人困惑的用户界面</li>
+<li>配置数据存储在文本中</li>
+</ul>
+<h2 id="%E8%8E%B7%E5%8F%96%E5%8F%91%E8%A1%8C%E7%89%88%E7%9A%84%E9%80%94%E5%BE%84">获取发行版的途径</h2>
+<ul>
+<li>CentOS</li>
+</ul>
+<ul>
+<li>
+<p>https://wiki.centos.org/Download</p>
+</li>
+<li>
+<p>http://mirrors.aliyun.com</p>
+</li>
+<li>
+<p>http://mirrors.sohu.com</p>
+</li>
+<li>
+<p>http://mirrors.163.com</p>
+</li>
+<li>
+<p>https://mirrors.tuna.tsinghua.edu.cn/centos/</p>
+</li>
+</ul>
+<ul>
+<li>Ubuntu</li>
+</ul>
+<ul>
+<li>http://cdimage.ubuntu.com/releases/</li>
+</ul>
+
+</body>
+</html>

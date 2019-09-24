@@ -1,5 +1,17 @@
 @[TOC](<center><font size=214 face=黑体 color=grey> linux文件管理 </font></center>)
 
+> # 一.文件系统结构元素
+
+
+
+
+> # 二.创建和查看文件
+
+> # 三.复制、转移和删除文件
+ 
+> # 四.软和硬链接
+
+
 
 
 

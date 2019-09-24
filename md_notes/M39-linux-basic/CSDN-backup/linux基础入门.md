@@ -1,4 +1,4 @@
-@[TOC](<center><font size=214 face=黑体 color=grey> Linux基础入门 </font></center>)
+﻿@[TOC](<center><font size=214 face=黑体 color=grey> Linux基础入门 </font></center>)
 
 
 ---
@@ -194,7 +194,6 @@ centos7.steve
     官方站点：Documentation
 (6) 发行版的官方文档
 (7) Google
-
 ```
 ---
 ---
@@ -279,8 +278,8 @@ man 9：Linux 内核API
 
 - 红帽知识库和官方在线文档  
 [http://kbase.redhat.comt](http://kbase.redhat.com)  
-[http://www.redhat.com/docs](http://www.redhat.com/docs)  
-[http://access.redhat.com](http://access.redhat.com)  
+[http://www.redhat.com/docs](http://www.redhat.com/docs)
+[http://access.redhat.com](http://access.redhat.com)
 [https://help.ubuntu.com/lts/serverguide/index.html](https://help.ubuntu.com/lts/serverguide/index.html)
 
 ---
