@@ -136,7 +136,7 @@ ddd
 [root@centos7 ~]$echo $a
 9
 ```
-- ### 逗号操作符亦可以用来连接字符串
+- ### 逗号操作符亦可和花括号{}配合以用来连接字符串
 ```bash
 for file in /{,usr/}bin/*calc
 #             ^    Find all executable files ending in "calc"
@@ -508,8 +508,22 @@ base64_charset=( {A..Z} {a..z} {0..9} + / = )
 ```
 
 > # [{}] 花括号代码块
-- 花括号中的代码块所包含的变量可被后续脚本识别
-- 花括号所包含的代码块一般有I/O重定向
+**1.花括号中的代码块所包含的变量可被后续脚本代码识别**
+
+```bash
+# 例子1
+bash$ { local a;
+              a=123; }
+bash: local: 使用local关键字定义的变量为本地变量，只能在某个函数中使用
+
+# 例子2
+a=123
+{ a=321; }
+echo "a = $a"   # a = 321   (花括号中的变量2被打印)
+# Thanks, S.C.
+```
+
+**2.花括号所包含的代码块一般有I/O重定向**
 ```bash
 #!bin/bash
 
@@ -525,7 +539,7 @@ echo "Second line in $File is:"
 echo "$line2"
 exit
 ```
-- 花括号内的代码块执行结果保存到某个文件中
+**3.花括号内的代码块执行结果保存到某个文件中**
 
 ```bash
 #!/bin/bash
@@ -563,6 +577,17 @@ echo "Results of rpm test in file $1.test"
 # See rpm man page for explanation of options.
 exit 0
 ```
+- 不像在()圆括号中的命令组合会产生新的shell子进程，花括号{}中的代码通常不产生子shell。
 
-Unlike a command group within (parentheses), as above, a code block enclosed by
-{braces} will not normally launch a subshell
+**4.不标准的for循环也可以遍历某个花括号中的代码块**
+```bash
+for((n=1; n<=10; n++))   # 注意：圆括号后无内容，直接跟花括号代码块
+# No do!
+{
+  echo -n "* $n *"
+}
+# No done!
+# Outputs:
+# * 1 ** 2 ** 3 ** 4 ** 5 ** 6 ** 7 ** 8 ** 9 ** 10 *
+# And, echo $? returns 0, so Bash does not register an error.
+```
