@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>linux文件管理.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<p>@[TOC](<center><font size=214 face=黑体 color=grey> linux文件管理 </font></center>)</p>
+<blockquote>
+<h1 id="%E4%B8%80%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84%E5%8F%8A%E7%BB%84%E7%BB%87%E7%BB%86%E8%8A%82">一.文件系统结构及组织细节</h1>
+</blockquote>
+<h2 id="1linux%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84centos7">1.linux文件目录结构(centos7)</h2>
+<p><img src="png/2019-09-24-10-06-37.png" alt="linux文件目录结构"></p>
+<h2 id="2linux%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%80%E8%BF%B0">2.linux文件系统简述</h2>
+<ul>
+<li>
+<p>linux系统下文件和目录被组织成一个单根倒置的树状结构
+文件系统从根目录下开始，用“/”表示</p>
+</li>
+<li>
+<p>根文件系统(rootfs)：root filesystem</p>
+</li>
+<li>
+<p>linux文件系统中的文件名称区分大小写，其中以点(.)开头的文件为隐藏文件</p>
+</li>
+<li>
+<p>文件有两类数据：
+元数据：metadata
+数据：data</p>
+</li>
+<li>
+<p>文件系统分层结构：LSB Linux Standard Base<br>
+FHS: (Filesystem Hierarchy Standard) 该标准由文件系统层级标准组定制,可直接在下面网站获得其pdf版本</p>
+</li>
+<li>
+<p>FHS:该标准提供了一些在类unix系统下如何安排文件和目录的一些指导和要求；目的在于支持应用程序、系统管理工具、开发工具和脚本的互操作性及为这些系统所提供的文档的一致性。</p>
+</li>
+</ul>
+<p><a href="http://www.pathname.com/fhs/">FHS-pdf</a></p>
+<h2 id="3linux%E4%B8%8B%E7%9A%84%E6%96%87%E4%BB%B6%E5%91%BD%E4%BB%A4%E8%A7%84%E5%88%99">3.linux下的文件命令规则</h2>
+<ul>
+<li>文件名最长255个字节</li>
+<li>包括路径在内文件名称最长4095个字节</li>
+<li>蓝色--&gt;目录 绿色--&gt;可执行文件 红色--&gt;压缩文件 浅蓝色--&gt;链接文件 灰色--&gt;其他文件  (可以自定义)</li>
+<li>除了斜杠和NUL,所有字符都有效.但使用特殊字符的目录名和文件不推荐使用，有些字符需要用引号来引用它们</li>
+<li>标准Linux文件系统（如ext4），文件名称大小写敏感<br>
+例如：MAIL, Mail, mail, mAiL</li>
+</ul>
+<h2 id="4%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84%E7%BB%86%E8%8A%82">4.文件系统结构细节</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">目录</th>
+<th style="text-align:left">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">/boot</td>
+<td style="text-align:left">引导文件存放目录，内核文件(vmlinuz)、引导加载器(bootloader, grub)都存放于此目录</td>
+</tr>
+<tr>
+<td style="text-align:left">/bin</td>
+<td style="text-align:left">所有用户使用的基本命令；不能关联至独立分区，OS启动即会用到的程序</td>
+</tr>
+<tr>
+<td style="text-align:left">/sbin</td>
+<td style="text-align:left">管理类的基本命令；不能关联至独立分区，OS启动即会用到的程序</td>
+</tr>
+<tr>
+<td style="text-align:left">/lib</td>
+<td style="text-align:left">启动时程序依赖的基本共享库文件以及内核模块文件(/lib/modules)</td>
+</tr>
+<tr>
+<td style="text-align:left">/lib64</td>
+<td style="text-align:left">专用于x86_64系统上的辅助共享库文件存放位置</td>
+</tr>
+<tr>
+<td style="text-align:left">/etc</td>
+<td style="text-align:left">配置文件目录</td>
+</tr>
+<tr>
+<td style="text-align:left">/home/USERNAME</td>
+<td style="text-align:left">普通用户家目录</td>
+</tr>
+<tr>
+<td style="text-align:left">/root</td>
+<td style="text-align:left">管理员的家目录</td>
+</tr>
+<tr>
+<td style="text-align:left">/media</td>
+<td style="text-align:left">便携式移动设备挂载点</td>
+</tr>
+<tr>
+<td style="text-align:left">/mnt</td>
+<td style="text-align:left">临时文件系统挂载点</td>
+</tr>
+<tr>
+<td style="text-align:left">/dev</td>
+<td style="text-align:left">设备文件及特殊文件存储位置</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">b: block device，块设备，随机访问</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">c: character device，字符设备，线性访问</td>
+</tr>
+<tr>
+<td style="text-align:left">/opt</td>
+<td style="text-align:left">第三方应用程序的安装位置</td>
+</tr>
+<tr>
+<td style="text-align:left">/srv</td>
+<td style="text-align:left">系统上运行的服务用到的数据</td>
+</tr>
+<tr>
+<td style="text-align:left">/tmp</td>
+<td style="text-align:left">临时文件存储位置</td>
+</tr>
+<tr>
+<td style="text-align:left">/usr</td>
+<td style="text-align:left">universal shared, read-only data 全局共享的只读文件存放地</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/usr/bin: 保证系统拥有完整功能而提供的应用程序</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/usr/sbin: centos7上访问/sbin实质是访问 /usr/sbin</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/usr/lib：32位使用</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/usr/lib64：只存在64位系统</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/usr/include: C程序的头文件(header files)</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/usr/share：结构化独立的数据，例如doc, man等</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/usr/local：第三方应用程序的安装位置：bin, sbin, lib, lib64, etc, share</td>
+</tr>
+<tr>
+<td style="text-align:left">/var</td>
+<td style="text-align:left">variable data files 可变文件存放地点</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/var/cache: 应用程序缓存数据目录</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/var/lib: 应用程序状态信息数据</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/var/local：专用于为/usr/local下的应用程序存储可变数据</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/var/lock: 锁文件</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/var/log: 日志目录及文件</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/var/opt: 专用于为/opt下的应用程序存储可变数据</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/var/run: 运行中的进程相关数据,通常用于存储进程pid文件</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/var/spool: 应用程序数据池</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td style="text-align:left">/var/tmp: 保存系统两次重启之间产生的临时数据</td>
+</tr>
+<tr>
+<td style="text-align:left">/proc</td>
+<td style="text-align:left">用于输出内核与进程信息相关的虚拟文件系统</td>
+</tr>
+<tr>
+<td style="text-align:left">/sys</td>
+<td style="text-align:left">用于输出当前系统上硬件设备相关信息虚拟文件系统</td>
+</tr>
+<tr>
+<td style="text-align:left">/selinux</td>
+<td style="text-align:left">security enhanced Linux，selinux相关的安全策略等信息的存储位置</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5linux%E4%B8%8B%E6%96%87%E4%BB%B6%E7%A7%8D%E7%B1%BB%E5%8F%8A%E5%90%84%E7%B1%BB%E6%96%87%E4%BB%B6%E5%AD%98%E6%94%BE%E5%9C%B0">5.Linux下文件种类及各类文件存放地</h2>
+<ul>
+<li>文件类型</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>文件类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-</td>
+<td>普通文件</td>
+</tr>
+<tr>
+<td>d</td>
+<td>目录文件</td>
+</tr>
+<tr>
+<td>b</td>
+<td>块设备</td>
+</tr>
+<tr>
+<td>c</td>
+<td>字符设备</td>
+</tr>
+<tr>
+<td>l</td>
+<td>符号链接文件</td>
+</tr>
+<tr>
+<td>p</td>
+<td>管道文件pipe</td>
+</tr>
+<tr>
+<td>s</td>
+<td>套接字文件socket</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>下面例子中第一列第一个字符表示文件类型，如&quot;-rw-------.&quot;中开头的&quot;-&quot;表示普通字符</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos7 ~]<span class="hljs-variable">$ll</span>
+total 112
+-rw-------. 1 root root  2026 Sep 20 14:31 anaconda-ks.cfg
+-rw-r--r--. 1 root root    77 Sep 22 15:42 bash-scripting.sh
+drwxr-xr-x. 2 root root     6 Sep 20 15:08 Desktop
+drwxr-xr-x. 2 root root     6 Sep 20 15:05 Documents
+drwxr-xr-x. 2 root root     6 Sep 20 15:05 Downloads
+-rw-r--r--. 1 root root  2056 Sep 20 14:45 initial-setup-ks.cfg
+-rw-r--r--. 1 root root     0 Sep 23 11:25 lslfdjsljD
+drwxr-xr-x. 2 root root     6 Sep 20 15:05 Music
+drwxr-xr-x. 2 root root     6 Sep 20 15:05 Pictures
+drwxr-xr-x. 2 root root     6 Sep 20 15:05 Public
+drwxr-xr-x. 3 root root    21 Sep 21 18:39 scripts
+drwxr-xr-x. 2 root root     6 Sep 20 15:05 Templates
+-rw-r--r--. 1 root root 15502 Sep 22 20:18 user-home.png
+-rw-r--r--. 1 root root 83424 Sep 22 20:30 user-trash.png
+drwxr-xr-x. 2 root root     6 Sep 20 15:05 Videos
+</div></code></pre>
+<ul>
+<li>各类型的文件存放地</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>文件类型</th>
+<th>存放的文件夹</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>二进制程序</td>
+<td>/bin, /sbin, /usr/bin, /usr/sbin, /usr/local/bin, /usr/local/sbin</td>
+</tr>
+<tr>
+<td>库文件</td>
+<td>/lib, /lib64, /usr/lib, /usr/lib64, /usr/local/lib, /usr/local/lib64</td>
+</tr>
+<tr>
+<td>配置文件</td>
+<td>/etc, /etc/DIRECTORY, /usr/local/etc</td>
+</tr>
+<tr>
+<td>帮助文件</td>
+<td>/usr/share/man, /usr/share/doc, /usr/local/share/man, /usr/local/share/doc</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<h1 id="%E4%BA%8Clinux%E7%B3%BB%E7%BB%9F%E4%B8%8B%E6%96%87%E4%BB%B6%E7%9A%84%E5%88%9B%E5%BB%BA%E5%92%8C%E7%9B%AE%E5%BD%95%E7%9A%84%E5%AF%BC%E8%88%AA%E7%AD%89%E6%93%8D%E4%BD%9C">二.linux系统下文件的创建和目录的导航等操作</h1>
+</blockquote>
+<h2 id="1%E5%BD%93%E5%89%8D%E5%B7%A5%E4%BD%9C%E7%9B%AE%E5%BD%95%E7%9B%B8%E5%85%B3%E7%9A%84%E6%93%8D%E4%BD%9C">1.当前工作目录相关的操作</h2>
+<ul>
+<li>每个shell和系统进程都有一个当前的工作目录，用户登录后默认在自己的家目录，如:/home/alice</li>
+<li>术语CWD:current work directory  当前工作路径</li>
+<li>显示当前shell CWD的绝对路径使用：
+pwd: printing working directory<br>
+-P 显示真实物理路径<br>
+-L 显示链接路径（默认）</li>
+</ul>
+<h2 id="2%E7%BB%9D%E5%AF%B9%E5%92%8C%E7%9B%B8%E5%AF%B9%E8%B7%AF%E5%BE%84%E8%A1%A8%E7%A4%BA%E5%92%8C%E7%9B%B8%E5%85%B3%E6%93%8D%E4%BD%9C">2.绝对和相对路径表示和相关操作</h2>
+<ul>
+<li>
+<p>绝对路径表示从根开始完整的文件的位置路径，以正斜杠开始，可用于任何想指定一个文件名的时候</p>
+</li>
+<li>
+<p>相对路径名指定相对于当前工作目录或某目录的位置，不以斜线开始，可以作为一个简短的形式指定一个文件名<br>
+查看路径的基名：basename   /path/to/somefile
+查看某路径的目录名：dirname    /path/to/somefile
+如：</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos7 ~]<span class="hljs-variable">$basename</span> /etc/sysconfig/network-scripts
+network-scripts
+[root@centos7 ~]<span class="hljs-variable">$dirname</span> /etc/sysconfig/network-scripts
+/etc/sysconfig
+</div></code></pre>
+<h2 id="3%E6%9B%B4%E6%94%B9%E7%9B%AE%E5%BD%95">3.更改目录</h2>
+<ul>
+<li>cd 命令用于改变工作目录<br>
+cd /home/wang/<br>
+cd home/wang<br>
+切换至父目录： cd ..<br>
+切换至当前用户主目录： cd<br>
+切换至以前的工作目录： cd -<br>
+选项：-P    #使用真实的物理文件路径，不跟随符号链接文件
+相关的环境变量：<br>
+PWD：当前目录路径<br>
+OLDPWD：上一次目录路径</li>
+</ul>
+<h2 id="4%E4%BD%BF%E7%94%A8ls%E5%91%BD%E4%BB%A4%E5%88%97%E5%87%BA%E7%9B%AE%E5%BD%95%E5%86%85%E5%AE%B9">4.使用ls命令列出目录内容</h2>
+<pre class="hljs"><code><div>列出当前目录的内容或指定目录
+    用法：ls [options] [files_or_dirs]
+示例
+    ls -a 包含隐藏文件
+    ls -l 显示额外的信息
+    ls -R 目录递归
+    ls -ld 目录和符号链接信息
+    ls -1 文件分行显示
+    ls –S 按从大到小排序
+    ls –t 按mtime排序
+    ls –u 配合-t选项，显示并按atime从新到旧排序
+    ls –U 按目录存放顺序显示
+    ls –X 按文件后缀排序
+</div></code></pre>
+<h2 id="5%E4%BD%BF%E7%94%A8stat%E5%91%BD%E4%BB%A4%E6%9F%A5%E7%9C%8B%E6%96%87%E4%BB%B6">5.使用stat命令查看文件</h2>
+<ul>
+<li>
+<p>默认stat列出所给的文件的大小、类型和三个时间戳</p>
+<p>三个时间戳：<br>
+access time 访问时间，atime，读取文件内容<br>
+modify time 修改时间, mtime，改变文件内容（数据）<br>
+change time 改变时间, ctime，元数据发生改变</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos7 ~]<span class="hljs-variable">$stat</span> .bashrc
+  File: ‘.bashrc’
+  Size: 759             Blocks: 8          IO Block: 4096   regular file
+Device: 802h/2050d      Inode: 201510615   Links: 1
+Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)
+Context: system_u:object_r:admin_home_t:s0
+Access: 2019-09-23 21:58:28.695883200 +0800
+Modify: 2019-09-23 17:42:43.856543586 +0800
+Change: 2019-09-23 17:42:43.857543588 +0800
+ Birth: -
+[root@centos7 ~]<span class="hljs-variable">$stat</span> -c %x .bashrc
+2019-09-23 21:58:28.695883200 +0800
+[root@centos7 ~]<span class="hljs-variable">$stat</span> -c %y .bashrc
+2019-09-23 17:42:43.856543586 +0800
+[root@centos7 ~]<span class="hljs-variable">$stat</span> -c %z .bashrc
+2019-09-23 17:42:43.857543588 +0800
+</div></code></pre>
+<h2 id="6%E9%80%9A%E9%85%8D%E7%AC%A6%E6%A8%A1%E5%BC%8F-wild-card-pattern">6.通配符模式 wild-card pattern</h2>
+<ul>
+<li>使用ls等命令时可以使用文件名通配开筛选需要的文件，使用特定的字符代表需要匹配的字符：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>代表的意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>*</td>
+<td>匹配零个或多个字符</td>
+</tr>
+<tr>
+<td>?</td>
+<td>匹配任何单个字符</td>
+</tr>
+<tr>
+<td>~</td>
+<td>当前用户家目录</td>
+</tr>
+<tr>
+<td>~mage</td>
+<td>用户mage家目录</td>
+</tr>
+<tr>
+<td>~+</td>
+<td>当前工作目录</td>
+</tr>
+<tr>
+<td>~-</td>
+<td>前一个工作目录</td>
+</tr>
+<tr>
+<td>[0-9]</td>
+<td>匹配数字范围</td>
+</tr>
+<tr>
+<td>[a-z]</td>
+<td>字母</td>
+</tr>
+<tr>
+<td>[A-Z]</td>
+<td>字母</td>
+</tr>
+<tr>
+<td>[wang]</td>
+<td>匹配列表中的任何的一个字符</td>
+</tr>
+<tr>
+<td>[^wang]</td>
+<td>匹配列表中的所有字符以外的字符</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>另外，llinux系统中有定义好的字符类表示入下：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>代表的意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[:digit:]</td>
+<td>任意数字，相当于0-9</td>
+</tr>
+<tr>
+<td>[:lower:]</td>
+<td>任意小写字母</td>
+</tr>
+<tr>
+<td>[:upper:]</td>
+<td>任意大写字母</td>
+</tr>
+<tr>
+<td>[:alpha:]</td>
+<td>任意大小写字母</td>
+</tr>
+<tr>
+<td>[:alnum:]</td>
+<td>任意数字或字母</td>
+</tr>
+<tr>
+<td>[:blank:]</td>
+<td>水平空白字符</td>
+</tr>
+<tr>
+<td>[:space:]</td>
+<td>水平或垂直空白字符</td>
+</tr>
+<tr>
+<td>[:punct:]</td>
+<td>标点符号</td>
+</tr>
+<tr>
+<td>[:print:]</td>
+<td>可打印字符</td>
+</tr>
+<tr>
+<td>[:cntrl:]</td>
+<td>控制（非打印）字符</td>
+</tr>
+<tr>
+<td>[:graph:]</td>
+<td>图形字符</td>
+</tr>
+<tr>
+<td>[:xdigit:]</td>
+<td>十六进制字符</td>
+</tr>
+</tbody>
+</table>
+<h2 id="7%E9%80%9A%E9%85%8D%E7%AC%A6%E7%BB%83%E4%B9%A0">7.通配符练习</h2>
+<pre class="hljs"><code><div>1、显示/var目录下所有以l开头，以一个小写字母结尾，且中间出现至少一位数字的文件或目录
+    ls -d /var/l*[0-9]*[[:lower:]]
+2、显示/etc目录下以任意一位数字开头，且以非数字结尾的文件或目录
+    ls -d /etc/[[:digit:]]*[^[:digit:]]
+3、显示/etc/目录下以非字母开头，后面跟了一个字母及其它任意长度任意字符的文件或目录
+    ls -d /etc/[^[:alpha:]][[:alpha:]]*
+4、显示/etc/目录下所有以rc开头，并后面是0-6之间的数字，其它为任意字符的文件或目录
+    ls -d /etc/rc[0-6]*
+5、显示/etc目录下，所有以.d结尾的文件或目录
+    ls /etc/*.d -d
+6、显示/etc目录下，所有.conf结尾，且以m,n,r,p开头的文件或目录
+    ls /etc/[mnpr]*.conf -d
+7、只显示/root下的隐藏文件和目录
+    ls -d /root/.* (ls -d .[^.]*)
+8、只显示/etc下的非隐藏目录
+    ls /etc/*/ -d
+</div></code></pre>
+<h2 id="8%E4%BD%BF%E7%94%A8touch%E5%91%BD%E4%BB%A4%E5%88%9B%E5%BB%BA%E6%96%87%E4%BB%B6%E5%92%8C%E6%9B%B4%E6%94%B9%E6%96%87%E4%BB%B6%E7%9A%84%E6%97%B6%E9%97%B4%E6%88%B3">8.使用touch命令创建文件和更改文件的时间戳</h2>
+<ul>
+<li>touch命令<br>
+格式：touch [OPTION]... FILE...<br>
+-a 仅改变 atime和ctime<br>
+-m 仅改变 mtime和ctime<br>
+-t [[CC]YY]MMDDhhmm[.ss]<br>
+指定atime和mtime的时间戳时加-c选项表示如果文件不存在则不新建文件</li>
+</ul>
+<blockquote>
+<h1 id="%E4%B8%89%E5%A4%8D%E5%88%B6%E3%80%81%E8%BD%AC%E7%A7%BB%E5%92%8C%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6%E5%8F%8A%E7%9B%AE%E5%BD%95">三.复制、转移和删除文件及目录</h1>
+</blockquote>
+<h2 id="1%E4%BD%BF%E7%94%A8cp%E5%91%BD%E4%BB%A4%E5%A4%8D%E5%88%B6%E6%96%87%E4%BB%B6%E3%80%81%E7%9B%AE%E5%BD%95%E5%92%8C%E6%94%B9%E5%90%8D">1.使用cp命令复制文件、目录和改名</h2>
+<ul>
+<li>cp命令使用简述</li>
+</ul>
+<pre class="hljs"><code><div>cp [OPTION]... [-T] SOURCE DEST 
+cp [OPTION]... SOURCE... DIRECTORY 
+cp [OPTION]... -t DIRECTORY SOURCE... 
+cp SRC DEST 
+     SRC是文件： 
+          如果目标不存在：新建DEST，并将SRC中内容填充至DEST中 
+          如果目标存在： 
+              如果DEST是文件：将SRC中的内容覆盖至DEST中 
+    
+        基于安全，建议为cp命令使用-i选项 
+              如果DEST是目录：在DEST下新建与原文件同名的文件，并将SRC中内容
+填充至新文件中 
+
+cp SRC... DEST 
+     SRC...  
+多个文件 
+     DEST       必须存在，且为目录，其它情形均会出错 
+cp SRC DEST 
+    SRC是目录：此时使用选项：-r 
+       如果DEST不存在：则创建指定目录，复制SRC目录中所有文件至DEST中 
+       如果DEST存在： 
+         如果DEST是文件：报错 
+         如果DEST是目录： 
+</div></code></pre>
+<ul>
+<li>cp命令常用选项</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-i</td>
+<td>覆盖前提示</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>不覆盖，注意两者顺序</td>
+</tr>
+<tr>
+<td>-r, -R</td>
+<td>递归复制目录及内部的所有内容</td>
+</tr>
+<tr>
+<td>-a</td>
+<td>归档，相当于-dR --preserv=all</td>
+</tr>
+<tr>
+<td>-d   --no-dereference --preserv=links</td>
+<td>不复制原文件，只复制链接名</td>
+</tr>
+<tr>
+<td>--preserv[=ATTR_LIST]</td>
+<td>mode: 权限 ownership: 属主属组 timestamp:  links ,xattr，context，all</td>
+</tr>
+<tr>
+<td>-p</td>
+<td>等同--preserv=mode,ownership,timestamp</td>
+</tr>
+<tr>
+<td>-v --verbose</td>
+<td>显示详细信息</td>
+</tr>
+<tr>
+<td>-f --force</td>
+<td>删除目标文件夹的同名文件，再创建新文件</td>
+</tr>
+<tr>
+<td>-u --update</td>
+<td>只复制源比目标更新文件或目标不存在的文件</td>
+</tr>
+<tr>
+<td>-b</td>
+<td>目标存在，覆盖前先备份，形式为 filename~</td>
+</tr>
+<tr>
+<td>--backup=numbered</td>
+<td>目标存在，覆盖前先备份加数字后缀:cp -av --backup=numbered /etc/issue ./</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>cp命令各种情况</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>源\目标</th>
+<th>不存在</th>
+<th>存在且为文件</th>
+<th>存在且为目录</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一个文件</td>
+<td>新建DEST，并将SRC中内容填充至DEST中</td>
+<td>将SRC中的内容覆盖至DEST中，注意：数据丢失风险！建议用 –i 选项</td>
+<td>在DEST下新建与原文件同名的文件，并将SRC中内容填充至新文件中</td>
+</tr>
+<tr>
+<td>多个文件</td>
+<td>提示错误</td>
+<td>提示错误</td>
+<td>在DEST下新建与原文件同名的文件，并将原文件内容复制进新文件中</td>
+</tr>
+<tr>
+<td>目录 须使用-r选项</td>
+<td>创建指定DEST同名目录，复制SRC目录中所有文件至DEST下</td>
+<td>提示错误</td>
+<td>在DEST下新建与原目录同名的目录，并将SRC中内容复制至新目录中</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2%E4%BD%BF%E7%94%A8mv%E5%91%BD%E4%BB%A4%E7%A7%BB%E5%8A%A8%E5%92%8C%E9%87%8D%E5%91%BD%E5%90%8D%E6%96%87%E4%BB%B6">2.使用mv命令移动和重命名文件</h2>
+<pre class="hljs"><code><div>mv [OPTION]... [-T] SOURCE DEST
+mv [OPTION]... SOURCE... DIRECTORY
+mv [OPTION]... -t DIRECTORY SOURCE...
+常用选项：
+    -i 交互式
+    -f 强制
+    -b 目标存在，覆盖前先备份
+</div></code></pre>
+<h2 id="3%E4%BD%BF%E7%94%A8rm%E5%91%BD%E4%BB%A4%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6">3.使用rm命令删除文件</h2>
+<pre class="hljs"><code><div>rm [OPTION]... FILE...
+常用选项：
+    -i 交互式
+    -f 强制删除
+    -r 递归
+    --no-preserve-root 删除/
+示例：
+        rm -rf /*
+</div></code></pre>
+<h2 id="4%E7%9B%AE%E5%BD%95%E6%93%8D%E4%BD%9C">4.目录操作</h2>
+<pre class="hljs"><code><div>tree 显示目录树
+    -d: 只显示目录
+    -L level：指定显示的层级数目
+    -P pattern: 只显示由指定wild-card pattern匹配到的路径
+mkdir 创建目录
+    -p: 存在于不报错，且可自动创建所需的各目录
+    -v: 显示详细信息
+    -m MODE: 创建目录时直接指定权限
+rmdir 删除空目录
+    -p: 递归删除父空目录x
+    -v: 显示详细信息
+    rm -r 递归删除目录树
+</div></code></pre>
+<h2 id="5%E7%BB%83%E4%B9%A0">5.练习</h2>
+<pre class="hljs"><code><div>(1)每天将/etc/目录下所有文件，备份到/data独立的子目录下，并要求子目录格式为 backupYYYY-mm-dd，备 份过程可见
+    cp -a -v /etc /data/backup`date +%Y`
+
+(2)创建/data/rootdir目录，并复制/root下所有文件到该目录内，要求保留原有权限 mkdir /data/rootdir
+    cp -av /root /data/rootdir
+
+(3) 如何创建/testdir/dir1/x, /testdir/dir1/y, /testdir/dir1/x/a, /testdir/dir1/x/b, /testdir/dir1/y/a, /testdir/dir1/y/b
+    mkdir -pv /testdir/dir1/{x,y}/{a,b}
+
+(4) 如何创建/testdir/dir2/x, /testdir/dir2/y, /testdir/dir2/x/a,/testdir/dir2/x/b
+    mkdir -pv /testdir/dir2/{x/{a,b},y}
+
+(5) 如何创建/testdir/dir3, /testdir/dir4, /testdir/dir5, /testdir/dir5/dir6, /testdir/dir5/dir7
+    mkdir -pv /testdir/dir{3,4,5/dir{6,7}}
+
+</div></code></pre>
+<blockquote>
+<h1 id="%E5%9B%9Blinux%E4%B8%8B%E7%9A%84inode%E8%A7%A3%E9%87%8A">四.linux下的inode解释</h1>
+</blockquote>
+<h2 id="1inode%E7%AE%80%E8%BF%B0">1.inode简述</h2>
+<ul>
+<li>几乎每个文件系统都会需要大量不同的数据结构来保证其底层对各种文件存储目的的支持;在linux系统中（ext3或者ext4或者xfs文件系统）就有一个很重要的数据结构叫<strong>inode</strong>(index node),一个inode包含某个文件或者某个目录的以下信息（也叫元数据）：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>信息项</th>
+<th>英文术语</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文件类型（可执行文件，块文件，字符文件等）</td>
+<td>File types ( executable, block special etc )</td>
+</tr>
+<tr>
+<td>文件权限（读，写，执行等）</td>
+<td>Permissions ( read, write etc )</td>
+</tr>
+<tr>
+<td>文件属主全局唯一标识符</td>
+<td>UID ( Owner )</td>
+</tr>
+<tr>
+<td>文件属组全局唯一标识符</td>
+<td>GID ( Group )</td>
+</tr>
+<tr>
+<td>文件大小</td>
+<td>FileSize</td>
+</tr>
+<tr>
+<td>时间戳：最后访问时间、最后修改时间、最后改变时间和inode号变化信息</td>
+<td>Time stamps including last access, last modification and last inode number change.</td>
+</tr>
+<tr>
+<td>文件链接数（硬链接和软链接）</td>
+<td>Number of links ( soft/hard )</td>
+</tr>
+<tr>
+<td>文件在磁盘的位置</td>
+<td>Location of ile on harddisk.</td>
+</tr>
+<tr>
+<td>其他信息</td>
+<td>Some other metadata about file.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>inode数据结构被存储在inode表中：由于每个inode代表某个文件的所有属性信息，所以inode表就记录了整个文件系统上的所有文件的信息（元数据）</li>
+<li>linux文件系统中每个目录下的文件被存储成目录项，每一项对应其inode号，通过inode号就可以访问到inode表的某一项，该项就记录了该文件的元数据。如下图：</li>
+</ul>
+<p><img src="png/2019-09-25-21-00-49.png" alt=""></p>
+<center><font size=4 face=黑体 color=grey> 目录项和inode表及inode表某项所指向的数据交互图 </font></center>
+<ul>
+<li>上图中目录项通过inode号找到其在inode table中的元数据，linux系统下查看inode号使用ls -i：</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 /data]<span class="hljs-variable">$ls</span> -i my_file_1.txt 
+144 my_file_1.txt                          <span class="hljs-comment"># 144就是文件my_file_1.txt的inode号</span>
+</div></code></pre>
+<ul>
+<li>
+<p>如下图，左边的表格是文件名和inode表格，右边是inode表项和inode号码的对应表格，通过ref.cnt就可以找到inode项
+<img src="png/Simplified_illustration_of_hard_links_on_typical_UN_X_filesystem.png" alt=""></p>
+</li>
+<li>
+<p>找到inode项后，该项存储有下图的元数据和指向文件实际数据的指针（箭头的起点所在的数据块就存储了指针：其中有12个一级指针，当指针不够用时，会使用间接指针和三次间接及更多次的间接指针）
+<img src="png/2019-09-25-20-54-42.png" alt=""></p>
+</li>
+</ul>
+<h2 id="2-cp%E3%80%81rm%E3%80%81mv%E7%AD%89%E5%91%BD%E4%BB%A4%E9%83%BD%E5%92%8Cinode%E7%B4%A7%E5%AF%86%E7%9B%B8%E5%85%B3">2. cp、rm、mv等命令都和inode紧密相关</h2>
+<h2 id="3cp%E5%91%BD%E4%BB%A4%E4%B8%8Einode">3.cp命令与inode</h2>
+<blockquote>
+<blockquote>
+<p>分配一个空闲的inode号，在inode表中生成新条目;在目录中创建一个目录项，将名称与inode编号关联;拷贝数据生成新的文件</p>
+</blockquote>
+</blockquote>
+<h2 id="4rm%E5%91%BD%E4%BB%A4%E5%92%8Cinode">4.rm命令和inode</h2>
+<blockquote>
+<blockquote>
+<p>链接数递减，从而释放的inode号可以被重用
+把数据块放在空闲列表中
+删除目录项
+数据实际上不会马上被删除，但当另一个文件使用数据块时将被覆盖</p>
+</blockquote>
+</blockquote>
+<h2 id="5mv%E5%91%BD%E4%BB%A4%E5%92%8Cinode">5.mv命令和inode</h2>
+<blockquote>
+<p>如果mv命令的目标和源在相同的文件系统，作为mv 命令</p>
+<blockquote>
+<p>用新的文件名创建对应新的目录项<br>
+删除旧目录条目对应的旧的文件名<br>
+不影响inode表（除时间戳）或磁盘上的数据位置：没有数据被移动！</p>
+</blockquote>
+<p>如果目标和源在一个不同的文件系统， mv相当于cp和rm</p>
+</blockquote>
+<blockquote>
+<h1 id="%E4%BA%94%E7%A1%AC%E9%93%BE%E6%8E%A5%E5%92%8C%E8%BD%AF%E9%93%BE%E6%8E%A5">五.硬链接和软链接</h1>
+</blockquote>
+<h2 id="1%E7%A1%AC%E9%93%BE%E6%8E%A5">1.硬链接</h2>
+<blockquote>
+<p>创建硬链接会增加额外的记录项以引用文件<br>
+对应于同一文件系统上一个物理文件<br>
+每个目录引用相同的inode号<br>
+创建时链接数递增</p>
+</blockquote>
+<blockquote>
+<p>删除文件时：</p>
+<blockquote>
+<p>rm命令递减计数的链接<br>
+文件要存在，至少有一个链接数<br>
+当链接数为零时，该文件被删除<br>
+不能跨越驱动器或分区</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>为文件创建硬链接语法:</p>
+<blockquote>
+<p>ln filename [linkname ]</p>
+</blockquote>
+</blockquote>
+<h2 id="2%E7%AC%A6%E5%8F%B7%EF%BC%88%E6%88%96%E8%BD%AF%EF%BC%89%E9%93%BE%E6%8E%A5">2.符号（或软）链接</h2>
+<blockquote>
+<p>一个符号链接指向另一个文件<br>
+ls - l的 显示链接的名称和引用的文件<br>
+一个符号链接的内容是它引用文件的名称<br>
+可以对目录进行<br>
+可以跨分区<br>
+指向的是另一个文件的路径；其大小为指向的路径字符串的长度；不增加或减少目标文件inode的引用计数<br>
+语法：</p>
+<blockquote>
+<p>ln -s filename [linkname]</p>
+</blockquote>
+</blockquote>
+<h2 id="3%E7%A1%AE%E5%AE%9A%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9">3.确定文件内容</h2>
+<blockquote>
+<p>文件可以包含多种类型的数据<br>
+检查文件的类型，然后确定适当的打开命令或应用程序使用</p>
+<blockquote>
+<p>file [options] &lt;filename&gt;...</p>
+</blockquote>
+<p>常用选项:</p>
+<blockquote>
+<p>-b 列出文件辨识结果时，不显示文件名称<br>
+-f filelist 列出文件filelist中文件名的文件类型<br>
+-F 使用指定分隔符号替换输出文件名后默认的”:”分隔符<br>
+-L 查看对应软链接对应文件的文件类型<br>
+--help 显示命令在线帮助</p>
+</blockquote>
+</blockquote>
+
+</body>
+</html>
