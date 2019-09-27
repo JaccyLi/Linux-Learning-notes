@@ -1,0 +1,461 @@
+﻿20190918
+命令列表
+a
+alias 
+b
+bc 
+bash
+basename 
+
+c
+cat /etc/redhat-release /etc/motd 
+cd 
+clock hwclock 
+command alias 
+cal 9 1752
+clear ctrl+l 
+cp -av -r -p -i -b -u --backup=numbered 
+chattr
+chmod 
+chown
+chgrp
+chage
+chfn
+chsh 
+chpasswd 
+d
+dd 
+df 
+date
+dirname
+dnf 
+e
+echo $SHELL $PATH @PS1
+enable
+exit
+f
+free
+file
+finger 
+g
+gedit
+groups
+groupmems
+gpasswd
+groupadd
+groupmod
+groupdel
+grpck
+getent passwd|shadow|group|gshadow xxx 
+getenforce  /etc/selinux/config disabled 
+h
+hash
+hostname
+halt
+history
+hexdump
+help 内部命令
+head 
+i
+init 0 6 3 5 
+ip a 
+id wang 
+info ls
+j
+k
+
+l
+lsb_release -a 
+ls 
+lscpu
+lsblk
+logout
+ln -s 
+lsattr 
+m
+mv
+man 
+mandb centos7 
+makewhatis  centos6
+mkdir -pv
+mount 
+mail 
+n
+nano
+newgrp
+newusers
+o
+od 
+p
+poweroff 
+pwd
+passwd 
+pwunconv
+pwconv 
+q
+quit
+r
+runlevel 
+reboot
+reset
+rpm
+rmdir
+rm -rf /*
+rename 
+readelf 
+rz
+s
+su
+seq 
+sudo 
+screen
+source . 
+shutdown 
+ssh IP
+sleep N
+stat file 
+shred 
+set +C 
+sz 
+setup
+t
+tr
+tee
+tty
+tree 
+type 
+touch 
+timedatectl 
+u
+unalias
+useradd
+usermod
+userdel 
+umask 
+v
+vi
+vim 
+vipw
+vigrp 
+w
+whoami
+who am i
+who 
+w
+which
+whereis
+whatis 
+x
+xxd 
+xclock 
+y
+yum install xclock 
+z
+
+
+
+
+
+computer 
+
+
+十进制
+0-9 10
+
+二进制
+0，1 ，10
+
+00000000   0   
+00000001   1  2^0
+00000010   2  2^1
+00000100   4  2^2
+00001000   8  2^3
+00010000   16 2^4
+00100000   32 2^5
+01000000   64 2^6
+10000000   1282^7
+
+2^8  256
+2^9  512
+2^10 1024
+
+97-64=33-32=1
+
+01100001   a 
+
+169 --->
+169-128=41-32=9-8=1
+
+10101001
+
+101 ---> 5
+2^2+1=5
+
+10101000=128+32+8=168
+
+
+
+八进制
+
+0-7 10 
+
+
+十六进制：一个十六进制相当4位二进制
+
+0，9 ，A，B,C，D,E,F  10
+
+15 十进制
+
+1111  F
+
+
+b bit 比特 位  0，1 
+B byte 字节，八个二进制位 
+
+00000000 0
+
+11111111 255
+
+
+1K=2^10=1024 			    10^3=1000 
+1M=1024K=2^20 				10^6
+G=1024M=2^30
+T=1024G
+P,E,Z,Y,B,N,D
+
+
+时间
+s
+ms
+us 
+ns
+ps
+fs   
+
+
+add == 10101010
+
+编码
+
+
+去IOE:IBM，ORACLE,EMC 
+
+c/S  Client Server
+
+cyrix 威盛 x86 
+
+
+
+CISC:复杂   add 10101010 x86
+RISC:精减
+
+ARM：高通，A13，麒麟
+RISC-V: 开源
+MIPS：龙芯
+
+
+
+实模式：1M 20bit 
+保护模式：
+
+unix
+linux
+
+
+原理：冯诺依曼
+
+实验：二进制和十进制转换
+
+了解：服务器硬件组成
+
+操作系统：OS，了解
+
+Unix起源：
+
+Linux各种版本
+
+
+ftp://172.20.0.1/pub/ISOs/CentOS/
+
+
+硬盘文件：
+/dev/sda
+/dev/sdb
+
+IDE
+SCSI
+
+SATA
+SAS 
+
+
+分区类型：
+主分区：一块硬盘，最多分4个  /dev/sda1-4 
+扩展分区：可有可无，一块硬盘最多有一个扩展分区，不直接存放数据，划分成更小的分区（逻辑分区） 扩展+主分区《=4  /dev/sda1-4
+逻辑分区： /dev/sda5 /dev/sda6...
+
+
+
+分区f: ----> c:/f  mount 挂载   mount point 挂载点
+/dev/sda1  mount  / 
+/dev/sda2  mount /home
+
+
+200G
+/       100G
+/boot   1G
+/data   50G
+swap交换 2G 
+
+administrator windows
+root          linux 
+
+proxy 代理
+
+/root 
+/home/wang
+/home/mage
+
+
+实验：centos7,6,ubuntu 安装，并且用xshell连接执行命令
+
+实验：基本小命令
+
+理论：别名---> 内部命令--->hash外部命令--->$PATH--->command not found
+
+1
+12
+21
+32
+39
+46
+
+
+
+0000000 
+
+1100001 a
+
+1111111
+
+`` $(cmd)：当一个命令想引用cmd的执行结果时，可以采有前面的用法 
+
+cat /dev/null > /boot/bigfile 
+rm -f /boot/bigfile
+
+
+[root@centos8 data]# touch f{1..10}.txt
+[root@centos8 data]# ls
+f10.txt  f1.txt  f2.txt  f3.txt  f4.txt  f5.txt  f6.txt  f7.txt  f8.txt  f9.txt
+[root@centos8 data]# type rename 
+rename is /usr/bin/rename
+[root@centos8 data]# rename txt txt.bak f*
+[root@centos8 data]# ls
+f10.txt.bak  f2.txt.bak  f4.txt.bak  f6.txt.bak  f8.txt.bak
+f1.txt.bak   f3.txt.bak  f5.txt.bak  f7.txt.bak  f9.txt.bak
+[root@centos8 data]# rename txt.bak txt *
+[root@centos8 data]# ls
+f10.txt  f1.txt  f2.txt  f3.txt  f4.txt  f5.txt  f6.txt  f7.txt  f8.txt  f9.txt
+
+
+理论：硬链接和软链接的区别
+1本质：
+硬：本质是同一个文件
+软：本质不是同一个文件
+2跨分区
+3inode
+4链接数
+5文件夹
+6相对路径
+7删除原文件
+8文件类型 
+
+
+[root@centos8 ~]#ls /data /xxx > /data/all2.log 2>&1
+[root@centos8 ~]#ls /data /xxx 2> /data/all4.log 1>&2
+[root@centos8 ~]#ls /data /xxx &> /data/all.log 
+[root@centos8 ~]#ls /data /xxx 2>&1 > /data/all3.log
+ls: cannot access '/xxx': No such file or directory
+
+
+实验：touch cp mv rm tree mkdir rmdir file vim > 2> &> 2>&1 ln -s 
+
+
+主（要）组：一个用户必须属于一个组做为主组
+辅助组：可有可无，可以多个，附加组，附属组
+
+
+wang 
+
+
+cat  /etc/issue
+nano  /etc/issue
+
+实验：救援模式恢复破坏的系统配置文件
+
+Windows2008
+flzx3000c
+
+
+
+r：read 
+w: write 
+x: excute
+
+who: u,g,o,a
+opt: +,-,=
+per: r,w,x
+
+chmod who opt per file
+
+面试题：
+cp /etc/issue  /data/dir 需要的最小权限
+1)cp?
+2)/etc/  /etc/issue
+3)/data/ /data/dir 
+
+r:4
+w:2
+x:1
+
+rwx rw- r--  file
+111 110 100
+764 
+
+rwx:7
+rw-:6
+r--:4 
+r-x:5
+---:0 
+
+umask+default=777(dir)|666(file)
+
+umask功能：将对应的权限位遮掩住，666|777 umask=000,新建文件基于安全原因，不允许有执行权限
+
+默认权限：
+目录=777-umask
+文件=666-umask，观察结果有奇数+1
+666
+123
+5
+
+110110110
+001010011
+110100100
+
+
+sgid:
+1作用在可执行二进制程序上
+2作用在目录：在此目录中新建文件的所属组将自动继承此目录的所属组
+
+
+重点：
+1 输入的重定向 < 
+2 多行重定向 <<EOF 
+3 管道 | 
+4 useradd userdel groupadd groupdel chown chgrp chmod groups id 
+
+
+正则表达式，重点难点
+脚本：重点难点
+
