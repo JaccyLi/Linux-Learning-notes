@@ -1,6 +1,7 @@
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 # <center>Chapter3: bash shell 中的特殊字符详解
+
+
 ----
 > # [sharp] # 井号
 
@@ -631,8 +632,433 @@ echo $[$a*$b]   # 21
 > # [(( ))] 整数表达式计算
 - 展开并计算(())内的整数表达式
 
-> # ['>'  '&>'  '>&'  '>>'  '<'  '<>'] 各种重定向符
-1.'>' scriptname >filename 重定向左边脚本的执行结果到右边文件中；如果文件已经存在则覆盖。
+> # ['>'  '&>'  '>&'  '>>'  '<>'] 各种重定向符
+**1. '>'** 
+- scriptname >filename 重定向左边脚本的执行结果到右边文件中；如果文件已经存在则覆盖。 
 
-2 '&>' 
+**2. '&>'**
 
+- command &>filename 将command的标准输出和标准错误重定向到文件filename中。
+- 在CLI中测试某个命令是否存在时使用该重定向符时很有帮助的。如：
+```bash
+bash$ type bogus_command &>/dev/null
+bash$ echo $?
+1
+```
+- 或是在脚本中
+```bash
+command_test () { type "$1" &>/dev/null; }
+#                                      ^
+cmd=rmdir            # Legitimate command.合法命令
+command_test $cmd; echo $?   # 0
+cmd=bogus_command    # Illegitimate command.不存在的命令
+command_test $cmd; echo $?   # 1
+```
+
+**3. '>&'**
+
+- command >&2 该结构将重定向command的标准输出到标准错误。
+
+**4. '>>'**
+
+- scriptname >>filename 将scriptname的输出结果追加到filename文件中。如果filename文件事先不存在则创建。
+
+**5. '<>'**
+
+[i]<>filename 该结构以可写可读的方式打开filename文件，并且添加文件描述符i到该文件。如果filename不存在，则创建。
+
+
+
+> # [<<]
+- 用于就地文本的重定向符号。
+
+> # [<<<]
+- 用于就地字符串的重定向符号。
+
+> # [<,>]
+
+- 用来比较ASCII字符
+
+```bash
+veg1=carrots
+veg2=tomatoes
+if [[ "$veg1" < "$veg2" ]]
+then
+  echo "Although $veg1 precede $veg2 in the dictionary,"
+  echo -n "this does not necessarily imply anything "
+  echo "about my culinary preferences."
+else
+  echo "What kind of dictionary are you using, anyhow?"
+fi
+```
+
+> # [\<, \>]
+
+- 在正则表达式中用于锚定单词的头部和尾部。
+
+```bash
+[root@centos8 ~]grep '\<root\>' /etc/passwd 
+root:x:0:0:steve,banzhuang,18800001111,1123443,:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+```
+
+> # [|] 管道符
+- linux中管道用于连接多个命令，将前一个命令的输出（标准输出）传给后一个命令的输入（标准输入）或者shell。
+```bash
+echo ls -l | sh
+#  Passes the output of "echo ls -l" to the shell,
+#+ with the same result as a simple "ls -l".
+cat *.lst | sort | uniq
+# Merges and sorts all ".lst" files, then deletes duplicate lines.
+```
+- 某个命令的输出也可以使用管道传给某个脚本。
+```bash
+#!/bin/bash
+# uppercase.sh : Changes input to uppercase.
+tr 'a-z' 'A-Z'
+#  Letter ranges must be quoted
+#+ to prevent filename generation from single-letter filenames.
+exit 0
+###################
+bash$ ls -l | ./uppercase.sh
+-RW-RW-R--    1 BOZO  BOZO       109 APR  7 19:49 1.TXT
+-RW-RW-R--    1 BOZO  BOZO       109 APR 14 16:48 2.TXT
+-RW-R--R--    1 BOZO  BOZO       725 APR 20 20:56 DATA-FILE
+
+```
+- 在管道两侧签个进程的标准输出必须作为下一个进程的标准输入被读取。否则，数据流将会被阻塞，管道将不会按照预想的工作。
+```bash
+cat file1 file2 | ls -l | sort
+# The output from "cat file1 file2" disappears.命令cat file1 file2的输出会消失
+```
+- 管道是作为子进程运行的，因此无法更改脚本中的变量。
+```bash
+variable="initial_value"
+echo "new_value" | read variable
+echo "variable = $variable"     # variable = initial_value
+```
+- 如果在管道中的某个命令终止了，这将会提前结束该管道进程。叫做‘断开的管道’，这种情况下会发送一个SIGPIPE信号。
+
+
+> # [>|] 强制重定向符
+- 强制重定向（即是noclobber选项已经被设置），使用该符号强制性的覆盖某个文件。
+- noclobber是bash的选项之一，使用-C选项指定，意思是不让重定向符'>'覆盖文件，但使用'>|'强制覆盖。
+
+> # [||] OR或逻辑操作符
+- OR逻辑操作符。在test测试结构中，如果||两边的测试结构只有一个为真，则整体返回0（成功）。
+
+> # [&] AND符号
+- &使用该符号在后台运行某个作业。一个命令后面跟&符号将会在后台运行该命令。
+```bash
+[root@centos8 ~](sleep 5 ;echo -e "\ndone")&
+[1] 15682
+[root@centos8 ~]
+done
+```
+- 在脚本中，命令或者循环也可以运行在后台。
+```bash
+#!/bin/bash
+# background-loop.sh
+for i in 1 2 3 4 5 6 7 8 9 10            # First loop.
+do
+  echo -n "$i "
+done & # Run this loop in background.
+       # Will sometimes execute after second loop.
+echo   # This 'echo' sometimes will not display.
+for i in 11 12 13 14 15 16 17 18 19 20   # Second loop.
+do
+  echo -n "$i "
+done  
+echo   # This 'echo' sometimes will not display.
+# ======================================================
+# The expected output from the script:
+# 1 2 3 4 5 6 7 8 9 10 
+# 11 12 13 14 15 16 17 18 19 20 
+# Sometimes, though, you get:
+# 11 12 13 14 15 16 17 18 19 20 
+# 1 2 3 4 5 6 7 8 9 10 bozo $
+# (The second 'echo' doesn't execute. Why?)
+# Occasionally also:
+# 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+# (The first 'echo' doesn't execute. Why?)
+# Very rarely something like:
+# 11 12 13 1 2 3 4 5 6 7 8 9 10 14 15 16 17 18 19 20 
+# The foreground loop preempts the background one.
+exit 0
+#  Nasimuddin Ansari suggests adding    sleep 1
+#+ after the   echo -n "$i"   in lines 6 and 14,
+#+ for some real fun.
+```
+
+> # [&&] AND逻辑操作符
+- && AND逻辑操作符。在test测试结构中，如果操作符连接的测试条件都为真，则整个测试结果为0（真）。
+
+
+> # [-] 选项 前缀
+- 命令或者过滤器的选项标志。操作码的前缀。在参数替换中作为默认参数的前缀。
+
+- 重定向（从标准输入或标准输出；到标准输入或标准输出）。下面是实际用到的例子：
+
+```bash
+（cd /source/directory && tar cf - . ) | (cd /dest/directory && tar xpvf -)
+# Move entire file tree from one directory to another
+# [courtesy Alan Cox <a.cox@swansea.ac.uk>, with a minor change]
+# 1) cd /source/directory
+#    Source directory, where the files to be moved are.
+# 2) &&
+#   "And-list": if the 'cd' operation successful,
+#    then execute the next command.
+# 3) tar cf - .
+#    The 'c' option 'tar' archiving command creates a new archive,
+#    the 'f' (file) option, followed by '-' designates the target file
+#    as stdout, and do it in current directory tree ('.').
+# 4) |
+#    Piped to ...
+# 5) ( ... )
+#    a subshell
+# 6) cd /dest/directory
+#    Change to the destination directory.
+# 7) &&
+#   "And-list", as above
+# 8) tar xpvf -
+#    Unarchive ('x'), preserve ownership and file permissions ('p'),
+#    and send verbose messages to stdout ('v'),
+#    reading data from stdin ('f' followed by '-').
+#
+#    Note that 'x' is a command, and 'p', 'v', 'f' are options.
+#
+# Whew!
+# More elegant than, but equivalent to:
+#   cd source/directory
+#   tar cf - . | (cd ../dest/directory; tar xpvf -)
+#
+#     Also having same effect:
+# cp -a /source/directory/* /dest/directory
+#     Or:
+# cp -a /source/directory/* /source/directory/.[^.]* /dest/directory
+#     If there are hidden files in /source/directory.
+bunzip2 -c linux-2.6.16.tar.bz2 | tar xvf -
+#  --uncompress tar file--      | --then pass it to "tar"--
+#  If "tar" has not been patched to handle "bunzip2",
+#+ this needs to be done in two discrete steps, using a pipe.
+#  The purpose of the exercise is to unarchive "bzipped" kernel source.
+```
+
+- 在下面的情况下"-"并不是一个bash操作符，而是被特定的UNIX工具如：tar，cat等识别的一个选项。
+
+```bash
+bash$ echo "whatever" | cat -
+whatever
+```
+
+- 上面cat后一般跟文件，把文件换为"-"后，cat收到的内容将被重定向到标准输出。
+
+- 加上"-"后使命令结果更加细节化。使用"-"让shell等待用户输入。
+- 
+```bash
+[root@centos8 /data]file -
+123qwert
+/dev/stdin: ASCII text
+[root@centos8 /data]file -
+#!/bin/bash
+/dev/stdin: Bourne-Again shell script, ASCII text executable
+```
+
+- 下面是"-"和tar结合使用的一个例子：备份当前文件夹下24H内更改过的所有文件
+```bash
+#!/bin/bash
+#  Backs up all files in current directory modified within last 24 hours
+#+ in a "tarball" (tarred and gzipped file).
+BACKUPFILE=backup-$(date +%m-%d-%Y)
+#                 Embeds date in backup filename.
+#                 Thanks, Joshua Tschida, for the idea.
+archive=${1:-$BACKUPFILE}
+#  If no backup-archive filename specified on command-line,
+#+ it will default to "backup-MM-DD-YYYY.tar.gz."
+tar cvf - `find . -mtime -1 -type f -print` > $archive.tar
+gzip $archive.tar
+echo "Directory $PWD backed up in archive file \"$archive.tar.g
+#  Stephane Chazelas points out that the above code will fail
+#+ if there are too many files found
+#+ or if any filenames contain blank characters.
+# He suggests the following alternatives:
+# -------------------------------------------------------------------
+#   find . -mtime -1 -type f -print0 | xargs -0 tar rvf "$archive.tar"
+#      using the GNU version of "find".
+#   find . -mtime -1 -type f -exec tar rvf "$archive.tar" '{}' \;
+#         portable to other UNIX flavors, but much slower.
+# -------------------------------------------------------------------
+exit 0
+```
+- 以"-"开头的文件名和重定向符"-"在一起使用时可能报错。脚本应该检查文件名是否以"-"开头，并加上合适的前缀。如：`./-FILENAME, $PWD/-FILENAME, 或者 $PATHNAME/-FILENAME`
+
+- 如果某个变量的值以"-"开头，也可能造成错误。如：
+
+```bash
+var="-n"
+echo $var
+# bash认为上面的命令等同于 "echo -n", 不打印任何东西.
+```
+
+- "-"符号和cd命令使用时，表示前一个工作文件夹；此时使用到$OLDPWD这个环境变量。
+
+```bash
+[root@centos8 ~]pwd
+/root
+[root@centos8 ~]cd /etc/
+[root@centos8 /etc]pwd
+/etc
+[root@centos8 /etc]cd -
+/root
+[root@centos8 ~]pwd
+/root
+```
+
+- "-"在算术运算中做减法符号。
+
+
+
+> # [--] 命令长选项
+
+- 作为一个命令的长选项格式的一部分。
+- 在和bash的builtin类型使用是表示命令选项的结束。可以用来删除某些以-开头的文件。如：
+```bash
+bash$ ls -l
+-rw-r--r-- 1 bozo bozo 0 Nov 25 12:29 -badname #当前目录有个-开头的文件
+bash$ rm -- -badname   # 使用--避免rm认为-badname为选项
+bash$ ls -l
+total 0
+```
+
+> # [=] 等号
+- 赋值运算符
+
+```bash
+a=28
+echo $a   # 28
+```
+- 等号也作为字符串比较操作符。
+
+```bash
+if [ "$a" = "$b" ] # 如果字符串$a和$b相同，则为真。注意等号两边空格
+```
+
+> # [+] 加号
+
+- 加号，加法运算符。
+- 正则表达式中加号表示匹配其前面的字符集一次或多次。类似\*号，但是\*号包括0次
+
+> # [%] 百分号
+
+- 百分号为取模运算符，即取除法的余数
+
+```bash
+let "z = 5 % 3"
+echo $z  # 2
+```
+- 百分号也用于正则表达式中
+
+
+> # [~] 波浪符(读：tilde)
+- 波浪符代表家目录的意思，对应于$HOME环境变量。
+
+```bash
+[root@centos8 /etc/sysconfig/network-scripts] cd ~
+[root@centos8 ~] pwd
+/root
+
+[root@centos8 /etc/sysconfig/network-scripts] ls ~
+anaconda-ks.cfg      dead.letter  Documents  file1                 lig    passwd    Public   Templates  Videos
+anaconda-ks.cfg.bak  Desktop      Downloads  initial-setup-ks.cfg  Music  Pictures  scripts  tr
+```
+
+> # [~+] 当前工作目录$PWD
+
+- "~+"表示当前工作目录，对应于内部变量$PWD。
+```bash
+[root@centos8 /etc/sysconfig/network-scripts] echo $PWD
+/etc/sysconfig/network-scripts
+[root@centos8 /etc/sysconfig/network-scripts] echo ~+
+/etc/sysconfig/network-scripts
+```
+
+> # [~-] 前一个工作目录$OLDPWD
+
+- "~-"表示前一个工作目录，对应于内部变量$OLDPWD。
+```bash
+[root@centos8 /etc/sysconfig/network-scripts] cd
+[root@centos8 ~] echo ~+                          # 当前目录
+/root
+[root@centos8 ~] echo ~-                          # 前一个工作目录
+/etc/sysconfig/network-scripts
+[root@centos8 ~]
+```
+
+> # [=~] 正则表达式匹配符
+- "=~"该正则表达式匹配符号用于两对中括号中。(Perl语言也有类似的操作符)。
+```bash
+#!/bin/bash
+variable="This is a fine mess."
+echo "$variable"
+# Regex matching with =~ operator within [[ double brackets ]].
+if [[ "$variable" =~ T.........fin*es* ]]
+# NOTE: As of version 3.2 of Bash, expression to match no longer quoted.
+then
+  echo "match found"
+      # match found
+fi
+```
+或者更实用的例子：
+```bash
+#!/bin/bash
+input=$1
+if [[ "$input" =~ "[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" ]]
+#                 ^ NOTE: Quoting not necessary, as of version 3.2 of Bash.
+# NNN-NN-NNNN (where each N is a digit).
+then
+  echo "Social Security number."
+  # Process SSN.
+else
+  echo "Not a Social Security number!"
+  # Or, ask for corrected input.
+fi
+```
+
+> # [^] 行开始位置
+
+- 在正则表达式中，"^"表示一行的开头。
+```bash
+#### 找出/etc/passwd文件中以r开头的行
+[root@centos8 ~] grep "^r.*" /etc/passwd
+root:x:0:0:steve,banzhuang,18800001111,1123443,:/root:/bin/bash
+rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+rpc:x:32:32:Rpcbind Daemon:/var/lib/rpcbind:/sbin/nologin
+radvd:x:75:75:radvd user:/:/sbin/nologin
+rpcuser:x:29:29:RPC Service User:/var/lib/nfs:/sbin/nologin
+```
+
+> # [^,^^]
+- 在参数替换中起将字符串中的字母转换成大写的作用（在bash4版本中引进。）
+
+```bash
+#!/bin/bash4
+var=veryMixedUpVariable
+echo ${var}            # veryMixedUpVariable
+echo ${var^}           # VeryMixedUpVariable
+#         *             第一个字符大写
+#         *              First char --> uppercase.
+echo ${var^^}          # VERYMIXEDUPVARIABLE
+#         **            所有字符大写
+#         **             All chars  --> uppercase.
+echo ${var,}           # veryMixedUpVariable
+#         *             第一个字符小写
+#         *              First char --> lowercase.
+echo ${var,,}          # verymixedupvariable
+#         **            所有字符小写
+#         **             All chars  --> lowercase.
+```
+
+> # [Whitespace] 空白符
+- 空白符一般作为命令或者变量之间的分割符。空白符包含空格、退格、空白行或者这些的组合。
+
+- 在一些环境下不允许出现空白符，如变量赋值等。

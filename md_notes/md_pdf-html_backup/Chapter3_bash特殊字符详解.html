@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Chapter3_bash特殊字符详解.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<h1 id="centerchapter3-bash-shell-%E4%B8%AD%E7%9A%84%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6%E8%AF%A6%E8%A7%A3"><center>Chapter3: bash shell 中的特殊字符详解</h1>
+<hr>
+<blockquote>
+<h1 id="sharp-%E4%BA%95%E5%8F%B7">[sharp] # 井号</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E4%BA%95%E5%8F%B7%E5%B8%B8%E7%94%A8%E4%BD%9C%E6%B3%A8%E9%87%8A%E7%AC%A6%E5%8F%B7">井号常用作注释符号</h3>
+</li>
+</ul>
+<p><strong>1.注释示例</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># This line is a comment.</span>
+</div></code></pre>
+<p><strong>2.某命令后注释，#号前需要添加一个空格</strong></p>
+<pre class="hljs"><code><div><span class="hljs-built_in">echo</span> <span class="hljs-string">"A comment will follow."</span> <span class="hljs-comment"># Comment here.</span>
+<span class="hljs-comment">#                            ^ Note whitespace before #</span>
+</div></code></pre>
+<p><strong>3.注释前亦可跟空白字符</strong></p>
+<pre class="hljs"><code><div>   <span class="hljs-comment"># A tab precedes this comment.</span>
+</div></code></pre>
+<p><strong>4.注释符号还可以被嵌入到带管道的命令当中</strong></p>
+<pre class="hljs"><code><div>initial=( `cat <span class="hljs-string">"<span class="hljs-variable">$startfile</span>"</span> | sed -e <span class="hljs-string">'/#/d'</span> | tr -d <span class="hljs-string">'\n'</span> |\
+           sed -e <span class="hljs-string">'s/\./\. /g'</span> -e <span class="hljs-string">'s/_/_ /g'</span>` )
+<span class="hljs-comment"># Delete lines containing '#' comment character.</span>
+<span class="hljs-comment"># 该命令用于删除包含#号的行</span>
+</div></code></pre>
+<p><strong>5.当然，在echo命令中被引用或者被转义的#号不会成为注释,#号也会出现在特定的参数替换结构中及一些数值常量表达式中</strong></p>
+<pre class="hljs"><code><div><span class="hljs-built_in">echo</span> <span class="hljs-string">"The # here does not begin a comment."</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">'The # here does not begin a comment.'</span>
+<span class="hljs-built_in">echo</span> The \<span class="hljs-comment"># here does not begin a comment.</span>
+<span class="hljs-built_in">echo</span> The <span class="hljs-comment"># here begins a comment.</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-variable">${PATH#*:}</span>       <span class="hljs-comment"># 参数替换，不是注释</span>
+<span class="hljs-built_in">echo</span> $(( 2<span class="hljs-comment">#101011 ))  # 数制转换，不是注释</span>
+
+[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$echo</span> <span class="hljs-variable">${PATH#*:}</span> 
+/usr/<span class="hljs-built_in">local</span>/sbin:/usr/<span class="hljs-built_in">local</span>/bin:/usr/sbin:/usr/bin:/root/bin
+[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$echo</span> <span class="hljs-variable">${PATH}</span>    
+/usr/lib64/qt-3.3/bin:/usr/<span class="hljs-built_in">local</span>/sbin:/usr/<span class="hljs-built_in">local</span>/bin:/usr/sbin:/usr/bin:/root/bin
+</div></code></pre>
+<p><strong>6.标准的单双引用符号和转义符号(&quot;'/)都能转义#号</strong></p>
+<p><strong>7.某些特定的模式匹配操作也使用#号</strong></p>
+<hr>
+<blockquote>
+<h1 id="semicolon-%E5%88%86%E5%8F%B7">[semicolon] ; 分号</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E5%88%86%E5%8F%B7%E4%B8%80%E8%88%AC%E7%94%A8%E4%BD%9C%E5%91%BD%E4%BB%A4%E5%88%86%E9%9A%94%E7%AC%A6%EF%BC%8C%E5%85%81%E8%AE%B8%E5%A4%9A%E4%B8%AA%E5%91%BD%E4%BB%A4%E5%A4%84%E4%BA%8E%E5%90%8C%E4%B8%80%E8%A1%8C">分号一般用作命令分隔符，允许多个命令处于同一行</h3>
+</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-built_in">echo</span> hello; <span class="hljs-built_in">echo</span> there
+</div></code></pre>
+<pre class="hljs"><code><div><span class="hljs-keyword">if</span> [ -x <span class="hljs-string">"<span class="hljs-variable">$filename</span>"</span> ]; <span class="hljs-keyword">then</span>    <span class="hljs-comment">#  Note the space after the semicolon.</span>
+<span class="hljs-comment">#+                   ^^</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"File <span class="hljs-variable">$filename</span> exists."</span>; cp <span class="hljs-variable">$filename</span> <span class="hljs-variable">$filename</span>.bak
+<span class="hljs-keyword">else</span>   <span class="hljs-comment">#                       ^^</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"File <span class="hljs-variable">$filename</span> not found."</span>; touch <span class="hljs-variable">$filename</span>
+<span class="hljs-keyword">fi</span>; <span class="hljs-built_in">echo</span> <span class="hljs-string">"File test complete."</span>
+</div></code></pre>
+<hr>
+<blockquote>
+<h1 id="double-semicolon-%E5%8F%8C%E5%88%86%E5%8F%B7">[double semicolon] ;; 双分号</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E5%8F%8C%E5%88%86%E5%8F%B7%E7%94%A8%E4%BD%9Ccase%E8%AF%AD%E5%8F%A5%E4%B8%AD%E7%9A%84%E8%AF%AD%E5%8F%A5%E7%BB%93%E6%9D%9F%E7%AC%A6">双分号用作case语句中的语句结束符</h3>
+</li>
+<li>bash4.0+的版本使用;;&amp;或者;&amp;作为结束符</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">case</span> <span class="hljs-string">"<span class="hljs-variable">$variable</span>"</span> <span class="hljs-keyword">in</span>
+  abc)  <span class="hljs-built_in">echo</span> <span class="hljs-string">"\$variable = abc"</span> ;;
+  xyz)  <span class="hljs-built_in">echo</span> <span class="hljs-string">"\$variable = xyz"</span> ;;
+<span class="hljs-keyword">esac</span>
+</div></code></pre>
+<hr>
+<blockquote>
+<h1 id="period-%E8%8B%B1%E6%96%87%E5%8F%A5%E5%8F%B7">[period] . 英文句号</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E9%80%9A%E5%B8%B8%EF%BC%8C%E8%8B%B1%E6%96%87%E5%8F%A5%E5%8F%B7%E4%B8%BAbash-builtin%E5%91%BD%E4%BB%A4%EF%BC%8C%E7%AD%89%E5%90%8C%E4%BA%8Esource">通常，英文句号.为bash builtin命令，等同于source</h3>
+</li>
+</ul>
+<p><strong>1.作为文件名的一部分，当一个文件以.开头，则为隐藏文件，ls不会显示，使用ls -a</strong></p>
+<pre class="hljs"><code><div>bash$ touch .hidden-file
+bash$ ls -l
+total 10
+ -rw-r--r--    1 bozo      4034 Jul 18 22:04 data1.addressbook
+ -rw-r--r--    1 bozo      4602 May 25 13:58 data1.addressbook.bak
+ -rw-r--r--    1 bozo       877 Dec 17  2000 employment.addressbook
+bash$ ls -al
+total 14
+ drwxrwxr-x    2 bozo  bozo      1024 Aug 29 20:54 ./
+ drwx------   52 bozo  bozo      3072 Aug 29 20:51 ../
+ -rw-r--r--    1 bozo  bozo      4034 Jul 18 22:04 data1.addressbook
+ -rw-r--r--    1 bozo  bozo      4602 May 25 13:58 data1.addressbook.bak
+ -rw-r--r--    1 bozo  bozo       877 Dec 17  2000 employment.addressbook
+ -rw-rw-r--    1 bozo  bozo         0 Aug 29 20:54 .hidden-file
+</div></code></pre>
+<p><strong>2.句号在目录中，一个句号.表示当前目录，两个句号..表示当前目录的父目录</strong></p>
+<pre class="hljs"><code><div>bash$ <span class="hljs-built_in">pwd</span>
+/home/bozo/projects
+bash$ <span class="hljs-built_in">cd</span> .
+bash$ <span class="hljs-built_in">pwd</span>
+/home/bozo/projects
+bash$ <span class="hljs-built_in">cd</span> ..
+bash$ <span class="hljs-built_in">pwd</span>
+/home/bozo/
+</div></code></pre>
+<p><strong>3.句号在移动文件的命令中表示目标文件夹，此时的目标文件夹常常是当前目录</strong></p>
+<pre class="hljs"><code><div>bash$ cp /home/bozo/current_work/junk/* .
+<span class="hljs-comment"># 拷贝junk/文件夹下的所有文件到当前目录</span>
+</div></code></pre>
+<p><strong>4.字符匹配时，句号作为正则表达式的一部分表示匹配任意一个字符</strong></p>
+<hr>
+<blockquote>
+<h1 id="double-quote-%E5%8D%95%E5%8F%8C%E5%BC%95%E5%8F%B7">[double quote] ' &quot; 单双引号</h1>
+</blockquote>
+<ul>
+<li><strong>&quot;STRING&quot; preserves (from interpretation) most of the specia characters within STRING</strong></li>
+<li><strong>'STRING' preserves all special characters within STRING. This is a stronger form of quoting than &quot;STRING&quot;</strong></li>
+<li><strong>部分(弱)引用：&quot;STRING&quot; 这种写法表示 解释器会认为STRING中的小部分特殊字符有特殊意义</strong></li>
+<li><strong>全(强)引用：'STRING' 这种写法表示 解释器会认为STRING中的所有特殊字符都无特殊意义</strong></li>
+</ul>
+<pre class="hljs"><code><div>[root@centos7 /data]<span class="hljs-variable">$var</span>=jjjj
+[root@centos7 /data]<span class="hljs-variable">$cat</span> file
+<span class="hljs-built_in">test</span>
+ddd
+[root@centos7 /data]<span class="hljs-variable">$sed</span> <span class="hljs-string">"s/test/<span class="hljs-variable">${var}</span>/"</span> file <span class="hljs-comment">#双引号表示部分特殊字符具备特殊意义,此处${var}表示jjjj</span>
+jjjj
+ddd
+[root@centos7 /data]<span class="hljs-variable">$sed</span> <span class="hljs-string">'s/test/${var}/'</span> file <span class="hljs-comment">#单引号表示所有特殊字符均无特殊意义，此处${var}表示包含6个字符的字符串</span>
+<span class="hljs-variable">${var}</span>
+ddd
+[root@centos7 /data]$
+</div></code></pre>
+<hr>
+<blockquote>
+<h1 id="comma-operator-%E9%80%97%E5%8F%B7%E6%93%8D%E4%BD%9C%E7%AC%A6">[comma operator] , 逗号操作符</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E9%80%97%E5%8F%B7%E6%93%8D%E4%BD%9C%E7%AC%A6%E5%B0%86%E5%A4%9A%E4%B8%AA%E6%95%B0%E5%AD%A6%E8%BF%90%E7%AE%97%E8%A1%A8%E8%BE%BE%E5%BC%8F%E9%93%BE%E6%8E%A5%E5%9C%A8%E4%B8%80%E8%B5%B7%EF%BC%8C%E6%89%80%E6%9C%89%E8%A1%A8%E8%BE%BE%E5%BC%8F%E9%83%BD%E4%BC%9A%E8%A2%AB%E8%AE%A1%E7%AE%97%EF%BC%8C%E4%BD%86%E6%98%AF%E5%8F%AA%E6%9C%89%E6%9C%80%E5%90%8E%E4%B8%80%E4%B8%AA%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E7%BB%93%E6%9E%9C%E8%A2%AB%E8%BF%94%E5%9B%9E">逗号操作符将多个数学运算表达式链接在一起，所有表达式都会被计算，但是只有最后一个表达式的结果被返回</h3>
+</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos7 ~]<span class="hljs-variable">$let</span> <span class="hljs-string">"t2 = ((a = 9, 15 / 3))"</span>
+[root@centos7 ~]<span class="hljs-variable">$echo</span> <span class="hljs-variable">$t2</span>   <span class="hljs-comment"># 此处返回值为15/3=5</span>
+5
+[root@centos7 ~]<span class="hljs-variable">$echo</span> <span class="hljs-variable">$a</span>
+9
+</div></code></pre>
+<ul>
+<li>
+<h3 id="%E9%80%97%E5%8F%B7%E6%93%8D%E4%BD%9C%E7%AC%A6%E4%BA%A6%E5%8F%AF%E5%92%8C%E8%8A%B1%E6%8B%AC%E5%8F%B7%E9%85%8D%E5%90%88%E4%BB%A5%E7%94%A8%E6%9D%A5%E8%BF%9E%E6%8E%A5%E5%AD%97%E7%AC%A6%E4%B8%B2">逗号操作符亦可和花括号{}配合以用来连接字符串</h3>
+</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">for</span> file <span class="hljs-keyword">in</span> /{,usr/}bin/*calc
+<span class="hljs-comment">#             ^    Find all executable files ending in "calc"</span>
+<span class="hljs-comment">#+                 in /bin and /usr/bin directories.</span>
+<span class="hljs-keyword">do</span>
+        <span class="hljs-keyword">if</span> [ -x <span class="hljs-string">"<span class="hljs-variable">$file</span>"</span> ]
+        <span class="hljs-keyword">then</span>
+          <span class="hljs-built_in">echo</span> <span class="hljs-variable">$file</span>
+        <span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">done</span>
+
+<span class="hljs-comment"># /bin/ipcalc</span>
+<span class="hljs-comment"># /usr/bin/kcalc</span>
+<span class="hljs-comment"># /usr/bin/oidcalc</span>
+<span class="hljs-comment"># /usr/bin/oocalc</span>
+</div></code></pre>
+<hr>
+<blockquote>
+<h1 id="backslash-%E5%8F%8D%E6%96%9C%E6%9D%A0">[backslash] \ 反斜杠</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E7%94%A8%E4%BA%8E%E5%8D%95%E4%B8%AA%E5%AD%97%E7%AC%A6%E7%9A%84%E5%BC%95%E7%94%A8%E6%9C%BA%E5%88%B6">用于单个字符的引用机制</h3>
+</li>
+</ul>
+<pre class="hljs"><code><div>\X 该写法将转义字符X，等价于'X'，反斜杠也会用于转义'和&quot;。
+</div></code></pre>
+<blockquote>
+<h1 id="forward-slash-%E6%96%9C%E6%9D%A0">[forward slash] / 斜杠</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E6%96%9C%E6%9D%A0%E4%B8%80%E8%88%AC%E7%94%A8%E4%BD%9C%E6%96%87%E4%BB%B6%E5%90%8D%E8%B7%AF%E5%BE%84%E5%88%86%E9%9A%94%E7%AC%A6">斜杠一般用作文件名路径分隔符</h3>
+</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos7 ~]<span class="hljs-variable">$cat</span> /home/bozo/projects/Makefile
+</div></code></pre>
+<ul>
+<li>
+<h3 id="%E6%96%9C%E6%9D%A0%E4%B9%9F%E6%98%AF%E9%99%A4%E6%B3%95%E8%BF%90%E7%AE%97%E7%AC%A6">斜杠也是除法运算符</h3>
+</li>
+</ul>
+<blockquote>
+<h1 id="backquotes-%E5%8F%8D%E5%BC%95%E5%8F%B7">[backquotes] ` 反引号</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E5%8F%8D%E5%BC%95%E5%8F%B7%E7%94%A8%E4%BD%9C%E5%91%BD%E4%BB%A4%E6%9B%BF%E6%8D%A2%EF%BC%8Ccommand-%E8%BF%99%E7%A7%8D%E7%BB%93%E6%9E%84%E4%BD%BF%E5%BE%97command%E7%9A%84%E6%89%A7%E8%A1%8C%E7%BB%93%E6%9E%9C%E5%8F%AF%E4%BB%A5%E8%B5%8B%E7%BB%99%E6%96%B0%E7%9A%84%E5%8F%98%E9%87%8F">反引号用作命令替换，<code>command</code> 这种结构使得command的执行结果可以赋给新的变量</h3>
+</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos7 ~]<span class="hljs-variable">$num</span>=`seq 1 10`
+[root@centos7 ~]<span class="hljs-variable">$echo</span> <span class="hljs-variable">$num</span>
+1 2 3 4 5 6 7 8 9 10
+</div></code></pre>
+<blockquote>
+<h1 id="colon-%E5%86%92%E5%8F%B7">[colon] : 冒号</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E5%86%92%E5%8F%B7%E5%9C%A8shell%E4%B8%AD%E8%A1%A8%E7%A4%BAnop-no-op-a-do-nothing-operation%EF%BC%8C%E4%B8%80%E4%B8%AA%E4%B8%8D%E5%81%9A%E4%BB%BB%E4%BD%95%E6%93%8D%E4%BD%9C%E7%9A%84%E5%91%BD%E4%BB%A4%EF%BC%9B%E5%86%92%E5%8F%B7%E5%91%BD%E4%BB%A4%E5%B1%9E%E4%BA%8Ebash-builtin%E7%B1%BB%E5%9E%8B%EF%BC%8C%E5%85%B6%E5%91%BD%E4%BB%A4%E9%80%80%E5%87%BA%E7%8A%B6%E6%80%81%E4%B8%BAtrue%EF%BC%880%EF%BC%89">冒号在shell中表示&quot;NOP&quot; (no op, a do-nothing operation)，一个不做任何操作的命令；&quot;:&quot;冒号命令属于bash builtin类型，其命令退出状态为True（0）</h3>
+</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos7 ~]$:
+[root@centos7 ~]<span class="hljs-variable">$echo</span> $?
+0
+</div></code></pre>
+<p><strong>1.冒号用于实现无限循环</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">while</span> :
+<span class="hljs-keyword">do</span>
+   operation-1
+   operation-2
+   ...
+   operation-n
+<span class="hljs-keyword">done</span>
+<span class="hljs-comment"># 等同于:</span>
+<span class="hljs-comment">#    while true</span>
+<span class="hljs-comment">#    do</span>
+<span class="hljs-comment">#      ...</span>
+<span class="hljs-comment">#    done</span>
+</div></code></pre>
+<p><strong>2.在if/then语句中作为占位符</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">if</span> condition
+<span class="hljs-keyword">then</span> :   <span class="hljs-comment"># 什么也不做，分支继续</span>
+<span class="hljs-keyword">else</span>     <span class="hljs-comment"># Or else ...</span>
+   take-some-action
+<span class="hljs-keyword">fi</span>
+</div></code></pre>
+<p><strong>3.在需要进行二进制操作的地方提供一个占位，</strong></p>
+<pre class="hljs"><code><div>[root@centos7 ~] : <span class="hljs-variable">${username=`whoami`}</span>
+<span class="hljs-comment"># ${username=`whoami`}   不以: 开头则会给出错误提示</span>
+<span class="hljs-comment">#                        unless "username" is a command or builtin...</span>
+[root@centos7 ~] : <span class="hljs-variable">${1?"Usage: $0 ARGUMENT"}</span>  
+</div></code></pre>
+<p><strong>4.用参数替换来确定某个变量是否已经存在</strong></p>
+<pre class="hljs"><code><div>[root@centos7 ~]$: <span class="hljs-variable">${HOSTNAME?}</span> <span class="hljs-variable">${USER?}</span> <span class="hljs-variable">${MAIL?}</span>
+[root@centos7 ~]<span class="hljs-variable">$echo</span> $?
+0
+<span class="hljs-comment"># 如果上面某个或多个必要的环境变量未设置，则会打印一条错误消息，此时我的电脑三个环境变量都已经存在，所以没有错误消息</span>
+</div></code></pre>
+<p><strong>5.和重定向符号&gt;配套使用，清除某个文件的内容，不改变其原有的权限属性-$: &gt; file</strong></p>
+<pre class="hljs"><code><div>[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$cat</span> hello
+HELLO
+[root@centos7 /data/<span class="hljs-built_in">test</span>]$: &gt; hello  <span class="hljs-comment"># 此处清空hello文件，如果hello不存在，则创建之</span>
+[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$cat</span> hello
+[root@centos7 /data/<span class="hljs-built_in">test</span>]$
+</div></code></pre>
+<p><strong><em>注意</em>：上面用法等同于“cat /dev/null &gt; hello”</strong></p>
+<p><strong>然而，使用上面的方法不会产生子进程，因为“:”是一个builtin类型</strong></p>
+<p><strong>如果和追加重定向符&gt;&gt;配合使用，则不对文件产生任何影响；无对应文件则创建之</strong></p>
+<p><strong>6.分号还可以用作注释，但是bash会在以分号开头的注释中检查错误；而以#号开头的注释是关闭错误检查的</strong></p>
+<pre class="hljs"><code><div>[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$cat</span> test.sh     
+<span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment">#</span>
+: This is a comment that generates an error, ( <span class="hljs-keyword">if</span> [ <span class="hljs-variable">$x</span> -eq 3] )  <span class="hljs-comment">#以分号开头的注释含有错误代码</span>
+[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$bash</span> -n test.sh 
+test.sh: line 13: syntax error near unexpected token `(<span class="hljs-string">'
+test.sh: line 13: `: This is a comment that generates an error, ( if [ $x -eq 3] )'</span> <span class="hljs-comment">#bash检查出分号开头的注释存在错误</span>
+[root@centos7 /data/<span class="hljs-built_in">test</span>]$
+</div></code></pre>
+<p><strong>7.分号还可以作为域分隔符，如文件:/etc/passwd和环境变量PATH</strong></p>
+<pre class="hljs"><code><div>[root@centos7 ~]<span class="hljs-variable">$echo</span> <span class="hljs-variable">$PATH</span>
+/usr/lib64/qt-3.3/bin:/usr/<span class="hljs-built_in">local</span>/sbin:/usr/<span class="hljs-built_in">local</span>/bin:/usr/sbin:/usr/bin:/root/bin
+</div></code></pre>
+<p><strong>8.分号也可以作为函数名，但是不推荐这种做法，会使得代码不易读</strong></p>
+<pre class="hljs"><code><div>:()              <span class="hljs-comment"># 该函数的函数名为分号</span>
+{
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"The name of this function is "</span><span class="hljs-variable">$FUNCNAME</span><span class="hljs-string">" "</span>
+  <span class="hljs-comment"># Why use a colon as a function name?</span>
+  <span class="hljs-comment"># It's a way of obfuscating your code.</span>
+}
+</div></code></pre>
+<p><strong>注意：在比较新的bash版本中已经不允许这样做，但是可以使用_下划线作为函数名</strong>
+<strong>9.冒号可以用作空函数中的占位符</strong></p>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-title">not_empty</span></span> ()
+{
+  :
+} <span class="hljs-comment"># Contains a : (null command), and so is not empty.</span>
+</div></code></pre>
+<p><strong>注：该函数不做任何动作，但是不是空函数</strong></p>
+<blockquote>
+<h1 id="bang-%E6%84%9F%E5%8F%B9%E5%8F%B7">[bang] ! 感叹号</h1>
+</blockquote>
+<ul>
+<li>
+<h3 id="%E6%84%9F%E5%8F%B9%E5%8F%B7%E4%B8%80%E8%88%AC%E6%9C%89%E5%8F%96%E5%8F%8D%E5%92%8C%E5%9C%A8bash%E5%91%BD%E4%BB%A4%E8%A1%8C%E8%B0%83%E7%94%A8%E5%91%BD%E4%BB%A4%E5%8E%86%E5%8F%B2%E6%9C%BA%E5%88%B6%E7%9A%84%E4%BD%9C%E7%94%A8">感叹号一般有取反和在bash命令行调用命令历史机制的作用</h3>
+</li>
+</ul>
+<p><strong>1.感叹号用来对一个test测试条件或者命令退出状态取反，感叹号属于bash关键字</strong></p>
+<p><strong>2.在不同的上下文中，!的出现也意味着间接变量引用</strong></p>
+<p><strong>3.在bash命令环境中，!调用Bash历史机制</strong></p>
+<pre class="hljs"><code><div> 1092  cls
+ 1093  ll
+ 1094  <span class="hljs-built_in">history</span> 
+[root@centos7 ~]$!l    <span class="hljs-comment"># 该写法表示bash执行history命令记录中以l开头的最近一次执行过的命令</span>
+ll
+total 32
+-rw-r--r--. 1 root root 4352 Sep 17 11:04 1
+drwxr-xr-x. 3 root root   17 Aug 24 13:13 Desktop
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Documents
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Downloads
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Music
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Pictures
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Public
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Templates
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Videos
+-rw-------. 1 root root 2053 Aug 24 13:03 anaconda-ks.cfg
+-rw-r--r--. 1 root root 2101 Aug 24 13:05 initial-setup-ks.cfg
+-rwxr-xr-x. 1 root root 3121 Sep 12 00:04 reset.sh.bak0
+-rw-r--r--. 1 root root    4 Sep  4 11:25 somaxconn~
+-rw-r--r--. 1 root root    4 Sep  4 11:29 somaxcony~
+-rw-r--r--. 1 root root    4 Sep  4 11:29 somaxconz~
+[root@centos7 ~]$
+</div></code></pre>
+<blockquote>
+<h1 id="asterisk-%E6%98%9F%E5%8F%B7%E9%80%9A%E9%85%8D%E7%AC%A6">[asterisk] * 星号通配符</h1>
+</blockquote>
+<p><strong>1.星号在文件名通配操作中扮演通配符的角色，表示匹配某文件夹下的所有文件名；与其他具体字符结合表示匹配0个或者多个任意字符</strong></p>
+<pre class="hljs"><code><div>[root@centos7 /data]$ <span class="hljs-built_in">echo</span> *
+c_program py_scripts rpmPacksges scripts <span class="hljs-built_in">test</span> test_scripts ttt.sh
+[root@centos7 ~]$ <span class="hljs-built_in">echo</span> /data/*
+/data/c_program /data/py_scripts /data/rpmPacksges /data/scripts /data/<span class="hljs-built_in">test</span> /data/test_scripts /data/ttt.sh
+</div></code></pre>
+<p><strong>2.星号在正则表达式中表示：匹配其前面的字符任意次，包括0次</strong><br>
+<strong>3.在算术运算操作中，星号表示乘法操作符</strong><br>
+<strong>4.** 两个星号一起是运算符中的乘方操作符号，比如2**8=256</strong><br>
+<strong>5.** 两个星号一起在bash4.0版本以上内核中表示$\color{red}{扩展的文件通配操作}$，会递归通配文件</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">#!/bin/bash4</span>
+<span class="hljs-comment"># filelist.bash4</span>
+<span class="hljs-built_in">shopt</span> -s globstar  <span class="hljs-comment"># 必须使能 globstar, 否则 ** 没用.</span>
+                   <span class="hljs-comment"># globstar 是bash4.0中新增的shell选项</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"Using *"</span>; <span class="hljs-built_in">echo</span>
+<span class="hljs-keyword">for</span> filename <span class="hljs-keyword">in</span> *
+<span class="hljs-keyword">do</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">$filename</span>"</span>
+<span class="hljs-keyword">done</span>   <span class="hljs-comment"># 列出当前目录的文件 ($PWD).</span>
+<span class="hljs-built_in">echo</span>; <span class="hljs-built_in">echo</span> <span class="hljs-string">"--------------"</span>; <span class="hljs-built_in">echo</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"Using **"</span>
+<span class="hljs-keyword">for</span> filename <span class="hljs-keyword">in</span> **
+<span class="hljs-keyword">do</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">$filename</span>"</span>
+<span class="hljs-keyword">done</span>   <span class="hljs-comment"># 递归列出完整的文件树.</span>
+<span class="hljs-built_in">exit</span>
+
+<span class="hljs-comment"># 列出当前目录输出如下</span>
+Using *
+allmyfiles
+filelist.bash4
+--------------
+<span class="hljs-comment"># 递归列出完整的文件树输出如下</span>
+Using **
+allmyfiles
+allmyfiles/file.index.txt
+allmyfiles/my_music
+allmyfiles/my_music/me-singing-60s-folksongs.ogg
+allmyfiles/my_music/me-singing-opera.ogg
+allmyfiles/my_music/piano-lesson.1.ogg
+allmyfiles/my_pictures
+allmyfiles/my_pictures/at-beach-with-Jade.png
+allmyfiles/my_pictures/picnic-with-Melissa.png
+filelist.bash4
+</div></code></pre>
+<hr>
+<blockquote>
+<h1 id="test-operator-%E6%B5%8B%E8%AF%95%E6%93%8D%E4%BD%9C%E7%AC%A6">[test operator] ? 测试操作符</h1>
+</blockquote>
+<p><strong>1.在特定的表达式中，问号表示对一个条件的测试</strong><br>
+<strong>2.在双括号结构中，问号表现为C风格三元操作符的组成部分</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># condition?result-if-true:result-if-false</span>
+<span class="hljs-comment"># 条件?条件为真的值:条件为假的值</span>
+(( var0 = var1&lt;98?9:21 ))
+<span class="hljs-comment">#                ^ ^</span>
+<span class="hljs-comment"># if [ "$var1" -lt 98 ]</span>
+<span class="hljs-comment"># then</span>
+<span class="hljs-comment">#   var0=9</span>
+<span class="hljs-comment"># else</span>
+<span class="hljs-comment">#   var0=21</span>
+<span class="hljs-comment"># fi</span>
+</div></code></pre>
+<p><strong>3.在参数替换表达式中，问号表示某变量是否已经存在</strong></p>
+<pre class="hljs"><code><div><span class="hljs-variable">${paramseter?err_msg}</span>, <span class="hljs-variable">${parameter:?err_msg}</span>
+<span class="hljs-comment"># 如果parameter已经存在，就使用其；否则打印err_msg退出脚本，并且退出状态为1</span>
+<span class="hljs-comment"># 上面两种写法几乎同等，后面写法中的冒号表示只有当parameter已经被声明且为空时(null)就使用</span>
+</div></code></pre>
+<p><strong>4.作为通配符，在文件名通配中表示匹配任何当个字符；在扩展正则表达式中表示匹配其前面的某单个字符。</strong></p>
+<blockquote>
+<h1 id="%E5%8F%98%E9%87%8F%E6%9B%BF%E6%8D%A2%E7%AC%A6%E8%8E%B7%E5%8F%96%E4%B8%80%E4%B8%AA%E5%8F%98%E9%87%8F%E6%89%80%E5%AD%98%E5%82%A8%E7%9A%84%E5%86%85%E5%AE%B9">[$] 变量替换符(获取一个变量所存储的内容)</h1>
+</blockquote>
+<pre class="hljs"><code><div>[root@centos7 /data/globbing]<span class="hljs-variable">$var1</span>=123
+[root@centos7 /data/globbing]<span class="hljs-variable">$var2</span>=hello
+[root@centos7 /data/globbing]<span class="hljs-variable">$echo</span> <span class="hljs-variable">$var1</span>; <span class="hljs-built_in">echo</span> <span class="hljs-variable">$var2</span>
+123
+hello
+</div></code></pre>
+<blockquote>
+<h1 id="end-of-line-%E5%9C%A8%E6%AD%A3%E5%88%99%E8%BE%BE%E5%BC%8F%E4%B8%AD%E8%A1%A8%E5%8C%B9%E9%85%8D%E6%96%87%E6%9C%AC%E7%9A%84%E8%A1%8C%E7%BB%93%E6%9D%9F%E4%BD%8D%E7%BD%AE%EF%BC%8C%E5%B8%B8%E7%94%A8%E4%BA%8E%E9%94%9A%E5%AE%9A%EF%BC%9B%E5%9C%A8linux%E7%B3%BB%E7%BB%9F%E4%B8%AD%E6%96%87%E6%9C%AC%E6%96%87%E4%BB%B6%E7%9A%84%E8%A1%8C%E7%BB%93%E6%9D%9F%E7%AC%A6%E4%B9%9F%E6%98%AF">[$] end-of-line 在正则达式中表匹配文本的行结束位置，常用于锚定；在linux系统中文本文件的行结束符也是$</h1>
+</blockquote>
+<pre class="hljs"><code><div>[root@centos7 /data/globbing]<span class="hljs-variable">$ls</span> |grep <span class="hljs-string">'.*[0-9]$'</span>  <span class="hljs-comment"># 表示匹配以数字结尾的文件名</span>
+10file.1
+10file.2
+1SdsflDSLFsdf677671
+1SdsflDSLFsdf677672
+{a-z}dsf3adsf1
+DSdsflDSLFsdf677671
+[root@centos7 /data/globbing]<span class="hljs-variable">$ls</span> |grep <span class="hljs-string">'.*[a-zA-Z]$'</span>   <span class="hljs-comment"># 表示匹配以字母结尾的文件名</span>
+10file.txt
+1SdsflDSLFsdf67767A
+1SdsflDSLFsdf67767B
+a123321a
+A123321A
+a123321b
+</div></code></pre>
+<pre class="hljs"><code><div>[root@centos7 /data/globbing]<span class="hljs-variable">$echo</span> hello &gt; 10file.1
+[root@centos7 /data/globbing]<span class="hljs-variable">$cat</span> -A 10file.1
+hello$                                            <span class="hljs-comment"># cat -A 查看文本的不可打印字符，包括tab键和行结束符$等。</span>
+</div></code></pre>
+<blockquote>
+<h1 id="%E5%8F%82%E6%95%B0%E6%9B%BF%E6%8D%A2%E7%AC%A6%E8%8E%B7%E5%8F%96%E8%8A%B1%E6%8B%AC%E5%8F%B7%E4%B8%AD%E7%9A%84%E5%8F%98%E9%87%8F%E6%89%80%E5%AD%98%E5%82%A8%E7%9A%84%E5%86%85%E5%AE%B9%EF%BC%9B%E5%87%A0%E4%B9%8E%E5%92%8C%E7%AD%89%E5%90%8C%EF%BC%8C%E5%9C%A8%E6%9F%90%E4%BA%9B%E6%83%85%E5%86%B5%E4%B8%8B%E4%BD%BF%E7%94%A8%E4%BE%8B%E5%A6%82%EF%BC%9A%E4%BD%BF%E7%94%A8%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BF%9E%E6%8E%A5%E4%B8%8D%E5%90%8C%E7%9A%84%E5%8F%98%E9%87%8F%E6%89%80%E5%AD%98%E5%82%A8%E7%9A%84%E5%86%85%E5%AE%B9">[${}] 参数替换符,获取花括号中的变量所存储的内容；几乎和$等同，在某些情况下使用${}(例如：使用字符串连接不同的变量所存储的内容)</h1>
+</blockquote>
+<pre class="hljs"><code><div>[root@centos7 /data/globbing]<span class="hljs-variable">$echo</span> <span class="hljs-variable">$USER</span>      <span class="hljs-comment"># 环境变量USER，保存有当前用户的用户名，使用$USER获取</span>
+root
+[root@centos7 /data/globbing]<span class="hljs-variable">$echo</span> <span class="hljs-variable">${USER}</span>    <span class="hljs-comment"># 此处功能同$</span>
+root
+[root@centos7 /data/globbing]<span class="hljs-variable">$your_id</span>=<span class="hljs-variable">${USER}</span>-on-<span class="hljs-variable">${HOSTNAME}</span>    <span class="hljs-comment"># 此处使用'-on-' 将USER和HOSTNAME存储的内容连接起来；获取它们的内容必须用${}</span>
+[root@centos7 /data/globbing]<span class="hljs-variable">$echo</span> <span class="hljs-string">"<span class="hljs-variable">$your_id</span>"</span>
+root-on-centos7.magedu.steve                 <span class="hljs-comment"># 连接后的结果</span>
+</div></code></pre>
+<blockquote>
+<h1 id="">[$' ... ']</h1>
+</blockquote>
+<ul>
+<li>该结构将展开单个或多个被转义的8进制或者16进制的值并转换为ASCII码或者Unicode字符：</li>
+</ul>
+<pre class="hljs"><code><div>[steve@centos7 ~]<span class="hljs-variable">$echo</span> $<span class="hljs-string">'\x21'</span>
+!
+[steve@centos7 ~]<span class="hljs-variable">$echo</span> $<span class="hljs-string">'\x22'</span>                <span class="hljs-comment"># 十六进制x22代表ASCII码中的双引号 "</span>
+<span class="hljs-string">"
+[steve@centos7 ~]<span class="hljs-variable">$echo</span> $'\037'
+
+</span></div></code></pre>
+<blockquote>
+<h1 id="%E4%BD%8D%E7%BD%AE%E5%8F%82%E6%95%B0%EF%BC%8C%E5%AD%98%E5%82%A8%E6%89%80%E6%9C%89%E7%9A%84%E4%BD%8D%E7%BD%AE%E5%8F%82%E6%95%B0%EF%BC%8C%E6%9C%89%E5%8C%BA%E5%88%AB">[$*, $@] 位置参数，存储所有的位置参数，有区别</h1>
+</blockquote>
+<ul>
+<li>$* 将所有位置参数视为单个字符串</li>
+<li>$@ 每个位置参数存储为单独引用的字符串，分开对待每个位置参数</li>
+</ul>
+<blockquote>
+<h1 id="%E8%AF%A5%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E5%AD%98%E5%82%A8%E9%80%80%E5%87%BA%E7%8A%B6%E6%80%81%EF%BC%9B%E5%8F%AF%E4%BB%A5%E6%98%AF%E5%91%BD%E4%BB%A4%E3%80%81%E5%87%BD%E6%95%B0%E6%88%96%E8%80%85%E8%84%9A%E6%9C%AC%E7%9A%84%E9%80%80%E5%87%BA%E7%8A%B6%E6%80%81">[$?] 该环境变量存储退出状态；可以是命令、函数或者脚本的退出状态</h1>
+</blockquote>
+<ul>
+<li>脚本的退出状态为脚本中最后一条命令的退出状态</li>
+<li>函数退出状态也为最后一条命令的退出状态</li>
+<li>一般成功执行退出状态为0；命令执行失败退出状态为1-255之间的整数.</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$cat</span> exit_status.sh 
+<span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-built_in">echo</span> hello
+<span class="hljs-built_in">echo</span> $?    <span class="hljs-comment"># 打印hello成功，放回的退出状态值为0.</span>
+lskdf      <span class="hljs-comment"># Unrecognized command.</span>
+<span class="hljs-built_in">echo</span> $?    <span class="hljs-comment"># 无该命令命令，执行失败，退出状态非0.</span>
+<span class="hljs-built_in">echo</span>
+<span class="hljs-built_in">exit</span> 113   <span class="hljs-comment"># 脚本结束后使用echo $? 查看，脚本退出状态为113.</span>
+[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$bash</span> exit_status.sh 
+hello
+0
+exit_status.sh: line 4: lskdf: <span class="hljs-built_in">command</span> not found
+127
+[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$echo</span> $?
+113
+</div></code></pre>
+<blockquote>
+<h1 id="%E4%B8%BApid%E5%8F%98%E9%87%8F%EF%BC%8C%E5%AD%98%E5%82%A8%E5%85%B6%E5%87%BA%E7%8E%B0%E5%9C%A8%E7%9A%84%E8%84%9A%E6%9C%AC%E6%89%80%E5%B1%9E%E7%9A%84%E8%BF%9B%E7%A8%8B%E7%9A%84%E8%BF%9B%E7%A8%8B%E5%8F%B7">[$$] 为PID变量，存储其出现在的脚本所属的进程的进程号</h1>
+</blockquote>
+<pre class="hljs"><code><div>[root@centos7 ~]<span class="hljs-variable">$pstree</span> -p |grep sshd.*bash
+           |-sshd(1164)---sshd(1842)---bash(1848)---bash(6007)-+-grep(6043)
+[root@centos7 ~]<span class="hljs-variable">$echo</span> $$                        <span class="hljs-comment"># 当前所在bash进程为6007</span>
+6007
+[root@centos7 ~]<span class="hljs-variable">$exit</span>                           <span class="hljs-comment"># 退出6007号bash进程</span>
+<span class="hljs-built_in">exit</span>
+[root@centos7 ~]<span class="hljs-variable">$echo</span> $$                        <span class="hljs-comment"># 此时$$记录1848</span>
+1848
+</div></code></pre>
+<blockquote>
+<h1 id="%E5%9C%86%E6%8B%AC%E5%8F%B7">[()] 圆括号</h1>
+</blockquote>
+<p><strong>1.圆括号可以用来执行其包括的一组命令，各个命令使用分号；隔开</strong></p>
+<pre class="hljs"><code><div>[root@centos7 ~]$(a=hello; <span class="hljs-built_in">echo</span> <span class="hljs-variable">$a</span>)
+hello
+</div></code></pre>
+<ul>
+<li>注意；结构(command1;command2)中，shell会生成一个子shell进程来运行括号内的多个命令。括号内的变量(子shell中)不被括号外的命令读取，父进程(父shell)无法读取子进程的变量。</li>
+</ul>
+<pre class="hljs"><code><div>a=123
+( a=321; )            
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"a = <span class="hljs-variable">$a</span>"</span>   <span class="hljs-comment"># a = 123</span>
+<span class="hljs-comment"># "a" 可视为本地变量.</span>
+</div></code></pre>
+<p><strong>2.圆括号用于初始化数组</strong></p>
+<pre class="hljs"><code><div>Array=(element1 element2 element3)
+</div></code></pre>
+<blockquote>
+<h1 id="xxxyyyzzz-%E8%8A%B1%E6%8B%AC%E5%8F%B7%E5%B1%95%E5%BC%80">[{xxx,yyy,zzz,...}] 花括号展开</h1>
+</blockquote>
+<p><strong>1.有如下用法</strong></p>
+<pre class="hljs"><code><div><span class="hljs-built_in">echo</span> \"{These,words,are,quoted}\"   <span class="hljs-comment"># " 添加前缀和后缀(prefix and suffix)</span>
+<span class="hljs-comment"># "These" "words" "are" "quoted"</span>
+cat {file1,file2,file3} &gt; combined_file
+<span class="hljs-comment"># 链接三个文件 file1, file2, and file3 成一个文件combined_file.</span>
+cp file22.{txt,backup}
+<span class="hljs-comment"># Copies "file22.txt" to "file22.backup"</span>
+</div></code></pre>
+<p><strong>2.使用花括号展开时如果包含空格需要转义</strong></p>
+<pre class="hljs"><code><div>[root@centos7 /data/<span class="hljs-built_in">test</span>]<span class="hljs-variable">$echo</span> {file1,file2}\ :{\ A,<span class="hljs-string">" B"</span>,<span class="hljs-string">' C'</span>}
+file1 : A file1 : B file1 : C file2 : A file2 : B file2 : C
+</div></code></pre>
+<blockquote>
+<h1 id="az-%E6%89%A9%E5%B1%95%E7%9A%84%E8%8A%B1%E6%8B%AC%E5%8F%B7%E5%B1%95%E5%BC%80">[{a..z}] 扩展的花括号展开</h1>
+</blockquote>
+<ul>
+<li>扩展的花括号展开是bash3.0中新介绍的特性</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-built_in">echo</span> {a..z} <span class="hljs-comment"># a b c d e f g h i j k l m n o p q r s t u v w x y z</span>
+<span class="hljs-comment"># Echoes characters between a and z.</span>
+<span class="hljs-built_in">echo</span> {0..3} <span class="hljs-comment"># 0 1 2 3</span>
+<span class="hljs-comment"># Echoes characters between 0 and 3.</span>
+base64_charset=( {A..Z} {a..z} {0..9} + / = )
+<span class="hljs-comment"># Initializing an array, using extended brace expansion.</span>
+</div></code></pre>
+<blockquote>
+<h1 id="%E8%8A%B1%E6%8B%AC%E5%8F%B7%E4%BB%A3%E7%A0%81%E5%9D%97">[{}] 花括号代码块</h1>
+</blockquote>
+<p><strong>1.花括号中的代码块所包含的变量可被后续脚本代码识别</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment"># 例子1</span>
+bash$ { <span class="hljs-built_in">local</span> a;
+              a=123; }
+bash: <span class="hljs-built_in">local</span>: 使用<span class="hljs-built_in">local</span>关键字定义的变量为本地变量，只能在某个函数中使用
+
+<span class="hljs-comment"># 例子2</span>
+a=123
+{ a=321; }
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"a = <span class="hljs-variable">$a</span>"</span>   <span class="hljs-comment"># a = 321   (花括号中的变量2被打印)</span>
+<span class="hljs-comment"># Thanks, S.C.</span>
+</div></code></pre>
+<p><strong>2.花括号所包含的代码块一般有I/O重定向</strong></p>
+<pre class="hljs"><code><div><span class="hljs-meta">#!bin/bash
+</span>
+File=/etc/fstab
+{
+<span class="hljs-built_in">read</span> line1
+<span class="hljs-built_in">read</span> line2
+} &lt; <span class="hljs-variable">$File</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"First line in <span class="hljs-variable">$File</span> is:"</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">$line1</span>"</span>
+<span class="hljs-built_in">echo</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"Second line in <span class="hljs-variable">$File</span> is:"</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">$line2</span>"</span>
+<span class="hljs-built_in">exit</span>
+</div></code></pre>
+<p><strong>3.花括号内的代码块执行结果保存到某个文件中</strong></p>
+<pre class="hljs"><code><div><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment"># rpm-check.sh</span>
+<span class="hljs-comment">#  Queries an rpm file for description, listing,</span>
+<span class="hljs-comment">#+ and whether it can be installed.</span>
+<span class="hljs-comment">#  Saves output to a file.</span>
+<span class="hljs-comment"># </span>
+<span class="hljs-comment">#  This script illustrates using a code block.</span>
+SUCCESS=0
+E_NOARGS=65
+<span class="hljs-keyword">if</span> [ -z <span class="hljs-string">"<span class="hljs-variable">$1</span>"</span> ]
+<span class="hljs-keyword">then</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"Usage: `basename <span class="hljs-variable">$0</span>` rpm-file"</span>
+  <span class="hljs-built_in">exit</span> <span class="hljs-variable">$E_NOARGS</span>
+<span class="hljs-keyword">fi</span>  
+{ <span class="hljs-comment"># Begin code block.</span>
+  <span class="hljs-built_in">echo</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"Archive Description:"</span>
+  rpm -qpi <span class="hljs-variable">$1</span>       <span class="hljs-comment"># Query description.</span>
+  <span class="hljs-built_in">echo</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"Archive Listing:"</span>
+  rpm -qpl <span class="hljs-variable">$1</span>       <span class="hljs-comment"># Query listing.</span>
+  <span class="hljs-built_in">echo</span>
+  rpm -i --<span class="hljs-built_in">test</span> <span class="hljs-variable">$1</span>  <span class="hljs-comment"># Query whether rpm file can be installed.</span>
+  <span class="hljs-keyword">if</span> [ <span class="hljs-string">"$?"</span> -eq <span class="hljs-variable">$SUCCESS</span> ]
+  <span class="hljs-keyword">then</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">$1</span> can be installed."</span>
+  <span class="hljs-keyword">else</span>
+    <span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">$1</span> cannot be installed."</span>
+  <span class="hljs-keyword">fi</span>  
+  <span class="hljs-built_in">echo</span>              <span class="hljs-comment"># End code block.</span>
+} &gt; <span class="hljs-string">"<span class="hljs-variable">$1</span>.test"</span>       <span class="hljs-comment"># Redirects output of everything in block to file.</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"Results of rpm test in file <span class="hljs-variable">$1</span>.test"</span>
+<span class="hljs-comment"># See rpm man page for explanation of options.</span>
+<span class="hljs-built_in">exit</span> 0
+</div></code></pre>
+<ul>
+<li>不像在()圆括号中的命令组合会产生新的shell子进程，花括号{}中的代码通常不产生子shell。</li>
+</ul>
+<p><strong>4.不标准的for循环也可以遍历某个花括号中的代码块</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">for</span>((n=1; n&lt;=10; n++))   <span class="hljs-comment"># 注意：圆括号后无内容，直接跟花括号代码块</span>
+<span class="hljs-comment"># No do!</span>
+{
+  <span class="hljs-built_in">echo</span> -n <span class="hljs-string">"* <span class="hljs-variable">$n</span> *"</span>
+}
+<span class="hljs-comment"># No done!</span>
+<span class="hljs-comment"># Outputs:</span>
+<span class="hljs-comment"># * 1 ** 2 ** 3 ** 4 ** 5 ** 6 ** 7 ** 8 ** 9 ** 10 *</span>
+<span class="hljs-comment"># And, echo $? returns 0, so Bash does not register an error.</span>
+</div></code></pre>
+<p><strong>5.花括号亦可用作文本占位符，一般用于xargs -i(替换字符串选项)后面；花括号是输出的文本的占位符</strong></p>
+<pre class="hljs"><code><div>ls . | xargs -i -t cp ./{} <span class="hljs-variable">$1</span>
+<span class="hljs-comment">#            ^^         ^^</span>
+<span class="hljs-comment"># From "ex42.sh" (copydir.sh) example.</span>
+</div></code></pre>
+<blockquote>
+<h1 id="%EF%BC%8C-%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%84%EF%BC%8C%E6%B5%8B%E8%AF%95%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%BD%8D%E4%BA%8E%E4%B9%8B%E9%97%B4">[ []，[[]] ] 测试结构，测试表达式位于[]之间</h1>
+</blockquote>
+<ul>
+<li>需要注意的是'[',左中括号是shell的built-in测试类型，而没有链接到外部测试命令/usr/bin/test</li>
+<li>[[]],双重的中括号测试结构比[]更加灵活和稳定，[[]]是shell的关键字，keyword;
+也叫做扩展的测试命令，从ksh88版本中借鉴而来。</li>
+<li>注意注意注意：在双中括号结构中，文件名展开和word splitting都失效；但是参数替换和命令替换有效。</li>
+</ul>
+<pre class="hljs"><code><div>file=/etc/passwd
+<span class="hljs-keyword">if</span> [[ -e <span class="hljs-variable">$file</span> ]]
+<span class="hljs-keyword">then</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"Password file exists."</span>
+<span class="hljs-keyword">fi</span>
+</div></code></pre>
+<ul>
+<li>在数组的使用中，[]用来标识数组中的某个元素</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 ~]<span class="hljs-variable">$Array</span>[1]=slot_1
+[root@centos8 ~]<span class="hljs-variable">$echo</span> <span class="hljs-variable">${Array[1]}</span>
+slot_1
+</div></code></pre>
+<ul>
+<li>[]还乐意用来表示某范围内的字符，作为正则表达式的一部分，中括号描述了某个范围内的可被匹配到的字符。</li>
+</ul>
+<blockquote>
+<h1 id="%E6%95%B4%E6%95%B0%E8%A1%A8%E8%BE%BE%E5%BC%8F%E8%AE%A1%E7%AE%97">[$[ ... ]] 整数表达式计算</h1>
+</blockquote>
+<ul>
+<li>$[ ... ]该结构计算中括号内的整数表达式</li>
+</ul>
+<pre class="hljs"><code><div>a=3
+b=7
+<span class="hljs-built_in">echo</span> $[<span class="hljs-variable">$a</span>+<span class="hljs-variable">$b</span>]   <span class="hljs-comment"># 10</span>
+<span class="hljs-built_in">echo</span> $[<span class="hljs-variable">$a</span>*<span class="hljs-variable">$b</span>]   <span class="hljs-comment"># 21</span>
+</div></code></pre>
+<ul>
+<li></li>
+</ul>
+<blockquote>
+<h1 id="%E6%95%B4%E6%95%B0%E8%A1%A8%E8%BE%BE%E5%BC%8F%E8%AE%A1%E7%AE%97">[(( ))] 整数表达式计算</h1>
+</blockquote>
+<ul>
+<li>展开并计算(())内的整数表达式</li>
+</ul>
+<blockquote>
+<h1 id="%E5%90%84%E7%A7%8D%E9%87%8D%E5%AE%9A%E5%90%91%E7%AC%A6">['&gt;'  '&amp;&gt;'  '&gt;&amp;'  '&gt;&gt;'  '&lt;&gt;'] 各种重定向符</h1>
+</blockquote>
+<p><strong>1. '&gt;'</strong></p>
+<ul>
+<li>scriptname &gt;filename 重定向左边脚本的执行结果到右边文件中；如果文件已经存在则覆盖。</li>
+</ul>
+<p><strong>2. '&amp;&gt;'</strong></p>
+<ul>
+<li>command &amp;&gt;filename 将command的标准输出和标准错误重定向到文件filename中。</li>
+<li>在CLI中测试某个命令是否存在时使用该重定向符时很有帮助的。如：</li>
+</ul>
+<pre class="hljs"><code><div>bash$ <span class="hljs-built_in">type</span> bogus_command &amp;&gt;/dev/null
+bash$ <span class="hljs-built_in">echo</span> $?
+1
+</div></code></pre>
+<ul>
+<li>或是在脚本中</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-title">command_test</span></span> () { <span class="hljs-built_in">type</span> <span class="hljs-string">"<span class="hljs-variable">$1</span>"</span> &amp;&gt;/dev/null; }
+<span class="hljs-comment">#                                      ^</span>
+cmd=rmdir            <span class="hljs-comment"># Legitimate command.合法命令</span>
+command_test <span class="hljs-variable">$cmd</span>; <span class="hljs-built_in">echo</span> $?   <span class="hljs-comment"># 0</span>
+cmd=bogus_command    <span class="hljs-comment"># Illegitimate command.不存在的命令</span>
+command_test <span class="hljs-variable">$cmd</span>; <span class="hljs-built_in">echo</span> $?   <span class="hljs-comment"># 1</span>
+</div></code></pre>
+<p><strong>3. '&gt;&amp;'</strong></p>
+<ul>
+<li>command &gt;&amp;2 该结构将重定向command的标准输出到标准错误。</li>
+</ul>
+<p><strong>4. '&gt;&gt;'</strong></p>
+<ul>
+<li>scriptname &gt;&gt;filename 将scriptname的输出结果追加到filename文件中。如果filename文件事先不存在则创建。</li>
+</ul>
+<p><strong>5. '&lt;&gt;'</strong></p>
+<p>[i]&lt;&gt;filename 该结构以可写可读的方式打开filename文件，并且添加文件描述符i到该文件。如果filename不存在，则创建。</p>
+<blockquote>
+<h1 id="">[&lt;&lt;]</h1>
+</blockquote>
+<ul>
+<li>用于就地文本的重定向符号。</li>
+</ul>
+<blockquote>
+<h1 id="">[&lt;&lt;&lt;]</h1>
+</blockquote>
+<ul>
+<li>用于就地字符串的重定向符号。</li>
+</ul>
+<blockquote>
+<h1 id="">[&lt;,&gt;]</h1>
+</blockquote>
+<ul>
+<li>用来比较ASCII字符</li>
+</ul>
+<pre class="hljs"><code><div>veg1=carrots
+veg2=tomatoes
+<span class="hljs-keyword">if</span> [[ <span class="hljs-string">"<span class="hljs-variable">$veg1</span>"</span> &lt; <span class="hljs-string">"<span class="hljs-variable">$veg2</span>"</span> ]]
+<span class="hljs-keyword">then</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"Although <span class="hljs-variable">$veg1</span> precede <span class="hljs-variable">$veg2</span> in the dictionary,"</span>
+  <span class="hljs-built_in">echo</span> -n <span class="hljs-string">"this does not necessarily imply anything "</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"about my culinary preferences."</span>
+<span class="hljs-keyword">else</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"What kind of dictionary are you using, anyhow?"</span>
+<span class="hljs-keyword">fi</span>
+</div></code></pre>
+<blockquote>
+<h1 id="">[&lt;, &gt;]</h1>
+</blockquote>
+<ul>
+<li>在正则表达式中用于锚定单词的头部和尾部。</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 ~]grep <span class="hljs-string">'\&lt;root\&gt;'</span> /etc/passwd 
+root:x:0:0:steve,banzhuang,18800001111,1123443,:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+</div></code></pre>
+<blockquote>
+<h1 id="%E7%AE%A1%E9%81%93%E7%AC%A6">[|] 管道符</h1>
+</blockquote>
+<ul>
+<li>linux中管道用于连接多个命令，将前一个命令的输出（标准输出）传给后一个命令的输入（标准输入）或者shell。</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-built_in">echo</span> ls -l | sh
+<span class="hljs-comment">#  Passes the output of "echo ls -l" to the shell,</span>
+<span class="hljs-comment">#+ with the same result as a simple "ls -l".</span>
+cat *.lst | sort | uniq
+<span class="hljs-comment"># Merges and sorts all ".lst" files, then deletes duplicate lines.</span>
+</div></code></pre>
+<ul>
+<li>某个命令的输出也可以使用管道传给某个脚本。</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment"># uppercase.sh : Changes input to uppercase.</span>
+tr <span class="hljs-string">'a-z'</span> <span class="hljs-string">'A-Z'</span>
+<span class="hljs-comment">#  Letter ranges must be quoted</span>
+<span class="hljs-comment">#+ to prevent filename generation from single-letter filenames.</span>
+<span class="hljs-built_in">exit</span> 0
+<span class="hljs-comment">###################</span>
+bash$ ls -l | ./uppercase.sh
+-RW-RW-R--    1 BOZO  BOZO       109 APR  7 19:49 1.TXT
+-RW-RW-R--    1 BOZO  BOZO       109 APR 14 16:48 2.TXT
+-RW-R--R--    1 BOZO  BOZO       725 APR 20 20:56 DATA-FILE
+
+</div></code></pre>
+<ul>
+<li>在管道两侧签个进程的标准输出必须作为下一个进程的标准输入被读取。否则，数据流将会被阻塞，管道将不会按照预想的工作。</li>
+</ul>
+<pre class="hljs"><code><div>cat file1 file2 | ls -l | sort
+<span class="hljs-comment"># The output from "cat file1 file2" disappears.命令cat file1 file2的输出会消失</span>
+</div></code></pre>
+<ul>
+<li>管道是作为子进程运行的，因此无法更改脚本中的变量。</li>
+</ul>
+<pre class="hljs"><code><div>variable=<span class="hljs-string">"initial_value"</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"new_value"</span> | <span class="hljs-built_in">read</span> variable
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"variable = <span class="hljs-variable">$variable</span>"</span>     <span class="hljs-comment"># variable = initial_value</span>
+</div></code></pre>
+<ul>
+<li>如果在管道中的某个命令终止了，这将会提前结束该管道进程。叫做‘断开的管道’，这种情况下会发送一个SIGPIPE信号。</li>
+</ul>
+<blockquote>
+<h1 id="%E5%BC%BA%E5%88%B6%E9%87%8D%E5%AE%9A%E5%90%91%E7%AC%A6">[&gt;|] 强制重定向符</h1>
+</blockquote>
+<ul>
+<li>强制重定向（即是noclobber选项已经被设置），使用该符号强制性的覆盖某个文件。</li>
+<li>noclobber是bash的选项之一，使用-C选项指定，意思是不让重定向符'&gt;'覆盖文件，但使用'&gt;|'强制覆盖。</li>
+</ul>
+<blockquote>
+<h1 id="or%E6%88%96%E9%80%BB%E8%BE%91%E6%93%8D%E4%BD%9C%E7%AC%A6">[||] OR或逻辑操作符</h1>
+</blockquote>
+<ul>
+<li>OR逻辑操作符。在test测试结构中，如果||两边的测试结构只有一个为真，则整体返回0（成功）。</li>
+</ul>
+<blockquote>
+<h1 id="and%E7%AC%A6%E5%8F%B7">[&amp;] AND符号</h1>
+</blockquote>
+<ul>
+<li>&amp;使用该符号在后台运行某个作业。一个命令后面跟&amp;符号将会在后台运行该命令。</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 ~](sleep 5 ;<span class="hljs-built_in">echo</span> -e <span class="hljs-string">"\ndone"</span>)&amp;
+[1] 15682
+[root@centos8 ~]
+<span class="hljs-keyword">done</span>
+</div></code></pre>
+<ul>
+<li>在脚本中，命令或者循环也可以运行在后台。</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment"># background-loop.sh</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> 1 2 3 4 5 6 7 8 9 10            <span class="hljs-comment"># First loop.</span>
+<span class="hljs-keyword">do</span>
+  <span class="hljs-built_in">echo</span> -n <span class="hljs-string">"<span class="hljs-variable">$i</span> "</span>
+<span class="hljs-keyword">done</span> &amp; <span class="hljs-comment"># Run this loop in background.</span>
+       <span class="hljs-comment"># Will sometimes execute after second loop.</span>
+<span class="hljs-built_in">echo</span>   <span class="hljs-comment"># This 'echo' sometimes will not display.</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> 11 12 13 14 15 16 17 18 19 20   <span class="hljs-comment"># Second loop.</span>
+<span class="hljs-keyword">do</span>
+  <span class="hljs-built_in">echo</span> -n <span class="hljs-string">"<span class="hljs-variable">$i</span> "</span>
+<span class="hljs-keyword">done</span>  
+<span class="hljs-built_in">echo</span>   <span class="hljs-comment"># This 'echo' sometimes will not display.</span>
+<span class="hljs-comment"># ======================================================</span>
+<span class="hljs-comment"># The expected output from the script:</span>
+<span class="hljs-comment"># 1 2 3 4 5 6 7 8 9 10 </span>
+<span class="hljs-comment"># 11 12 13 14 15 16 17 18 19 20 </span>
+<span class="hljs-comment"># Sometimes, though, you get:</span>
+<span class="hljs-comment"># 11 12 13 14 15 16 17 18 19 20 </span>
+<span class="hljs-comment"># 1 2 3 4 5 6 7 8 9 10 bozo $</span>
+<span class="hljs-comment"># (The second 'echo' doesn't execute. Why?)</span>
+<span class="hljs-comment"># Occasionally also:</span>
+<span class="hljs-comment"># 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20</span>
+<span class="hljs-comment"># (The first 'echo' doesn't execute. Why?)</span>
+<span class="hljs-comment"># Very rarely something like:</span>
+<span class="hljs-comment"># 11 12 13 1 2 3 4 5 6 7 8 9 10 14 15 16 17 18 19 20 </span>
+<span class="hljs-comment"># The foreground loop preempts the background one.</span>
+<span class="hljs-built_in">exit</span> 0
+<span class="hljs-comment">#  Nasimuddin Ansari suggests adding    sleep 1</span>
+<span class="hljs-comment">#+ after the   echo -n "$i"   in lines 6 and 14,</span>
+<span class="hljs-comment">#+ for some real fun.</span>
+</div></code></pre>
+<blockquote>
+<h1 id="and%E9%80%BB%E8%BE%91%E6%93%8D%E4%BD%9C%E7%AC%A6">[&amp;&amp;] AND逻辑操作符</h1>
+</blockquote>
+<ul>
+<li>&amp;&amp; AND逻辑操作符。在test测试结构中，如果操作符连接的测试条件都为真，则整个测试结果为0（真）。</li>
+</ul>
+<blockquote>
+<h1 id="%E9%80%89%E9%A1%B9-%E5%89%8D%E7%BC%80"><input type="checkbox" id="checkbox0"><label for="checkbox0">选项 前缀</label></h1>
+</blockquote>
+<ul>
+<li>
+<p>命令或者过滤器的选项标志。操作码的前缀。在参数替换中作为默认参数的前缀。</p>
+</li>
+<li>
+<p>重定向（从标准输入或标准输出；到标准输入或标准输出）。下面是实际用到的例子：</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>（<span class="hljs-built_in">cd</span> /<span class="hljs-built_in">source</span>/directory &amp;&amp; tar cf - . ) | (<span class="hljs-built_in">cd</span> /dest/directory &amp;&amp; tar xpvf -)
+<span class="hljs-comment"># Move entire file tree from one directory to another</span>
+<span class="hljs-comment"># [courtesy Alan Cox &lt;a.cox@swansea.ac.uk&gt;, with a minor change]</span>
+<span class="hljs-comment"># 1) cd /source/directory</span>
+<span class="hljs-comment">#    Source directory, where the files to be moved are.</span>
+<span class="hljs-comment"># 2) &amp;&amp;</span>
+<span class="hljs-comment">#   "And-list": if the 'cd' operation successful,</span>
+<span class="hljs-comment">#    then execute the next command.</span>
+<span class="hljs-comment"># 3) tar cf - .</span>
+<span class="hljs-comment">#    The 'c' option 'tar' archiving command creates a new archive,</span>
+<span class="hljs-comment">#    the 'f' (file) option, followed by '-' designates the target file</span>
+<span class="hljs-comment">#    as stdout, and do it in current directory tree ('.').</span>
+<span class="hljs-comment"># 4) |</span>
+<span class="hljs-comment">#    Piped to ...</span>
+<span class="hljs-comment"># 5) ( ... )</span>
+<span class="hljs-comment">#    a subshell</span>
+<span class="hljs-comment"># 6) cd /dest/directory</span>
+<span class="hljs-comment">#    Change to the destination directory.</span>
+<span class="hljs-comment"># 7) &amp;&amp;</span>
+<span class="hljs-comment">#   "And-list", as above</span>
+<span class="hljs-comment"># 8) tar xpvf -</span>
+<span class="hljs-comment">#    Unarchive ('x'), preserve ownership and file permissions ('p'),</span>
+<span class="hljs-comment">#    and send verbose messages to stdout ('v'),</span>
+<span class="hljs-comment">#    reading data from stdin ('f' followed by '-').</span>
+<span class="hljs-comment">#</span>
+<span class="hljs-comment">#    Note that 'x' is a command, and 'p', 'v', 'f' are options.</span>
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># Whew!</span>
+<span class="hljs-comment"># More elegant than, but equivalent to:</span>
+<span class="hljs-comment">#   cd source/directory</span>
+<span class="hljs-comment">#   tar cf - . | (cd ../dest/directory; tar xpvf -)</span>
+<span class="hljs-comment">#</span>
+<span class="hljs-comment">#     Also having same effect:</span>
+<span class="hljs-comment"># cp -a /source/directory/* /dest/directory</span>
+<span class="hljs-comment">#     Or:</span>
+<span class="hljs-comment"># cp -a /source/directory/* /source/directory/.[^.]* /dest/directory</span>
+<span class="hljs-comment">#     If there are hidden files in /source/directory.</span>
+bunzip2 -c linux-2.6.16.tar.bz2 | tar xvf -
+<span class="hljs-comment">#  --uncompress tar file--      | --then pass it to "tar"--</span>
+<span class="hljs-comment">#  If "tar" has not been patched to handle "bunzip2",</span>
+<span class="hljs-comment">#+ this needs to be done in two discrete steps, using a pipe.</span>
+<span class="hljs-comment">#  The purpose of the exercise is to unarchive "bzipped" kernel source.</span>
+</div></code></pre>
+<ul>
+<li>在下面的情况下&quot;-&quot;并不是一个bash操作符，而是被特定的UNIX工具如：tar，cat等识别的一个选项。</li>
+</ul>
+<pre class="hljs"><code><div>bash$ <span class="hljs-built_in">echo</span> <span class="hljs-string">"whatever"</span> | cat -
+whatever
+</div></code></pre>
+<ul>
+<li>
+<p>上面cat后一般跟文件，把文件换为&quot;-&quot;后，cat收到的内容将被重定向到标准输出。</p>
+</li>
+<li>
+<p>加上&quot;-&quot;后使命令结果更加细节化。使用&quot;-&quot;让shell等待用户输入。</p>
+</li>
+<li></li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 /data]file -
+123qwert
+/dev/stdin: ASCII text
+[root@centos8 /data]file -
+<span class="hljs-meta">#!/bin/bash</span>
+/dev/stdin: Bourne-Again shell script, ASCII text executable
+</div></code></pre>
+<ul>
+<li>下面是&quot;-&quot;和tar结合使用的一个例子：备份当前文件夹下24H内更改过的所有文件</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment">#  Backs up all files in current directory modified within last 24 hours</span>
+<span class="hljs-comment">#+ in a "tarball" (tarred and gzipped file).</span>
+BACKUPFILE=backup-$(date +%m-%d-%Y)
+<span class="hljs-comment">#                 Embeds date in backup filename.</span>
+<span class="hljs-comment">#                 Thanks, Joshua Tschida, for the idea.</span>
+archive=<span class="hljs-variable">${1:-$BACKUPFILE}</span>
+<span class="hljs-comment">#  If no backup-archive filename specified on command-line,</span>
+<span class="hljs-comment">#+ it will default to "backup-MM-DD-YYYY.tar.gz."</span>
+tar cvf - `find . -mtime -1 -<span class="hljs-built_in">type</span> f -<span class="hljs-built_in">print</span>` &gt; <span class="hljs-variable">$archive</span>.tar
+gzip <span class="hljs-variable">$archive</span>.tar
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"Directory <span class="hljs-variable">$PWD</span> backed up in archive file \"<span class="hljs-variable">$archive</span>.tar.g
+#  Stephane Chazelas points out that the above code will fail
+#+ if there are too many files found
+#+ or if any filenames contain blank characters.
+# He suggests the following alternatives:
+# -------------------------------------------------------------------
+#   find . -mtime -1 -type f -print0 | xargs -0 tar rvf "</span><span class="hljs-variable">$archive</span>.tar<span class="hljs-string">"
+#      using the GNU version of "</span>find<span class="hljs-string">".
+#   find . -mtime -1 -type f -exec tar rvf "</span><span class="hljs-variable">$archive</span>.tar<span class="hljs-string">" '{}' \;
+#         portable to other UNIX flavors, but much slower.
+# -------------------------------------------------------------------
+exit 0
+</span></div></code></pre>
+<ul>
+<li>
+<p>以&quot;-&quot;开头的文件名和重定向符&quot;-&quot;在一起使用时可能报错。脚本应该检查文件名是否以&quot;-&quot;开头，并加上合适的前缀。如：<code>./-FILENAME, $PWD/-FILENAME, 或者 $PATHNAME/-FILENAME</code></p>
+</li>
+<li>
+<p>如果某个变量的值以&quot;-&quot;开头，也可能造成错误。如：</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>var=<span class="hljs-string">"-n"</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-variable">$var</span>
+<span class="hljs-comment"># bash认为上面的命令等同于 "echo -n", 不打印任何东西.</span>
+</div></code></pre>
+<ul>
+<li>&quot;-&quot;符号和cd命令使用时，表示前一个工作文件夹；此时使用到$OLDPWD这个环境变量。</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 ~]<span class="hljs-built_in">pwd</span>
+/root
+[root@centos8 ~]<span class="hljs-built_in">cd</span> /etc/
+[root@centos8 /etc]<span class="hljs-built_in">pwd</span>
+/etc
+[root@centos8 /etc]<span class="hljs-built_in">cd</span> -
+/root
+[root@centos8 ~]<span class="hljs-built_in">pwd</span>
+/root
+</div></code></pre>
+<ul>
+<li>&quot;-&quot;在算术运算中做减法符号。</li>
+</ul>
+<blockquote>
+<h1 id="%E5%91%BD%E4%BB%A4%E9%95%BF%E9%80%89%E9%A1%B9">[--] 命令长选项</h1>
+</blockquote>
+<ul>
+<li>作为一个命令的长选项格式的一部分。</li>
+<li>在和bash的builtin类型使用是表示命令选项的结束。可以用来删除某些以-开头的文件。如：</li>
+</ul>
+<pre class="hljs"><code><div>bash$ ls -l
+-rw-r--r-- 1 bozo bozo 0 Nov 25 12:29 -badname <span class="hljs-comment">#当前目录有个-开头的文件</span>
+bash$ rm -- -badname   <span class="hljs-comment"># 使用--避免rm认为-badname为选项</span>
+bash$ ls -l
+total 0
+</div></code></pre>
+<blockquote>
+<h1 id="%E7%AD%89%E5%8F%B7">[=] 等号</h1>
+</blockquote>
+<ul>
+<li>赋值运算符</li>
+</ul>
+<pre class="hljs"><code><div>a=28
+<span class="hljs-built_in">echo</span> <span class="hljs-variable">$a</span>   <span class="hljs-comment"># 28</span>
+</div></code></pre>
+<ul>
+<li>等号也作为字符串比较操作符。</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">if</span> [ <span class="hljs-string">"<span class="hljs-variable">$a</span>"</span> = <span class="hljs-string">"<span class="hljs-variable">$b</span>"</span> ] <span class="hljs-comment"># 如果字符串$a和$b相同，则为真。注意等号两边空格</span>
+</div></code></pre>
+<blockquote>
+<h1 id="%E5%8A%A0%E5%8F%B7">[+] 加号</h1>
+</blockquote>
+<ul>
+<li>加号，加法运算符。</li>
+<li>正则表达式中加号表示匹配其前面的字符集一次或多次。类似*号，但是*号包括0次</li>
+</ul>
+<blockquote>
+<h1 id="%E7%99%BE%E5%88%86%E5%8F%B7">[%] 百分号</h1>
+</blockquote>
+<ul>
+<li>百分号为取模运算符，即取除法的余数</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-built_in">let</span> <span class="hljs-string">"z = 5 % 3"</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-variable">$z</span>  <span class="hljs-comment"># 2</span>
+</div></code></pre>
+<ul>
+<li>百分号也用于正则表达式中</li>
+</ul>
+<blockquote>
+<h1 id="%E6%B3%A2%E6%B5%AA%E7%AC%A6%E8%AF%BB%EF%BC%9Atilde">[~] 波浪符(读：tilde)</h1>
+</blockquote>
+<ul>
+<li>波浪符代表家目录的意思，对应于$HOME环境变量。</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 /etc/sysconfig/network-scripts] <span class="hljs-built_in">cd</span> ~
+[root@centos8 ~] <span class="hljs-built_in">pwd</span>
+/root
+
+[root@centos8 /etc/sysconfig/network-scripts] ls ~
+anaconda-ks.cfg      dead.letter  Documents  file1                 lig    passwd    Public   Templates  Videos
+anaconda-ks.cfg.bak  Desktop      Downloads  initial-setup-ks.cfg  Music  Pictures  scripts  tr
+</div></code></pre>
+<blockquote>
+<h1 id="%E5%BD%93%E5%89%8D%E5%B7%A5%E4%BD%9C%E7%9B%AE%E5%BD%95pwd">[~+] 当前工作目录$PWD</h1>
+</blockquote>
+<ul>
+<li>&quot;~+&quot;表示当前工作目录，对应于内部变量$PWD。</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 /etc/sysconfig/network-scripts] <span class="hljs-built_in">echo</span> <span class="hljs-variable">$PWD</span>
+/etc/sysconfig/network-scripts
+[root@centos8 /etc/sysconfig/network-scripts] <span class="hljs-built_in">echo</span> ~+
+/etc/sysconfig/network-scripts
+</div></code></pre>
+<blockquote>
+<h1 id="%E5%89%8D%E4%B8%80%E4%B8%AA%E5%B7%A5%E4%BD%9C%E7%9B%AE%E5%BD%95oldpwd">[~-] 前一个工作目录$OLDPWD</h1>
+</blockquote>
+<ul>
+<li>&quot;~-&quot;表示前一个工作目录，对应于内部变量$OLDPWD。</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 /etc/sysconfig/network-scripts] <span class="hljs-built_in">cd</span>
+[root@centos8 ~] <span class="hljs-built_in">echo</span> ~+                          <span class="hljs-comment"># 当前目录</span>
+/root
+[root@centos8 ~] <span class="hljs-built_in">echo</span> ~-                          <span class="hljs-comment"># 前一个工作目录</span>
+/etc/sysconfig/network-scripts
+[root@centos8 ~]
+</div></code></pre>
+<blockquote>
+<h1 id="%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%8C%B9%E9%85%8D%E7%AC%A6">[=~] 正则表达式匹配符</h1>
+</blockquote>
+<ul>
+<li>&quot;=~&quot;该正则表达式匹配符号用于两对中括号中。(Perl语言也有类似的操作符)。</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-meta">#!/bin/bash</span>
+variable=<span class="hljs-string">"This is a fine mess."</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">$variable</span>"</span>
+<span class="hljs-comment"># Regex matching with =~ operator within [[ double brackets ]].</span>
+<span class="hljs-keyword">if</span> [[ <span class="hljs-string">"<span class="hljs-variable">$variable</span>"</span> =~ T.........fin*es* ]]
+<span class="hljs-comment"># <span class="hljs-doctag">NOTE:</span> As of version 3.2 of Bash, expression to match no longer quoted.</span>
+<span class="hljs-keyword">then</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"match found"</span>
+      <span class="hljs-comment"># match found</span>
+<span class="hljs-keyword">fi</span>
+</div></code></pre>
+<p>或者更实用的例子：</p>
+<pre class="hljs"><code><div><span class="hljs-meta">#!/bin/bash</span>
+input=<span class="hljs-variable">$1</span>
+<span class="hljs-keyword">if</span> [[ <span class="hljs-string">"<span class="hljs-variable">$input</span>"</span> =~ <span class="hljs-string">"[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]"</span> ]]
+<span class="hljs-comment">#                 ^ <span class="hljs-doctag">NOTE:</span> Quoting not necessary, as of version 3.2 of Bash.</span>
+<span class="hljs-comment"># NNN-NN-NNNN (where each N is a digit).</span>
+<span class="hljs-keyword">then</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"Social Security number."</span>
+  <span class="hljs-comment"># Process SSN.</span>
+<span class="hljs-keyword">else</span>
+  <span class="hljs-built_in">echo</span> <span class="hljs-string">"Not a Social Security number!"</span>
+  <span class="hljs-comment"># Or, ask for corrected input.</span>
+<span class="hljs-keyword">fi</span>
+</div></code></pre>
+<blockquote>
+<h1 id="%E8%A1%8C%E5%BC%80%E5%A7%8B%E4%BD%8D%E7%BD%AE">[^] 行开始位置</h1>
+</blockquote>
+<ul>
+<li>在正则表达式中，&quot;^&quot;表示一行的开头。</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">#### 找出/etc/passwd文件中以r开头的行</span>
+[root@centos8 ~] grep <span class="hljs-string">"^r.*"</span> /etc/passwd
+root:x:0:0:steve,banzhuang,18800001111,1123443,:/root:/bin/bash
+rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+rpc:x:32:32:Rpcbind Daemon:/var/lib/rpcbind:/sbin/nologin
+radvd:x:75:75:radvd user:/:/sbin/nologin
+rpcuser:x:29:29:RPC Service User:/var/lib/nfs:/sbin/nologin
+</div></code></pre>
+<blockquote>
+<h1 id="">[^,^^]</h1>
+</blockquote>
+<ul>
+<li>在参数替换中起将字符串中的字母转换成大写的作用（在bash4版本中引进。）</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">#!/bin/bash4</span>
+var=veryMixedUpVariable
+<span class="hljs-built_in">echo</span> <span class="hljs-variable">${var}</span>            <span class="hljs-comment"># veryMixedUpVariable</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-variable">${var^}</span>           <span class="hljs-comment"># VeryMixedUpVariable</span>
+<span class="hljs-comment">#         *             第一个字符大写</span>
+<span class="hljs-comment">#         *              First char --&gt; uppercase.</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-variable">${var^^}</span>          <span class="hljs-comment"># VERYMIXEDUPVARIABLE</span>
+<span class="hljs-comment">#         **            所有字符大写</span>
+<span class="hljs-comment">#         **             All chars  --&gt; uppercase.</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-variable">${var,}</span>           <span class="hljs-comment"># veryMixedUpVariable</span>
+<span class="hljs-comment">#         *             第一个字符小写</span>
+<span class="hljs-comment">#         *              First char --&gt; lowercase.</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-variable">${var,,}</span>          <span class="hljs-comment"># verymixedupvariable</span>
+<span class="hljs-comment">#         **            所有字符小写</span>
+<span class="hljs-comment">#         **             All chars  --&gt; lowercase.</span>
+</div></code></pre>
+<blockquote>
+<h1 id="whitespace-%E7%A9%BA%E7%99%BD%E7%AC%A6">[Whitespace] 空白符</h1>
+</blockquote>
+<ul>
+<li>
+<p>空白符一般作为命令或者变量之间的分割符。空白符包含空格、退格、空白行或者这些的组合。</p>
+</li>
+<li>
+<p>在一些环境下不允许出现空白符，如变量赋值等。</p>
+</li>
+</ul>
+
+</body>
+</html>
