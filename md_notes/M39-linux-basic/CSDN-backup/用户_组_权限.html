@@ -1,0 +1,1503 @@
+﻿<center><font size="214" face="黑体" color="grey"> Linux中的用户、组和权限</font></center>
+<hr>
+<blockquote>
+<h1><a id="Linux_3"></a>一，Linux的安全模型</h1>
+</blockquote>
+<blockquote>
+<blockquote>
+<h2><a id="13A_5"></a>1.安全3A</h2>
+</blockquote>
+</blockquote>
+<p>Authentication(认证),Authorization(授权),Accounting(审计)(AAA)是用于对计算机资源的访问、策略执行、审计使用情况和提供服务账单所需信息等功能进行智能控制的基本组件的一个术语。大多数人认为这三个组合的过程对有效的网络管理和系统安全管理非常重要。</p>
+<p>第一步，认证策略提供了辨识某个用户的方法，一般是在认证成功之前要求用户输入一个合法的用户名和有效的密码。认证的过程有赖于每个用户拥有获取访问权的唯一标准，AAA服务会拿该标准（密码）和数据库中的密码对比，如果匹配，则允许其访问计算机；否则，认证失败拒绝访问。</p>
+<p>第二步，认证完成后，用户必须得到授权才能做特定的事情和处理相关任务。在登录某个系统后，用户可能会尝试运行相关的命令。授权的进程会决定用户是否有运行该命令的权利。简单说，授权就是实施策略的过程：即是确定允许用户使用哪种类型或质量的活动、资源或服务的过程。<br>
+通常，授权发生在认证的上下文环境中。一旦你认证了某个用户也就意味着该用户也被授权了不同种类的访问和活动。</p>
+<p>在AAA框架中最后的一项是审计，意思是需要监控和测量在访问的过程中的资源使用情况。身份认证、授权和审计服务通常由专用的AAA服务提供，AAA服务是执行这些功能的程序。</p>
+<blockquote>
+<blockquote>
+<h2><a id="2linuxhttpsblogcsdnnetYouOopsarticledetails101845366_15"></a>2.<a href="https://blog.csdn.net/YouOops/article/details/101845366">用户登录linux的背后发生了什么</a></h2>
+</blockquote>
+</blockquote>
+<hr>
+<blockquote>
+<h1><a id="Linux_19"></a>二，Linux系统中用户和组及相关的文件</h1>
+</blockquote>
+<blockquote>
+<blockquote>
+<h2><a id="1linux_21"></a>1.linux系统中的用户类型</h2>
+</blockquote>
+</blockquote>
+<ul>
+<li>一般linux用户分为管理员和普通用户，root用户为超级管理员<br>
+1，超级管理员默认名称为：root；其UID为： 0<br>
+2，普通用户的UID：1-60000 系统自动分配；分为：系统用户和登录用户<br>
+系统用户：1-499（CentOS6）, 1-999 （CentOS7）系统用户负责对守护进程获取资源进行权限分配<br>
+登录用户：500+, 1000+（CentOS7）<br>
+使用交互式登录</li>
+</ul>
+<blockquote>
+<blockquote>
+<h2><a id="2linux_29"></a>2.linux中的用户组</h2>
+</blockquote>
+</blockquote>
+<p>管理员组的组ID(GID)也为0，叫root组(即使你把其他用户加入root组，他任然是普通用户)<br>
+普通组分为系统组和普通组：<br>
+系统组：1-499, 1-999（CENTOS7）<br>
+普通组：500+, 1000+（CENTOS7）</p>
+<pre><code class="prism language-bash">Linux组的类别 
+    用户的主要组<span class="token punctuation">(</span>primary group<span class="token punctuation">)</span> 
+        用户必须属于一个且只有一个主组,组名同用户名，且仅包含一个用户，私有组 
+    用户的附加组<span class="token punctuation">(</span>supplementary group<span class="token punctuation">)</span> 
+        一个用户可以属于零个或多个辅助组 
+</code></pre>
+<blockquote>
+<blockquote>
+<h2><a id="3Linux_41"></a>3.Linux用户和组的主要配置文件</h2>
+</blockquote>
+</blockquote>
+<ul>
+<li>用户和组的配置文件都位于/etc文件夹下</li>
+</ul>
+<pre><code class="prism language-bash">   /etc/passwd：保存用户及其属性信息<span class="token punctuation">(</span>名称、UID、主组ID等） 
+   /etc/group：保存组及其属性信息 
+   /etc/shadow：保存用户密码及其相关属性 
+   /etc/gshadow：保存组密码及其相关属性 
+</code></pre>
+<ul>
+<li>passwd文件格式</li>
+</ul>
+<pre><code class="prism language-bash">passwd文件格式:
+    1:2:3:4:5:6:7    <span class="token comment"># 每个用户使用一行特定格式的文本记录</span>
+    1:login name：登录用名（steve） 
+    2:passwd：密码  <span class="token punctuation">(</span>x<span class="token punctuation">)</span> 
+    3:UID：用户身份编号 <span class="token punctuation">(</span>1000<span class="token punctuation">)</span> 
+    4:GID：登录默认所在组编号  <span class="token punctuation">(</span>1000<span class="token punctuation">)</span> 
+    5:GECOS：用户全名或注释 
+    6:home directory：用户主目录 <span class="token punctuation">(</span>/home/steve<span class="token punctuation">)</span> 
+    7:shell：用户默认使用shell <span class="token punctuation">(</span>/bin/bash<span class="token punctuation">)</span>
+</code></pre>
+<ul>
+<li>shadow文件格式</li>
+</ul>
+<pre><code class="prism language-bash">shadow文件格式 
+    daemon:*:18027:0:99999:7:::   <span class="token comment"># 每个用户使用一行特定格式的文本记录</span>
+    1:2:3:4:5:6:7:8:9
+    1:登录用名 
+    2:用户密码:一般用sha512加密 
+    3:从1970年1月1日起到密码最近一次被更改的时间 
+    4:密码再过几天可以被变更（0表示随时可被变更） 
+    5:密码再过几天必须被变更（99999表示永不过期） 
+    6:密码过期前几天系统提醒用户（默认为一周） 
+    7:密码过期几天后帐号会被锁定 
+    8:从1970年1月1日算起，多少天后帐号失效 
+    9:预留未用
+</code></pre>
+<ul>
+<li>group文件格式</li>
+</ul>
+<pre><code class="prism language-bash">group文件格式
+    daemon:x:2:
+    1:2:3:4
+    1:群组名称：就是群组名称 
+    2:群组密码：通常不需要设定，密码是被记录在 /etc/gshadow  
+    3:GID：就是群组的 ID  
+    4:以当前组为附加组的用户列表<span class="token punctuation">(</span>分隔符为逗号<span class="token punctuation">)</span> 
+</code></pre>
+<ul>
+<li>gshdow文件格式</li>
+</ul>
+<pre><code class="prism language-bash">gshdow文件格式  
+    daemon:::
+    1:2:3:4
+    1:群组名称：就是群的名称 
+    2:群组密码： 
+    3:组管理员列表：组管理员的列表，更改组密码和成员 
+    4:以当前组为附加组的用户列表：多个用户间用逗号分隔 
+</code></pre>
+<hr>
+<blockquote>
+<h1><a id="Linux_100"></a>三，Linux系统中用户和组的管理命令</h1>
+</blockquote>
+<blockquote>
+<blockquote>
+<h2><a id="1_102"></a>1.相关文件操作</h2>
+</blockquote>
+</blockquote>
+<ul>
+<li><strong>vipw &amp; vigr</strong><br>
+vipw, vigr - edit the password, group, shadow-password or shadow-group file</li>
+</ul>
+<blockquote>
+<blockquote>
+<p>-g, --group</p>
+<blockquote>
+<pre><code>   Edit group database.
+</code></pre>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<pre><code>  -p, --passwd
+</code></pre>
+<blockquote>
+<pre><code>    Edit passwd database.
+</code></pre>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<pre><code>  -s, --shadow
+</code></pre>
+<blockquote>
+<pre><code>   Edit shadow or gshadow database.
+</code></pre>
+</blockquote>
+</blockquote>
+</blockquote>
+<ul>
+<li><strong>pwck</strong></li>
+</ul>
+<blockquote>
+<blockquote>
+<p>pwck - verify integrity of password files</p>
+</blockquote>
+</blockquote>
+<ul>
+<li><strong>grpck</strong></li>
+</ul>
+<blockquote>
+<blockquote>
+<p>grpck - verify integrity of group files</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<h2><a id="2_121"></a>2.用户和组管理命令</h2>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>用户管理命令</p>
+<blockquote>
+<p>useradd<br>
+usermod<br>
+userdel</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>组帐号维护命令</p>
+<blockquote>
+<p>groupadd<br>
+groupmod<br>
+groupdel</p>
+</blockquote>
+</blockquote>
+<ul>
+<li>
+<h3><a id="useradd__133"></a>useradd 创建用户</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>选项\用法</th>
+<th>useradd [options] LOGIN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-u UID</td>
+<td>指定用户UID</td>
+</tr>
+<tr>
+<td>-o</td>
+<td>配合-u 选项，不检查UID的唯一性，可创建不同用户名同UID的用户</td>
+</tr>
+<tr>
+<td>-g  GID</td>
+<td>GID 指明用户所属基本组，可为组名，也可以GID</td>
+</tr>
+<tr>
+<td>-c "COMMENT“</td>
+<td>指定用户的注释信息</td>
+</tr>
+<tr>
+<td>-d HOME_DIR</td>
+<td>指定路径(不存在)为家目录</td>
+</tr>
+<tr>
+<td>-s SHELL</td>
+<td>指明用户的默认shell程序，可用列表在/etc/shells文件中</td>
+</tr>
+<tr>
+<td>-G GROUP1[,GROUP2,…]</td>
+<td>为用户指明附加组，组须事先存在</td>
+</tr>
+<tr>
+<td>-N</td>
+<td>不创建私用组做主组，使用users组做主组</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>创建系统用户 CentOS 6: ID&lt;500，CentOS 7: ID&lt;1000</td>
+</tr>
+<tr>
+<td>-m</td>
+<td>创建家目录，用于系统用户</td>
+</tr>
+<tr>
+<td>-M</td>
+<td>不创建家目录，用于非系统用户</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>创建用户时默认值设定文件</td>
+<td>/etc/default/useradd</td>
+</tr>
+<tr>
+<td>显示或更改默认设置</td>
+<td>useradd -D  显示目前的默认值</td>
+</tr>
+<tr>
+<td></td>
+<td>useradd –D -s SHELL 改变新建用户的默认shell</td>
+</tr>
+<tr>
+<td></td>
+<td>useradd –D –b BASE_DIR  改变新建用户的默认家目录</td>
+</tr>
+<tr>
+<td></td>
+<td>useradd –D –g GROUP  改变新建用户的所属组</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>新建用户的相关文件和命令</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>/etc/default/useradd</td>
+</tr>
+<tr>
+<td></td>
+<td>/etc/skel/*</td>
+</tr>
+<tr>
+<td></td>
+<td>/etc/login.defs</td>
+</tr>
+<tr>
+<td>newusers</td>
+<td>使用passwd格式文件  批量创建用户</td>
+</tr>
+<tr>
+<td>chpasswd</td>
+<td>批量修改多个用户口令 每行的格式：username:passwd</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="usermod__162"></a>usermod 修改用户属性</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>参数\用法</th>
+<th>usermod [OPTION] login</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-u UID</td>
+<td>指定新UID</td>
+</tr>
+<tr>
+<td>-g GID</td>
+<td>指定新主组</td>
+</tr>
+<tr>
+<td>-G GROUP1[,GROUP2,…[,GROUPN]]]</td>
+<td>指定新附加组，原来的附加组将会被覆盖；若保留原有，则要同时使用-a选项</td>
+</tr>
+<tr>
+<td>-s SHELL</td>
+<td>新的默认SHELL</td>
+</tr>
+<tr>
+<td>-c ‘COMMENT’</td>
+<td>新的注释信息</td>
+</tr>
+<tr>
+<td>-d HOME</td>
+<td>新家目录不会自动创建；若要创建新家目录并移动原家数据，同时使用-m选项</td>
+</tr>
+<tr>
+<td>-l login_name</td>
+<td>新的名字</td>
+</tr>
+<tr>
+<td>-L</td>
+<td>lock指定用户,即是在/etc/shadow 密码栏的增加感叹号!</td>
+</tr>
+<tr>
+<td>-U</td>
+<td>unlock指定用户,将 /etc/shadow 密码栏的 ! 拿掉</td>
+</tr>
+<tr>
+<td>-e YYYY-MM-DD</td>
+<td>指明用户账号过期日期</td>
+</tr>
+<tr>
+<td>-f INACTIVE</td>
+<td>设定非活动期限</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="userdel_178"></a>userdel删除用户</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>选项\用法</th>
+<th>userdel [OPTION]… Login</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-f, --force</td>
+<td>强制删除用户</td>
+</tr>
+<tr>
+<td>-r, --remove</td>
+<td>删除用户家目录和邮箱</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="idID_185"></a>id命令查看用户相关的ID信息</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>选项\用法</th>
+<th>id [OPTION]… [USER]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-u</td>
+<td>显示UID</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>显示GID</td>
+</tr>
+<tr>
+<td>-G</td>
+<td>显示用户所属的组的ID</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>显示名称，需配合ugG使用</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="su_194"></a>su命令切换用户或以其他用户身份执行命令</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>选项\用法</th>
+<th>su [options…] [-] [user [args…]]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>切换用户的方式</td>
+<td></td>
+</tr>
+<tr>
+<td>su UserName</td>
+<td>非登录式切换，即不会读取目标用户的配置文件，不改变当前工作目录</td>
+</tr>
+<tr>
+<td>su - UserName</td>
+<td>登录式切换，会读取目标用户的配置文件，切换至家目录，完全切换</td>
+</tr>
+<tr>
+<td>root使用su切换至其他用户无须密码；非root用户切换时需要密码</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>换个身份执行命令</td>
+<td></td>
+</tr>
+<tr>
+<td>su [-] UserName -c ‘COMMAND’</td>
+<td>执行完命令还在当前用户下</td>
+</tr>
+<tr>
+<td></td>
+<td>选项：-l  --login</td>
+</tr>
+<tr>
+<td></td>
+<td>su -l UserName  相当于 su - UserName</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="passwd_207"></a>使用passwd命令设置密码</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>选项\用法</th>
+<th>passwd [OPTIONS] UserName: 修改指定用户的密码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>常用选项</td>
+<td></td>
+</tr>
+<tr>
+<td>-d</td>
+<td>删除指定用户密码</td>
+</tr>
+<tr>
+<td>-l</td>
+<td>锁定指定用户</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>解锁指定用户</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>强制用户下次登录修改密码</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>强制操作</td>
+</tr>
+<tr>
+<td>-n mindays</td>
+<td>指定最短使用期限</td>
+</tr>
+<tr>
+<td>-x maxdays</td>
+<td>最大使用期限</td>
+</tr>
+<tr>
+<td>-w warndays</td>
+<td>提前多少天开始警告</td>
+</tr>
+<tr>
+<td>-i inactivedays</td>
+<td>非活动期限</td>
+</tr>
+<tr>
+<td>–stdin</td>
+<td>从标准输入接收用户密码</td>
+</tr>
+<tr>
+<td></td>
+<td>示例：echo “PASSWORD” | passwd --stdin USERNAME</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="_223"></a>用户相关的其它命令</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>chfn</th>
+<th>指定个人信息</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chsh</td>
+<td>指定shell</td>
+</tr>
+<tr>
+<td>finger</td>
+<td>查看相关的注释信息</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="groupadd_232"></a>使用groupadd命令创建组</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>选项\用法</th>
+<th>groupadd [OPTION]… group_name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-g GID</td>
+<td>指明GID号；范围[GID_MIN, GID_MAX]</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>创建系统组</td>
+</tr>
+<tr>
+<td></td>
+<td>CentOS 6: ID&lt;500</td>
+</tr>
+<tr>
+<td></td>
+<td>CentOS 7: ID&lt;1000</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="groupmodgroupdel_241"></a>修改groupmod和删除组groupdel</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>选项\用法</th>
+<th>groupmod [OPTION]… group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-n group_name</td>
+<td>指定组的新名字</td>
+</tr>
+<tr>
+<td>-g GID</td>
+<td>新的GID</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>组删除：groupdel</td>
+<td>groupdel GROUP</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="gpasswd_249"></a>gpasswd命令更改组密码</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>选项\用法</th>
+<th>gpasswd [OPTION] GROUP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-a user</td>
+<td>将user添加至指定组中</td>
+</tr>
+<tr>
+<td>-d user</td>
+<td>从指定组中移除用户user</td>
+</tr>
+<tr>
+<td>-A user1,user2,…</td>
+<td>设置有管理权限的用户列表</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>newgrp命令：临时切换主组</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>如果用户本不属于此组，则需要组密码</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="groupmemsgroups_260"></a>groupmems更改和groups查看组成员</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>选项\用法</th>
+<th>groupmems [options] [action]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>options：</td>
+<td></td>
+</tr>
+<tr>
+<td>-g, --group groupname</td>
+<td>更改为指定组 (只有root)</td>
+</tr>
+<tr>
+<td>actions：</td>
+<td></td>
+</tr>
+<tr>
+<td>-a, --add username</td>
+<td>指定用户加入组</td>
+</tr>
+<tr>
+<td>-d, --delete username</td>
+<td>从组中删除用户</td>
+</tr>
+<tr>
+<td>-p, --purge</td>
+<td>从组中清除所有成员</td>
+</tr>
+<tr>
+<td>-l,  --list</td>
+<td>显示组成员列表</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>groups [OPTION].[USERNAME]…</td>
+<td>查看用户所属组列表</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="_273"></a>练习</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>题目</th>
+<th>解答</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>创建用户gentoo，附加组为bin和root，默认shell为/bin/csh，注释信息为"Gentoo Distribution"</td>
+<td>useradd -G bin,root -s /bin/csh -c “Gentoo Distribution” gentoo</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>创建下面的用户、组和组成员关系</td>
+<td></td>
+</tr>
+<tr>
+<td>名字为webs 的组</td>
+<td>groupadd webs</td>
+</tr>
+<tr>
+<td>用户nginx，使用webs 作为附加组</td>
+<td>useradd -G webs nginx</td>
+</tr>
+<tr>
+<td>用户varnish，使用webs 作为附加组</td>
+<td>useradd -G webs varnish</td>
+</tr>
+<tr>
+<td>用户mysql，不可交互登录系统，且不是webs的成员，nginx，varnish，mysql密码都是magedu</td>
+<td></td>
+</tr>
+<tr>
+<td>useradd mysql -s /bin/nologin</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>cat &gt; passwd &lt;&lt;EOF</td>
+</tr>
+<tr>
+<td></td>
+<td>nginx:magedu</td>
+</tr>
+<tr>
+<td></td>
+<td>varnish:magedu</td>
+</tr>
+<tr>
+<td></td>
+<td>mysql:magedu</td>
+</tr>
+<tr>
+<td></td>
+<td>EOF</td>
+</tr>
+<tr>
+<td></td>
+<td>echo passwd | chpasswd</td>
+</tr>
+</tbody>
+</table><hr>
+<blockquote>
+<h1><a id="Linux_291"></a>四，Linux系统中文件权限管理</h1>
+</blockquote>
+<blockquote>
+<blockquote>
+<h2><a id="1_293"></a>1.文件属性及命令</h2>
+</blockquote>
+</blockquote>
+<ul>
+<li>
+<h3><a id="_294"></a>文件属性</h3>
+</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20191001125258642.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<ul>
+<li>
+<h3><a id="_297"></a>文件属性操作命令</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chown</td>
+<td>设置文件的所有者</td>
+</tr>
+<tr>
+<td>chgrp</td>
+<td>设置文件的属组信息</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="chownchgrp_303"></a>使用chown/chgrp修改文件的属主和属组</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="left">选项/用法</th>
+<th align="left">chown [OPTION]… [OWNER][:[GROUP]] FILE…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">chown OWNER file</td>
+<td align="left">改变文件属主</td>
+</tr>
+<tr>
+<td align="left">chown OWNER:GROUP</td>
+<td align="left">同时改变属主和属组</td>
+</tr>
+<tr>
+<td align="left">chown :GROUP</td>
+<td align="left">只改变属组，冒号也可用 . 替换</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">-R: 递归</td>
+</tr>
+<tr>
+<td align="left">chown [OPTION]… --reference=RFILE FILE…</td>
+<td align="left">继承文件的属主属组</td>
+</tr>
+<tr>
+<td align="left">修改文件的属组：chgrp</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">chgrp [OPTION]… GROUP FILE…</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">chgrp [OPTION]… --reference=RFILE FILE…</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">-R 递归</td>
+</tr>
+</tbody>
+</table><blockquote>
+<blockquote>
+<h2><a id="2_316"></a>2.文件的权限</h2>
+</blockquote>
+</blockquote>
+<ul>
+<li>文件的权限主要针对三类对象进行定义</li>
+</ul>
+<pre><code class="prism language-bash">         owner 属主, u 
+         group 属组, g 
+         other 其他, o 
+</code></pre>
+<ul>
+<li>每个文件针对每类访问者都定义了三种权限</li>
+</ul>
+<pre><code class="prism language-bash">r       Readable 
+w       Writable 
+x       eXcutable 
+</code></pre>
+<ul>
+<li><strong>每种权限所对应的具体允许行为</strong></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">文件</th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">r</td>
+<td align="left">可使用文件查看类工具获取其内容</td>
+</tr>
+<tr>
+<td align="center">w</td>
+<td align="left">可修改其内容</td>
+</tr>
+<tr>
+<td align="center">x</td>
+<td align="left">可以把此文件提请内核启动为一个进程</td>
+</tr>
+<tr>
+<td align="center">目录</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="center">r</td>
+<td align="left">可以使用ls查看此目录中文件列表</td>
+</tr>
+<tr>
+<td align="center">w</td>
+<td align="left">可在此目录中创建文件，也可删除此目录中的文件</td>
+</tr>
+<tr>
+<td align="center">x</td>
+<td align="left">可以使用ls -l查看此目录中文件元数据（须配合r），可以cd进入此目录</td>
+</tr>
+<tr>
+<td align="center">X</td>
+<td align="left">只给目录x权限，不给文件x权限</td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="chmod_344"></a>使用触chmod更改文件权限</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="left">选项/用法</th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">chmod [OPTION]… OCTAL-MODE FILE…</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">-R: 递归修改权限</td>
+</tr>
+<tr>
+<td align="left">chmod [OPTION]… MODE[,MODE]… FILE…</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">MODE：修改一类用户的所有权限</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">u=  g= o= ug=  a= u=,g=</td>
+</tr>
+<tr>
+<td align="left">修改一类用户某位或某些位权限</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">u+  u- g+ g- o+ o- a+ a- + -</td>
+</tr>
+<tr>
+<td align="left">chmod [OPTION]… --reference=RFILE FILE…</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">参考RFILE文件的权限，将FILE的修改为同RFILE</td>
+</tr>
+</tbody>
+</table><ul>
+<li>权限设置示例</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">chgrp</span>  market files
+<span class="token function">chown</span>  root:admins  testfile 
+<span class="token function">chmod</span>  u+wx,g-r,o<span class="token operator">=</span>rx <span class="token function">file</span> 
+<span class="token function">chmod</span>  -R g+rwX /pat/to/dir
+<span class="token function">chmod</span>  600  <span class="token function">file</span> 
+<span class="token function">chown</span> steve file1 
+</code></pre>
+<ul>
+<li>
+<h3><a id="umask_367"></a>使用umask来规定新创建的文件和目录的默认权限</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">新建文件的默认权=666-umask</td>
+<td align="left">如果所得结果某位存在执行（奇数）权限，则将其权限+1</td>
+</tr>
+<tr>
+<td align="left">新建目录的默认权限=777-umask</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">非特权用户umask是 002</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">root的umask 是 022</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">umask</td>
+<td align="left">默认查看当前shell环境的umask</td>
+</tr>
+<tr>
+<td align="left">umask #</td>
+<td align="left">设定umask</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">示例：umask 002</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">umask u=rw,g=r,o=</td>
+</tr>
+<tr>
+<td align="left">umask –S 模式方式显示</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">umask –p 输出可被调用</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">配置文件：全局设置：/etc/bashrc 用户设置：~/.bashrc</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table><ul>
+<li>
+<h3><a id="_384"></a>练习</h3>
+</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">当用户docker对/testdir 目录无执行权限时，意味着无法做哪些操作？</td>
+<td align="left">docker不能新建、重命名或删除文件，不能追加目录内文件内容，不能转到该目录</td>
+</tr>
+<tr>
+<td align="left">当用户mongodb对/testdir 目录无读权限时，意味着无法做哪些操作？</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">当用户redis 对/testdir 目录无写权限时，该目录下的只读文件file1是否可修改和删除？</td>
+<td align="left">不可以</td>
+</tr>
+<tr>
+<td align="left">当用户zabbix对/testdir 目录有写和执行权限时，该目录下的只读文件file1是否可修改和删除？</td>
+<td align="left">只读文件只可以读，不可以修改，因为对目录有执行权限，所有可以删除文件</td>
+</tr>
+<tr>
+<td align="left">复制/etc/fstab文件到/var/tmp下，设置文件所有者为tomcat读写权限，所属组为apps组有读写权限，其他人无权限</td>
+<td align="left">cp /etc/fstab /var/tmp/–&gt; chown tomcat:apps /var/tmp–&gt; chmod 660 /var/tmp/fstab</td>
+</tr>
+<tr>
+<td align="left">误删除了用户git的家目录，请重建并恢复该用户家目录及相应的权限属性</td>
+<td align="left">cp -a /etc/skel/ /home/git/ --&gt; chown -R git:git /home/git/–&gt;chmod -R 700 /home/git</td>
+</tr>
+</tbody>
+</table><blockquote>
+<h1><a id="Linux_395"></a>五，Linux系统中的特殊权限</h1>
+<blockquote>
+<h2><a id="1linux_396"></a>1.linux中有三种特殊权限</h2>
+</blockquote>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th>SUID</th>
+<th>SGUI</th>
+<th>Sticky</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用于可执行文件</td>
+<td>用于可执行文件和目录</td>
+<td>目录设置Sticky 位，只有文件的所有者或root可以删除该文件</td>
+</tr>
+</tbody>
+</table><blockquote>
+<blockquote>
+<h2><a id="2SUID_402"></a>2.SUID权限用于可执行文件上</h2>
+</blockquote>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>任何一个可执行程序文件能不能启动为进程：取决发起者对程序文件是否拥有执行权限</td>
+<td></td>
+</tr>
+<tr>
+<td>启动为进程之后，其进程的属主为原程序文件的属主</td>
+<td></td>
+</tr>
+<tr>
+<td>SUID只对二进制可执行程序有效 ;SUID设置在目录上无意义</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>权限设定</td>
+</tr>
+<tr>
+<td></td>
+<td>chmod u+s FILE…</td>
+</tr>
+<tr>
+<td></td>
+<td>chmod u-s FILE…</td>
+</tr>
+</tbody>
+</table><blockquote>
+<blockquote>
+<h2><a id="3SGID_412"></a>3.SGID权限用于可执行文件上</h2>
+</blockquote>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">任何一个可执行程序文件能不能启动为进程：取决发起者对程序文件是否拥有执行权限</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">启动为进程之后，其进程的属组为原程序文件的属组</td>
+<td></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td>权限设定：</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td>chmod g+s FILE…</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td>chmod g-s FILE…</td>
+</tr>
+</tbody>
+</table><blockquote>
+<blockquote>
+<h2><a id="4SGID_421"></a>4.SGID权限用于目录，用来创建一个协作目录</h2>
+</blockquote>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">默认情况下，用户创建文件时，其属组为此用户所属的主组</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">一旦某目录被设定了SGID，则对此目录有写权限的用户在此目录中创建的文件</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">所属的组为此目录的属组;通常用于创建一个协作目录</td>
+<td></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td>权限设定：</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td>chmod g+s DIR…</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td>chmod g-s DIR…</td>
+</tr>
+</tbody>
+</table><blockquote>
+<blockquote>
+<h2><a id="5Sticky__431"></a>5.Sticky位 权限</h2>
+</blockquote>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">具有写权限的目录通常用户可以删除该目录中的任何文件，无论该文件的权限或拥有权</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">在目录设置Sticky 位，只有文件的所有者或root可以删除该文件</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">sticky 设置在文件上无意义</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">权限设定：</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">chmod o+t DIR…</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">chmod o-t DIR…</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">例如：</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">ls -ld /tmp</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">drwxrwxrwt  12 root  root  4096 Nov 2 15:44 /tmp</td>
+</tr>
+</tbody>
+</table><ul>
+<li>用数字表示特殊权限</li>
+</ul>
+<pre><code class="prism language-bash">特殊权限数字法 
+SUID SGID STICKY 
+000 0 
+001 1 
+010 2 
+011 3 
+100 4 
+101 5 
+110 6 
+111 7 
+<span class="token function">chmod</span> 4777 /tmp/a.txt
+</code></pre>
+<blockquote>
+<blockquote>
+<h2><a id="6_459"></a>6.特殊权限位映射</h2>
+</blockquote>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">SUID: user,占据属主的执行权限位</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">s</td>
+<td>属主拥有x权限</td>
+</tr>
+<tr>
+<td align="left">S</td>
+<td>属主没有x权限</td>
+</tr>
+<tr>
+<td align="left">SGID group,占据属组的执行权限位</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">s</td>
+<td>group拥有x权限</td>
+</tr>
+<tr>
+<td align="left">S</td>
+<td>group没有x权限</td>
+</tr>
+<tr>
+<td align="left">Sticky other,占据other的执行权限位</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">t</td>
+<td>other拥有x权限</td>
+</tr>
+<tr>
+<td align="left">T</td>
+<td>other没有x权限 v</td>
+</tr>
+</tbody>
+</table><blockquote>
+<blockquote>
+<h2><a id="7_472"></a>7.设置文件特定属性</h2>
+</blockquote>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chattr +i file</td>
+<td>不能删除，改名，更改</td>
+</tr>
+<tr>
+<td>chattr +a file</td>
+<td>只能追加内容</td>
+</tr>
+<tr>
+<td>lsattr file</td>
+<td>显示特定属性</td>
+</tr>
+</tbody>
+</table><blockquote>
+<h1><a id="LinuxFACL_479"></a>六，Linux文件系统的FACL</h1>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th align="left">FACL全称为：文件访问控制列表</th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">ACL：Access Control List</td>
+<td align="left">用于实现灵活的权限管理</td>
+</tr>
+<tr>
+<td align="left">除了文件的所有者，所属组和其它人，可以对更多的用户设置权限</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">CentOS7 默认创建的xfs和ext4文件系统具有ACL功能</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">CentOS7 之前版本，默认手工创建的ext4文件系统无ACL功能,需手动增加</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">tune2fs –o acl /dev/sdb1</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">mount –o acl /dev/sdb1  /mnt/test</td>
+</tr>
+<tr>
+<td align="left">ACL生效顺序：所有者–&gt;自定义用户–&gt;所属组|自定义组–&gt;其他人</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table><ul>
+<li>**为多用户或者组的文件和目录赋予访问权限rwx **</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">mount -o acl /directory</td>
+<td align="left">开启facl功能</td>
+</tr>
+<tr>
+<td align="left">getfacl  file |directory</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">setfacl  -m  u:wang:rwx file|directory</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">setfacl  -m  g:admins:rw file| directory</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">setfacl  -x  u:wang  file|directory</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">setfacl -b  file1</td>
+<td align="left">清除所有ACL权限</td>
+</tr>
+<tr>
+<td align="left">getfacl  file1 | setfacl --set-file=- file2</td>
+<td align="left">复制file1的acl权限给file2</td>
+</tr>
+</tbody>
+</table><pre><code class="prism language-bash">     mask只影响除所有者和other的之外的人和组的最大权限 
+     mask需要与用户的权限进行逻辑与运算后，才能变成有限的权限<span class="token punctuation">(</span>Effective  Permission<span class="token punctuation">)</span> 
+用户或组的设置必须存在于mask权限设定范围内才会生效             
+    setfacl  -m mask::rx  <span class="token function">file</span> 
+        --set选项会把原有的ACL项都删除，用新的替代，需要注意的是一定要包含
+UGO的设置，不能象-m一样只是添加ACL就可以 
+示例： 
+    setfacl --set u::rw,u:wang:rw,g::r,o::- file1 
+</code></pre>
+<ul>
+<li><strong>备份和恢复ACL</strong></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">主要的文件操作命令cp和mv都支持ACL，只是cp命令需要加上-p 参数。但是tar等常见的备份工具是不会保留目录和文件的ACL信息</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">getfacl -R /tmp/dir1 &gt; acl.txt</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">setfacl -R -b /tmp/dir1</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">setfacl -R  --set-file=acl.txt  /tmp/dir1</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">setfacl --restore acl.txt</td>
+<td></td>
+</tr>
+<tr>
+<td align="left">getfacl -R /tmp/dir1</td>
+<td></td>
+</tr>
+</tbody>
+</table>

@@ -1,7 +1,5 @@
-
+﻿@[TOC]
 # <center>Chapter3: bash shell 中的特殊字符详解
-
-
 ----
 > # [sharp] # 井号
 
@@ -40,7 +38,7 @@ echo $(( 2#101011 ))  # 数制转换，不是注释
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
 [root@centos7 /data/test]$echo ${PATH}    
 /usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
-``` 
+```
 **6.标准的单双引用符号和转义符号("'\/)都能转义#号**
 
 **7.某些特定的模式匹配操作也使用#号**
@@ -1062,4 +1060,36 @@ echo ${var,,}          # verymixedupvariable
 - 空白符一般作为命令或者变量之间的分割符。空白符包含空格、退格、空白行或者这些的组合。
 
 - 在一些环境下不允许出现空白符，如变量赋值等。
+passwd
+root:x:0:0:steve,banzhuang,18800001111,1123443,:/root:/bin/bash
+rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+rpc:x:32:32:Rpcbind Daemon:/var/lib/rpcbind:/sbin/nologin
+radvd:x:75:75:radvd user:/:/sbin/nologin
+rpcuser:x:29:29:RPC Service User:/var/lib/nfs:/sbin/nologin
+```
 
+> # [^,^^]
+- 在参数替换中起将字符串中的字母转换成大写的作用（在bash4版本中引进。）
+
+```bash
+#!/bin/bash4
+var=veryMixedUpVariable
+echo ${var}            # veryMixedUpVariable
+echo ${var^}           # VeryMixedUpVariable
+#         *             第一个字符大写
+#         *              First char --> uppercase.
+echo ${var^^}          # VERYMIXEDUPVARIABLE
+#         **            所有字符大写
+#         **             All chars  --> uppercase.
+echo ${var,}           # veryMixedUpVariable
+#         *             第一个字符小写
+#         *              First char --> lowercase.
+echo ${var,,}          # verymixedupvariable
+#         **            所有字符小写
+#         **             All chars  --> lowercase.
+```
+
+> # [Whitespace] 空白符
+- 空白符一般作为命令或者变量之间的分割符。空白符包含空格、退格、空白行或者这些的组合。
+
+- 在一些环境下不允许出现空白符，如变量赋值等。

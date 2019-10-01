@@ -1,0 +1,1190 @@
+﻿<p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#centerChapter3_bash_shell__1"></a><center>Chapter3: bash shell 中的特殊字符详解</center></li><li><a href="#sharp___3">[sharp] # 井号</a></li><ul><ul><li><a href="#_5">井号常用作注释符号</a></li></ul></ul><li><a href="#semicolon___46">[semicolon] ; 分号</a></li><ul><ul><li><a href="#_47">分号一般用作命令分隔符，允许多个命令处于同一行</a></li></ul></ul><li><a href="#double_semicolon___60">[double semicolon] ;; 双分号</a></li><ul><ul><li><a href="#case_61">双分号用作case语句中的语句结束符</a></li></ul></ul><li><a href="#period___70">[period] . 英文句号</a></li><ul><ul><li><a href="#bash_builtinsource_71">通常，英文句号.为bash builtin命令，等同于source</a></li></ul></ul><li><a href="#double_quote____109">[double quote] ' " 单双引号</a></li><li><a href="#comma_operator___128">[comma operator] , 逗号操作符</a></li><ul><ul><li><a href="#_129">逗号操作符将多个数学运算表达式链接在一起，所有表达式都会被计算，但是只有最后一个表达式的结果被返回</a></li><li><a href="#_137">逗号操作符亦可和花括号{}配合以用来连接字符串</a></li></ul></ul><li><a href="#backslash___155">[backslash] \ 反斜杠</a></li><ul><ul><li><a href="#_156">用于单个字符的引用机制</a></li></ul></ul><li><a href="#forward_slash___160">[forward slash] / 斜杠</a></li><ul><ul><li><a href="#_161">斜杠一般用作文件名路径分隔符</a></li><li><a href="#_165">斜杠也是除法运算符</a></li></ul></ul><li><a href="#backquotes___168">[backquotes] ` 反引号</a></li><ul><ul><li><a href="#command_command_169">反引号用作命令替换，`command` 这种结构使得command的执行结果可以赋给新的变量</a></li></ul></ul><li><a href="#colon___175">[colon] : 冒号</a></li><ul><ul><li><a href="#shellNOP_no_op_a_donothing_operationbash_builtinTrue0_176">冒号在shell中表示"NOP" (no op, a do-nothing operation)，一个不做任何操作的命令；":"冒号命令属于bash builtin类型，其命令退出状态为True（0）</a></li></ul></ul><li><a href="#bang___268">[bang] ! 感叹号</a></li><ul><ul><li><a href="#bash_269">感叹号一般有取反和在bash命令行调用命令历史机制的作用</a></li></ul></ul><li><a href="#asterisk___299">[asterisk] * 星号通配符</a></li><li><a href="#test_operator___348">[test operator] ? 测试操作符</a></li><li><a href="#__371">[$] 变量替换符(获取一个变量所存储的内容)</a></li><li><a href="#_endofline_linux_379">[$] end-of-line 在正则达式中表匹配文本的行结束位置，常用于锚定；在linux系统中文本文件的行结束符也是\$</a></li><li><a href="#__401">[${}] 参数替换符,获取花括号中的变量所存储的内容；几乎和\$等同，在某些情况下使用\${}(例如：使用字符串连接不同的变量所存储的内容)</a></li><li><a href="#___412">[$' ... ']</a></li><li><a href="#___423">[$*, $@] 位置参数，存储所有的位置参数，有区别</a></li><li><a href="#__427">[$?] 该环境变量存储退出状态；可以是命令、函数或者脚本的退出状态</a></li><li><a href="#_PID_448">[$$] 为PID变量，存储其出现在的脚本所属的进程的进程号</a></li><li><a href="#__460">[()] 圆括号</a></li><li><a href="#xxxyyyzzz__481">[{xxx,yyy,zzz,...}] 花括号展开</a></li><li><a href="#az__496">[{a..z}] 扩展的花括号展开</a></li><li><a href="#__508">[{}] 花括号代码块</a></li><li><a href="#____599">[ []，[[]] ] 测试结构，测试表达式位于[]之间</a></li><li><a href="#____620">[$[ ... ]] 整数表达式计算</a></li><li><a href="#___629">[(( ))] 整数表达式计算</a></li><li><a href="#__________632">['&gt;'  '&amp;&gt;'  '&gt;&amp;'  '&gt;&gt;'  '&lt;&gt;'] 各种重定向符</a></li><li><a href="#_669">[&lt;&lt;]</a></li><li><a href="#_672">[&lt;&lt;&lt;]</a></li><li><a href="#_675">[&lt;,&gt;]</a></li><li><a href="#__692">[\&lt;, \&gt;]</a></li><li><a href="#__702">[|] 管道符</a></li><li><a href="#__740">[&gt;|] 强制重定向符</a></li><li><a href="#_OR_744">[||] OR或逻辑操作符</a></li><li><a href="#_AND_747">[&amp;] AND符号</a></li><li><a href="#_AND_790">[&amp;&amp;] AND逻辑操作符</a></li><li><a href="#___794">[-] 选项 前缀</a></li><li><a href="#__918">[--] 命令长选项</a></li><li><a href="#__930">[=] 等号</a></li><li><a href="#__943">[+] 加号</a></li><li><a href="#__948">[%] 百分号</a></li><li><a href="#_tilde_959">[~] 波浪符(读：tilde)</a></li><li><a href="#_PWD_972">[~+] 当前工作目录$PWD</a></li><li><a href="#_OLDPWD_982">[~-] 前一个工作目录$OLDPWD</a></li><li><a href="#__994">[=~] 正则表达式匹配符</a></li><li><a href="#__1024">[^] 行开始位置</a></li><li><a href="#_1037">[^,^^]</a></li><li><a href="#Whitespace__1058">[Whitespace] 空白符</a></li><li><a href="#Whitespace__1091">[Whitespace] 空白符</a></li></ul></div><p></p>
+<h1><a id="centerChapter3_bash_shell__1"></a><center>Chapter3: bash shell 中的特殊字符详解</center></h1>
+<hr>
+<blockquote>
+<h1><a id="sharp___3"></a>[sharp] # 井号</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="_5"></a>井号常用作注释符号</h3>
+</li>
+</ul>
+<p><strong>1.注释示例</strong></p>
+<pre><code class="prism language-bash"><span class="token comment"># This line is a comment.</span>
+</code></pre>
+<p><strong>2.某命令后注释，#号前需要添加一个空格</strong></p>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">"A comment will follow."</span> <span class="token comment"># Comment here.</span>
+<span class="token comment">#                            ^ Note whitespace before #</span>
+</code></pre>
+<p><strong>3.注释前亦可跟空白字符</strong></p>
+<pre><code class="prism language-bash">   <span class="token comment"># A tab precedes this comment.</span>
+</code></pre>
+<p><strong>4.注释符号还可以被嵌入到带管道的命令当中</strong></p>
+<pre><code class="prism language-bash">initial<span class="token operator">=</span><span class="token punctuation">(</span> <span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> <span class="token string">"<span class="token variable">$startfile</span>"</span> <span class="token operator">|</span> <span class="token function">sed</span> -e <span class="token string">'/#/d'</span> <span class="token operator">|</span> <span class="token function">tr</span> -d <span class="token string">'\n'</span> <span class="token operator">|</span>\
+           <span class="token function">sed</span> -e <span class="token string">'s/\./\. /g'</span> -e <span class="token string">'s/_/_ /g'</span><span class="token variable">`</span></span> <span class="token punctuation">)</span>
+<span class="token comment"># Delete lines containing '#' comment character.</span>
+<span class="token comment"># 该命令用于删除包含#号的行</span>
+</code></pre>
+<p><strong>5.当然，在echo命令中被引用或者被转义的#号不会成为注释,#号也会出现在特定的参数替换结构中及一些数值常量表达式中</strong></p>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">"The # here does not begin a comment."</span>
+<span class="token keyword">echo</span> <span class="token string">'The # here does not begin a comment.'</span>
+<span class="token keyword">echo</span> The \# here does not begin a comment.
+<span class="token keyword">echo</span> The <span class="token comment"># here begins a comment.</span>
+<span class="token keyword">echo</span> $<span class="token punctuation">{</span>PATH<span class="token comment">#*:}       # 参数替换，不是注释</span>
+<span class="token keyword">echo</span> <span class="token variable"><span class="token variable">$(</span><span class="token punctuation">(</span> 2#101011 <span class="token variable">)</span></span><span class="token punctuation">)</span>  <span class="token comment"># 数制转换，不是注释</span>
+
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$echo</span> $<span class="token punctuation">{</span>PATH<span class="token comment">#*:} </span>
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">${PATH}</span>    
+/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+</code></pre>
+<p><strong>6.标准的单双引用符号和转义符号("’/)都能转义#号</strong></p>
+<p><strong>7.某些特定的模式匹配操作也使用#号</strong></p>
+<hr>
+<blockquote>
+<h1><a id="semicolon___46"></a>[semicolon] ; 分号</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="_47"></a>分号一般用作命令分隔符，允许多个命令处于同一行</h3>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> hello<span class="token punctuation">;</span> <span class="token keyword">echo</span> there
+</code></pre>
+<pre><code class="prism language-bash"><span class="token keyword">if</span> <span class="token punctuation">[</span> -x <span class="token string">"<span class="token variable">$filename</span>"</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>    <span class="token comment">#  Note the space after the semicolon.</span>
+<span class="token comment">#+                   ^^</span>
+  <span class="token keyword">echo</span> <span class="token string">"File <span class="token variable">$filename</span> exists."</span><span class="token punctuation">;</span> <span class="token function">cp</span> <span class="token variable">$filename</span> <span class="token variable">$filename</span>.bak
+<span class="token keyword">else</span>   <span class="token comment">#                       ^^</span>
+  <span class="token keyword">echo</span> <span class="token string">"File <span class="token variable">$filename</span> not found."</span><span class="token punctuation">;</span> <span class="token function">touch</span> <span class="token variable">$filename</span>
+<span class="token keyword">fi</span><span class="token punctuation">;</span> <span class="token keyword">echo</span> <span class="token string">"File test complete."</span>
+</code></pre>
+<hr>
+<blockquote>
+<h1><a id="double_semicolon___60"></a>[double semicolon] ;; 双分号</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="case_61"></a>双分号用作case语句中的语句结束符</h3>
+</li>
+<li>bash4.0+的版本使用;;&amp;或者;&amp;作为结束符</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">case</span> <span class="token string">"<span class="token variable">$variable</span>"</span> <span class="token keyword">in</span>
+  abc<span class="token punctuation">)</span>  <span class="token keyword">echo</span> <span class="token string">"\<span class="token variable">$variable</span> = abc"</span> <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  xyz<span class="token punctuation">)</span>  <span class="token keyword">echo</span> <span class="token string">"\<span class="token variable">$variable</span> = xyz"</span> <span class="token punctuation">;</span><span class="token punctuation">;</span>
+esac
+</code></pre>
+<hr>
+<blockquote>
+<h1><a id="period___70"></a>[period] . 英文句号</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="bash_builtinsource_71"></a>通常，英文句号.为bash builtin命令，等同于source</h3>
+</li>
+</ul>
+<p><strong>1.作为文件名的一部分，当一个文件以.开头，则为隐藏文件，ls不会显示，使用ls -a</strong></p>
+<pre><code class="prism language-bash">bash$ <span class="token function">touch</span> .hidden-file
+bash$ <span class="token function">ls</span> -l
+total 10
+ -rw-r--r--    1 bozo      4034 Jul 18 22:04 data1.addressbook
+ -rw-r--r--    1 bozo      4602 May 25 13:58 data1.addressbook.bak
+ -rw-r--r--    1 bozo       877 Dec 17  2000 employment.addressbook
+bash$ <span class="token function">ls</span> -al
+total 14
+ drwxrwxr-x    2 bozo  bozo      1024 Aug 29 20:54 ./
+ drwx------   52 bozo  bozo      3072 Aug 29 20:51 <span class="token punctuation">..</span>/
+ -rw-r--r--    1 bozo  bozo      4034 Jul 18 22:04 data1.addressbook
+ -rw-r--r--    1 bozo  bozo      4602 May 25 13:58 data1.addressbook.bak
+ -rw-r--r--    1 bozo  bozo       877 Dec 17  2000 employment.addressbook
+ -rw-rw-r--    1 bozo  bozo         0 Aug 29 20:54 .hidden-file
+</code></pre>
+<p><strong>2.句号在目录中，一个句号.表示当前目录，两个句号…表示当前目录的父目录</strong></p>
+<pre><code class="prism language-bash">bash$ <span class="token function">pwd</span>
+/home/bozo/projects
+bash$ <span class="token function">cd</span> <span class="token keyword">.</span>
+bash$ <span class="token function">pwd</span>
+/home/bozo/projects
+bash$ <span class="token function">cd</span> <span class="token punctuation">..</span>
+bash$ <span class="token function">pwd</span>
+/home/bozo/
+</code></pre>
+<p><strong>3.句号在移动文件的命令中表示目标文件夹，此时的目标文件夹常常是当前目录</strong></p>
+<pre><code class="prism language-bash">bash$ <span class="token function">cp</span> /home/bozo/current_work/junk/* <span class="token keyword">.</span>
+<span class="token comment"># 拷贝junk/文件夹下的所有文件到当前目录</span>
+</code></pre>
+<p><strong>4.字符匹配时，句号作为正则表达式的一部分表示匹配任意一个字符</strong></p>
+<hr>
+<blockquote>
+<h1><a id="double_quote____109"></a>[double quote] ’ " 单双引号</h1>
+</blockquote>
+<ul>
+<li><strong>"STRING" preserves (from interpretation) most of the specia characters within STRING</strong></li>
+<li><strong>’STRING’ preserves all special characters within STRING. This is a stronger form of quoting than "STRING"</strong></li>
+<li><strong>部分(弱)引用：“STRING” 这种写法表示 解释器会认为STRING中的小部分特殊字符有特殊意义</strong></li>
+<li><strong>全(强)引用：‘STRING’ 这种写法表示 解释器会认为STRING中的所有特殊字符都无特殊意义</strong></li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$var</span><span class="token operator">=</span>jjjj
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$cat</span> <span class="token function">file</span>
+<span class="token function">test</span>
+ddd
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$sed</span> <span class="token string">"s/test/<span class="token variable">${var}</span>/"</span> <span class="token function">file</span> <span class="token comment">#双引号表示部分特殊字符具备特殊意义,此处${var}表示jjjj</span>
+jjjj
+ddd
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$sed</span> <span class="token string">'s/test/<span class="token variable">${var}</span>/'</span> <span class="token function">file</span> <span class="token comment">#单引号表示所有特殊字符均无特殊意义，此处${var}表示包含6个字符的字符串</span>
+<span class="token variable">${var}</span>
+ddd
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span>$
+</code></pre>
+<hr>
+<blockquote>
+<h1><a id="comma_operator___128"></a>[comma operator] , 逗号操作符</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="_129"></a>逗号操作符将多个数学运算表达式链接在一起，所有表达式都会被计算，但是只有最后一个表达式的结果被返回</h3>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$let</span> <span class="token string">"t2 = <span class="token variable"><span class="token punctuation">((</span>a <span class="token operator">=</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token number">15</span> <span class="token operator">/</span> <span class="token number">3</span><span class="token punctuation">))</span></span>"</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$t2</span>   <span class="token comment"># 此处返回值为15/3=5</span>
+5
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$a</span>
+9
+</code></pre>
+<ul>
+<li>
+<h3><a id="_137"></a>逗号操作符亦可和花括号{}配合以用来连接字符串</h3>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">for</span> <span class="token function">file</span> <span class="token keyword">in</span> /<span class="token punctuation">{</span>,usr/<span class="token punctuation">}</span>bin/*calc
+<span class="token comment">#             ^    Find all executable files ending in "calc"</span>
+<span class="token comment">#+                 in /bin and /usr/bin directories.</span>
+<span class="token keyword">do</span>
+        <span class="token keyword">if</span> <span class="token punctuation">[</span> -x <span class="token string">"<span class="token variable">$file</span>"</span> <span class="token punctuation">]</span>
+        <span class="token keyword">then</span>
+          <span class="token keyword">echo</span> <span class="token variable">$file</span>
+        <span class="token keyword">fi</span>
+<span class="token keyword">done</span>
+
+<span class="token comment"># /bin/ipcalc</span>
+<span class="token comment"># /usr/bin/kcalc</span>
+<span class="token comment"># /usr/bin/oidcalc</span>
+<span class="token comment"># /usr/bin/oocalc</span>
+</code></pre>
+<hr>
+<blockquote>
+<h1><a id="backslash___155"></a>[backslash] \ 反斜杠</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="_156"></a>用于单个字符的引用机制</h3>
+</li>
+</ul>
+<pre><code>\X 该写法将转义字符X，等价于'X'，反斜杠也会用于转义'和"。
+</code></pre>
+<blockquote>
+<h1><a id="forward_slash___160"></a>[forward slash] / 斜杠</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="_161"></a>斜杠一般用作文件名路径分隔符</h3>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$cat</span> /home/bozo/projects/Makefile
+</code></pre>
+<ul>
+<li>
+<h3><a id="_165"></a>斜杠也是除法运算符</h3>
+</li>
+</ul>
+<blockquote>
+<h1><a id="backquotes___168"></a>[backquotes] ` 反引号</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="command_command_169"></a>反引号用作命令替换，<code>command</code> 这种结构使得command的执行结果可以赋给新的变量</h3>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$num</span><span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">seq</span> 1 10<span class="token variable">`</span></span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$num</span>
+1 2 3 4 5 6 7 8 9 10
+</code></pre>
+<blockquote>
+<h1><a id="colon___175"></a>[colon] : 冒号</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="shellNOP_no_op_a_donothing_operationbash_builtinTrue0_176"></a>冒号在shell中表示"NOP" (no op, a do-nothing operation)，一个不做任何操作的命令；":"冒号命令属于bash builtin类型，其命令退出状态为True（0）</h3>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>$:
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$?</span>
+0
+</code></pre>
+<p><strong>1.冒号用于实现无限循环</strong></p>
+<pre><code class="prism language-bash"><span class="token keyword">while</span> <span class="token keyword">:</span>
+<span class="token keyword">do</span>
+   operation-1
+   operation-2
+   <span class="token punctuation">..</span>.
+   operation-n
+<span class="token keyword">done</span>
+<span class="token comment"># 等同于:</span>
+<span class="token comment">#    while true</span>
+<span class="token comment">#    do</span>
+<span class="token comment">#      ...</span>
+<span class="token comment">#    done</span>
+</code></pre>
+<p><strong>2.在if/then语句中作为占位符</strong></p>
+<pre><code class="prism language-bash"><span class="token keyword">if</span> condition
+<span class="token keyword">then</span> <span class="token keyword">:</span>   <span class="token comment"># 什么也不做，分支继续</span>
+<span class="token keyword">else</span>     <span class="token comment"># Or else ...</span>
+   take-some-action
+<span class="token keyword">fi</span>
+</code></pre>
+<p><strong>3.在需要进行二进制操作的地方提供一个占位，</strong></p>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span> <span class="token keyword">:</span> $<span class="token punctuation">{</span>username<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">whoami</span><span class="token variable">`</span></span><span class="token punctuation">}</span>
+<span class="token comment"># ${username=`whoami`}   不以: 开头则会给出错误提示</span>
+<span class="token comment">#                        unless "username" is a command or builtin...</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span> <span class="token keyword">:</span> $<span class="token punctuation">{</span>1?<span class="token string">"Usage: <span class="token variable">$0</span> ARGUMENT"</span><span class="token punctuation">}</span>  
+</code></pre>
+<p><strong>4.用参数替换来确定某个变量是否已经存在</strong></p>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>$: <span class="token variable">${HOSTNAME?}</span> <span class="token variable">${USER?}</span> <span class="token variable">${MAIL?}</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$?</span>
+0
+<span class="token comment"># 如果上面某个或多个必要的环境变量未设置，则会打印一条错误消息，此时我的电脑三个环境变量都已经存在，所以没有错误消息</span>
+</code></pre>
+<p><strong>5.和重定向符号&gt;配套使用，清除某个文件的内容，不改变其原有的权限属性-$: &gt; file</strong></p>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$cat</span> hello
+HELLO
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span>$: <span class="token operator">&gt;</span> hello  <span class="token comment"># 此处清空hello文件，如果hello不存在，则创建之</span>
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$cat</span> hello
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span>$
+</code></pre>
+<p><strong><em>注意</em>：上面用法等同于“cat /dev/null &gt; hello”</strong></p>
+<p><strong>然而，使用上面的方法不会产生子进程，因为“:”是一个builtin类型</strong></p>
+<p><strong>如果和追加重定向符&gt;&gt;配合使用，则不对文件产生任何影响；无对应文件则创建之</strong></p>
+<p><strong>6.分号还可以用作注释，但是bash会在以分号开头的注释中检查错误；而以#号开头的注释是关闭错误检查的</strong></p>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$cat</span> test.sh     
+<span class="token comment">#!/bin/bash</span>
+<span class="token comment">#</span>
+<span class="token keyword">:</span> This is a comment that generates an error, <span class="token punctuation">(</span> <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token variable">$x</span> -eq 3<span class="token punctuation">]</span> <span class="token punctuation">)</span>  <span class="token comment">#以分号开头的注释含有错误代码</span>
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$bash</span> -n test.sh 
+test.sh: line 13: syntax error near unexpected token <span class="token variable"><span class="token variable">`</span><span class="token punctuation">(</span>'
+test.sh: line 13: <span class="token variable">`</span></span><span class="token keyword">:</span> This is a comment that generates an error, <span class="token punctuation">(</span> <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token variable">$x</span> -eq 3<span class="token punctuation">]</span> <span class="token punctuation">)</span>' <span class="token comment">#bash检查出分号开头的注释存在错误</span>
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span>$
+</code></pre>
+<p><strong>7.分号还可以作为域分隔符，如文件:/etc/passwd和环境变量PATH</strong></p>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$PATH</span>
+/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+</code></pre>
+<p><strong>8.分号也可以作为函数名，但是不推荐这种做法，会使得代码不易读</strong></p>
+<pre><code class="prism language-bash">:<span class="token punctuation">(</span><span class="token punctuation">)</span>              <span class="token comment"># 该函数的函数名为分号</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">echo</span> <span class="token string">"The name of this function is "</span><span class="token variable">$FUNCNAME</span><span class="token string">" "</span>
+  <span class="token comment"># Why use a colon as a function name?</span>
+  <span class="token comment"># It's a way of obfuscating your code.</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><strong>注意：在比较新的bash版本中已经不允许这样做，但是可以使用_下划线作为函数名</strong><br>
+<strong>9.冒号可以用作空函数中的占位符</strong></p>
+<pre><code class="prism language-bash">not_empty <span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">:</span>
+<span class="token punctuation">}</span> <span class="token comment"># Contains a : (null command), and so is not empty.</span>
+</code></pre>
+<p><strong>注：该函数不做任何动作，但是不是空函数</strong></p>
+<blockquote>
+<h1><a id="bang___268"></a>[bang] ! 感叹号</h1>
+</blockquote>
+<ul>
+<li>
+<h3><a id="bash_269"></a>感叹号一般有取反和在bash命令行调用命令历史机制的作用</h3>
+</li>
+</ul>
+<p><strong>1.感叹号用来对一个test测试条件或者命令退出状态取反，感叹号属于bash关键字</strong></p>
+<p><strong>2.在不同的上下文中，!的出现也意味着间接变量引用</strong></p>
+<p><strong>3.在bash命令环境中，!调用Bash历史机制</strong></p>
+<pre><code class="prism language-bash"> 1092  cls
+ 1093  ll
+ 1094  <span class="token function">history</span> 
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$!l</span>    <span class="token comment"># 该写法表示bash执行history命令记录中以l开头的最近一次执行过的命令</span>
+ll
+total 32
+-rw-r--r--. 1 root root 4352 Sep 17 11:04 1
+drwxr-xr-x. 3 root root   17 Aug 24 13:13 Desktop
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Documents
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Downloads
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Music
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Pictures
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Public
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Templates
+drwxr-xr-x. 2 root root    6 Aug 24 13:06 Videos
+-rw-------. 1 root root 2053 Aug 24 13:03 anaconda-ks.cfg
+-rw-r--r--. 1 root root 2101 Aug 24 13:05 initial-setup-ks.cfg
+-rwxr-xr-x. 1 root root 3121 Sep 12 00:04 reset.sh.bak0
+-rw-r--r--. 1 root root    4 Sep  4 11:25 somaxconn~
+-rw-r--r--. 1 root root    4 Sep  4 11:29 somaxcony~
+-rw-r--r--. 1 root root    4 Sep  4 11:29 somaxconz~
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>$
+</code></pre>
+<blockquote>
+<h1><a id="asterisk___299"></a>[asterisk] * 星号通配符</h1>
+</blockquote>
+<p><strong>1.星号在文件名通配操作中扮演通配符的角色，表示匹配某文件夹下的所有文件名；与其他具体字符结合表示匹配0个或者多个任意字符</strong></p>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span>$ <span class="token keyword">echo</span> *
+c_program py_scripts rpmPacksges scripts <span class="token function">test</span> test_scripts ttt.sh
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>$ <span class="token keyword">echo</span> /data/*
+/data/c_program /data/py_scripts /data/rpmPacksges /data/scripts /data/test /data/test_scripts /data/ttt.sh
+</code></pre>
+<p><strong>2.星号在正则表达式中表示：匹配其前面的字符任意次，包括0次</strong><br>
+<strong>3.在算术运算操作中，星号表示乘法操作符</strong><br>
+<strong>4.** 两个星号一起是运算符中的乘方操作符号，比如2**8=256</strong><br>
+<strong>5.** 两个星号一起在bash4.0版本以上内核中表示<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mstyle mathcolor="red"><mrow><mi mathvariant="normal">扩</mi><mi mathvariant="normal">展</mi><mi mathvariant="normal">的</mi><mi mathvariant="normal">文</mi><mi mathvariant="normal">件</mi><mi mathvariant="normal">通</mi><mi mathvariant="normal">配</mi><mi mathvariant="normal">操</mi><mi mathvariant="normal">作</mi></mrow></mstyle></mrow><annotation encoding="application/x-tex">\color{red}{扩展的文件通配操作}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0em; vertical-align: 0em;"></span><span class="mord" style="color: red;"><span class="mord cjk_fallback" style="color: red;">扩</span><span class="mord cjk_fallback" style="color: red;">展</span><span class="mord cjk_fallback" style="color: red;">的</span><span class="mord cjk_fallback" style="color: red;">文</span><span class="mord cjk_fallback" style="color: red;">件</span><span class="mord cjk_fallback" style="color: red;">通</span><span class="mord cjk_fallback" style="color: red;">配</span><span class="mord cjk_fallback" style="color: red;">操</span><span class="mord cjk_fallback" style="color: red;">作</span></span></span></span></span></span>，会递归通配文件</strong></p>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>4
+<span class="token comment"># filelist.bash4</span>
+<span class="token function">shopt</span> -s globstar  <span class="token comment"># 必须使能 globstar, 否则 ** 没用.</span>
+                   <span class="token comment"># globstar 是bash4.0中新增的shell选项</span>
+<span class="token keyword">echo</span> <span class="token string">"Using *"</span><span class="token punctuation">;</span> <span class="token keyword">echo</span>
+<span class="token keyword">for</span> filename <span class="token keyword">in</span> *
+<span class="token keyword">do</span>
+  <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$filename</span>"</span>
+<span class="token keyword">done</span>   <span class="token comment"># 列出当前目录的文件 ($PWD).</span>
+<span class="token keyword">echo</span><span class="token punctuation">;</span> <span class="token keyword">echo</span> <span class="token string">"--------------"</span><span class="token punctuation">;</span> <span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">"Using **"</span>
+<span class="token keyword">for</span> filename <span class="token keyword">in</span> **
+<span class="token keyword">do</span>
+  <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$filename</span>"</span>
+<span class="token keyword">done</span>   <span class="token comment"># 递归列出完整的文件树.</span>
+<span class="token keyword">exit</span>
+
+<span class="token comment"># 列出当前目录输出如下</span>
+Using *
+allmyfiles
+filelist.bash4
+--------------
+<span class="token comment"># 递归列出完整的文件树输出如下</span>
+Using **
+allmyfiles
+allmyfiles/file.index.txt
+allmyfiles/my_music
+allmyfiles/my_music/me-singing-60s-folksongs.ogg
+allmyfiles/my_music/me-singing-opera.ogg
+allmyfiles/my_music/piano-lesson.1.ogg
+allmyfiles/my_pictures
+allmyfiles/my_pictures/at-beach-with-Jade.png
+allmyfiles/my_pictures/picnic-with-Melissa.png
+filelist.bash4
+</code></pre>
+<hr>
+<blockquote>
+<h1><a id="test_operator___348"></a>[test operator] ? 测试操作符</h1>
+</blockquote>
+<p><strong>1.在特定的表达式中，问号表示对一个条件的测试</strong><br>
+<strong>2.在双括号结构中，问号表现为C风格三元操作符的组成部分</strong></p>
+<pre><code class="prism language-bash"><span class="token comment"># condition?result-if-true:result-if-false</span>
+<span class="token comment"># 条件?条件为真的值:条件为假的值</span>
+<span class="token variable"><span class="token punctuation">((</span> var0 <span class="token operator">=</span> var1<span class="token operator">&lt;</span><span class="token number">98</span><span class="token operator">?</span><span class="token number">9</span><span class="token operator">:</span><span class="token number">21</span> <span class="token punctuation">))</span></span>
+<span class="token comment">#                ^ ^</span>
+<span class="token comment"># if [ "$var1" -lt 98 ]</span>
+<span class="token comment"># then</span>
+<span class="token comment">#   var0=9</span>
+<span class="token comment"># else</span>
+<span class="token comment">#   var0=21</span>
+<span class="token comment"># fi</span>
+</code></pre>
+<p><strong>3.在参数替换表达式中，问号表示某变量是否已经存在</strong></p>
+<pre><code class="prism language-bash"><span class="token variable">${paramseter?err_msg}</span>, <span class="token variable">${parameter:?err_msg}</span>
+<span class="token comment"># 如果parameter已经存在，就使用其；否则打印err_msg退出脚本，并且退出状态为1</span>
+<span class="token comment"># 上面两种写法几乎同等，后面写法中的冒号表示只有当parameter已经被声明且为空时(null)就使用</span>
+</code></pre>
+<p><strong>4.作为通配符，在文件名通配中表示匹配任何当个字符；在扩展正则表达式中表示匹配其前面的某单个字符。</strong></p>
+<blockquote>
+<h1><a id="__371"></a>[$] 变量替换符(获取一个变量所存储的内容)</h1>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$var1</span><span class="token operator">=</span>123
+<span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$var2</span><span class="token operator">=</span>hello
+<span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$var1</span><span class="token punctuation">;</span> <span class="token keyword">echo</span> <span class="token variable">$var2</span>
+123
+hello
+</code></pre>
+<blockquote>
+<h1><a id="_endofline_linux_379"></a>[$] end-of-line 在正则达式中表匹配文本的行结束位置，常用于锚定；在linux系统中文本文件的行结束符也是$</h1>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$ls</span> <span class="token operator">|</span><span class="token function">grep</span> <span class="token string">'.*[0-9]$'</span>  <span class="token comment"># 表示匹配以数字结尾的文件名</span>
+10file.1
+10file.2
+1SdsflDSLFsdf677671
+1SdsflDSLFsdf677672
+<span class="token punctuation">{</span>a-z<span class="token punctuation">}</span>dsf3adsf1
+DSdsflDSLFsdf677671
+<span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$ls</span> <span class="token operator">|</span><span class="token function">grep</span> <span class="token string">'.*[a-zA-Z]$'</span>   <span class="token comment"># 表示匹配以字母结尾的文件名</span>
+10file.txt
+1SdsflDSLFsdf67767A
+1SdsflDSLFsdf67767B
+a123321a
+A123321A
+a123321b
+</code></pre>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$echo</span> hello <span class="token operator">&gt;</span> 10file.1
+<span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$cat</span> -A 10file.1
+hello$                                            <span class="token comment"># cat -A 查看文本的不可打印字符，包括tab键和行结束符$等。</span>
+</code></pre>
+<blockquote>
+<h1><a id="__401"></a>[${}] 参数替换符,获取花括号中的变量所存储的内容；几乎和$等同，在某些情况下使用${}(例如：使用字符串连接不同的变量所存储的内容)</h1>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$USER</span>      <span class="token comment"># 环境变量USER，保存有当前用户的用户名，使用$USER获取</span>
+root
+<span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">${USER}</span>    <span class="token comment"># 此处功能同$</span>
+root
+<span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$your_id</span><span class="token operator">=</span><span class="token variable">${USER}</span>-on-<span class="token variable">${HOSTNAME}</span>    <span class="token comment"># 此处使用'-on-' 将USER和HOSTNAME存储的内容连接起来；获取它们的内容必须用${}</span>
+<span class="token punctuation">[</span>root@centos7 /data/globbing<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token string">"<span class="token variable">$your_id</span>"</span>
+root-on-centos7.magedu.steve                 <span class="token comment"># 连接后的结果</span>
+</code></pre>
+<blockquote>
+<h1><a id="___412"></a>[$’ … ']</h1>
+</blockquote>
+<ul>
+<li>该结构将展开单个或多个被转义的8进制或者16进制的值并转换为ASCII码或者Unicode字符：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>steve@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> $<span class="token string">'\x21'</span>
+<span class="token operator">!</span>
+<span class="token punctuation">[</span>steve@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> $<span class="token string">'\x22'</span>                <span class="token comment"># 十六进制x22代表ASCII码中的双引号 "</span>
+"
+<span class="token punctuation">[</span>steve@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> $<span class="token string">'\037'</span>
+
+</code></pre>
+<blockquote>
+<h1><a id="___423"></a>[$*, $@] 位置参数，存储所有的位置参数，有区别</h1>
+</blockquote>
+<ul>
+<li>$* 将所有位置参数视为单个字符串</li>
+<li>$@ 每个位置参数存储为单独引用的字符串，分开对待每个位置参数</li>
+</ul>
+<blockquote>
+<h1><a id="__427"></a>[$?] 该环境变量存储退出状态；可以是命令、函数或者脚本的退出状态</h1>
+</blockquote>
+<ul>
+<li>脚本的退出状态为脚本中最后一条命令的退出状态</li>
+<li>函数退出状态也为最后一条命令的退出状态</li>
+<li>一般成功执行退出状态为0；命令执行失败退出状态为1-255之间的整数.</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$cat</span> exit_status.sh 
+<span class="token comment">#!/bin/bash</span>
+<span class="token keyword">echo</span> hello
+<span class="token keyword">echo</span> <span class="token variable">$?</span>    <span class="token comment"># 打印hello成功，放回的退出状态值为0.</span>
+lskdf      <span class="token comment"># Unrecognized command.</span>
+<span class="token keyword">echo</span> <span class="token variable">$?</span>    <span class="token comment"># 无该命令命令，执行失败，退出状态非0.</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">exit</span> 113   <span class="token comment"># 脚本结束后使用echo $? 查看，脚本退出状态为113.</span>
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$bash</span> exit_status.sh 
+hello
+0
+exit_status.sh: line 4: lskdf: <span class="token function">command</span> not found
+127
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$?</span>
+113
+</code></pre>
+<blockquote>
+<h1><a id="_PID_448"></a>[$$] 为PID变量，存储其出现在的脚本所属的进程的进程号</h1>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$pstree</span> -p <span class="token operator">|</span><span class="token function">grep</span> sshd.*bash
+           <span class="token operator">|</span>-sshd<span class="token punctuation">(</span>1164<span class="token punctuation">)</span>---sshd<span class="token punctuation">(</span>1842<span class="token punctuation">)</span>---bash<span class="token punctuation">(</span>1848<span class="token punctuation">)</span>---bash<span class="token punctuation">(</span>6007<span class="token punctuation">)</span>-+-grep<span class="token punctuation">(</span>6043<span class="token punctuation">)</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> $$                        <span class="token comment"># 当前所在bash进程为6007</span>
+6007
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$exit</span>                           <span class="token comment"># 退出6007号bash进程</span>
+<span class="token keyword">exit</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> $$                        <span class="token comment"># 此时$$记录1848</span>
+1848
+</code></pre>
+<blockquote>
+<h1><a id="__460"></a>[()] 圆括号</h1>
+</blockquote>
+<p><strong>1.圆括号可以用来执行其包括的一组命令，各个命令使用分号；隔开</strong></p>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable"><span class="token variable">$(</span>a<span class="token operator">=</span>hello<span class="token punctuation">;</span> <span class="token keyword">echo</span> $a<span class="token variable">)</span></span>
+hello
+</code></pre>
+<ul>
+<li>注意；结构(command1;command2)中，shell会生成一个子shell进程来运行括号内的多个命令。括号内的变量(子shell中)不被括号外的命令读取，父进程(父shell)无法读取子进程的变量。</li>
+</ul>
+<pre><code class="prism language-bash">a<span class="token operator">=</span>123
+<span class="token punctuation">(</span> a<span class="token operator">=</span>321<span class="token punctuation">;</span> <span class="token punctuation">)</span>            
+<span class="token keyword">echo</span> <span class="token string">"a = <span class="token variable">$a</span>"</span>   <span class="token comment"># a = 123</span>
+<span class="token comment"># "a" 可视为本地变量.</span>
+</code></pre>
+<p><strong>2.圆括号用于初始化数组</strong></p>
+<pre><code class="prism language-bash">Array<span class="token operator">=</span><span class="token punctuation">(</span>element1 element2 element3<span class="token punctuation">)</span>
+</code></pre>
+<blockquote>
+<h1><a id="xxxyyyzzz__481"></a>[{xxx,yyy,zzz,…}] 花括号展开</h1>
+</blockquote>
+<p><strong>1.有如下用法</strong></p>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> \<span class="token string">"{These,words,are,quoted}\"   # "</span> 添加前缀和后缀<span class="token punctuation">(</span>prefix and suffix<span class="token punctuation">)</span>
+<span class="token comment"># "These" "words" "are" "quoted"</span>
+<span class="token function">cat</span> <span class="token punctuation">{</span>file1,file2,file3<span class="token punctuation">}</span> <span class="token operator">&gt;</span> combined_file
+<span class="token comment"># 链接三个文件 file1, file2, and file3 成一个文件combined_file.</span>
+<span class="token function">cp</span> file22.<span class="token punctuation">{</span>txt,backup<span class="token punctuation">}</span>
+<span class="token comment"># Copies "file22.txt" to "file22.backup"</span>
+</code></pre>
+<p><strong>2.使用花括号展开时如果包含空格需要转义</strong></p>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token punctuation">{</span>file1,file2<span class="token punctuation">}</span>\ :<span class="token punctuation">{</span>\ A,<span class="token string">" B"</span>,<span class="token string">' C'</span><span class="token punctuation">}</span>
+file1 <span class="token keyword">:</span> A file1 <span class="token keyword">:</span> B file1 <span class="token keyword">:</span> C file2 <span class="token keyword">:</span> A file2 <span class="token keyword">:</span> B file2 <span class="token keyword">:</span> C
+</code></pre>
+<blockquote>
+<h1><a id="az__496"></a>[{a…z}] 扩展的花括号展开</h1>
+</blockquote>
+<ul>
+<li>扩展的花括号展开是bash3.0中新介绍的特性</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token punctuation">{</span>a<span class="token punctuation">..</span>z<span class="token punctuation">}</span> <span class="token comment"># a b c d e f g h i j k l m n o p q r s t u v w x y z</span>
+<span class="token comment"># Echoes characters between a and z.</span>
+<span class="token keyword">echo</span> <span class="token punctuation">{</span>0<span class="token punctuation">..</span>3<span class="token punctuation">}</span> <span class="token comment"># 0 1 2 3</span>
+<span class="token comment"># Echoes characters between 0 and 3.</span>
+base64_charset<span class="token operator">=</span><span class="token punctuation">(</span> <span class="token punctuation">{</span>A<span class="token punctuation">..</span>Z<span class="token punctuation">}</span> <span class="token punctuation">{</span>a<span class="token punctuation">..</span>z<span class="token punctuation">}</span> <span class="token punctuation">{</span>0<span class="token punctuation">..</span>9<span class="token punctuation">}</span> + / <span class="token operator">=</span> <span class="token punctuation">)</span>
+<span class="token comment"># Initializing an array, using extended brace expansion.</span>
+</code></pre>
+<blockquote>
+<h1><a id="__508"></a>[{}] 花括号代码块</h1>
+</blockquote>
+<p><strong>1.花括号中的代码块所包含的变量可被后续脚本代码识别</strong></p>
+<pre><code class="prism language-bash"><span class="token comment"># 例子1</span>
+bash$ <span class="token punctuation">{</span> local a<span class="token punctuation">;</span>
+              a<span class="token operator">=</span>123<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+bash: local: 使用local关键字定义的变量为本地变量，只能在某个函数中使用
+
+<span class="token comment"># 例子2</span>
+a<span class="token operator">=</span>123
+<span class="token punctuation">{</span> a<span class="token operator">=</span>321<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token keyword">echo</span> <span class="token string">"a = <span class="token variable">$a</span>"</span>   <span class="token comment"># a = 321   (花括号中的变量2被打印)</span>
+<span class="token comment"># Thanks, S.C.</span>
+</code></pre>
+<p><strong>2.花括号所包含的代码块一般有I/O重定向</strong></p>
+<pre><code class="prism language-bash"><span class="token comment">#!bin/bash</span>
+
+File<span class="token operator">=</span>/etc/fstab
+<span class="token punctuation">{</span>
+<span class="token function">read</span> line1
+<span class="token function">read</span> line2
+<span class="token punctuation">}</span> <span class="token operator">&lt;</span> <span class="token variable">$File</span>
+<span class="token keyword">echo</span> <span class="token string">"First line in <span class="token variable">$File</span> is:"</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$line1</span>"</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">"Second line in <span class="token variable">$File</span> is:"</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$line2</span>"</span>
+<span class="token keyword">exit</span>
+</code></pre>
+<p><strong>3.花括号内的代码块执行结果保存到某个文件中</strong></p>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># rpm-check.sh</span>
+<span class="token comment">#  Queries an rpm file for description, listing,</span>
+<span class="token comment">#+ and whether it can be installed.</span>
+<span class="token comment">#  Saves output to a file.</span>
+<span class="token comment"># </span>
+<span class="token comment">#  This script illustrates using a code block.</span>
+SUCCESS<span class="token operator">=</span>0
+E_NOARGS<span class="token operator">=</span>65
+<span class="token keyword">if</span> <span class="token punctuation">[</span> -z <span class="token string">"<span class="token variable">$1</span>"</span> <span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+<span class="token keyword">echo</span> <span class="token string">"Usage: <span class="token variable"><span class="token variable">`</span><span class="token function">basename</span> $0<span class="token variable">`</span></span> rpm-file"</span>
+  <span class="token keyword">exit</span> <span class="token variable">$E_NOARGS</span>
+<span class="token keyword">fi</span>  
+<span class="token punctuation">{</span> <span class="token comment"># Begin code block.</span>
+  <span class="token keyword">echo</span>
+  <span class="token keyword">echo</span> <span class="token string">"Archive Description:"</span>
+  rpm -qpi <span class="token variable">$1</span>       <span class="token comment"># Query description.</span>
+  <span class="token keyword">echo</span>
+  <span class="token keyword">echo</span> <span class="token string">"Archive Listing:"</span>
+  rpm -qpl <span class="token variable">$1</span>       <span class="token comment"># Query listing.</span>
+  <span class="token keyword">echo</span>
+  rpm -i --test <span class="token variable">$1</span>  <span class="token comment"># Query whether rpm file can be installed.</span>
+  <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$?</span>"</span> -eq <span class="token variable">$SUCCESS</span> <span class="token punctuation">]</span>
+  <span class="token keyword">then</span>
+    <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$1</span> can be installed."</span>
+  <span class="token keyword">else</span>
+    <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$1</span> cannot be installed."</span>
+  <span class="token keyword">fi</span>  
+  <span class="token keyword">echo</span>              <span class="token comment"># End code block.</span>
+<span class="token punctuation">}</span> <span class="token operator">&gt;</span> <span class="token string">"<span class="token variable">$1</span>.test"</span>       <span class="token comment"># Redirects output of everything in block to file.</span>
+<span class="token keyword">echo</span> <span class="token string">"Results of rpm test in file <span class="token variable">$1</span>.test"</span>
+<span class="token comment"># See rpm man page for explanation of options.</span>
+<span class="token keyword">exit</span> 0
+</code></pre>
+<ul>
+<li>不像在()圆括号中的命令组合会产生新的shell子进程，花括号{}中的代码通常不产生子shell。</li>
+</ul>
+<p><strong>4.不标准的for循环也可以遍历某个花括号中的代码块</strong></p>
+<pre><code class="prism language-bash"><span class="token keyword">for</span><span class="token variable"><span class="token punctuation">((</span>n<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span> n<span class="token operator">&lt;=</span><span class="token number">10</span><span class="token punctuation">;</span> n<span class="token operator">++</span><span class="token punctuation">))</span></span>   <span class="token comment"># 注意：圆括号后无内容，直接跟花括号代码块</span>
+<span class="token comment"># No do!</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">echo</span> -n <span class="token string">"* <span class="token variable">$n</span> *"</span>
+<span class="token punctuation">}</span>
+<span class="token comment"># No done!</span>
+<span class="token comment"># Outputs:</span>
+<span class="token comment"># * 1 ** 2 ** 3 ** 4 ** 5 ** 6 ** 7 ** 8 ** 9 ** 10 *</span>
+<span class="token comment"># And, echo $? returns 0, so Bash does not register an error.</span>
+</code></pre>
+<p><strong>5.花括号亦可用作文本占位符，一般用于xargs -i(替换字符串选项)后面；花括号是输出的文本的占位符</strong></p>
+<pre><code class="prism language-bash"><span class="token function">ls</span> <span class="token keyword">.</span> <span class="token operator">|</span> <span class="token function">xargs</span> -i -t <span class="token function">cp</span> ./<span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token variable">$1</span>
+<span class="token comment">#            ^^         ^^</span>
+<span class="token comment"># From "ex42.sh" (copydir.sh) example.</span>
+</code></pre>
+<blockquote>
+<h1><a id="____599"></a>[ []，[[]] ] 测试结构，测试表达式位于[]之间</h1>
+</blockquote>
+<ul>
+<li>需要注意的是’[’,左中括号是shell的built-in测试类型，而没有链接到外部测试命令/usr/bin/test</li>
+<li>[[]],双重的中括号测试结构比[]更加灵活和稳定，[[]]是shell的关键字，keyword;<br>
+也叫做扩展的测试命令，从ksh88版本中借鉴而来。</li>
+<li>注意注意注意：在双中括号结构中，文件名展开和word splitting都失效；但是参数替换和命令替换有效。</li>
+</ul>
+<pre><code class="prism language-bash">file<span class="token operator">=</span>/etc/passwd
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> -e <span class="token variable">$file</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+  <span class="token keyword">echo</span> <span class="token string">"Password file exists."</span>
+<span class="token keyword">fi</span>
+</code></pre>
+<ul>
+<li>在数组的使用中，[]用来标识数组中的某个元素</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$Array</span><span class="token punctuation">[</span>1<span class="token punctuation">]</span><span class="token operator">=</span>slot_1
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">${Array[1]}</span>
+slot_1
+</code></pre>
+<ul>
+<li>[]还乐意用来表示某范围内的字符，作为正则表达式的一部分，中括号描述了某个范围内的可被匹配到的字符。</li>
+</ul>
+<blockquote>
+<h1><a id="____620"></a>[$[ … ]] 整数表达式计算</h1>
+</blockquote>
+<ul>
+<li>$[ … ]该结构计算中括号内的整数表达式</li>
+</ul>
+<pre><code class="prism language-bash">a<span class="token operator">=</span>3
+b<span class="token operator">=</span>7
+<span class="token keyword">echo</span> $<span class="token punctuation">[</span><span class="token variable">$a</span>+<span class="token variable">$b</span><span class="token punctuation">]</span>   <span class="token comment"># 10</span>
+<span class="token keyword">echo</span> $<span class="token punctuation">[</span><span class="token variable">$a*</span><span class="token variable">$b</span><span class="token punctuation">]</span>   <span class="token comment"># 21</span>
+</code></pre>
+<ul>
+<li></li>
+</ul>
+<blockquote>
+<h1><a id="___629"></a>[(( ))] 整数表达式计算</h1>
+</blockquote>
+<ul>
+<li>展开并计算(())内的整数表达式</li>
+</ul>
+<blockquote>
+<h1><a id="__________632"></a>[’&gt;’  ‘&amp;&gt;’  ‘&gt;&amp;’  ‘&gt;&gt;’  ‘&lt;&gt;’] 各种重定向符</h1>
+</blockquote>
+<p><strong>1. '&gt;'</strong></p>
+<ul>
+<li>scriptname &gt;filename 重定向左边脚本的执行结果到右边文件中；如果文件已经存在则覆盖。</li>
+</ul>
+<p><strong>2. '&amp;&gt;'</strong></p>
+<ul>
+<li>command &amp;&gt;filename 将command的标准输出和标准错误重定向到文件filename中。</li>
+<li>在CLI中测试某个命令是否存在时使用该重定向符时很有帮助的。如：</li>
+</ul>
+<pre><code class="prism language-bash">bash$ <span class="token function">type</span> bogus_command <span class="token operator">&amp;</span><span class="token operator">&gt;</span>/dev/null
+bash$ <span class="token keyword">echo</span> <span class="token variable">$?</span>
+1
+</code></pre>
+<ul>
+<li>或是在脚本中</li>
+</ul>
+<pre><code class="prism language-bash">command_test <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token function">type</span> <span class="token string">"<span class="token variable">$1</span>"</span> <span class="token operator">&amp;</span><span class="token operator">&gt;</span>/dev/null<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token comment">#                                      ^</span>
+cmd<span class="token operator">=</span>rmdir            <span class="token comment"># Legitimate command.合法命令</span>
+command_test <span class="token variable">$cmd</span><span class="token punctuation">;</span> <span class="token keyword">echo</span> <span class="token variable">$?</span>   <span class="token comment"># 0</span>
+cmd<span class="token operator">=</span>bogus_command    <span class="token comment"># Illegitimate command.不存在的命令</span>
+command_test <span class="token variable">$cmd</span><span class="token punctuation">;</span> <span class="token keyword">echo</span> <span class="token variable">$?</span>   <span class="token comment"># 1</span>
+</code></pre>
+<p><strong>3. '&gt;&amp;'</strong></p>
+<ul>
+<li>command &gt;&amp;2 该结构将重定向command的标准输出到标准错误。</li>
+</ul>
+<p><strong>4. '&gt;&gt;'</strong></p>
+<ul>
+<li>scriptname &gt;&gt;filename 将scriptname的输出结果追加到filename文件中。如果filename文件事先不存在则创建。</li>
+</ul>
+<p><strong>5. '&lt;&gt;'</strong></p>
+<p>[i]&lt;&gt;filename 该结构以可写可读的方式打开filename文件，并且添加文件描述符i到该文件。如果filename不存在，则创建。</p>
+<blockquote>
+<h1><a id="_669"></a>[&lt;&lt;]</h1>
+</blockquote>
+<ul>
+<li>用于就地文本的重定向符号。</li>
+</ul>
+<blockquote>
+<h1><a id="_672"></a>[&lt;&lt;&lt;]</h1>
+</blockquote>
+<ul>
+<li>用于就地字符串的重定向符号。</li>
+</ul>
+<blockquote>
+<h1><a id="_675"></a>[&lt;,&gt;]</h1>
+</blockquote>
+<ul>
+<li>用来比较ASCII字符</li>
+</ul>
+<pre><code class="prism language-bash">veg1<span class="token operator">=</span>carrots
+veg2<span class="token operator">=</span>tomatoes
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$veg1</span>"</span> <span class="token operator">&lt;</span> <span class="token string">"<span class="token variable">$veg2</span>"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+  <span class="token keyword">echo</span> <span class="token string">"Although <span class="token variable">$veg1</span> precede <span class="token variable">$veg2</span> in the dictionary,"</span>
+  <span class="token keyword">echo</span> -n <span class="token string">"this does not necessarily imply anything "</span>
+  <span class="token keyword">echo</span> <span class="token string">"about my culinary preferences."</span>
+<span class="token keyword">else</span>
+  <span class="token keyword">echo</span> <span class="token string">"What kind of dictionary are you using, anyhow?"</span>
+<span class="token keyword">fi</span>
+</code></pre>
+<blockquote>
+<h1><a id="__692"></a>[&lt;, &gt;]</h1>
+</blockquote>
+<ul>
+<li>在正则表达式中用于锚定单词的头部和尾部。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>grep <span class="token string">'\&lt;root\&gt;'</span> /etc/passwd 
+root:x:0:0:steve,banzhuang,18800001111,1123443,:/root:/bin/bash
+operator:x:11:0:operator:/root:/sbin/nologin
+</code></pre>
+<blockquote>
+<h1><a id="__702"></a>[|] 管道符</h1>
+</blockquote>
+<ul>
+<li>linux中管道用于连接多个命令，将前一个命令的输出（标准输出）传给后一个命令的输入（标准输入）或者shell。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token function">ls</span> -l <span class="token operator">|</span> sh
+<span class="token comment">#  Passes the output of "echo ls -l" to the shell,</span>
+<span class="token comment">#+ with the same result as a simple "ls -l".</span>
+<span class="token function">cat</span> *.lst <span class="token operator">|</span> <span class="token function">sort</span> <span class="token operator">|</span> <span class="token function">uniq</span>
+<span class="token comment"># Merges and sorts all ".lst" files, then deletes duplicate lines.</span>
+</code></pre>
+<ul>
+<li>某个命令的输出也可以使用管道传给某个脚本。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># uppercase.sh : Changes input to uppercase.</span>
+<span class="token function">tr</span> <span class="token string">'a-z'</span> <span class="token string">'A-Z'</span>
+<span class="token comment">#  Letter ranges must be quoted</span>
+<span class="token comment">#+ to prevent filename generation from single-letter filenames.</span>
+<span class="token keyword">exit</span> 0
+<span class="token comment">###################</span>
+bash$ <span class="token function">ls</span> -l <span class="token operator">|</span> ./uppercase.sh
+-RW-RW-R--    1 BOZO  BOZO       109 APR  7 19:49 1.TXT
+-RW-RW-R--    1 BOZO  BOZO       109 APR 14 16:48 2.TXT
+-RW-R--R--    1 BOZO  BOZO       725 APR 20 20:56 DATA-FILE
+
+</code></pre>
+<ul>
+<li>在管道两侧签个进程的标准输出必须作为下一个进程的标准输入被读取。否则，数据流将会被阻塞，管道将不会按照预想的工作。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">cat</span> file1 file2 <span class="token operator">|</span> <span class="token function">ls</span> -l <span class="token operator">|</span> <span class="token function">sort</span>
+<span class="token comment"># The output from "cat file1 file2" disappears.命令cat file1 file2的输出会消失</span>
+</code></pre>
+<ul>
+<li>管道是作为子进程运行的，因此无法更改脚本中的变量。</li>
+</ul>
+<pre><code class="prism language-bash">variable<span class="token operator">=</span><span class="token string">"initial_value"</span>
+<span class="token keyword">echo</span> <span class="token string">"new_value"</span> <span class="token operator">|</span> <span class="token function">read</span> variable
+<span class="token keyword">echo</span> <span class="token string">"variable = <span class="token variable">$variable</span>"</span>     <span class="token comment"># variable = initial_value</span>
+</code></pre>
+<ul>
+<li>如果在管道中的某个命令终止了，这将会提前结束该管道进程。叫做‘断开的管道’，这种情况下会发送一个SIGPIPE信号。</li>
+</ul>
+<blockquote>
+<h1><a id="__740"></a>[&gt;|] 强制重定向符</h1>
+</blockquote>
+<ul>
+<li>强制重定向（即是noclobber选项已经被设置），使用该符号强制性的覆盖某个文件。</li>
+<li>noclobber是bash的选项之一，使用-C选项指定，意思是不让重定向符’&gt;‘覆盖文件，但使用’&gt;|'强制覆盖。</li>
+</ul>
+<blockquote>
+<h1><a id="_OR_744"></a>[||] OR或逻辑操作符</h1>
+</blockquote>
+<ul>
+<li>OR逻辑操作符。在test测试结构中，如果||两边的测试结构只有一个为真，则整体返回0（成功）。</li>
+</ul>
+<blockquote>
+<h1><a id="_AND_747"></a>[&amp;] AND符号</h1>
+</blockquote>
+<ul>
+<li>&amp;使用该符号在后台运行某个作业。一个命令后面跟&amp;符号将会在后台运行该命令。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token punctuation">(</span>sleep 5 <span class="token punctuation">;</span><span class="token keyword">echo</span> -e <span class="token string">"\ndone"</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>
+<span class="token punctuation">[</span>1<span class="token punctuation">]</span> 15682
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>
+<span class="token keyword">done</span>
+</code></pre>
+<ul>
+<li>在脚本中，命令或者循环也可以运行在后台。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># background-loop.sh</span>
+<span class="token keyword">for</span> i <span class="token keyword">in</span> 1 2 3 4 5 6 7 8 9 10            <span class="token comment"># First loop.</span>
+<span class="token keyword">do</span>
+  <span class="token keyword">echo</span> -n <span class="token string">"<span class="token variable">$i</span> "</span>
+<span class="token keyword">done</span> <span class="token operator">&amp;</span> <span class="token comment"># Run this loop in background.</span>
+       <span class="token comment"># Will sometimes execute after second loop.</span>
+<span class="token keyword">echo</span>   <span class="token comment"># This 'echo' sometimes will not display.</span>
+<span class="token keyword">for</span> i <span class="token keyword">in</span> 11 12 13 14 15 16 17 18 19 20   <span class="token comment"># Second loop.</span>
+<span class="token keyword">do</span>
+  <span class="token keyword">echo</span> -n <span class="token string">"<span class="token variable">$i</span> "</span>
+<span class="token keyword">done</span>  
+<span class="token keyword">echo</span>   <span class="token comment"># This 'echo' sometimes will not display.</span>
+<span class="token comment"># ======================================================</span>
+<span class="token comment"># The expected output from the script:</span>
+<span class="token comment"># 1 2 3 4 5 6 7 8 9 10 </span>
+<span class="token comment"># 11 12 13 14 15 16 17 18 19 20 </span>
+<span class="token comment"># Sometimes, though, you get:</span>
+<span class="token comment"># 11 12 13 14 15 16 17 18 19 20 </span>
+<span class="token comment"># 1 2 3 4 5 6 7 8 9 10 bozo $</span>
+<span class="token comment"># (The second 'echo' doesn't execute. Why?)</span>
+<span class="token comment"># Occasionally also:</span>
+<span class="token comment"># 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20</span>
+<span class="token comment"># (The first 'echo' doesn't execute. Why?)</span>
+<span class="token comment"># Very rarely something like:</span>
+<span class="token comment"># 11 12 13 1 2 3 4 5 6 7 8 9 10 14 15 16 17 18 19 20 </span>
+<span class="token comment"># The foreground loop preempts the background one.</span>
+<span class="token keyword">exit</span> 0
+<span class="token comment">#  Nasimuddin Ansari suggests adding    sleep 1</span>
+<span class="token comment">#+ after the   echo -n "$i"   in lines 6 and 14,</span>
+<span class="token comment">#+ for some real fun.</span>
+</code></pre>
+<blockquote>
+<h1><a id="_AND_790"></a>[&amp;&amp;] AND逻辑操作符</h1>
+</blockquote>
+<ul>
+<li>&amp;&amp; AND逻辑操作符。在test测试结构中，如果操作符连接的测试条件都为真，则整个测试结果为0（真）。</li>
+</ul>
+<blockquote>
+<h1><a id="___794"></a>[-] 选项 前缀</h1>
+</blockquote>
+<ul>
+<li>
+<p>命令或者过滤器的选项标志。操作码的前缀。在参数替换中作为默认参数的前缀。</p>
+</li>
+<li>
+<p>重定向（从标准输入或标准输出；到标准输入或标准输出）。下面是实际用到的例子：</p>
+</li>
+</ul>
+<pre><code class="prism language-bash">（cd /source/directory <span class="token operator">&amp;&amp;</span> <span class="token function">tar</span> cf - <span class="token keyword">.</span> <span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token punctuation">(</span>cd /dest/directory <span class="token operator">&amp;&amp;</span> <span class="token function">tar</span> xpvf -<span class="token punctuation">)</span>
+<span class="token comment"># Move entire file tree from one directory to another</span>
+<span class="token comment"># [courtesy Alan Cox &lt;a.cox@swansea.ac.uk&gt;, with a minor change]</span>
+<span class="token comment"># 1) cd /source/directory</span>
+<span class="token comment">#    Source directory, where the files to be moved are.</span>
+<span class="token comment"># 2) &amp;&amp;</span>
+<span class="token comment">#   "And-list": if the 'cd' operation successful,</span>
+<span class="token comment">#    then execute the next command.</span>
+<span class="token comment"># 3) tar cf - .</span>
+<span class="token comment">#    The 'c' option 'tar' archiving command creates a new archive,</span>
+<span class="token comment">#    the 'f' (file) option, followed by '-' designates the target file</span>
+<span class="token comment">#    as stdout, and do it in current directory tree ('.').</span>
+<span class="token comment"># 4) |</span>
+<span class="token comment">#    Piped to ...</span>
+<span class="token comment"># 5) ( ... )</span>
+<span class="token comment">#    a subshell</span>
+<span class="token comment"># 6) cd /dest/directory</span>
+<span class="token comment">#    Change to the destination directory.</span>
+<span class="token comment"># 7) &amp;&amp;</span>
+<span class="token comment">#   "And-list", as above</span>
+<span class="token comment"># 8) tar xpvf -</span>
+<span class="token comment">#    Unarchive ('x'), preserve ownership and file permissions ('p'),</span>
+<span class="token comment">#    and send verbose messages to stdout ('v'),</span>
+<span class="token comment">#    reading data from stdin ('f' followed by '-').</span>
+<span class="token comment">#</span>
+<span class="token comment">#    Note that 'x' is a command, and 'p', 'v', 'f' are options.</span>
+<span class="token comment">#</span>
+<span class="token comment"># Whew!</span>
+<span class="token comment"># More elegant than, but equivalent to:</span>
+<span class="token comment">#   cd source/directory</span>
+<span class="token comment">#   tar cf - . | (cd ../dest/directory; tar xpvf -)</span>
+<span class="token comment">#</span>
+<span class="token comment">#     Also having same effect:</span>
+<span class="token comment"># cp -a /source/directory/* /dest/directory</span>
+<span class="token comment">#     Or:</span>
+<span class="token comment"># cp -a /source/directory/* /source/directory/.[^.]* /dest/directory</span>
+<span class="token comment">#     If there are hidden files in /source/directory.</span>
+bunzip2 -c linux-2.6.16.tar.bz2 <span class="token operator">|</span> <span class="token function">tar</span> xvf -
+<span class="token comment">#  --uncompress tar file--      | --then pass it to "tar"--</span>
+<span class="token comment">#  If "tar" has not been patched to handle "bunzip2",</span>
+<span class="token comment">#+ this needs to be done in two discrete steps, using a pipe.</span>
+<span class="token comment">#  The purpose of the exercise is to unarchive "bzipped" kernel source.</span>
+</code></pre>
+<ul>
+<li>在下面的情况下"-"并不是一个bash操作符，而是被特定的UNIX工具如：tar，cat等识别的一个选项。</li>
+</ul>
+<pre><code class="prism language-bash">bash$ <span class="token keyword">echo</span> <span class="token string">"whatever"</span> <span class="token operator">|</span> <span class="token function">cat</span> -
+whatever
+</code></pre>
+<ul>
+<li>
+<p>上面cat后一般跟文件，把文件换为"-"后，cat收到的内容将被重定向到标准输出。</p>
+</li>
+<li>
+<p>加上"-“后使命令结果更加细节化。使用”-"让shell等待用户输入。</p>
+</li>
+<li></li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 /data<span class="token punctuation">]</span>file -
+123qwert
+/dev/stdin: ASCII text
+<span class="token punctuation">[</span>root@centos8 /data<span class="token punctuation">]</span>file -
+<span class="token comment">#!/bin/bash</span>
+/dev/stdin: Bourne-Again shell script, ASCII text executable
+</code></pre>
+<ul>
+<li>下面是"-"和tar结合使用的一个例子：备份当前文件夹下24H内更改过的所有文件</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment">#  Backs up all files in current directory modified within last 24 hours</span>
+<span class="token comment">#+ in a "tarball" (tarred and gzipped file).</span>
+BACKUPFILE<span class="token operator">=</span>backup-<span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> +%m-%d-%Y<span class="token variable">)</span></span>
+<span class="token comment">#                 Embeds date in backup filename.</span>
+<span class="token comment">#                 Thanks, Joshua Tschida, for the idea.</span>
+archive<span class="token operator">=</span><span class="token variable">${1:-$BACKUPFILE}</span>
+<span class="token comment">#  If no backup-archive filename specified on command-line,</span>
+<span class="token comment">#+ it will default to "backup-MM-DD-YYYY.tar.gz."</span>
+<span class="token function">tar</span> cvf - <span class="token variable"><span class="token variable">`</span><span class="token function">find</span> <span class="token keyword">.</span> -mtime -1 -type f -print<span class="token variable">`</span></span> <span class="token operator">&gt;</span> <span class="token variable">$archive</span>.tar
+<span class="token function">gzip</span> <span class="token variable">$archive</span>.tar
+<span class="token keyword">echo</span> <span class="token string">"Directory <span class="token variable">$PWD</span> backed up in archive file \"<span class="token variable">$archive</span>.tar.g
+#  Stephane Chazelas points out that the above code will fail
+#+ if there are too many files found
+#+ or if any filenames contain blank characters.
+# He suggests the following alternatives:
+# -------------------------------------------------------------------
+#   find . -mtime -1 -type f -print0 | xargs -0 tar rvf "</span><span class="token variable">$archive</span>.tar<span class="token string">"
+#      using the GNU version of "</span><span class="token function">find</span><span class="token string">".
+#   find . -mtime -1 -type f -exec tar rvf "</span><span class="token variable">$archive</span>.tar" <span class="token string">'{}'</span> \<span class="token punctuation">;</span>
+<span class="token comment">#         portable to other UNIX flavors, but much slower.</span>
+<span class="token comment"># -------------------------------------------------------------------</span>
+<span class="token keyword">exit</span> 0
+</code></pre>
+<ul>
+<li>
+<p>以"-“开头的文件名和重定向符”-“在一起使用时可能报错。脚本应该检查文件名是否以”-"开头，并加上合适的前缀。如：<code>./-FILENAME, $PWD/-FILENAME, 或者 $PATHNAME/-FILENAME</code></p>
+</li>
+<li>
+<p>如果某个变量的值以"-"开头，也可能造成错误。如：</p>
+</li>
+</ul>
+<pre><code class="prism language-bash">var<span class="token operator">=</span><span class="token string">"-n"</span>
+<span class="token keyword">echo</span> <span class="token variable">$var</span>
+<span class="token comment"># bash认为上面的命令等同于 "echo -n", 不打印任何东西.</span>
+</code></pre>
+<ul>
+<li>"-"符号和cd命令使用时，表示前一个工作文件夹；此时使用到$OLDPWD这个环境变量。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>pwd
+/root
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>cd /etc/
+<span class="token punctuation">[</span>root@centos8 /etc<span class="token punctuation">]</span>pwd
+/etc
+<span class="token punctuation">[</span>root@centos8 /etc<span class="token punctuation">]</span>cd -
+/root
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>pwd
+/root
+</code></pre>
+<ul>
+<li>"-"在算术运算中做减法符号。</li>
+</ul>
+<blockquote>
+<h1><a id="__918"></a>[–] 命令长选项</h1>
+</blockquote>
+<ul>
+<li>作为一个命令的长选项格式的一部分。</li>
+<li>在和bash的builtin类型使用是表示命令选项的结束。可以用来删除某些以-开头的文件。如：</li>
+</ul>
+<pre><code class="prism language-bash">bash$ <span class="token function">ls</span> -l
+-rw-r--r-- 1 bozo bozo 0 Nov 25 12:29 -badname <span class="token comment">#当前目录有个-开头的文件</span>
+bash$ <span class="token function">rm</span> -- -badname   <span class="token comment"># 使用--避免rm认为-badname为选项</span>
+bash$ <span class="token function">ls</span> -l
+total 0
+</code></pre>
+<blockquote>
+<h1><a id="__930"></a>[=] 等号</h1>
+</blockquote>
+<ul>
+<li>赋值运算符</li>
+</ul>
+<pre><code class="prism language-bash">a<span class="token operator">=</span>28
+<span class="token keyword">echo</span> <span class="token variable">$a</span>   <span class="token comment"># 28</span>
+</code></pre>
+<ul>
+<li>等号也作为字符串比较操作符。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$a</span>"</span> <span class="token operator">=</span> <span class="token string">"<span class="token variable">$b</span>"</span> <span class="token punctuation">]</span> <span class="token comment"># 如果字符串$a和$b相同，则为真。注意等号两边空格</span>
+</code></pre>
+<blockquote>
+<h1><a id="__943"></a>[+] 加号</h1>
+</blockquote>
+<ul>
+<li>加号，加法运算符。</li>
+<li>正则表达式中加号表示匹配其前面的字符集一次或多次。类似*号，但是*号包括0次</li>
+</ul>
+<blockquote>
+<h1><a id="__948"></a>[%] 百分号</h1>
+</blockquote>
+<ul>
+<li>百分号为取模运算符，即取除法的余数</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">let</span> <span class="token string">"z = 5 % 3"</span>
+<span class="token keyword">echo</span> <span class="token variable">$z</span>  <span class="token comment"># 2</span>
+</code></pre>
+<ul>
+<li>百分号也用于正则表达式中</li>
+</ul>
+<blockquote>
+<h1><a id="_tilde_959"></a>[~] 波浪符(读：tilde)</h1>
+</blockquote>
+<ul>
+<li>波浪符代表家目录的意思，对应于$HOME环境变量。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 /etc/sysconfig/network-scripts<span class="token punctuation">]</span> <span class="token function">cd</span> ~
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span> <span class="token function">pwd</span>
+/root
+
+<span class="token punctuation">[</span>root@centos8 /etc/sysconfig/network-scripts<span class="token punctuation">]</span> <span class="token function">ls</span> ~
+anaconda-ks.cfg      dead.letter  Documents  file1                 lig    <span class="token function">passwd</span>    Public   Templates  Videos
+anaconda-ks.cfg.bak  Desktop      Downloads  initial-setup-ks.cfg  Music  Pictures  scripts  <span class="token function">tr</span>
+</code></pre>
+<blockquote>
+<h1><a id="_PWD_972"></a>[~+] 当前工作目录$PWD</h1>
+</blockquote>
+<ul>
+<li>"~+"表示当前工作目录，对应于内部变量$PWD。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 /etc/sysconfig/network-scripts<span class="token punctuation">]</span> <span class="token keyword">echo</span> <span class="token variable">$PWD</span>
+/etc/sysconfig/network-scripts
+<span class="token punctuation">[</span>root@centos8 /etc/sysconfig/network-scripts<span class="token punctuation">]</span> <span class="token keyword">echo</span> ~+
+/etc/sysconfig/network-scripts
+</code></pre>
+<blockquote>
+<h1><a id="_OLDPWD_982"></a>[~-] 前一个工作目录$OLDPWD</h1>
+</blockquote>
+<ul>
+<li>"~-"表示前一个工作目录，对应于内部变量$OLDPWD。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 /etc/sysconfig/network-scripts<span class="token punctuation">]</span> <span class="token function">cd</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span> <span class="token keyword">echo</span> ~+                          <span class="token comment"># 当前目录</span>
+/root
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span> <span class="token keyword">echo</span> ~-                          <span class="token comment"># 前一个工作目录</span>
+/etc/sysconfig/network-scripts
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>
+</code></pre>
+<blockquote>
+<h1><a id="__994"></a>[=~] 正则表达式匹配符</h1>
+</blockquote>
+<ul>
+<li>"=~"该正则表达式匹配符号用于两对中括号中。(Perl语言也有类似的操作符)。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+variable<span class="token operator">=</span><span class="token string">"This is a fine mess."</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$variable</span>"</span>
+<span class="token comment"># Regex matching with =~ operator within [[ double brackets ]].</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$variable</span>"</span> <span class="token operator">=</span>~ T<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span>.fin*es* <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token comment"># NOTE: As of version 3.2 of Bash, expression to match no longer quoted.</span>
+<span class="token keyword">then</span>
+  <span class="token keyword">echo</span> <span class="token string">"match found"</span>
+      <span class="token comment"># match found</span>
+<span class="token keyword">fi</span>
+</code></pre>
+<p>或者更实用的例子：</p>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+input<span class="token operator">=</span><span class="token variable">$1</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$input</span>"</span> <span class="token operator">=</span>~ <span class="token string">"[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token comment">#                 ^ NOTE: Quoting not necessary, as of version 3.2 of Bash.</span>
+<span class="token comment"># NNN-NN-NNNN (where each N is a digit).</span>
+<span class="token keyword">then</span>
+  <span class="token keyword">echo</span> <span class="token string">"Social Security number."</span>
+  <span class="token comment"># Process SSN.</span>
+<span class="token keyword">else</span>
+  <span class="token keyword">echo</span> <span class="token string">"Not a Social Security number!"</span>
+  <span class="token comment"># Or, ask for corrected input.</span>
+<span class="token keyword">fi</span>
+</code></pre>
+<blockquote>
+<h1><a id="__1024"></a>[^] 行开始位置</h1>
+</blockquote>
+<ul>
+<li>在正则表达式中，"^"表示一行的开头。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token comment">#### 找出/etc/passwd文件中以r开头的行</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span> <span class="token function">grep</span> <span class="token string">"^r.*"</span> /etc/passwd
+root:x:0:0:steve,banzhuang,18800001111,1123443,:/root:/bin/bash
+rtkit:x:172:172:RealtimeKit:/proc:/sbin/nologin
+rpc:x:32:32:Rpcbind Daemon:/var/lib/rpcbind:/sbin/nologin
+radvd:x:75:75:radvd user:/:/sbin/nologin
+rpcuser:x:29:29:RPC Service User:/var/lib/nfs:/sbin/nologin
+</code></pre>
+<blockquote>
+<h1><a id="_1037"></a>[<sup>,</sup>^]</h1>
+</blockquote>
+<ul>
+<li>在参数替换中起将字符串中的字母转换成大写的作用（在bash4版本中引进。）</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>4
+var<span class="token operator">=</span>veryMixedUpVariable
+<span class="token keyword">echo</span> <span class="token variable">${var}</span>            <span class="token comment"># veryMixedUpVariable</span>
+<span class="token keyword">echo</span> <span class="token variable">${var^}</span>           <span class="token comment"># VeryMixedUpVariable</span>
+<span class="token comment">#         *             第一个字符大写</span>
+<span class="token comment">#         *              First char --&gt; uppercase.</span>
+<span class="token keyword">echo</span> <span class="token variable">${var^^}</span>          <span class="token comment"># VERYMIXEDUPVARIABLE</span>
+<span class="token comment">#         **            所有字符大写</span>
+<span class="token comment">#         **             All chars  --&gt; uppercase.</span>
+<span class="token keyword">echo</span> <span class="token variable">${var,}</span>           <span class="token comment"># veryMixedUpVariable</span>
+<span class="token comment">#         *             第一个字符小写</span>
+<span class="token comment">#         *              First char --&gt; lowercase.</span>
+<span class="token keyword">echo</span> <span class="token variable">${var,,}</span>          <span class="token comment"># verymixedupvariable</span>
+<span class="token comment">#         **            所有字符小写</span>
+<span class="token comment">#         **             All chars  --&gt; lowercase.</span>
+</code></pre>
+<blockquote>
+<h1><a id="Whitespace__1058"></a>[Whitespace] 空白符</h1>
+</blockquote>
+<ul>
+<li>
+<p>空白符一般作为命令或者变量之间的分割符。空白符包含空格、退格、空白行或者这些的组合。</p>
+</li>
+<li>
+<p>在一些环境下不允许出现空白符，如变量赋值等。<br>
+passwd<br>
+root❌0:0:steve,banzhuang,18800001111,1123443,:/root:/bin/bash<br>
+rtkit❌172:172:RealtimeKit:/proc:/sbin/nologin<br>
+rpc❌32:32:Rpcbind Daemon:/var/lib/rpcbind:/sbin/nologin<br>
+radvd❌75:75:radvd user:/:/sbin/nologin<br>
+rpcuser❌29:29:RPC Service User:/var/lib/nfs:/sbin/nologin</p>
+</li>
+</ul>
+<pre><code>
+&gt; # [^,^^]
+- 在参数替换中起将字符串中的字母转换成大写的作用（在bash4版本中引进。）
+
+```bash
+#!/bin/bash4
+var=veryMixedUpVariable
+echo ${var}            # veryMixedUpVariable
+echo ${var^}           # VeryMixedUpVariable
+#         *             第一个字符大写
+#         *              First char --&gt; uppercase.
+echo ${var^^}          # VERYMIXEDUPVARIABLE
+#         **            所有字符大写
+#         **             All chars  --&gt; uppercase.
+echo ${var,}           # veryMixedUpVariable
+#         *             第一个字符小写
+#         *              First char --&gt; lowercase.
+echo ${var,,}          # verymixedupvariable
+#         **            所有字符小写
+#         **             All chars  --&gt; lowercase.
+</code></pre>
+<blockquote>
+<h1><a id="Whitespace__1091"></a>[Whitespace] 空白符</h1>
+</blockquote>
+<ul>
+<li>
+<p>空白符一般作为命令或者变量之间的分割符。空白符包含空格、退格、空白行或者这些的组合。</p>
+</li>
+<li>
+<p>在一些环境下不允许出现空白符，如变量赋值等。</p>
+</li>
+</ul>
+

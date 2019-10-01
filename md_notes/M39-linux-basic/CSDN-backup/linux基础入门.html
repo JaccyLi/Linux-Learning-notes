@@ -1,0 +1,619 @@
+﻿<p></p><div class="toc"><h3><center><font size="214" face="黑体" color="grey"> Linux基础入门 </font></center></h3><ul><li><a href="#Linux_4">一.Linux用户类型</a></li><ul><li><a href="#1root__5">1.root 用户</a></li><li><a href="#2___8">2.普通（ 非特权 ）用户</a></li></ul><li><a href="#Linux_12">二.Linux下的终端种类介绍</a></li><ul><li><a href="#_24">交互式接口</a></li></ul><li><a href="#Shell_39">三.Shell介绍</a></li><ul><li><a href="#1shell_40">1.什么是shell</a></li><li><a href="#2shell_49">2.各种shell及其分支</a></li><li><a href="#3bash_shell_56">3.bash shell简介</a></li><li><a href="#4bash_shell_69">4.bash shell的命令提示符认识认识</a></li></ul><li><a href="#shell_89">四.shell执行命令</a></li><ul><li><a href="#1shell_90">1.在shell中执行命令</a></li><li><a href="#2_105">2.执行外部命令</a></li><li><a href="#3_118">3.命令别名</a></li><li><a href="#4_144">4.命令格式</a></li></ul><li><a href="#_171">五.获取命令的帮助文档</a></li><li><a href="#_199">六.练习</a></li><li><a href="#man_212">七.man</a></li><ul><li><a href="#1man_213">1.man命令</a></li><li><a href="#2man__220">2.man 章节</a></li><li><a href="#3man_234">3.man帮助段落说明</a></li><li><a href="#4man_254">4.man帮助命令使用</a></li><li><a href="#5_267">5.通过在线文档获取帮助</a></li></ul><li><a href="#_286">八.练习</a></li><li><a href="#_298">九.简单的小命令</a></li><ul><li><a href="#1_299">1.关机重启</a></li><li><a href="#2_317">2.查看登录信息</a></li><li><a href="#3screen_326">3.screen命令</a></li><li><a href="#4echo_342">4.echo命令</a></li><li><a href="#5ASCII_369">5.ASCII码表</a></li><li><a href="#6_375">6.字符集和编码</a></li></ul><li><a href="#_388">十.命令历史简介</a></li><ul><li><a href="#1shell_389">1.命令历史是shell的特性之一</a></li><li><a href="#2_393">2.命令历史的使用</a></li><li><a href="#3_422">3.调用历史参数</a></li><li><a href="#4history_439">4.打印历史命令列表的命令history</a></li><li><a href="#5_454">5.与命令历史相关的环境变量</a></li><li><a href="#6bash_470">6.bash快捷键列表</a></li></ul></ul></div><p></p>
+<hr>
+<blockquote>
+<h1><a id="Linux_4"></a>一.Linux用户类型</h1>
+</blockquote>
+<h2><a id="1root__5"></a>1.root 用户</h2>
+<blockquote>
+<p>在linux中root用户属于一个特殊的管理帐户，也被称为超级用户。<br>
+root拥有接近百分之百的系统控制权限，对系统损害几乎有无限的能力。除非必要,一般不会使用root登录系统。</p>
+</blockquote>
+<h2><a id="2___8"></a>2.普通（ 非特权 ）用户</h2>
+<blockquote>
+<p>普通用户权限有限，造成损害的能力比较有限。普通用户也可以在root或者管理员用户手偶全下成为管理员用户。</p>
+</blockquote>
+<hr>
+<hr>
+<blockquote>
+<h1><a id="Linux_12"></a>二.Linux下的终端种类介绍</h1>
+</blockquote>
+<pre><code>设备终端：键盘、鼠标、显示器
+控制台终端： /dev/console
+串行终端：/dev/ttyS#
+虚拟终端：tty：teletypewriters， /dev/tty#，tty 可有n个，Ctrl+Alt+F#
+图形终端：startx, xwindows
+CentOS 6: Ctrl + Alt + F7
+CentOS 7: 在哪个终端启动，即位于哪个虚拟终端
+伪终端：pty：pseudo-tty ， /dev/pts/# 如：SSH远程连接
+查看当前的终端设备：#tty
+</code></pre>
+<blockquote>
+<blockquote>
+<h2><a id="_24"></a>交互式接口</h2>
+</blockquote>
+</blockquote>
+<pre><code>交互式接口：启动终端后，在终端设备附加的一个交互式应用程序
+GUI：Graphic User Interface
+X protocol, window manager, desktop
+Desktop:
+    GNOME (C, 图形库gtk)   # linux 桌面版有名的桌面环境之一
+    KDE (C++,图形库qt)     # 同上
+    XFCE (轻量级桌面)      # 同上
+CLI：Command Line Interface    # 命令行接口
+如：shell程序  就是一个命令行接口
+</code></pre>
+<hr>
+<hr>
+<blockquote>
+<h1><a id="Shell_39"></a>三.Shell介绍</h1>
+</blockquote>
+<h2><a id="1shell_40"></a>1.什么是shell</h2>
+<blockquote>
+<p>Shell 是Linux系统的用户界面，提供了用户与内核进行交互操作的一种接口。它接收用户输入的命令并把它送入内核去执行<br>
+shell也被称为LINUX的命令解释器（command interpreter）,是一种高级程序设计语言。</p>
+</blockquote>
+<div align="center">
+<img src="https://img-blog.csdnimg.cn/20190923194838984.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" height="260" width="260">
+</div>
+<center><font size="4" face="黑体" color="grey"> shell处于内核和用户之间 </font></center>
+<h2><a id="2shell_49"></a>2.各种shell及其分支</h2>
+<div align="center">
+<img src="https://img-blog.csdnimg.cn/2019092319524283.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" height="350" width="1100">
+</div>
+<center><font size="4" face="黑体" color="grey"> 从1977年到2003年各种衍生于shell的不同shell版本示意 </font></center>
+<h2><a id="3bash_shell_56"></a>3.bash shell简介</h2>
+<blockquote>
+<p>bash shell是目前linux系统的标配shell，其起源于GNU Bourne-Again Shell(bash)；是GNU计划中重要的工具软件之一，与sh兼容。<br>
+CentOS默认使用 bash shell</p>
+</blockquote>
+<pre><code>在bash shell中显示当前使用的shell
+echo ${SHELL}
+显示当前系统使用的所有shell
+cat /etc/shells
+主机名示例
+bj-yz-k8s-node1-100-10.magedu.com
+</code></pre>
+<ul>
+<li>注意：主机名不建议用下划线</li>
+</ul>
+<h2><a id="4bash_shell_69"></a>4.bash shell的命令提示符认识认识</h2>
+<pre><code>命令提示符：prompt
+[root@localhost ~]#
+        # 管理员
+        $ 普通用户
+显示提示符格式
+[root@localhost ~]#echo $PS1
+修改提示符格式
+PS1="\[\e[1;5;41;33m\][\u@\h \W]\\$\[\e[0m\]"
+PS1="\[\e[1;32m\][\[\e[0m\]\t \[\e[1;33m\]\u\[\e[36m\]@\h\[\e[1;31m\] \W\[\e[1;32m\]]\[\e[0m\]\\$"
+\e 控制符\033     \u 当前用户
+\h 主机名简称     \H 主机名
+\w 当前工作目录   \W 当前工作目录基名
+\t 24小时时间格式 \T 12小时时间格式
+\! 命令历史数     \# 开机后命令历史数
+</code></pre>
+<hr>
+<hr>
+<blockquote>
+<h1><a id="shell_89"></a>四.shell执行命令</h1>
+</blockquote>
+<h2><a id="1shell_90"></a>1.在shell中执行命令</h2>
+<pre><code class="prism language-bash"><span class="token operator">&gt;</span> 输入命令后回车
+    shell程序找到键入命令所对应的可执行程序或代码，并由其分析后提交给内核分配资源将其运行起来
+<span class="token operator">&gt;</span> 在shell中可执行的命令有两类
+    内部命令：由shell自带的，而且通过某命令形式提供
+        <span class="token function">help</span> 内部命令列表   <span class="token comment"># 查询内部命令的帮助文档</span>
+        <span class="token function">enable</span> cmd 启用内部命令
+        <span class="token function">enable</span> –n cmd 禁用内部命令
+        <span class="token function">enable</span> –n 查看所有禁用的内部命令
+    外部命令：在文件系统路径下有对应的可执行程序文件
+        查看路径：which -a <span class="token operator">|</span>--skip-alias <span class="token punctuation">;</span> <span class="token function">whereis</span>
+<span class="token operator">&gt;</span> 区别指定的命令是内部或外部命令
+    <span class="token function">type</span> COMMAND
+</code></pre>
+<h2><a id="2_105"></a>2.执行外部命令</h2>
+<ul>
+<li>Hash缓存表</li>
+</ul>
+<blockquote>
+<p>系统刚启动时hash表为空，当外部命令执行时，bash默认会从PATH路径下寻找该命令，找到后会将这条命令的路径记录到hash表中。当再次使用该命令时，shell解释器首先会查看hash表，存在将执行之，如果不存在，将会去PATH路径下寻找，利用hash缓存表可大大提高命令的调用速率。</p>
+</blockquote>
+<pre><code class="prism language-sh">hash常见用法
+    hash 显示hash缓存
+    hash -l 显示hash缓存，可作为输入使用
+    hash -p path name 将命令全路径path起别名为name
+    hash -t name 打印缓存中name的路径
+    hash -d name 清除name缓存
+    hash -r 清除缓存
+</code></pre>
+<h2><a id="3_118"></a>3.命令别名</h2>
+<pre><code class="prism language-bash">显示当前shell进程所有可用的命令别名
+    <span class="token function">alias</span>
+定义别名NAME，其相当于执行命令VALUE
+    <span class="token function">alias</span> NAME<span class="token operator">=</span><span class="token string">'VALUE'</span>
+在命令行中定义的别名，仅对当前shell进程有效
+    如果想永久有效，要定义在配置文件中
+          仅对当前用户：~/.bashrc
+        对所有用户有效：/etc/bashrc
+
+编辑配置文件给出的新配置不会立即生效
+如果要不重启电脑的情况下是配置文件生效，则可以让bash进程重新读取配置文件：
+    <span class="token function">source</span> /path/to/config_file
+    <span class="token keyword">.</span> /path/to/config_file
+    此处soure和.都是shell built-in类型
+撤消别名：unalias
+    <span class="token function">unalias</span> <span class="token punctuation">[</span>-a<span class="token punctuation">]</span> name <span class="token punctuation">[</span>name <span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+            -a 取消所有别名
+别名同原命令同名的情况下，如果要执行原命令，可使用
+    \ALIASNAME
+    “ALIASNAME”
+    ‘ALIASNAME’
+    <span class="token function">command</span> ALIASNAME
+    /path/commmand
+</code></pre>
+<h2><a id="4_144"></a>4.命令格式</h2>
+<pre><code class="prism language-bash">COMMAND <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token punctuation">[</span>ARGUMENTS<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+    选项：用于启用或关闭命令的某个或某些功能
+        短选项：UNIX 风格选项，-c 例如：-l, -h
+        长选项：GNU风格选项，--word 例如：--all, --human
+        BSD风格选项： 一个字母，例如：a
+    参数：命令的作用对象，比如文件名，用户名等
+注意：
+多个选项以及多参数和命令之间使用空白字符分隔
+取消和结束命令执行：Ctrl+c，Ctrl+d
+多个命令可以用<span class="token punctuation">;</span>符号分开
+一个命令可以用\分成多行
+</code></pre>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> hello<span class="token punctuation">;</span> <span class="token keyword">echo</span> hi
+hello
+hi
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$host</span>\
+<span class="token operator">&gt;</span> na\
+<span class="token operator">&gt;</span> me
+centos7.steve
+</code></pre>
+<hr>
+<hr>
+<blockquote>
+<h1><a id="_171"></a>五.获取命令的帮助文档</h1>
+</blockquote>
+<blockquote>
+<p><strong>type 判断command是内部还是外部命令</strong></p>
+<blockquote>
+<p>内部命令 help command</p>
+</blockquote>
+<blockquote>
+<p>外部命令 whatis --&gt; command --help --&gt; man -f -k …</p>
+</blockquote>
+</blockquote>
+<ul>
+<li>各个帮助的类型</li>
+</ul>
+<pre><code class="prism language-bash">命令帮助
+    内部命令：help COMMAND 或 <span class="token function">man</span> <span class="token function">bash</span>
+    外部命令：COMMAND --help 或 COMMAND -h
+<span class="token punctuation">(</span>2<span class="token punctuation">)</span> 使用手册<span class="token punctuation">(</span>manual<span class="token punctuation">)</span>
+    <span class="token function">man</span> COMMAND
+<span class="token punctuation">(</span>3<span class="token punctuation">)</span> 信息页
+    info COMMAND
+<span class="token punctuation">(</span>4<span class="token punctuation">)</span> 程序自身的帮助文档
+    README
+    INSTALL
+    ChangeLog
+<span class="token punctuation">(</span>5<span class="token punctuation">)</span> 程序官方文档
+    官方站点：Documentation
+<span class="token punctuation">(</span>6<span class="token punctuation">)</span> 发行版的官方文档
+<span class="token punctuation">(</span>7<span class="token punctuation">)</span> Google
+</code></pre>
+<hr>
+<hr>
+<blockquote>
+<h1><a id="_199"></a>六.练习</h1>
+</blockquote>
+<blockquote>
+<p>1、显示当前时间，格式：2016-06-18 10:20:30</p>
+<blockquote>
+<p>date +%F\ %T</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>2、显示前天是星期几</p>
+<blockquote>
+<p>date -d ‘-2 day’ +%A</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>3、设置当前日期为2019-08-07 06:05:10</p>
+<blockquote>
+<p>date 080706052019.30</p>
+</blockquote>
+</blockquote>
+<hr>
+<hr>
+<blockquote>
+<h1><a id="man_212"></a>七.man</h1>
+</blockquote>
+<h2><a id="1man_213"></a>1.man命令</h2>
+<pre><code class="prism language-bash">man命令提供完整的命令帮助信息，手册页存放在/usr/share/man；几乎每个命令都有man的“页面”，man页面分组为不同的“章节”，统称为Linux手册。
+    man命令的配置文件：/etc/man.config <span class="token operator">|</span> man_db.conf
+    MANPATH /PATH/TO/SOMEWHERE: 指明man文件搜索位置
+    <span class="token function">man</span> -M /PATH/TO/SOMEWHERE COMMAND: 到指定位置下搜索COMMAND命令的手册页并显示
+</code></pre>
+<h2><a id="2man__220"></a>2.man 章节</h2>
+<ul>
+<li>man帮助分为9个章节，带§标识的章节属于开发人员帮助手册</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">man</span> 1：用户命令
+<span class="token function">man</span> 2：系统调用
+<span class="token function">man</span> 3：C库调用
+<span class="token function">man</span> 4：设备文件及特殊文件
+<span class="token function">man</span> 5：配置文件格式
+<span class="token function">man</span> 6：游戏
+<span class="token function">man</span> 7：杂项
+<span class="token function">man</span> 8：管理类的命令
+<span class="token function">man</span> 9：Linux 内核API
+</code></pre>
+<h2><a id="3man_234"></a>3.man帮助段落说明</h2>
+<pre><code class="prism language-bash">帮助手册中的段落说明：
+    NAME 名称及简要说明
+    SYNOPSIS 用法格式说明
+        •<span class="token punctuation">[</span><span class="token punctuation">]</span> 可选内容
+        •<span class="token operator">&lt;</span><span class="token operator">&gt;</span> 必选内容
+        •a<span class="token operator">|</span>b 二选一
+        •<span class="token punctuation">{</span> <span class="token punctuation">}</span> 分组
+        •<span class="token punctuation">..</span>. 同一内容可出现多次
+    DESCRIPTION 详细说明
+    OPTIONS 选项说明
+    EXAMPLES 示例
+    FILES 相关文件
+    AUTHOR 作者
+    COPYRIGHT 版本信息
+    REPORTING BUGS bug信息
+    SEE ALSO 其它帮助参考
+</code></pre>
+<h2><a id="4man_254"></a>4.man帮助命令使用</h2>
+<pre><code class="prism language-bash">查看man手册页
+    <span class="token function">man</span> <span class="token punctuation">[</span>章节<span class="token punctuation">]</span> keyword
+列出所有帮助
+    <span class="token function">man</span> –a keyword
+搜索man手册
+    <span class="token function">man</span> -k keyword 列出所有匹配的页面
+使用 whatis 数据库<span class="token punctuation">;</span>相当于whatis
+    <span class="token function">man</span> –f keyword
+打印man帮助文件的路径
+    <span class="token function">man</span> –w <span class="token punctuation">[</span>章节<span class="token punctuation">]</span> keyword
+</code></pre>
+<h2><a id="5_267"></a>5.通过在线文档获取帮助</h2>
+<ul>
+<li>
+<p>第三方应用官方文档<br>
+<a href="http://httpd.apache.org">apache</a><br>
+<a href="http://www.nginx.org">nginx</a><br>
+<a href="https://mariadb.com/kb/en">Mariadb</a><br>
+<a href="https://dev.mysql.com/doc/">mysql</a><br>
+<a href="http://tomcat.apache.org">tomcat</a><br>
+<a href="http://www.python.org">python</a><br>
+通过发行版官方的文档光盘或网站可以获得<br>
+安装指南、部署指南、虚拟化指南等.</p>
+</li>
+<li>
+<p>红帽知识库和官方在线文档<br>
+<a href="http://kbase.redhat.com">http://kbase.redhat.comt</a><br>
+<a href="http://www.redhat.com/docs">http://www.redhat.com/docs</a><br>
+<a href="http://access.redhat.com">http://access.redhat.com</a><br>
+<a href="https://help.ubuntu.com/lts/serverguide/index.html">https://help.ubuntu.com/lts/serverguide/index.html</a></p>
+</li>
+</ul>
+<hr>
+<hr>
+<h1><a id="_286"></a>八.练习</h1>
+<blockquote>
+<p>1、在本机字符终端登录时，除显示原有信息外，再显示当前登录终端号，主机名和当前时间</p>
+<blockquote>
+<p>man -k issue --&gt; man 8 pam_issue<br>
+\l --tty<br>
+\n --hostname<br>
+\t --time<br>
+vim /etc/issue</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>2、今天18：30自动关机，并提示用户</p>
+<blockquote>
+<p>shutdown 18:30 wall “System will shutdown at 18:30!!”</p>
+</blockquote>
+</blockquote>
+<hr>
+<hr>
+<h1><a id="_298"></a>九.简单的小命令</h1>
+<h2><a id="1_299"></a>1.关机重启</h2>
+<pre><code class="prism language-bash">关机：halt, poweroff
+
+重启：reboot
+    -f: 强制，不调用shutdown
+    -p: 切断电源
+
+关机或重启：shutdown
+<span class="token function">shutdown</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>TIME<span class="token punctuation">]</span> <span class="token punctuation">[</span>MESSAGE<span class="token punctuation">]</span>
+    -r: <span class="token function">reboot</span>
+    -h: halt
+    -c：cancel
+    TIME：无指定，默认相当于+1（CentOS7）
+    now: 立刻,相当于+0
+    +m: 相对时间表示法，几分钟之后；例如 +3
+    hh:mm: 绝对时间表示，指明具体时间
+</code></pre>
+<h2><a id="2_317"></a>2.查看登录信息</h2>
+<pre><code class="prism language-bash">用户登录信息查看命令：
+whoami: 显示当前登录有效用户
+who: 系统当前所有的登录会话
+w: 系统当前所有的登录会话及所做的操作1
+</code></pre>
+<h2><a id="3screen_326"></a>3.screen命令</h2>
+<ul>
+<li>screen命令可以用来在同一台服务器上互相协助处理问题</li>
+</ul>
+<pre><code class="prism language-bash">创建新screen会话
+    <span class="token function">screen</span> –S <span class="token punctuation">[</span>SESSION<span class="token punctuation">]</span>
+加入screen会话
+    <span class="token function">screen</span> –x <span class="token punctuation">[</span>SESSION<span class="token punctuation">]</span>
+退出并关闭screen会话
+    <span class="token keyword">exit</span>
+剥离当前screen会话
+    Ctrl+a,d
+显示所有已经打开的screen会话
+    <span class="token function">screen</span> -ls
+恢复某screen会话
+    <span class="token function">screen</span> -r <span class="token punctuation">[</span>SESSION<span class="token punctuation">]</span>
+</code></pre>
+<h2><a id="4echo_342"></a>4.echo命令</h2>
+<pre><code class="prism language-bash">功能：显示字符
+    语法：echo <span class="token punctuation">[</span>-neE<span class="token punctuation">]</span><span class="token punctuation">[</span>字符串<span class="token punctuation">]</span>
+    说明：echo会将输入的字符串送往标准输出。输出的字符串间以空白字符隔开, 并在最后加上换行号
+选项：
+    -E （默认）不支持 \ 解释功能
+    -n 不自动换行
+    -e 启用 \ 字符的解释功能
+显示变量
+    <span class="token keyword">echo</span> "<span class="token variable">$VAR_NAME</span>” 变量会替换，弱引用
+    decho <span class="token string">'<span class="token variable">$VAR_NAME</span>'</span> 变量不会替换，强引用
+
+启用命令选项-e，若字符串中出现以下字符，则特别加以处理，而不会将它当成一般文字输出:
+    \a 发出警告声
+    \b 退格键
+    \c 最后不加上换行符号
+    \e escape，相当于\033
+    \n 换行且光标移至行首
+    \r 回车，即光标移至行首，但不换行
+    \t 插入tab
+    \\ 插入\字符
+    \0nnn 插入nnn（八进制）所代表的ASCII字符
+    <span class="token keyword">echo</span> -e <span class="token string">'\033[43;31;5mmagedu\e[0m'</span>
+    \xHH插入HH（十六进制）所代表的ASCII数字（man 7 ascii）
+</code></pre>
+<h2><a id="5ASCII_369"></a>5.ASCII码表</h2>
+<ul>
+<li>ASCII：American Standard Code for Information Interchange</li>
+</ul>
+<div align="center">
+<img src="https://img-blog.csdnimg.cn/20190924083545298.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" height="450" width="1100">
+</div>
+<h2><a id="6_375"></a>6.字符集和编码</h2>
+<ul>
+<li>UTF-8 在计算机上存储时可以占用1、2、3或者4个字节</li>
+<li>UTF-16 在计算机上存储时占用2或4个字节</li>
+<li>UTF-32 全部存储为4个字节</li>
+<li>一般在网络中传输数据时使用utf-8格式传输</li>
+<li>读取数据在内存中处理时以unicode格式存储</li>
+<li>编码转换和查询<br>
+<a href="http://www.chi2ko.com/tool/CJK.htm">http://www.chi2ko.com/tool/CJK.htm</a><br>
+<a href="https://javawind.net/tools/native2ascii.jsp?action=transform">https://javawind.net/tools/native2ascii.jsp?action=transform</a><br>
+<a href="http://tool.oschina.net/encode">http://tool.oschina.net/encode</a></li>
+</ul>
+<hr>
+<hr>
+<h1><a id="_388"></a>十.命令历史简介</h1>
+<h2><a id="1shell_389"></a>1.命令历史是shell的特性之一</h2>
+<ul>
+<li>保存你输入的命令历史。可以用它来重复执行命令</li>
+<li>登录shell时，会读取命令历史文件中记录下的命令~/.bash_history</li>
+<li>登录进shell后新执行的命令只会记录在缓存中；这些命令会用户退出时“追加”至命令历史文件中</li>
+</ul>
+<h2><a id="2_393"></a>2.命令历史的使用</h2>
+<pre><code class="prism language-bash">重复前一个命令，有4种方法
+    重复前一个命令使用上方向键，并回车执行
+    按 <span class="token operator">!</span><span class="token operator">!</span> 并回车执行
+    输入 <span class="token operator">!</span>-1 并回车执行
+    按 Ctrl+p 并回车执行
+    <span class="token operator">!</span>:0 执行前一条命令（去除参数）
+    <span class="token operator">!</span>n 执行history命令输出对应序号n的命令
+    <span class="token operator">!</span>-n 执行history历史中倒数第n个命令
+
+    <span class="token operator">!</span>string 重复前一个以“string”开头的命令
+    <span class="token operator">!</span>?string 重复前一个包含string的命令
+    <span class="token operator">!</span>string:p 仅打印命令历史，而不执行
+    <span class="token operator">!</span>$:p 打印输出 <span class="token operator">!</span>$ （上一条命令的最后一个参数）的内容
+    <span class="token operator">!</span>*:p 打印输出 <span class="token operator">!</span>*（上一条命令的所有参数）的内容
+    ^string 删除上一条命令中的第一个string
+    ^string1^string2 将上一条命令中的第一个string1替换为string2
+    <span class="token operator">!</span>:gs/string1/string2 将上一条命令中所有的string1都替换为 string2
+
+    使用up（向上）和down（向下）键来上下浏览从前输入的命令
+    ctrl-r来在命令历史中搜索命令
+        （reverse-i-search）`':
+    Ctrl+g：从历史搜索模式退出
+    要重新调用前一个命令中最后一个参数
+    <span class="token operator">!</span>$ 表示
+    Esc, .（点击Esc键后松开，然后点击 <span class="token keyword">.</span> 键）
+    Alt+ .（按住Alt键的同时点击 <span class="token keyword">.</span> 键）
+</code></pre>
+<h2><a id="3_422"></a>3.调用历史参数</h2>
+<pre><code class="prism language-bash"><span class="token function">command</span> <span class="token operator">!</span>^ 利用上一个命令的第一个参数做cmd的参数
+<span class="token function">command</span> <span class="token operator">!</span>$ 利用上一个命令的最后一个参数做cmd的参数
+<span class="token function">command</span> <span class="token operator">!</span>* 利用上一个命令的全部参数做cmd的参数
+<span class="token function">command</span> <span class="token operator">!</span>:n 利用上一个命令的第n个参数做cmd的参数
+<span class="token function">command</span> <span class="token operator">!</span>n:^ 调用第n条命令的第一个参数
+<span class="token function">command</span> <span class="token operator">!</span>n:$ 调用第n条命令的最后一个参数
+<span class="token function">command</span> <span class="token operator">!</span>n:m 调用第n条命令的第m个参数
+<span class="token function">command</span> <span class="token operator">!</span>n:* 调用第n条命令的所有参数
+<span class="token function">command</span> <span class="token operator">!</span>string:^ 从命令历史中搜索以 string 开头的命令，并获取它的第一个参数
+<span class="token function">command</span> <span class="token operator">!</span>string:$ 从命令历史中搜索以 string 开头的命令,并获取它的最后一个参数
+<span class="token function">command</span> <span class="token operator">!</span>string:n 从命令历史中搜索以 string 开头的命令，并获取它的第n个参数
+<span class="token function">command</span> <span class="token operator">!</span>string:* 从命令历史中搜索以 string 开头的命令，并获取它的所有参数
+调用历史参数
+</code></pre>
+<h2><a id="4history_439"></a>4.打印历史命令列表的命令history</h2>
+<pre><code class="prism language-bash"><span class="token function">history</span> <span class="token punctuation">[</span>-c<span class="token punctuation">]</span> <span class="token punctuation">[</span>-d offset<span class="token punctuation">]</span> <span class="token punctuation">[</span>n<span class="token punctuation">]</span>
+<span class="token function">history</span> -anrw <span class="token punctuation">[</span>filename<span class="token punctuation">]</span>
+<span class="token function">history</span> -ps arg <span class="token punctuation">[</span>arg<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+    -c: 清空命令历史
+    -d offset: 删除历史中指定的第offset个命令
+    n: 显示最近的n条历史
+    -a: 追加本次会话新执行的命令历史列表至历史文件
+    -r: 读历史文件附加到历史列表
+    -w: 保存历史列表到指定的历史文件
+    -n: 读历史文件中未读过的行到历史列表
+    -p: 展开历史参数成多行，但不存在历史列表中
+    -s: 展开历史参数成一行，附加在历史列表后`
+</code></pre>
+<h2><a id="5_454"></a>5.与命令历史相关的环境变量</h2>
+<pre><code class="prism language-bash">HISTSIZE：命令历史记录的条数
+HISTFILE：指定历史文件，默认为~/.bash_history
+HISTFILESIZE：命令历史文件记录历史的条数
+HISTTIMEFORMAT<span class="token operator">=</span>“%F %T “ 显示时间
+HISTIGNORE<span class="token operator">=</span>“str1:str2*:… “ 忽略str1命令，str2开头的历史
+控制命令历史的记录方式：
+环境变量：HISTCONTROL 可选值：
+    ignoredups 默认，忽略重复的命令，连续且相同为“重复”
+    ignorespace 忽略所有以空白开头的命令
+    ignoreboth 相当于ignoredups, ignorespace的组合
+    erasedups 删除重复命令
+<span class="token function">export</span> 变量名<span class="token operator">=</span>"值“
+编辑后可以存放在 /etc/profile（全局有效） 或 ~/.bash_profile（某个用户有效）
+</code></pre>
+<blockquote>
+<h2><a id="6bash_470"></a>6.bash快捷键列表</h2>
+</blockquote>
+
+<table>
+<thead>
+<tr>
+<th>快捷键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ctrl + l</td>
+<td>清屏，相当于clear命令</td>
+</tr>
+<tr>
+<td>Ctrl + o</td>
+<td>执行当前命令，并重新显示本命令</td>
+</tr>
+<tr>
+<td>Ctrl + s</td>
+<td>阻止屏幕输出，锁定</td>
+</tr>
+<tr>
+<td>Ctrl + q</td>
+<td>允许屏幕输出</td>
+</tr>
+<tr>
+<td>Ctrl + c</td>
+<td>终止命令</td>
+</tr>
+<tr>
+<td>Ctrl + z</td>
+<td>挂起命令</td>
+</tr>
+<tr>
+<td>Ctrl + a</td>
+<td>光标移到命令行首，相当于Home</td>
+</tr>
+<tr>
+<td>Ctrl + e</td>
+<td>光标移到命令行尾，相当于End</td>
+</tr>
+<tr>
+<td>Ctrl + f</td>
+<td>光标向右移动一个字符</td>
+</tr>
+<tr>
+<td>Ctrl + b</td>
+<td>光标向左移动一个字符</td>
+</tr>
+<tr>
+<td>Alt + f</td>
+<td>光标向右移动一个单词尾</td>
+</tr>
+<tr>
+<td>Alt + b</td>
+<td>光标向左移动一个单词首</td>
+</tr>
+<tr>
+<td>Ctrl + xx</td>
+<td>光标在命令行首和光标之间移动</td>
+</tr>
+<tr>
+<td>Ctrl + u</td>
+<td>从光标处删除至命令行首</td>
+</tr>
+<tr>
+<td>Ctrl + k</td>
+<td>从光标处删除至命令行尾</td>
+</tr>
+<tr>
+<td>Alt + r</td>
+<td>删除当前整行</td>
+</tr>
+<tr>
+<td>Ctrl + w</td>
+<td>从光标处向左删除至单词首</td>
+</tr>
+<tr>
+<td>Alt + d</td>
+<td>从光标处向右删除至单词尾</td>
+</tr>
+<tr>
+<td>Ctrl + d</td>
+<td>删除光标处的一个字符</td>
+</tr>
+<tr>
+<td>Ctrl + h</td>
+<td>删除光标前的一个字符</td>
+</tr>
+<tr>
+<td>Ctrl + y</td>
+<td>将删除的字符粘贴至光标后</td>
+</tr>
+<tr>
+<td>Alt + c</td>
+<td>从光标处开始向右更改为首字母大写的单词</td>
+</tr>
+<tr>
+<td>Alt + u</td>
+<td>从光标处开始，将右边一个单词更改为大写</td>
+</tr>
+<tr>
+<td>Alt + l</td>
+<td>从光标处开始，将右边一个单词更改为小写</td>
+</tr>
+<tr>
+<td>Ctrl + t</td>
+<td>交换光标处和之前的字符位置</td>
+</tr>
+<tr>
+<td>Alt + t</td>
+<td>交换光标处和之前的单词位置</td>
+</tr>
+<tr>
+<td>Alt + N</td>
+<td>提示输入指定字符后，重复显示该字符N次</td>
+</tr>
+<tr>
+<td>注意</td>
+<td>Alt组合快捷键经常和其它软件冲突</td>
+</tr>
+</tbody>
+</table>

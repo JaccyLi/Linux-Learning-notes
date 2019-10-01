@@ -1,0 +1,813 @@
+﻿<p></p><div class="toc"><h3><center><font size="214" face="黑体" color="grey"> linux初学者小命令 </font></center></h3><ul><li><a href="#linuxlinux_3">一.在正式学习linux命令之前需要先认识一下linux环境中命令是如何被执行的</a></li><ul><ul><li><a href="#bashls_18">bash执行命令的过程，以'ls'命令为例:</a></li><li><a href="#hashPATH_42">别名---&gt;内部命令---&gt;hash记录的外部命令---&gt;$PATH</a></li></ul></ul><li><a href="#Linux_44">二.Linux初学的小命令</a></li><ul><li><a href="#alias__45">[alias] 定义或者显示别名</a></li><li><a href="#bc__69">[bc] 计算器</a></li><li><a href="#cat__90">[cat] 拼接文件并打印</a></li><li><a href="#cd__208">[cd] 切换工作文件夹</a></li><li><a href="#df__228">[df] 报告文件系统磁盘空间使用情况</a></li><li><a href="#free__328">[free] 显示系统内存使用情况</a></li><li><a href="#hash___370">[hash]  加速外部命令访问的技术</a></li><li><a href="#hostname__398">[hostname] 查看和显示主机名</a></li><li><a href="#lscpu_cpu_416">[lscpu] 打印cpu架构相关的信息</a></li><li><a href="#lsblk__421">[lsblk] 列出块设备相关信息</a></li><li><a href="#mv__564">[mv] 移动或者重命名文件</a></li><li><a href="#nano_linux_609">[nano] linux下的简单字符界面编辑器</a></li><li><a href="#runlevel__611">[runlevel] 显示系统运行级别</a></li><li><a href="#tty__621">[tty] 打印链接到标准输入的终端文件名</a></li><li><a href="#type__634">[type] 判断某名称是否需要解析为命令名</a></li><li><a href="#unalias__661">[unalias] 从定义好的命令别名列表中移除某别名</a></li><li><a href="#whoami_ID_669">[whoami] 打印有效的用户ID</a></li></ul></ul></div><p></p>
+<h1><a id="linuxlinux_3"></a>一.在正式学习linux命令之前需要先认识一下linux环境中命令是如何被执行的</h1>
+<ul>
+<li>shell是一个属于linux内核的软件，在系统启动后加载进RAM(内存)内，每个用户通过终端登录系统后，就会运行。负责不间断的接收用户的输入，通过创建新的‘进程’来运行用户输入的命令，执行完后再次返回等待新的命令输入。</li>
+</ul>
+<blockquote>
+<p><strong>进程</strong>：进程是一个具有一定独立功能的程序在一个数据集上的一次动态执行的过程,是操作系统进行资源分配和调度的一个独立单位,是应用程序运行的载体。</p>
+</blockquote>
+<ul>
+<li>例如:下面我们先执行了pwd命令，bash就打印了目前用户所处的位置（此处为/root文件夹）；接着执行了ls命令，bash接着显示了当前/root目录下的所有可见文件夹和文件（linux下的隐藏文件以点.开头，使用’ls -a’可以看到）,下面使用*号表示匹配D开头的所有文件与文件夹。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$pwd</span>
+/root
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$ls</span>
+anaconda-ks.cfg  Desktop  Documents  Downloads  initial-setup-ks.cfg  Music  Pictures  Public  Templates  Videos
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$ls</span> D*
+Desktop:
+Documents:
+Downloads:
+</code></pre>
+<blockquote>
+<h3><a id="bashls_18"></a>bash执行命令的过程，以’ls’命令为例:</h3>
+</blockquote>
+<p>第一步.<strong>读取输入信息</strong>：shell通过STDIN(标准输入)的getline()函数得到用户的输入信息(命令ls)并保存其到一个字符串中（“ls”）。然后字符串被解析存储在一个数组内（类似{“ls”，“NULL”}），该数组就存储了内核执行该命令的所有信息。<br>
+第二步.<strong>判断别名</strong>：shell在搜索该命令前会先查看命令别名（用户自定义的命令别名）。如果ls是某个命令的别名，则shell直接执行ls。<br>
+第三步.<strong>判断是否是built-in</strong>：shell检查该命令是否是shell内置的命令（随shell一同加载到内存，随时准备运行），如果是内置命令则直接在shell自己的上下文环境中运行该命令。<br>
+第四步.<strong>在hash中查找</strong>：如果某个非内部命令已经执行过，则该命令的访问路径被记录在hash中，shell下次运行该命令时就无须再去PATH环境变量所记录的文件夹下搜索该命令的执行文件。<br>
+第五步.<strong>在PATH环境变量中查找</strong>：如果命令不是shell内置命令，则shell会去PATH环境变量所代表的文件路径下去查找该命令的可执行二进制文件。找到后shell会复制自己的某些上下文配置，生成一个子shell进程来运行该命令，此时正在运行命令的shell为子shell进程，之前输入命令的shell为父进程。</p>
+<ul>
+<li><strong>PATH</strong>:在linux中PATH环境变量用来存储包含可执行二进制文件的文件夹，这些文件夹名使用分号:隔开，如下面我电脑上的PATH环境变量存储了字符串"/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/",这字符串说明我的linux中所有非内置的命令都在这些分号隔开的文件夹下。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$PATH</span>
+/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+</code></pre>
+<ul>
+<li>下面就列出了/usr/bin/这个文件夹下的一部分可执行文件</li>
+<li>PATH=/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:<strong>/usr/bin</strong>:/root/</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$ls</span> /usr/bin/
+<span class="token punctuation">[</span>                                    <span class="token function">diff</span>                          gtk-query-immodules-2.0-64   mmount                     python2.7                swig
+a2p                                  <span class="token function">diff3</span>                         gtk-query-immodules-3.0-64   mmove                      qdbus                    sx
+abrt-action-analyze-backtrace        diff-jars                     gtk-update-icon-cache        mobj_dump                  qemu-ga                  <span class="token function">sync</span>
+abrt-action-analyze-c                diffpp                        gtroff                       modifyrepo                 qemu-img                 synclient
+abrt-action-analyze-ccpp-local       diffstat                      gucharmap                    modutil                    qemu-io                  syndaemon
+abrt-action-analyze-core             <span class="token function">dig</span>                           gunzip                       mokutil                    qemu-nbd                 sy
+</code></pre>
+<ul>
+<li>shell执行命令过程简而言之：</li>
+</ul>
+<blockquote>
+<h3><a id="hashPATH_42"></a>别名—&gt;内部命令—&gt;hash记录的外部命令—&gt;$PATH</h3>
+</blockquote>
+<hr>
+<h1><a id="Linux_44"></a>二.Linux初学的小命令</h1>
+<blockquote>
+<h2><a id="alias__45"></a>[alias] 定义或者显示别名</h2>
+</blockquote>
+<ul>
+<li>用法：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token operator">&gt;</span> <span class="token function">alias</span> <span class="token punctuation">[</span>alias-name<span class="token punctuation">[</span><span class="token operator">=</span>string<span class="token punctuation">]</span> <span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+</code></pre>
+<pre><code class="prism language-bash">EXAMPLES 
+        1. Change <span class="token function">ls</span> to give a columnated, <span class="token function">more</span> annotated output:
+
+           <span class="token function">alias</span> ls<span class="token operator">=</span><span class="token string">"ls -CF"</span>
+
+        2. Create a simple <span class="token string">"redo"</span> <span class="token function">command</span> to repeat previous entries <span class="token keyword">in</span> the <span class="token function">command</span> <span class="token function">history</span> file:
+
+           <span class="token function">alias</span> r<span class="token operator">=</span><span class="token string">'fc -s'</span>
+
+        3. Use 1K <span class="token function">units</span> <span class="token keyword">for</span> du:
+
+           <span class="token function">alias</span> du<span class="token operator">=</span>du\ -k
+
+        4. Set up <span class="token function">nohup</span> so that it can deal with an argument that is itself an <span class="token function">alias</span> name:
+
+           <span class="token function">alias</span> nohup<span class="token operator">=</span><span class="token string">"nohup "</span>
+</code></pre>
+<blockquote>
+<h2><a id="bc__69"></a>[bc] 计算器</h2>
+</blockquote>
+<ul>
+<li>bc是一种支持任意精度数字的带有交互执行语句的语言,在linux中可以使用bc进行交互式的数学计算，其包含很多数学计算的表达式和用法，简单示例如下：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$bc</span>
+<span class="token function">bc</span> 1.06.95
+Copyright 1991-1994, 1997, 1998, 2000, 2004, 2006 Free Software Foundation, Inc.
+This is <span class="token function">free</span> software with ABSOLUTELY NO WARRANTY.
+For details <span class="token function">type</span> `warranty'. 
+1+1
+2
+2*3
+6
+4/5
+0
+5/4
+1
+3%5
+3
+</code></pre>
+<blockquote>
+<h2><a id="cat__90"></a>[cat] 拼接文件并打印</h2>
+</blockquote>
+<ul>
+<li>拼接文件并在标准输出上打印文件内容,用法：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token operator">&gt;</span> <span class="token function">cat</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>FILE<span class="token punctuation">]</span><span class="token punctuation">..</span>
+</code></pre>
+<ul>
+<li>不带参数或者跟一个减号(-)表示将标准输入复制打印给标准输出</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$cat</span>    <span class="token comment"># cat - 也可以</span>
+123                     <span class="token comment"># 输入123，回车</span>
+123                     <span class="token comment"># 回车后标准输入（123）被打印到标准输出</span>
+ABC
+ABC
+hello world
+hello world
+^C                      <span class="token comment"># ctrl + c 强制退出</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>$
+</code></pre>
+<ul>
+<li>带参数</li>
+</ul>
+<blockquote>
+<p>-A, --show-all</p>
+<blockquote>
+<p>等同于 -vET，显示Tab控制符^I和行结束符</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$cat</span> -vET
+gg
+gg$                         <span class="token comment">#标注输入为gg</span>
+gg	
+gg^I$                       <span class="token comment">#标准输入为gg和tab键</span>
+                            <span class="token comment">#无标准输入，按enter键</span>
+$
+ddff		                
+ddff^I^I$                   <span class="token comment">#标准输入为ddff和两个tab键</span>
+</code></pre>
+<blockquote>
+<p>-b, --number-nonblank</p>
+<blockquote>
+<p>记录非空输入的行号</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$cat</span> -b
+123
+     1	123            <span class="token comment">#第一次标准输入内容</span>
+222
+     2	222            <span class="token comment">#第二次标准输入内容</span>
+asdfw
+     3	asdfw
+dfbsg4
+     4	dfbsg4
+3242g
+     5	3242g
+
+                        <span class="token comment">#标准输入为空，未记录</span>
+ffff
+     6	ffff
+
+
+
+
+
+
+fffff
+     7	fffff
+</code></pre>
+<blockquote>
+<p>-e</p>
+<blockquote>
+<p>等同于 -vE</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-E, --show-ends</p>
+<blockquote>
+<p>显示每行的换行符$</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-n, --number</p>
+<blockquote>
+<p>显示所有的标准输出行</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$cat</span> -n
+hello
+     1	hello
+hi
+     2	hi
+whats up
+     3	whats up
+nothing
+     4	nothing
+
+     5	                         <span class="token comment"># 第五次标准输入无输入，也记录行号</span>
+	
+     6		
+</code></pre>
+<blockquote>
+<p>-s, --squeeze-blank</p>
+<blockquote>
+<p>压缩重复的空白行，第一个空白行以后的空白行无输入时不显示任何内容（$也不显示）在标准输出，</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$cat</span> -sA
+<span class="token function">dd</span>
+dd$
+ddff	
+ddff^I$
+
+$                                  <span class="token comment"># 第一个空白行的输出</span>
+                                   <span class="token comment"># 后面的空白行被压缩，换行符$也不显示</span>
+                                   <span class="token comment"># 同上</span>
+</code></pre>
+<blockquote>
+<p>-t</p>
+<blockquote>
+<p>等同于 -vT<br>
+-T, --show-tabs<br>
+显示 TAB 字符为^I</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-u</p>
+<blockquote>
+<p>忽略tab键和换行符</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-v, --show-nonprinting</p>
+<blockquote>
+<p>显示不可打印字符，配合-E,-T使用，如:cat -vET</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>cat后没有跟文件或者跟横杆 - (减号)，则表示读取标准输入</p>
+</blockquote>
+<blockquote>
+<h2><a id="cd__208"></a>[cd] 切换工作文件夹</h2>
+</blockquote>
+<ul>
+<li>cd命令为shell built-in类型，属于bash内置命令，用于切换用户工作目录，例如：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$pwd</span>
+/data/test                                   <span class="token comment"># 当前所处位置</span>
+<span class="token punctuation">[</span>root@centos7 /data/test<span class="token punctuation">]</span><span class="token variable">$cd</span> /               <span class="token comment"># / 表示系统根目录 </span>
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token variable">$pwd</span>
+/
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token variable">$ls</span>                          <span class="token comment"># 显示根目录文件</span>
+bin  boot  data  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token variable">$cd</span> -                        <span class="token comment"># cd - 表示切换到前一个工作目录 </span>
+/data/test
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$cd</span> ~                    <span class="token comment"># cd ~ 表示切换到家目录</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$cd</span> /data/
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$cd</span> <span class="token punctuation">..</span>                   <span class="token comment"># cd .. 表示切换到目前所处目录的父目录</span>
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span><span class="token variable">$cd</span> <span class="token keyword">.</span>                        <span class="token comment"># . 一个点表示当前目录</span>
+<span class="token punctuation">[</span>root@centos7 /<span class="token punctuation">]</span>$
+</code></pre>
+<blockquote>
+<h2><a id="df__228"></a>[df] 报告文件系统磁盘空间使用情况</h2>
+</blockquote>
+<ul>
+<li>不带参数默认df显示所有文件系统的空间使用情况</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$df</span>
+Filesystem     1K-blocks    Used Available Use% Mounted on
+devtmpfs          747304       0    747304   0% /dev
+tmpfs             763104       0    763104   0% /dev/shm
+tmpfs             763104   10516    752588   2% /run
+tmpfs             763104       0    763104   0% /sys/fs/cgroup
+/dev/sda2      104806400 5169652  99636748   5% /
+/dev/sda3       52403200   32996  52370204   1% /data
+/dev/sda1        1038336  171704    866632  17% /boot
+tmpfs             152624      12    152612   1% /run/user/42
+tmpfs             152624       0    152624   0% /run/user/0
+</code></pre>
+<blockquote>
+<p>默认df以1K的块大小为显示单位，</p>
+<blockquote>
+<p>显示的单位大小获取顺序：–block-size(用户指定)–&gt;DF_BLOCK_SIZE–&gt;BLOCK_SIZ–&gt;BLOCKSIZE–&gt;1024 bytes (或者当POSIXLY_CORRECT变量已经被设置时使用512 bytes)</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-a, --all</p>
+<blockquote>
+<p>显示所有文件系统，包括不可访问的</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-B, --block-size=SIZE</p>
+<blockquote>
+<p>指定显示单位大小</p>
+</blockquote>
+</blockquote>
+<pre><code>SIZE is an integer and optional unit (example: 10M is 10*1024*1024).  
+Units are K, M, G, T, P, E, Z, Y (powers of 1024) or KB, MB, ... (powers of 1000).
+</code></pre>
+<blockquote>
+<p>-h, --human-readable</p>
+<blockquote>
+<p>使用便于人类阅读的格式显示空间大小(e.g.：1K 234M 2G)，此时1M=1024K</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-H, --si</p>
+<blockquote>
+<p>同-h，只不过此时1M=1000K，用此选项数值偏大</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-i, --inodes</p>
+<blockquote>
+<p>不显示空间使用情况，显示inode的使用情况</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$df</span> -i
+Filesystem       Inodes  IUsed    IFree IUse% Mounted on
+devtmpfs         186826    402   186424    1% /dev
+tmpfs            190776      1   190775    1% /dev/shm
+tmpfs            190776    921   189855    1% /run
+tmpfs            190776     16   190760    1% /sys/fs/cgroup
+/dev/sda2      52428800 162818 52265982    1% /
+/dev/sda3      26214400      5 26214395    1% /data
+/dev/sda1        524288    340   523948    1% /boot
+tmpfs            190776      9   190767    1% /run/user/42
+tmpfs            190776      1   190775    1% /run/user/0
+</code></pre>
+<blockquote>
+<p>-k</p>
+<blockquote>
+<p>等同于 --block-size=1K</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-l, --local</p>
+<blockquote>
+<p>限制只显示本地文件系统</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-T</p>
+<blockquote>
+<p>显示文件系统</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$df</span> -T
+Filesystem     Type     1K-blocks    Used Available Use% Mounted on
+devtmpfs       devtmpfs    747304       0    747304   0% /dev
+tmpfs          tmpfs       763104       0    763104   0% /dev/shm
+tmpfs          tmpfs       763104   10516    752588   2% /run
+tmpfs          tmpfs       763104       0    763104   0% /sys/fs/cgroup
+/dev/sda2      xfs      104806400 5169704  99636696   5% /
+/dev/sda3      xfs       52403200   32996  52370204   1% /data
+/dev/sda1      xfs        1038336  171704    866632  17% /boot
+tmpfs          tmpfs       152624      12    152612   1% /run/user/42
+tmpfs          tmpfs       152624       0    152624   0% /run/user/0
+</code></pre>
+<blockquote>
+<p>-t , --type=TYPE</p>
+<blockquote>
+<p>显示特定文件系统的空间使用情况</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$df</span> -t tmpfs
+Filesystem     1K-blocks  Used Available Use% Mounted on
+tmpfs             763104     0    763104   0% /dev/shm
+tmpfs             763104 10516    752588   2% /run
+tmpfs             763104     0    763104   0% /sys/fs/cgroup
+tmpfs             152624    12    152612   1% /run/user/42
+tmpfs             152624     0    152624   0% /run/user/0
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$df</span> -t xfs
+Filesystem     1K-blocks    Used Available Use% Mounted on
+/dev/sda2      104806400 5169704  99636696   5% /
+/dev/sda3       52403200   32996  52370204   1% /data
+/dev/sda1        1038336  171704    866632  17% /boot
+</code></pre>
+<blockquote>
+<p>-x, --exclude-type</p>
+<blockquote>
+<p>显示非指定的文件系统</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$df</span> -x tmpfs          <span class="token comment"># 显示除了tmpfs以外的文件系统</span>
+Filesystem     1K-blocks    Used Available Use% Mounted on
+devtmpfs          747304       0    747304   0% /dev
+/dev/sda2      104806400 5169704  99636696   5% /
+/dev/sda3       52403200   32996  52370204   1% /data
+/dev/sda1        1038336  171704    866632  17% /boot
+</code></pre>
+<blockquote>
+<h2><a id="free__328"></a>[free] 显示系统内存使用情况</h2>
+</blockquote>
+<ul>
+<li>默认显示系统空闲内存和已经使用内存的总量、交换空间使用情况及内核的缓存使用情况。该命令显示的信息都是解析/proc/meminfo文件得到的。用法：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token operator">&gt;</span> <span class="token function">free</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+</code></pre>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$free</span>
+              total        used        <span class="token function">free</span>      shared  buff/cache   available
+Mem:        1526208      509240      640412       12744      376556      841456
+Swap:       3145724           0     3145724
+</code></pre>
+<ul>
+<li>选项：</li>
+</ul>
+<blockquote>
+<p>-b, --bytes</p>
+<blockquote>
+<p>一字节为单位显示.</p>
+</blockquote>
+<p>-k, --kilo</p>
+<blockquote>
+<p>以千字节为单位，默认选用.</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-m, --mega</p>
+<blockquote>
+<p>以兆字节为单位显示</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-g, --giga</p>
+<blockquote>
+<p>以千兆字节为单位显示.</p>
+</blockquote>
+<blockquote>
+<p>–tera 以T为单位.</p>
+</blockquote>
+<blockquote>
+<p>–peta 以P为单位.</p>
+</blockquote>
+<p>-h, --human</p>
+<blockquote>
+<p>以适合人类阅读的大小合适的单位显示</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>-w, --wide</p>
+<blockquote>
+<p>使用宽格式，分开显示buffer和cache，类似centos6</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$free</span> -w
+              total        used        <span class="token function">free</span>      shared     buffers       cache   available
+Mem:        1526208      763656      116976       19932          40      645536      576160
+Swap:       3145724         264     3145460
+</code></pre>
+<blockquote>
+<h2><a id="hash___370"></a>[hash]  加速外部命令访问的技术</h2>
+</blockquote>
+<ul>
+<li>每次执行外部命令时，某命令的完整路径会被hash通过搜索<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi><mi>A</mi><mi>T</mi><mi>H</mi><mi mathvariant="normal">中</mi><mi mathvariant="normal">的</mi><mi mathvariant="normal">文</mi><mi mathvariant="normal">件</mi><mi mathvariant="normal">夹</mi><mi mathvariant="normal">而</mi><mi mathvariant="normal">记</mi><mi mathvariant="normal">录</mi><mi mathvariant="normal">。</mi><mi mathvariant="normal">如</mi><mi mathvariant="normal">果</mi><mi mathvariant="normal">某</mi><mi mathvariant="normal">命</mi><mi mathvariant="normal">令</mi><mi mathvariant="normal">运</mi><mi mathvariant="normal">行</mi><mi mathvariant="normal">多</mi><mi mathvariant="normal">次</mi><mi mathvariant="normal">，</mi><mi mathvariant="normal">则</mi><mi mathvariant="normal">会</mi><mi mathvariant="normal">命</mi><mi mathvariant="normal">中</mi><mi>h</mi><mi>a</mi><mi>s</mi><mi>h</mi><mi mathvariant="normal">缓</mi><mi mathvariant="normal">存</mi><mi mathvariant="normal">的</mi><mi mathvariant="normal">命</mi><mi mathvariant="normal">令</mi><mi mathvariant="normal">访</mi><mi mathvariant="normal">问</mi><mi mathvariant="normal">信</mi><mi mathvariant="normal">息</mi><mi mathvariant="normal">，</mi><mi mathvariant="normal">此</mi><mi mathvariant="normal">时</mi><mi>b</mi><mi>a</mi><mi>s</mi><mi>h</mi><mi mathvariant="normal">不</mi><mi mathvariant="normal">再</mi><mi mathvariant="normal">搜</mi><mi mathvariant="normal">索</mi></mrow><annotation encoding="application/x-tex">PATH中的文件夹而记录。如果某命令运行多次，则会命中hash缓存的命令访问信息，此时bash不再搜索</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.13889em;">P</span><span class="mord mathdefault">A</span><span class="mord mathdefault" style="margin-right: 0.13889em;">T</span><span class="mord mathdefault" style="margin-right: 0.08125em;">H</span><span class="mord cjk_fallback">中</span><span class="mord cjk_fallback">的</span><span class="mord cjk_fallback">文</span><span class="mord cjk_fallback">件</span><span class="mord cjk_fallback">夹</span><span class="mord cjk_fallback">而</span><span class="mord cjk_fallback">记</span><span class="mord cjk_fallback">录</span><span class="mord cjk_fallback">。</span><span class="mord cjk_fallback">如</span><span class="mord cjk_fallback">果</span><span class="mord cjk_fallback">某</span><span class="mord cjk_fallback">命</span><span class="mord cjk_fallback">令</span><span class="mord cjk_fallback">运</span><span class="mord cjk_fallback">行</span><span class="mord cjk_fallback">多</span><span class="mord cjk_fallback">次</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">则</span><span class="mord cjk_fallback">会</span><span class="mord cjk_fallback">命</span><span class="mord cjk_fallback">中</span><span class="mord mathdefault">h</span><span class="mord mathdefault">a</span><span class="mord mathdefault">s</span><span class="mord mathdefault">h</span><span class="mord cjk_fallback">缓</span><span class="mord cjk_fallback">存</span><span class="mord cjk_fallback">的</span><span class="mord cjk_fallback">命</span><span class="mord cjk_fallback">令</span><span class="mord cjk_fallback">访</span><span class="mord cjk_fallback">问</span><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">息</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">此</span><span class="mord cjk_fallback">时</span><span class="mord mathdefault">b</span><span class="mord mathdefault">a</span><span class="mord mathdefault">s</span><span class="mord mathdefault">h</span><span class="mord cjk_fallback">不</span><span class="mord cjk_fallback">再</span><span class="mord cjk_fallback">搜</span><span class="mord cjk_fallback">索</span></span></span></span></span>PATH,可以直接找到该命令并运行。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token operator">&gt;</span> <span class="token function">hash</span> <span class="token punctuation">[</span>-lr<span class="token punctuation">]</span> <span class="token punctuation">[</span>-p filename<span class="token punctuation">]</span> <span class="token punctuation">[</span>-dt<span class="token punctuation">]</span> <span class="token punctuation">[</span>name<span class="token punctuation">]</span>
+</code></pre>
+<blockquote>
+<p>hash -r</p>
+<blockquote>
+<p>-r 使用该选项清空hash表，以防移动某些外部命令后，bash任然搜索hash表中的路径，找不到命令。</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>hash -t</p>
+<blockquote>
+<p>该选项使得后面跟的多个命令的名字打印在其完整路径名前</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$hash</span> -t <span class="token function">tr</span> <span class="token function">ls</span>
+<span class="token function">tr</span>      /usr/bin/tr
+<span class="token function">ls</span>      /usr/bin/ls
+</code></pre>
+<blockquote>
+<p>hash -l</p>
+<blockquote>
+<p>该选项使得打印出来的格式可用于输入用途</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-hash">[root@centos7 ~]$hash -l
+builtin hash -p /usr/bin/tr 
+builtin hash -p /usr/bin/ls 
+</code></pre>
+<blockquote>
+<h2><a id="hostname__398"></a>[hostname] 查看和显示主机名</h2>
+</blockquote>
+<blockquote>
+<p>hostname [新主机名]</p>
+<blockquote>
+<p>该操作在下次重启电脑后失效，编辑/etc/hostname文件永久生效</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>hostname -d</p>
+<p>hostname -f</p>
+<p>hostnaem -i</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /var/www/html<span class="token punctuation">]</span><span class="token variable">$hostname</span> -f
+centos7.magedu.steve
+<span class="token punctuation">[</span>root@centos7 /var/www/html<span class="token punctuation">]</span><span class="token variable">$hostname</span> -i
+fe80::43be:3721:e7cd:b3a3%ens33 192.168.142.136 192.168.122.1
+<span class="token punctuation">[</span>root@centos7 /var/www/html<span class="token punctuation">]</span><span class="token variable">$hostname</span> -d
+magedu.steve
+</code></pre>
+<blockquote>
+<h2><a id="lscpu_cpu_416"></a>[lscpu] 打印cpu架构相关的信息</h2>
+<p>lscpu [-a|-b|-c|-J] [-x] [-y] [-s directory] [-e[=list]|-p[=list]]</p>
+<p>lscpu -h|-V</p>
+</blockquote>
+<blockquote>
+<h2><a id="lsblk__421"></a>[lsblk] 列出块设备相关信息</h2>
+</blockquote>
+<ul>
+<li>该命令通过sysfs收集的文件系统信息列出当前系统可用的块设备，默认情况下该命令以树状结构打印所有块设备(不含RAM)。</li>
+<li>用法：</li>
+</ul>
+<pre><code class="prism language-bash">       -a, --all
+              包含空设备.  <span class="token punctuation">(</span>By default they are skipped.<span class="token punctuation">)</span>
+
+       -b, --bytes
+              制指定SIZE栏的单位.
+
+       -D, --discard
+              打印关于每个设备丢弃功能<span class="token punctuation">(</span>修剪、取消映射<span class="token punctuation">)</span>的信息.
+
+       -d, --nodeps
+              不打印隶属于该设备的设备信息.  For example, lsblk --nodeps /dev/sda prints information about the sda device only.
+               \``<span class="token variable"><span class="token variable">`</span>
+               <span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>$lsblk --nodeps /dev/sda
+               NAME MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+               sda    8:0    0  200G  0 disk 
+               <span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>$lsblk /dev/sda         
+               NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+               sda      8:0    0  200G  0 disk 
+               ├─sda1   8:1    0    1G  0 part /boot
+               ├─sda2   8:2    0  100G  0 part /
+               ├─sda3   8:3    0   50G  0 part /data
+               ├─sda4   8:4    0    1K  0 part 
+               └─sda5   8:5    0    3G  0 part <span class="token punctuation">[</span>SWAP<span class="token punctuation">]</span>
+               <span class="token variable">`</span></span>`<span class="token variable"><span class="token variable">`</span>
+       -f, --fs
+              Output info about filesystems.  This option is equivalent to -o NAME,FSTYPE,LABEL,MOUNTPOINT.  The authoritative information about filesystems  and
+              raids is provided by the blkid<span class="token punctuation">(</span>8<span class="token punctuation">)</span> command.
+
+       -h, --help
+              Print a <span class="token function">help</span> text and exit.
+
+       -I, --include list
+              Include devices specified by the comma-separated list of major device numbers.  The filter is applied to the top-level devices only.
+
+       -i, --ascii
+              Use ASCII characters <span class="token keyword">for</span> tree formatting.
+
+       -l, --list
+              Produce output <span class="token keyword">in</span> the form of a list.
+
+       -m, --perms
+              Output info about device owner, group and mode.  This option is equivalent to -o NAME,SIZE,OWNER,GROUP,MODE.
+
+       -n, --noheadings
+              Do not print a header line.
+
+       -o, --output list
+              Specify <span class="token function">which</span> output columns to print.  Use --help to get a list of all supported columns.
+
+              The default list of columns may be extended <span class="token keyword">if</span> list is specified <span class="token keyword">in</span> the <span class="token function">format</span> +list <span class="token punctuation">(</span>e.g. lsblk -o +UUID<span class="token punctuation">)</span>.
+
+       -P, --pairs
+              Produce output <span class="token keyword">in</span> the form of key<span class="token operator">=</span><span class="token string">"value"</span> pairs.  All potentially unsafe characters are hex-escaped <span class="token punctuation">(</span>\x<span class="token operator">&lt;</span>code<span class="token operator">&gt;</span><span class="token punctuation">)</span>.
+
+       -p, --paths
+              Print full device paths.
+
+       -r, --raw
+              Produce  output  <span class="token keyword">in</span>  raw  format.  All potentially unsafe characters are hex-escaped <span class="token punctuation">(</span>\x<span class="token operator">&lt;</span>code<span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">in</span> the NAME, KNAME, LABEL, PARTLABEL and MOUNTPOINT
+              columns.
+
+       -S, --scsi
+              Output info about SCSI devices only.  All partitions, slaves and holder devices are ignored.
+
+       -s, --inverse
+              Print dependencies <span class="token keyword">in</span> inverse order.
+
+       -t, --topology
+              Output info about block-device topology.  This option is equivalent to -o NAME,ALIGNMENT,MIN-IO,OPT-IO,PHY-SEC,LOG-SEC,ROTA,SCHED,RQ-SIZE,WSAME.
+\<span class="token variable">`</span></span>`<span class="token variable"><span class="token variable">`</span>
+
+<span class="token variable">`</span></span>``bash
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$lsblk</span>
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda      8:0    0  200G  0 disk 
+├─sda1   8:1    0    1G  0 part /boot
+├─sda2   8:2    0  100G  0 part /
+├─sda3   8:3    0   50G  0 part /data
+├─sda4   8:4    0    1K  0 part 
+└─sda5   8:5    0    3G  0 part <span class="token punctuation">[</span>SWAP<span class="token punctuation">]</span>
+sdb      8:16   0  100G  0 disk 
+sr0     11:0    1 10.3G  0 rom  /run/media/steve/CentOS 7 x86_64
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$lsblk</span> --fs
+NAME   FSTYPE  LABEL           UUID                                 MOUNTPOINT
+sda                                                                 
+├─sda1 xfs                     64e5c295-18f6-4a06-815c-96ce9f316b69 /boot
+├─sda2 xfs                     2f98e043-cee1-4eaf-97f8-7ecf3cfd7228 /
+├─sda3 xfs                     cae2d8fc-15b1-4750-bf94-267b411c4178 /data
+├─sda4                                                              
+└─sda5 swap                    eb86e30f-4567-4869-b840-1b70f6562bf9 <span class="token punctuation">[</span>SWAP<span class="token punctuation">]</span>
+sdb                                                                 
+sr0    iso9660 CentOS 7 x86_64 2019-09-09-19-08-41-00               /run/media/steve/CentOS 7 x86_64
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$lsblk</span> -f
+NAME   FSTYPE  LABEL           UUID                                 MOUNTPOINT
+sda                                                                 
+├─sda1 xfs                     64e5c295-18f6-4a06-815c-96ce9f316b69 /boot
+├─sda2 xfs                     2f98e043-cee1-4eaf-97f8-7ecf3cfd7228 /
+├─sda3 xfs                     cae2d8fc-15b1-4750-bf94-267b411c4178 /data
+├─sda4                                                              
+└─sda5 swap                    eb86e30f-4567-4869-b840-1b70f6562bf9 <span class="token punctuation">[</span>SWAP<span class="token punctuation">]</span>
+sdb                                                                 
+sr0    iso9660 CentOS 7 x86_64 2019-09-09-19-08-41-00               /run/media/steve/CentOS 7 x86_64
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$lsblk</span> -t
+NAME   ALIGNMENT MIN-IO OPT-IO PHY-SEC LOG-SEC ROTA SCHED    RQ-SIZE   RA WSAME
+sda            0    512      0     512     512    1 deadline     128 4096   32M
+├─sda1         0    512      0     512     512    1 deadline     128 4096   32M
+├─sda2         0    512      0     512     512    1 deadline     128 4096   32M
+├─sda3         0    512      0     512     512    1 deadline     128 4096   32M
+├─sda4         0    512      0     512     512    1 deadline     128 4096   32M
+└─sda5         0    512      0     512     512    1 deadline     128 4096   32M
+sdb            0    512      0     512     512    1 deadline     128 4096   32M
+sr0            0   2048      0    2048    2048    1 deadline     128  128    0B
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$lsblk</span> -b
+NAME   MAJ:MIN RM         SIZE RO TYPE MOUNTPOINT
+sda      8:0    0 214748364800  0 disk 
+├─sda1   8:1    0   1073741824  0 part /boot
+├─sda2   8:2    0 107374182400  0 part /
+├─sda3   8:3    0  53687091200  0 part /data
+├─sda4   8:4    0         1024  0 part 
+└─sda5   8:5    0   3221225472  0 part <span class="token punctuation">[</span>SWAP<span class="token punctuation">]</span>
+sdb      8:16   0 107374182400  0 disk 
+sr0     11:0    1  11026825216  0 rom  /run/media/steve/CentOS 7 x86_64
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$lsblk</span> -p /dev/sda
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+/dev/sda      8:0    0  200G  0 disk 
+├─/dev/sda1   8:1    0    1G  0 part /boot
+├─/dev/sda2   8:2    0  100G  0 part /
+├─/dev/sda3   8:3    0   50G  0 part /data
+├─/dev/sda4   8:4    0    1K  0 part 
+└─/dev/sda5   8:5    0    3G  0 part <span class="token punctuation">[</span>SWAP<span class="token punctuation">]</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$lsblk</span> -l /dev/sda
+NAME MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda    8:0    0  200G  0 disk 
+sda1   8:1    0    1G  0 part /boot
+sda2   8:2    0  100G  0 part /
+sda3   8:3    0   50G  0 part /data
+sda4   8:4    0    1K  0 part 
+sda5   8:5    0    3G  0 part <span class="token punctuation">[</span>SWAP<span class="token punctuation">]</span>
+</code></pre>
+<blockquote>
+<h2><a id="mv__564"></a>[mv] 移动或者重命名文件</h2>
+</blockquote>
+<ul>
+<li>用法：</li>
+</ul>
+<pre><code class="prism language-bash">       <span class="token function">mv</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>-T<span class="token punctuation">]</span> SOURCE DEST
+       <span class="token function">mv</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. SOURCE<span class="token punctuation">..</span>. DIRECTORY
+       <span class="token function">mv</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. -t DIRECTORY SOURCE<span class="token punctuation">..</span>.
+</code></pre>
+<ul>
+<li>选项：</li>
+</ul>
+<pre><code class="prism language-bash">       --backup<span class="token punctuation">[</span><span class="token operator">=</span>CONTROL<span class="token punctuation">]</span>
+              备份已经存在的目标文件，默认备份文件名为<span class="token string">'原文件~'</span>
+
+       -b     类似 --backup 但是不接受参数
+
+       -f, --force
+              覆盖文件时不提示
+
+       -i, --interactive
+              覆盖前提示
+
+       -n, --no-clobber
+              不要覆盖已经存在的文件
+
+       注意注意注意：如果多个选项被指定，最后一个有效
+
+       --strip-trailing-slashes
+              remove any trailing slashes from each SOURCE argument
+
+       -S, --suffix<span class="token operator">=</span>SUFFIX
+              替换默认的备份文件名后缀
+
+       -t, --target-directory<span class="token operator">=</span>DIRECTORY
+              move all SOURCE arguments into DIRECTORY
+
+       -T, --no-target-directory
+              视目标为普通文件
+
+       -u, --update
+              只有当源文件新于目标文件或者目标文件不存在时才移动
+              
+       -v, --verbose
+              显示详细信息
+</code></pre>
+<blockquote>
+<h2><a id="nano_linux_609"></a>[nano] linux下的简单字符界面编辑器</h2>
+</blockquote>
+<blockquote>
+<h2><a id="runlevel__611"></a>[runlevel] 显示系统运行级别</h2>
+</blockquote>
+<ul>
+<li>默认显示前一次和当前SysV系统运行级别</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$runlevel</span>
+N 5
+</code></pre>
+<blockquote>
+<p>上面运行runlevel后显示N 5,中间为单个空格，N表示无法识别先前的系统运行级别，5表示目前系统运行与接5，即是带图形界面的级别。</p>
+<blockquote>
+<p>/var/run/utmp<br>
+:runlevel 读取两个运行级别的utmp数据库所在的地方。</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<h2><a id="tty__621"></a>[tty] 打印链接到标准输入的终端文件名</h2>
+</blockquote>
+<blockquote>
+<p>-s, --silent, --quiet</p>
+<blockquote>
+<p>不打印任何东西，只返回一个退出状态</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$tty</span>
+/dev/pts/4
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$tty</span> -s
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$echo</span> <span class="token variable">$?</span>  <span class="token comment"># 显示tty -s 的退出状态</span>
+0                             <span class="token comment"># 退出状态为0 表示成功执行</span>
+</code></pre>
+<blockquote>
+<h2><a id="type__634"></a>[type] 判断某名称是否需要解析为命令名</h2>
+</blockquote>
+<blockquote>
+<p>type -t name</p>
+<blockquote>
+<p>-t选项表示type识别输入 的名称是否为别名、内置命令 、shell关键字或外部命令中的一种，若果都不是，则不打印任何信息，退出状态非0</p>
+</blockquote>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$type</span> -t <span class="token function">ls</span>
+<span class="token function">alias</span>
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$type</span> -t ll
+<span class="token function">alias</span>
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$type</span> -t <span class="token function">cd</span>
+<span class="token function">builtin</span>
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$type</span> -t <span class="token function">type</span>
+<span class="token function">builtin</span>
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$type</span> -t <span class="token function">tr</span>
+<span class="token function">file</span>
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$type</span> -t /etc
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$type</span> -t /etc/fstab
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$type</span> -t <span class="token keyword">if</span>
+keyword
+<span class="token punctuation">[</span>root@centos7 /data<span class="token punctuation">]</span><span class="token variable">$type</span> -t esac
+keyword
+</code></pre>
+<blockquote>
+
+<table>
+<thead>
+<tr>
+<th>type标准输入</th>
+<th>别名</th>
+<th>内置命令</th>
+<th>shell关键字</th>
+<th>外部命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>type命令返回值</td>
+<td>alias</td>
+<td>builtin</td>
+<td>keyword</td>
+<td>file</td>
+</tr>
+</tbody>
+</table></blockquote>
+<blockquote>
+<h2><a id="unalias__661"></a>[unalias] 从定义好的命令别名列表中移除某别名</h2>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token operator">&gt;</span> <span class="token function">unalias</span> <span class="token punctuation">[</span>-a<span class="token punctuation">]</span> <span class="token punctuation">[</span>name <span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+</code></pre>
+<blockquote>
+<p>ualias -a</p>
+<blockquote>
+<p>该命令会移除所有已经定义的命令别名</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<h2><a id="whoami_ID_669"></a>[whoami] 打印有效的用户ID</h2>
+</blockquote>
+<ul>
+<li>默认打印当前系统的有效用户id所关联的用户名，同等于：id -un</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /var/www/html<span class="token punctuation">]</span>$ <span class="token function">whoami</span>
+root
+<span class="token punctuation">[</span>root@centos7 /var/www/html<span class="token punctuation">]</span>$ <span class="token function">who</span> am i
+root     pts/3        2019-09-21 13:53 <span class="token punctuation">(</span>192.168.142.1<span class="token punctuation">)</span>
+<span class="token punctuation">[</span>root@centos7 /var/www/html<span class="token punctuation">]</span>$ <span class="token function">who</span> is 666
+root     pts/3        2019-09-21 13:53 <span class="token punctuation">(</span>192.168.142.1<span class="token punctuation">)</span>
+</code></pre>
+

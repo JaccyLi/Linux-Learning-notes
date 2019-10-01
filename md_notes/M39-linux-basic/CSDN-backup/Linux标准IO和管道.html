@@ -1,0 +1,331 @@
+﻿<p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#LinuxIO_5">一，Linux的三种I/O设备</a></li><ul><li><a href="#1LinuxIO_7">1.Linux为程序提供三种I/O设备</a></li><li><a href="#2IO_17">2.使用I/O重定向</a></li><li><a href="#3tr_110">3.tr命令</a></li><li><a href="#4STDIN_169">4.使用文件中的内容来代替终端输入给STDIN</a></li></ul><li><a href="#_223">二，管道</a></li><ul><li><a href="#1_225">1.管道</a></li><li><a href="#2_228">2.使用管道</a></li><li><a href="#3_240">3.结合管道实现一些小功能</a></li><li><a href="#4___252">4.管道中 - 符号</a></li><li><a href="#5tee_261">5.结合tee命令重定向到多个目标</a></li></ul><li><a href="#_273">三，练习</a></li></ul></div><p></p>
+<center><font size="214" face="黑体" color="grey"> Linux标准I/O和管道 </font></center>
+<hr>
+<blockquote>
+<h1><a id="LinuxIO_5"></a>一，Linux的三种I/O设备</h1>
+</blockquote>
+<h2><a id="1LinuxIO_7"></a>1.Linux为程序提供三种I/O设备</h2>
+
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>linux使用数字表示某设备</th>
+<th>默认动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标准输入</td>
+<td>使用0表示</td>
+<td>默认接收来自终端窗口的输入</td>
+</tr>
+<tr>
+<td>标准输出</td>
+<td>使用1表示</td>
+<td>标准输出默认将内容输出到终端窗口</td>
+</tr>
+<tr>
+<td>标准错误</td>
+<td>使用2表示</td>
+<td>标准错误默认直接输出到终端窗口</td>
+</tr>
+</tbody>
+</table><ul>
+<li><strong>使用I/O重定向技术可以改变上面三种设备的默认行为。</strong></li>
+</ul>
+<h2><a id="2IO_17"></a>2.使用I/O重定向</h2>
+<ul>
+<li>把标准输出和标准错误重新定向到文件而不打印到终端</li>
+</ul>
+<pre><code class="prism language-bash">用法：
+    命令 操作符号 文件名 
+        支持的操作符号包括： 
+            <span class="token operator">&gt;</span>  把STDOUT重定向到文件 
+            2<span class="token operator">&gt;</span> 把STDERR重定向到文件 
+            <span class="token operator">&amp;</span><span class="token operator">&gt;</span> 把所有输出重定向到文件 
+</code></pre>
+<pre><code class="prism language-bash"><span class="token comment">#### &gt;  把STDOUT重定向到文件 </span>
+<span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>ls
+1  2  3  333  add1.txt  add.txt  ASCII-WELCOME.txt  cal.log  hello  <span class="token keyword">if</span>  jdsfjllfj.log  log1  log2  log3  my_file_1.txt  one  <span class="token function">passwd</span>  passwdd  pattern.example  so  so.link
+<span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>ls <span class="token operator">&gt;</span> ls.log
+<span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>cat ls.log 
+1
+2
+3
+333
+add1.txt
+add.txt
+ASCII-WELCOME.txt
+cal.log
+hello
+<span class="token keyword">if</span>
+jdsfjllfj.log
+log1
+log2
+log3
+ls.log
+my_file_1.txt
+one
+<span class="token function">passwd</span>
+passwdd
+pattern.example
+so
+so.link
+
+<span class="token comment">####  2&gt; 把STDERR重定向到文件 </span>
+<span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>lls 2<span class="token operator">&gt;</span> error.log
+<span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>cat error.log 
+bash: lls: <span class="token function">command</span> not found<span class="token punctuation">..</span>.
+Similar <span class="token function">command</span> is: <span class="token string">'ls'</span>
+
+<span class="token comment">####  &amp;&gt; 把所有输出重定向到文件 </span>
+<span class="token punctuation">[</span>root@centos8 /data  <span class="token comment">#]ls /data/ /noshuchdir &amp;&gt; allerror.log</span>
+<span class="token punctuation">[</span>root@centos8 /data  <span class="token comment">#]cat allerror.log </span>
+ls: cannot access <span class="token string">'/noshuchdir'</span><span class="token keyword">:</span> No such <span class="token function">file</span> or directory  <span class="token comment"># STDERR</span>
+/data/:
+1
+2
+3
+333
+add1.txt
+add.txt
+allerror.log
+ASCII-WELCOME.txt
+cal.log
+error.log
+hello
+<span class="token keyword">if</span>
+jdsfjllfj.log
+log1
+log2
+log3
+ls.log
+my_file_1.txt
+one
+<span class="token function">passwd</span>
+passwdd
+pattern.example
+so
+so.link
+</code></pre>
+<ul>
+<li>
+<p><strong>使用&gt;符号会覆盖已有文件，若追加则需要用&gt;&gt;。</strong></p>
+</li>
+<li>
+<p><strong>将标准输出和错误输出各自定向至不同文件如下：</strong></p>
+</li>
+</ul>
+<pre><code class="prism language-bash">COMMAND <span class="token operator">&gt;</span> /path/to/success.out 2<span class="token operator">&gt;</span> /path/to/error.out
+</code></pre>
+<ul>
+<li><strong>合并标准输出和错误输出为同一个数据流并重定向到某个文件如下：</strong></li>
+</ul>
+<pre><code class="prism language-bash"> <span class="token operator">&amp;</span><span class="token operator">&gt;</span>   覆盖重定向 
+ <span class="token operator">&amp;</span><span class="token operator">&gt;&gt;</span>  追加重定向 
+ COMMAND <span class="token operator">&gt;</span> /path/to/successanderror.out 2<span class="token operator">&gt;</span><span class="token operator">&amp;</span>1 （注意顺序） 
+ COMMAND <span class="token operator">&gt;&gt;</span> /path/to/successanderror.out 2<span class="token operator">&gt;</span><span class="token operator">&amp;</span>1
+</code></pre>
+<h2><a id="3tr_110"></a>3.tr命令</h2>
+<ul>
+<li>tr命令用于替换、删除或者压缩从标准输入的字符，并把处理的结果写到标准输出</li>
+<li>用法：tr [OPTION]… SET1 [SET2]</li>
+<li>选项：</li>
+</ul>
+<pre><code class="prism language-bash">
+       -c, -C, --complement
+              使用字符集 SET1 的补集
+       -d, --delete
+              删除字符集SET1中的字符集
+       -s, --squeeze-repeats
+             压缩最后指明的SET字符集中的每个连续重复的字符，使用单个该字符替换
+       -t, --truncate-set1
+             截断SET1字符集到字符集SET2的长度
+       字符集使用字符串指明，大部分字符串代表自身。可被识别的字符集如下：
+       \NNN   character with octal value NNN <span class="token punctuation">(</span>1 to 3 octal digits<span class="token punctuation">)</span>
+       \\     backslash
+       \a     audible BEL
+       \b     backspace
+       \f     form feed
+       \n     new line
+       \r     <span class="token keyword">return</span>
+       \t     horizontal tab
+       \v     vertical tab
+       CHAR1-CHAR2
+              all characters from CHAR1 to CHAR2 <span class="token keyword">in</span> ascending order
+       <span class="token punctuation">[</span>CHAR*<span class="token punctuation">]</span>
+              <span class="token keyword">in</span> SET2, copies of CHAR <span class="token keyword">until</span> length of SET1
+       <span class="token punctuation">[</span>CHAR*REPEAT<span class="token punctuation">]</span>
+              REPEAT copies of CHAR, REPEAT octal <span class="token keyword">if</span> starting with 0
+       <span class="token punctuation">[</span>:alnum:<span class="token punctuation">]</span>
+              all letters and digits
+       <span class="token punctuation">[</span>:alpha:<span class="token punctuation">]</span>
+              all letters
+       <span class="token punctuation">[</span>:blank:<span class="token punctuation">]</span>
+              all horizontal whitespace
+       <span class="token punctuation">[</span>:cntrl:<span class="token punctuation">]</span>
+              all control characters
+       <span class="token punctuation">[</span>:digit:<span class="token punctuation">]</span>
+              all digits
+       <span class="token punctuation">[</span>:graph:<span class="token punctuation">]</span>
+              all printable characters, not including space
+       <span class="token punctuation">[</span>:lower:<span class="token punctuation">]</span>
+              all lower <span class="token keyword">case</span> letters
+       <span class="token punctuation">[</span>:print:<span class="token punctuation">]</span>
+              all printable characters, including space
+       <span class="token punctuation">[</span>:punct:<span class="token punctuation">]</span>
+              all punctuation characters
+       <span class="token punctuation">[</span>:space:<span class="token punctuation">]</span>
+              all horizontal or vertical whitespace
+       <span class="token punctuation">[</span>:upper:<span class="token punctuation">]</span>
+              all upper <span class="token keyword">case</span> letters
+       <span class="token punctuation">[</span>:xdigit:<span class="token punctuation">]</span>
+              all hexadecimal digits
+       <span class="token punctuation">[</span><span class="token operator">=</span>CHAR<span class="token operator">=</span><span class="token punctuation">]</span>
+              all characters <span class="token function">which</span> are equivalent to CHAR
+        如果 -d 选项没有指定并且SET1和SET2都被指定，则输入的文本中属于SET1的字符将被转换为SET2所代表的字符。-t选项只用于转换字符的情况。
+</code></pre>
+<h2><a id="4STDIN_169"></a>4.使用文件中的内容来代替终端输入给STDIN</h2>
+<ul>
+<li><strong>使用使用 &lt; 来重定向标准输入</strong></li>
+</ul>
+<pre><code class="prism language-bash">某些命令能够接受从文件中重定向的标准输入STDIN
+    <span class="token function">tr</span> ‘a-z’   ‘A-Z’<span class="token operator">&lt;</span> /etc/issue  
+    该命令会把/etc/issue中的小写字符都转换成大写字符
+    <span class="token function">tr</span> –d abc <span class="token operator">&lt;</span> /etc/fstab  
+    删除fstab文件中的所有abc中任意字符
+</code></pre>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>cat <span class="token operator">&gt;</span> log22
+hello
+this is a log <span class="token function">file</span>
+^C
+<span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>cat log2
+log2   log22  
+<span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>cat log22 
+hello
+this is a log <span class="token function">file</span>
+</code></pre>
+<ul>
+<li><strong>可以使用文件来代替键盘的输入</strong></li>
+</ul>
+<pre><code class="prism language-bash">    <span class="token function">cat</span>  <span class="token operator">&lt;</span> file1 <span class="token operator">&gt;</span>  file2  <span class="token comment"># log22的内容被cat命令视为标准输入，其写给标准输出，而标准输出被重定向给file2</span>
+
+    <span class="token function">cat</span>  <span class="token operator">&lt;</span> file1 <span class="token operator">&gt;&gt;</span> file1 <span class="token comment"># 追加</span>
+<span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>cat  <span class="token operator">&lt;</span> log22 <span class="token operator">&gt;</span>  file2
+<span class="token punctuation">[</span>root@centos8 /data  $<span class="token punctuation">]</span>cat file2 
+hello
+this is a log <span class="token function">file</span>
+</code></pre>
+<ul>
+<li><strong>把多行发送给STDIN</strong></li>
+</ul>
+<pre><code class="prism language-bash">使用“<span class="token operator">&lt;&lt;</span>终止词”命令从键盘把多行重导向给STDIN 
+    直到 终止词 位置的所有文本都发送给STDIN
+    有时被称为“就地文本（here documents）”
+mail -s <span class="token string">"Please Call"</span>  admin@magedu.com <span class="token operator">&lt;&lt;</span>END  
+<span class="token operator">&gt;</span> Hi Wang 
+<span class="token operator">&gt;</span>         
+<span class="token operator">&gt;</span> Please give me a call when you get in. We may need  
+<span class="token operator">&gt;</span> to <span class="token keyword">do</span> some maintenance on server1.  
+<span class="token operator">&gt;</span>          
+<span class="token operator">&gt;</span> Details when you're on-site 
+<span class="token operator">&gt;</span> Zhang 
+<span class="token operator">&gt;</span> END 
+</code></pre>
+<blockquote>
+<h1><a id="_223"></a>二，管道</h1>
+</blockquote>
+<h2><a id="1_225"></a>1.管道</h2>
+<blockquote>
+<p><strong>管道是linux或者其他类unix系统中用来将一个命令（程序、进程）的结果发送给另一个命令（程序、进程）以便进一步处理的一种重定向技术。类Unix/Linux系统允许某个命令的标准输出被定向到另一个命令的输入。使用管道符‘|’来实现。</strong></p>
+</blockquote>
+<h2><a id="2_228"></a>2.使用管道</h2>
+<pre><code class="prism language-bash">使用管道的格式
+    命令1 <span class="token operator">|</span> 命令2 <span class="token operator">|</span> 命令3 <span class="token operator">|</span> … 
+    将命令1的STDOUT发送给命令2的STDIN，命令2的STDOUT发送到命令3的
+    STDIN和STDERR默认不能通过管道转发，可利用2<span class="token operator">&gt;</span><span class="token operator">&amp;</span>1 或 <span class="token operator">|</span><span class="token operator">&amp;</span> 实现 
+使用管道可以组合多种工具的功能
+    <span class="token function">ls</span>  <span class="token operator">|</span> <span class="token function">tr</span> ‘a-z’ ‘A-Z
+</code></pre>
+<ul>
+<li><strong>注意注意注意：最后一个命令会在当前shell进程的子shell进程中执行</strong></li>
+</ul>
+<h2><a id="3_240"></a>3.结合管道实现一些小功能</h2>
+<blockquote>
+<p>less ：一页一页地查看输入</p>
+<blockquote>
+<p>ls -l /etc | less</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>mail： 通过电子邮件发送输入</p>
+<blockquote>
+<p>echo “hello email” | mail  -s “hello” steve@example.com</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p>bc：算术运算</p>
+<blockquote>
+<p>echo “2^3” |bc</p>
+</blockquote>
+</blockquote>
+<h2><a id="4___252"></a>4.管道中 - 符号</h2>
+<pre><code class="prism language-bash">示例: 将 /home 里面的文件打包，但打包的数据不是记录到文件，而是传送到 stdout，
+经过管道后，将 <span class="token function">tar</span> -cvf - /home 传送给后面的 <span class="token function">tar</span> -xvf - , 后面的这个 - 则是取
+前一个命令的 stdout， 因此，就不需要使用临时file了
+
+    <span class="token function">tar</span> -cvf - /home <span class="token operator">|</span> <span class="token function">tar</span> -xvf  -
+</code></pre>
+<h2><a id="5tee_261"></a>5.结合tee命令重定向到多个目标</h2>
+<pre><code class="prism language-bash">用法：
+    命令1 <span class="token operator">|</span> <span class="token function">tee</span> <span class="token punctuation">[</span>-a <span class="token punctuation">]</span> 文件名 <span class="token operator">|</span> 命令2  
+        把命令1的STDOUT保存在文件中，做为命令2的输入
+        -a 追加
+    作用用：
+        保存不同阶段的输出
+        复杂管道的故障排除
+        同时查看和记录输出
+</code></pre>
+<blockquote>
+<h1><a id="_273"></a>三，练习</h1>
+</blockquote>
+<pre><code class="prism language-bash">1、将/etc/issue文件中的内容转换为大写后保存至/tmp/issue.out文件中 
+    <span class="token function">cat</span> /etc/issue <span class="token operator">|</span> <span class="token function">tr</span> <span class="token string">'a-z'</span> <span class="token string">'A-Z'</span> <span class="token operator">&gt;</span> /tmp/issue
+
+2、将当前系统登录用户的信息转换为大写后保存至/tmp/who.out文件中 
+    <span class="token function">whoami</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token string">'a-z'</span> <span class="token string">'A-Z'</span> <span class="token operator">&gt;</span> /tmp/who.out
+
+3、一个linux用户给root发邮件，要求邮件标题为”help”，邮件正文如下： 
+     Hello, I am 用户名,The system version is here,please <span class="token function">help</span> me to  check 
+it ,thanks<span class="token operator">!</span> 
+操作系统版本信息
+    mail -s <span class="token function">help</span> root<span class="token operator">&lt;&lt;</span><span class="token string">EOF
+Hello,I am <span class="token variable"><span class="token variable">`</span><span class="token function">whoami</span><span class="token variable">`</span></span>,The system version is here ,please help me check it, Thanks!
+<span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> /etc/redhat-release<span class="token variable">`</span></span>
+EOF</span>
+
+4、将/root/下文件列表，显示成一行，并文件名之间用空格隔开  
+    <span class="token function">ls</span> -1 <span class="token operator">|</span> <span class="token function">tr</span> <span class="token string">'\n'</span> <span class="token string">' '</span> 
+
+5、计算1+2+3+<span class="token punctuation">..</span>.+99+100的总和 
+    <span class="token keyword">echo</span> <span class="token punctuation">{</span>1<span class="token punctuation">..</span>100<span class="token punctuation">}</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token string">' '</span> <span class="token string">'+'</span> <span class="token operator">|</span> <span class="token function">bc</span>
+    <span class="token function">seq</span> -s+ 100 <span class="token operator">|</span> <span class="token function">bc</span>
+
+6、删除Windows文本文件中的回车字符 ，即“\r” 
+    <span class="token keyword">echo</span> file.txt <span class="token operator">|</span> <span class="token function">tr</span> <span class="token string">'\r'</span> <span class="token string">''</span>
+
+7、处理字符串“xt.,l 1 jr<span class="token comment">#!$mn 2 c*/fe 3 uz 4”，只保留其中的数字和空格 </span>
+    <span class="token keyword">echo</span> <span class="token string">"xt.,l 1 jr#!<span class="token variable">$mn</span> 2 c*/fe 3 uz 4"</span> <span class="token operator">|</span> <span class="token function">tr</span> -dc <span class="token string">"[0-9]|[[:space:]]"</span>
+
+
+8、将PATH变量每个目录显示在独立的一行 
+    <span class="token keyword">echo</span> <span class="token variable">$PATH</span> <span class="token operator">|</span> <span class="token function">tr</span> <span class="token string">':'</span> <span class="token string">'\n'</span>
+
+9、将指定文件中0-9分别替代成a-j 
+    <span class="token function">cat</span> file1 <span class="token operator">|</span> <span class="token function">tr</span> <span class="token string">'[0-9]'</span> <span class="token string">'[a-j]'</span>
+
+10、将文件/etc/centos-release中每个单词（由字母组成）显示在独立一行，并无空行 
+    <span class="token function">cat</span> /etc/redhat-release  <span class="token operator">|</span> <span class="token function">tr</span> -s <span class="token string">' '</span> <span class="token string">'\n'</span>
+</code></pre>
+
