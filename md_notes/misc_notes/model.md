@@ -136,7 +136,7 @@ Authors
 
 一个具有注脚的文本。[^1]
 
-[^1]: 注脚的解释
+[^1]: dkfafjafjdf;ljlafjaldfjad
 
 
 
