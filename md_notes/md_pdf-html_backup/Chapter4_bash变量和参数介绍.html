@@ -1,0 +1,596 @@
+﻿<p></p><div class="toc"><h3><center>Chapter4_bash变量和参数详细介绍</center></h3><ul><li><a href="#_2">概述</a></li><ul><li><a href="#41_Variable_Substitution_5">4.1. 变量替换(Variable Substitution)</a></li><li><a href="#42_Variable_Assignment_124">4.2. 变量赋值(Variable Assignment)</a></li><li><a href="#43_BashBash_Variables_Are_Untyped_209">4.3. Bash变量是无强制类型要求的(Bash Variables Are Untyped)</a></li><li><a href="#44_Special_Variable_Types_270">4.4. 特殊变量类型(Special Variable Types)</a></li><ul><li><a href="#1Local_variables_272">1.局部变量(Local variables)</a></li><li><a href="#2Environmental_variables_275">2.环境变量(Environmental variables)</a></li><li><a href="#3Positional_parameters_285">3.位置变量(Positional parameters)</a></li></ul><li><a href="#_536">注脚</a></li></ul></ul></div><p></p>
+<blockquote>
+<h1><a id="_2"></a>概述</h1>
+</blockquote>
+<ul>
+<li>变量可以让程序和脚本语言用来描述数据。一个变量仅仅是一个标签而已，被指定到计算机内存中存储着数据的某个位置或某些位置的标签。变量一般出现在算术运算操作和数量操纵及字符串解析中。</li>
+</ul>
+<h2><a id="41_Variable_Substitution_5"></a>4.1. 变量替换(Variable Substitution)</h2>
+<ul>
+<li>
+<p>变量的名称是其值的占位符，代表它所包含的数据。引用(检索)它的值称为变量替换。</p>
+</li>
+<li>
+<p>举个例子来仔细区别一个变量名和其存储的值。例如：如果val1是某个变量的名称，那么使用$val1来引用该变量，即是其存储的数据。</p>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>val1<span class="token operator">=</span>hello         <span class="token comment"># 将字符串"hello"赋值给变量val1</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>echo <span class="token variable">$val1</span>         <span class="token comment"># 使用$符来引用该变量</span>
+hello
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>echo val1          <span class="token comment"># 不加$无法引用val所存储的数据</span>
+val1
+</code></pre>
+<ul>
+<li>只有在如下环境中，变量前的$符可以不出现：</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>(引用)变量不出现$前缀的情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>declared or assigned:声明其或者其被赋值<sup class="footnote-ref"><a href="#fn1" id="fnref1">1</a></sup></td>
+</tr>
+<tr>
+<td>被unset或者export</td>
+</tr>
+<tr>
+<td>在双圆括号((…))的算术运算操作结构中</td>
+</tr>
+<tr>
+<td>变量代表某个信号的特殊情况<sup class="footnote-ref"><a href="#fn2" id="fnref2">2</a></sup></td>
+</tr>
+</tbody>
+</table><ul>
+<li>将引用值包括在两个双引号("$val")中不会影响其对变量值的引用(变量替换)。该引用方法称作"部分引用",或者叫做"弱引用"。但是使用两个单引号(’$val’)则会使变量替换失效，shell按照变量名的字面意思处理其。该引用方式称为"全引用",也叫作"强引用"。第五章详细介绍。</li>
+<li><strong>需要注意的是：$val实际上是${$val}的简写。某些场合前者$val会出错，使用长格式的后者兼容性更好。</strong><br>
+-</li>
+<li>
+<blockquote>
+<p>例4-1. 变量赋值和变量替换：</p>
+</blockquote>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># Variables: 变量赋值和变量替换</span>
+a<span class="token operator">=</span>375
+hello<span class="token operator">=</span><span class="token variable">$a</span>
+<span class="token comment">#   ^ ^</span>
+<span class="token comment">#-------------------------------------------------------------------------</span>
+<span class="token comment"># 当进行赋值操作时，等号=两边不允许出现空格。</span>
+<span class="token comment"># 若出现空格会如何?</span>
+<span class="token comment">#  "VARIABLE =value"</span>
+<span class="token comment">#           ^</span>
+<span class="token comment">#% 上面脚本会试图运行"VARIABLE"命令，并且认为其参数为："=value"</span>
+<span class="token comment">#  "VARIABLE= value"</span>
+<span class="token comment">#            ^</span>
+<span class="token comment">#% 上面脚本会试图运行"value"命令，并且认为与其相关的环境变量"VARIABLE"的值是" "(空格) </span>
+<span class="token comment">#-------------------------------------------------------------------------</span>
+<span class="token keyword">echo</span> hello    <span class="token comment"># hello</span>
+<span class="token comment"># 此处 "hello" 不是变量引用，只是字符串</span>
+<span class="token keyword">echo</span> <span class="token variable">$hello</span>   <span class="token comment"># 375</span>
+<span class="token comment">#    ^          这是变量引用</span>
+<span class="token keyword">echo</span> <span class="token variable">${hello}</span> <span class="token comment"># 375</span>
+<span class="token comment">#               同上，这是变量引用</span>
+<span class="token comment"># Quoting . . .</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$hello</span>"</span>    <span class="token comment"># 375  # 弱引用</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">${hello}</span>"</span>  <span class="token comment"># 375  # 弱引用</span>
+<span class="token keyword">echo</span>
+hello<span class="token operator">=</span><span class="token string">"A B  C   D"</span>                              <span class="token comment"># 给hello变量赋值，不用$</span>
+<span class="token keyword">echo</span> <span class="token variable">$hello</span>   <span class="token comment"># A B C D                         # 变量引用结果未保留空格</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$hello</span>"</span> <span class="token comment"># A B  C   D                      # 变量引用结果保留空格</span>
+<span class="token comment"># 可以看到 echo $hello 和 echo "$hello" 结果不同</span>
+<span class="token comment"># =======================================</span>
+<span class="token comment"># 使用双引号引用可以保留变量的空白符</span>
+<span class="token comment"># =======================================</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">'<span class="token variable">$hello</span>'</span>  <span class="token comment"># 输出：$hello  而不是："A B  C   D"</span>
+<span class="token comment">#    ^      ^</span>
+<span class="token comment">#  单引号使变量引用失效,导致$符号被按照字面值对待，而不认为其是引用变量</span>
+
+hello<span class="token operator">=</span>    <span class="token comment"># 设置hello为空(null).</span>
+<span class="token keyword">echo</span> <span class="token string">"\<span class="token variable">$hello</span> (null value) = <span class="token variable">$hello</span>"</span>      <span class="token comment"># $hello (null value) =</span>
+<span class="token comment">#  Note that setting a variable to a null value is not the same as</span>
+<span class="token comment">#+ unsetting it, although the end result is the same (see below).</span>
+<span class="token comment"># --------------------------------------------------------------</span>
+<span class="token comment">#  在同一行中可使用空格隔开来定义多个变量</span>
+<span class="token comment">#  值得注意的是, 这样做会导致代码不易读，并且不利于移植。</span>
+var1<span class="token operator">=</span>21  var2<span class="token operator">=</span>22  var3<span class="token operator">=</span><span class="token variable">$V3</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">"var1=<span class="token variable">$var1</span>   var2=<span class="token variable">$var2</span>   var3=<span class="token variable">$var3</span>"</span>
+<span class="token comment"># 运行上面代码，老版本的shell可能会出错</span>
+<span class="token comment"># --------------------------------------------------------------</span>
+<span class="token keyword">echo</span><span class="token punctuation">;</span> <span class="token keyword">echo</span>
+numbers<span class="token operator">=</span><span class="token string">"one two three"</span>
+<span class="token comment">#           ^   ^</span>
+other_numbers<span class="token operator">=</span><span class="token string">"1 2 3"</span>
+<span class="token comment">#               ^ ^</span>
+<span class="token comment">#  如果某个变量里面含有空白符，则需要使用引号引用起来</span>
+<span class="token comment">#  other_numbers=1 2 3                  # 这样赋值会报错</span>
+<span class="token keyword">echo</span> <span class="token string">"numbers = <span class="token variable">$numbers</span>"</span>
+<span class="token keyword">echo</span> <span class="token string">"other_numbers = <span class="token variable">$other_numbers</span>"</span>   <span class="token comment"># other_numbers = 1 2 3</span>
+<span class="token comment">#  使用反斜杠转义空白符亦可行</span>
+mixed_bag<span class="token operator">=</span>2\ ---\ Whatever
+<span class="token comment">#           ^    ^ Space after escape (\).</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$mixed_bag</span>"</span>         <span class="token comment"># 2 --- Whatever</span>
+<span class="token keyword">echo</span><span class="token punctuation">;</span> <span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">"uninitialized_variable = <span class="token variable">$uninitialized_variable</span>"</span>
+<span class="token comment"># 未初始化的变量具有空值 null(即是没有任何值)</span>
+uninitialized_variable<span class="token operator">=</span>   <span class="token comment">#  声明但是没有赋值，和上面一样 --</span>
+                         
+<span class="token keyword">echo</span> <span class="token string">"uninitialized_variable = <span class="token variable">$uninitialized_variable</span>"</span>
+                          <span class="token comment"># It still has a null value.</span>
+uninitialized_variable<span class="token operator">=</span>23       <span class="token comment"># 初始化变量</span>
+unset uninitialized_variable    <span class="token comment"># 删除该变量</span>
+<span class="token keyword">echo</span> <span class="token string">"uninitialized_variable = <span class="token variable">$uninitialized_variable</span>"</span>
+                                <span class="token comment"># uninitialized_variable =</span>
+                                <span class="token comment"># 任然为空</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">exit</span> 0
+</code></pre>
+<ul>
+<li>
+<p><strong>注意：一个未初始化的变量具有空值–没有赋值，不是0！</strong></p>
+</li>
+<li>
+<p>在还未赋值时使用某个变量可能会出现各种问题。但是未初始化的变量却可以使用在算术应算中。</p>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span> <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$uninitialized</span>"</span>            <span class="token comment"># 未初始化的变量</span>
+
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span> <span class="token keyword">let</span> <span class="token string">"uninitialized += 5"</span>         <span class="token comment"># 加5</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span> <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$uninitialized</span>"</span>
+5                                                 <span class="token comment"># 结果为5</span>
+
+<span class="token comment">#  结论:</span>
+<span class="token comment">#  未初始化的变量没有值,但是在算术运算中视为0</span>
+</code></pre>
+<h2><a id="42_Variable_Assignment_124"></a>4.2. 变量赋值(Variable Assignment)</h2>
+<blockquote>
+<p>= 等号为赋值操作符(其前后不允许出现空白符)</p>
+</blockquote>
+<ul>
+<li>注意：=号在不同的环境下既可以是赋值操作符，也可以是测试操作符。</li>
+</ul>
+<blockquote>
+<p>例4-2. 一般变量赋值操作</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># Naked variables</span>
+<span class="token keyword">echo</span>
+<span class="token comment"># When is a variable "naked", i.e., lacking the '$' in front?</span>
+<span class="token comment"># When it is being assigned, rather than referenced.</span>
+<span class="token comment"># Assignment</span>
+a<span class="token operator">=</span>879
+<span class="token keyword">echo</span> <span class="token string">"The value of \"a\" is <span class="token variable">$a</span>."</span>
+<span class="token comment"># 使用'let'关键字来做简单的运算赋值操作</span>
+<span class="token keyword">let</span> a<span class="token operator">=</span>16+5
+<span class="token keyword">echo</span> <span class="token string">"The value of \"a\" is now <span class="token variable">$a</span>."</span>
+<span class="token keyword">echo</span>
+<span class="token comment"># 在for循环中(实际上是一种伪装的赋值操作):</span>
+<span class="token keyword">echo</span> -n <span class="token string">"Values of \"a\" in the loop are: "</span>
+<span class="token keyword">for</span> a <span class="token keyword">in</span> 7 8 9 11
+<span class="token keyword">do</span>
+  <span class="token keyword">echo</span> -n <span class="token string">"<span class="token variable">$a</span> "</span>
+<span class="token keyword">done</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span>
+<span class="token comment"># In a 'read' statement (另一种赋值操作):</span>
+<span class="token keyword">echo</span> -n <span class="token string">"Enter \"a\" "</span>
+<span class="token function">read</span> a
+<span class="token keyword">echo</span> <span class="token string">"The value of \"a\" is now <span class="token variable">$a</span>."</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">exit</span> 0
+</code></pre>
+<blockquote>
+<p>例4-3. 一般变量赋值操作和特殊的赋值手法</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+a<span class="token operator">=</span>23              <span class="token comment"># Simple case</span>
+<span class="token keyword">echo</span> <span class="token variable">$a</span>
+b<span class="token operator">=</span><span class="token variable">$a</span>
+<span class="token keyword">echo</span> <span class="token variable">$b</span>
+<span class="token comment"># 使用(命令替换)来赋值</span>
+a<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token keyword">echo</span> Hello<span class="token operator">!</span><span class="token variable">`</span></span>   <span class="token comment"># 将'echo'命令的输出结果赋值给 'a' ...</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+<span class="token punctuation">[</span>root@centos8 /data<span class="token punctuation">]</span>a<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token keyword">echo</span> Hello<span class="token operator">!</span><span class="token variable">`</span></span> 
+-bash: <span class="token operator">!</span><span class="token variable"><span class="token variable">`</span><span class="token keyword">:</span> event not found
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+<span class="token keyword">echo</span> $a
+#  Note that including an exclamation mark <span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">)</span> within a
+#+ <span class="token function">command</span> substitution construct will not work from the command-line,
+#+ since this triggers the Bash <span class="token string">"history mechanism."</span>
+#  Inside a script, however, the <span class="token function">history</span> functions are disabled by default.
+a<span class="token operator">=</span><span class="token variable">`</span></span><span class="token function">ls</span> -l<span class="token variable"><span class="token variable">`</span>         # 将命令<span class="token string">'ls -l'</span> 的运行结果 赋值给 <span class="token string">'a'</span>
+<span class="token keyword">echo</span> $a           # 由于赋值没有使用双引号引起来，所以结果未保留格式
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+<span class="token punctuation">[</span>root@centos8 /data<span class="token punctuation">]</span> <span class="token function">ls</span> -l
+100664000 drwxr-xr-x 2 root root 204 Oct  2 09:53 scripts
+      131 drwxr-xr-x 2 root root  21 Oct  2 21:01 <span class="token function">test</span>
+      171 drwxr-xr-x 4 root root  69 Oct  2 21:01 tmp
+<span class="token punctuation">[</span>root@centos8 /data<span class="token punctuation">]</span> a<span class="token operator">=</span><span class="token variable">`</span></span><span class="token function">ls</span> -l`
+<span class="token punctuation">[</span>root@centos8 /data<span class="token punctuation">]</span> <span class="token keyword">echo</span> <span class="token variable">$a</span>  
+total 0 drwxr-xr-x 2 root root 204 Oct 2 09:53 scripts drwxr-xr-x 2 root root 21 Oct 2 21:01 <span class="token function">test</span> drwxr-xr-x 4 root root 69 Oct 2 21:01 tmp
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$a</span>"</span>         <span class="token comment"># 引起来的变量保留了格式</span>
+                  <span class="token comment"># (See the chapter on "Quoting.")</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+<span class="token punctuation">[</span>root@centos8 /data<span class="token punctuation">]</span>echo <span class="token string">"<span class="token variable">$a</span>"</span> 
+total 0
+drwxr-xr-x 2 root root 204 Oct  2 09:53 scripts
+drwxr-xr-x 2 root root  21 Oct  2 21:01 <span class="token function">test</span>
+drwxr-xr-x 4 root root  69 Oct  2 21:01 tmp
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+<span class="token keyword">exit</span> 0
+</code></pre>
+<ul>
+<li>使用$(…)结构来变量赋值也是一种命令替换。（比反引号新的一种变量替换）</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token comment"># From /etc/rc.d/rc.local</span>
+R<span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">cat</span> /etc/redhat-release<span class="token variable">)</span></span>
+arch<span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">uname</span> -m<span class="token variable">)</span></span>
+</code></pre>
+<h2><a id="43_BashBash_Variables_Are_Untyped_209"></a>4.3. Bash变量是无强制类型要求的(Bash Variables Are Untyped)</h2>
+<ul>
+<li>并不像其他大多数编程语言，Bash并不以"类型"来区分其变量。本质上，Bash变量都是字符串，但是由于语境不同，Bash允许在变量上进行算术运算操作和比较操作。决定性因数是该变量是否只仅仅包含数字。</li>
+</ul>
+<blockquote>
+<p>例4-4. 整数还是字符串?</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># int-or-string.sh</span>
+a<span class="token operator">=</span>2334                   <span class="token comment"># 变量a是整数.</span>
+<span class="token keyword">let</span> <span class="token string">"a += 1"</span>
+<span class="token keyword">echo</span> <span class="token string">"a = <span class="token variable">$a</span> "</span>           <span class="token comment"># a = 2335</span>
+<span class="token keyword">echo</span>                     <span class="token comment"># 还是整数.</span>
+b<span class="token operator">=</span><span class="token variable">${a/23/BB}</span>             <span class="token comment"># 将"23"替换为"BB".</span>
+                         <span class="token comment"># 该操作将 $b 转换为字符串.</span>
+<span class="token keyword">echo</span> <span class="token string">"b = <span class="token variable">$b</span>"</span>            <span class="token comment"># b = BB35</span>
+<span class="token keyword">declare</span> -i b             <span class="token comment"># 即使声明其为整数也不行，还是字符串.</span>
+<span class="token keyword">echo</span> <span class="token string">"b = <span class="token variable">$b</span>"</span>            <span class="token comment"># b = BB35</span>
+<span class="token keyword">let</span> <span class="token string">"b += 1"</span>             <span class="token comment"># BB35 + 1</span>
+<span class="token keyword">echo</span> <span class="token string">"b = <span class="token variable">$b</span>"</span>            <span class="token comment"># b = 1</span>
+<span class="token keyword">echo</span>                     <span class="token comment"># Bash 将一个字符串的整数值视为0".</span>
+c<span class="token operator">=</span>BB34
+<span class="token keyword">echo</span> <span class="token string">"c = <span class="token variable">$c</span>"</span>            <span class="token comment"># c = BB34</span>
+d<span class="token operator">=</span><span class="token variable">${c/BB/23}</span>             <span class="token comment"># 将"BB"替换为"23".</span>
+                         <span class="token comment"># 该操作使得$d 成为整.</span>
+<span class="token keyword">echo</span> <span class="token string">"d = <span class="token variable">$d</span>"</span>            <span class="token comment"># d = 2334</span>
+<span class="token keyword">let</span> <span class="token string">"d += 1"</span>             <span class="token comment"># 2334 + 1</span>
+<span class="token keyword">echo</span> <span class="token string">"d = <span class="token variable">$d</span>"</span>            <span class="token comment"># d = 2335</span>
+<span class="token keyword">echo</span>
+<span class="token comment"># 空(null)变量会怎样?</span>
+e<span class="token operator">=</span><span class="token string">''</span>                     <span class="token comment"># ... 或者 e="" ... 或者 e=</span>
+<span class="token keyword">echo</span> <span class="token string">"e = <span class="token variable">$e</span>"</span>            <span class="token comment"># e =</span>
+<span class="token keyword">let</span> <span class="token string">"e += 1"</span>             <span class="token comment"># 允许对一个空变量执行算术运算?</span>
+<span class="token keyword">echo</span> <span class="token string">"e = <span class="token variable">$e</span>"</span>            <span class="token comment"># e = 1</span>
+<span class="token keyword">echo</span>                     <span class="token comment"># 空变量转换为一个整数0.</span>
+<span class="token comment"># 未声明的变量呢?</span>
+<span class="token keyword">echo</span> <span class="token string">"f = <span class="token variable">$f</span>"</span>            <span class="token comment"># f =</span>
+<span class="token keyword">let</span> <span class="token string">"f += 1"</span>             <span class="token comment"># Arithmetic operations allowed?</span>
+<span class="token keyword">echo</span> <span class="token string">"f = <span class="token variable">$f</span>"</span>            <span class="token comment"># f = 1</span>
+<span class="token keyword">echo</span>                     <span class="token comment"># 未声明的变量转换为整数0.</span>
+<span class="token comment">#</span>
+<span class="token comment"># However ...</span>
+<span class="token keyword">let</span> <span class="token string">"f /= <span class="token variable">$undecl_var</span>"</span>   <span class="token comment"># Divide by zero?</span>
+<span class="token comment">#  错误提示：-bash: let: f /= : syntax error: operand expected (error token is " ")</span>
+<span class="token comment"># Syntax error! 这里，变量 $undecl_var未被设置为0!</span>
+<span class="token comment">#</span>
+<span class="token comment"># But still ...</span>
+<span class="token keyword">let</span> <span class="token string">"f /= 0"</span>
+<span class="token comment">#   let: f /= 0: division by 0 (error token is "0")</span>
+<span class="token comment"># Expected behavior.</span>
+<span class="token comment">#  Bash (usually) sets the "integer value" of null to zero</span>
+<span class="token comment">#+ when performing an arithmetic operation.</span>
+<span class="token comment">#  But, don't try this at home, folks!</span>
+<span class="token comment">#  It's undocumented and probably non-portable behavior.</span>
+<span class="token comment"># Conclusion: Variables in Bash are untyped,</span>
+<span class="token comment">#+ with all attendant consequences.</span>
+<span class="token keyword">exit</span> <span class="token variable">$?</span>
+</code></pre>
+<ul>
+<li>无强制变量类型是把双刃剑。这使得代码更加灵活并且很容易的写出很多行代码（同时给你设了足够多的坑！）。然而，这样的灵活性和便利性使得很多微小的失误混进你的代码形成疏忽的代码编写习惯。</li>
+<li>为了便于追踪脚本中的变量类型，bash也允许声明变量。</li>
+</ul>
+<h2><a id="44_Special_Variable_Types_270"></a>4.4. 特殊变量类型(Special Variable Types)</h2>
+<h3><a id="1Local_variables_272"></a>1.局部变量(Local variables)</h3>
+<ul>
+<li>局部变量指：只属于某个代码块或者函数的变量。</li>
+</ul>
+<h3><a id="2Environmental_variables_275"></a>2.环境变量(Environmental variables)</h3>
+<ul>
+<li>
+<p>环境变量：影响shell行为和用户接口的变量。</p>
+</li>
+<li>
+<ul>
+<li>广义来说，每个进程都有自己的"环境",也就是该进程所引用的变量的集合。从这个意义上来说，shell的行为和其他任何进程都一样。</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>每次新的shell启动，它就会创建相对应于它自己的环境变量的另一个变量集合。更新或者新增变量都会使得shell更新其自己的环境，其所有的子shell进程会继承其环境。</li>
+</ul>
+</li>
+<li>
+<p>如果一个脚本设置了环境变量，这些变量需要被"导出（export）"，也就是报告给该脚本的本地环境。这就是export命令的功能。</p>
+</li>
+<li>
+<p><strong>注意注意注意</strong>：一个脚本只能将其变量导出到其子进程<sup class="footnote-ref"><a href="#fn3" id="fnref3">3</a></sup>（该脚本初始化的命令或者进程）。从命令行执行的脚本不能将变量导出到命令行环境。子进程无法将变量导出到产生其的父进程。</p>
+</li>
+</ul>
+<h3><a id="3Positional_parameters_285"></a>3.位置变量(Positional parameters)</h3>
+<ul>
+<li>位置变量：从命令行传给某个脚本的参数: $0, $1, $2, $3 . . .</li>
+<li>$0表示脚本的名称，$1表示脚本的第一个参数，$2表示第二个参数，依次只到$9；之后的参数引用必须使用花括号括起来如：${10},${13}…</li>
+<li>特殊变量<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∗</mo><mi mathvariant="normal">和</mi></mrow><annotation encoding="application/x-tex">*和</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.46528em; vertical-align: 0em;"></span><span class="mord">∗</span><span class="mord cjk_fallback">和</span></span></span></span></span>@都表示所有的位置参数。</li>
+<li>
+<ul>
+<li>$* 将所有位置参数视为单个字符串</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>$@ 将每个位置参数存储为单独引用的字符串，分开对待每个位置参数</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>例4-5. 位置参数</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># 至少使用 10 来调用该脚本</span>
+<span class="token comment"># ./scriptname 1 2 3 4 5 6 7 8 9 10</span>
+MINPARAMS<span class="token operator">=</span>10
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">"The name of this script is \"<span class="token variable">$0</span>\"."</span>
+<span class="token comment"># Adds ./ for current directory</span>
+<span class="token keyword">echo</span> <span class="token string">"The name of this script is \"<span class="token variable"><span class="token variable">`</span><span class="token function">basename</span> $0<span class="token variable">`</span></span>\"."</span>
+<span class="token comment"># Strips out path name info (see 'basename')</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span> -n <span class="token string">"<span class="token variable">$1</span>"</span> <span class="token punctuation">]</span>              <span class="token comment"># 测试结构中变量需要引起来.</span>
+<span class="token keyword">then</span>
+ <span class="token keyword">echo</span> <span class="token string">"Parameter #1 is <span class="token variable">$1</span>"</span>  <span class="token comment"># Need quotes to escape #</span>
+<span class="token keyword">fi</span> 
+<span class="token keyword">if</span> <span class="token punctuation">[</span> -n <span class="token string">"<span class="token variable">$2</span>"</span> <span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+ <span class="token keyword">echo</span> <span class="token string">"Parameter #2 is <span class="token variable">$2</span>"</span>
+<span class="token keyword">fi</span> 
+<span class="token keyword">if</span> <span class="token punctuation">[</span> -n <span class="token string">"<span class="token variable">$3</span>"</span> <span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+ <span class="token keyword">echo</span> <span class="token string">"Parameter #3 is <span class="token variable">$3</span>"</span>
+<span class="token keyword">fi</span> 
+<span class="token comment"># ...</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span> -n <span class="token string">"<span class="token variable">${10}</span>"</span> <span class="token punctuation">]</span>  <span class="token comment"># Parameters &gt; $9 must be enclosed in {brackets}.</span>
+<span class="token keyword">then</span>
+ <span class="token keyword">echo</span> <span class="token string">"Parameter #10 is <span class="token variable">${10}</span>"</span>
+<span class="token keyword">fi</span> 
+<span class="token keyword">echo</span> <span class="token string">"-----------------------------------"</span>
+<span class="token keyword">echo</span> <span class="token string">"All the command-line parameters are: "</span><span class="token variable">$*</span><span class="token string">""</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span> $<span class="token comment"># -lt "$MINPARAMS" ]</span>
+<span class="token keyword">then</span>
+  <span class="token keyword">echo</span>
+  <span class="token keyword">echo</span> <span class="token string">"This script needs at least <span class="token variable">$MINPARAMS</span> command-line arguments!"</span>
+<span class="token keyword">fi</span>  
+<span class="token keyword">echo</span>
+<span class="token keyword">exit</span> 0
+
+<span class="token comment"># 脚本运行结果</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+<span class="token comment">## 不带参数</span>
+<span class="token punctuation">[</span>root@centos8 /data/test<span class="token punctuation">]</span> ./ttt.sh 
+
+The name of this script is <span class="token string">"./ttt.sh"</span><span class="token keyword">.</span>
+The name of this script is <span class="token string">"ttt.sh"</span><span class="token keyword">.</span>
+
+-----------------------------------
+All the command-line parameters are: 
+
+This script needs at least 10 command-line arguments<span class="token operator">!</span>
+
+<span class="token comment">## 带10个参数</span>
+<span class="token punctuation">[</span>root@centos8 /data/test<span class="token punctuation">]</span> ./ttt.sh 1 2 3 4 5 6 7 8 9 10
+
+The name of this script is <span class="token string">"./ttt.sh"</span><span class="token keyword">.</span>
+The name of this script is <span class="token string">"ttt.sh"</span><span class="token keyword">.</span>
+
+Parameter <span class="token comment">#1 is 1</span>
+Parameter <span class="token comment">#2 is 2</span>
+Parameter <span class="token comment">#3 is 3</span>
+Parameter <span class="token comment">#10 is 10</span>
+-----------------------------------
+All the command-line parameters are: 1 2 3 4 5 6 7 8 9 10
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+</code></pre>
+<ul>
+<li>下面花括号内的位置变量（使用${!val}的形式）使得引用最后一个从命令行传给脚本的位置参数非常方便，这需要使用感叹号！来间接引用。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+
+args<span class="token operator">=</span>$<span class="token comment">#</span>
+<span class="token keyword">echo</span> <span class="token variable">$args</span>
+<span class="token keyword">echo</span> <span class="token string">"last=<span class="token variable">${!args}</span>"</span>
+<span class="token keyword">echo</span> <span class="token string">"last=<span class="token variable">${!#}</span>"</span>
+
+<span class="token comment"># 脚本运行结果</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+<span class="token punctuation">[</span>root@centos8 /data/test<span class="token punctuation">]</span> ./ttt.sh 1 2 3 a b c hello
+7
+last<span class="token operator">=</span>hello
+last<span class="token operator">=</span>hello
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+</code></pre>
+<ul>
+<li><strong>某些脚本由于调用它们的名字不同，会表现出不同的行为。要使得这种用法可行，脚本需要检查$0这个位置参数，即调用它的名字。这些可选的名字必须是不同的符号链接（symbolic links）<sup class="footnote-ref"><a href="#fn4" id="fnref4">4</a></sup>。</strong> 如下面的例子，“origin.sh"有两个软链接分别为hello和hi，使用hello和hi来运行"origin.sh”，其表现出不同的行为。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 /data/test<span class="token punctuation">]</span>ll
+total 4
+140 lrwxrwxrwx 1 root root   9 Oct  4 09:19 hello -<span class="token operator">&gt;</span> origin.sh
+144 lrwxrwxrwx 1 root root   9 Oct  4 09:20 hi -<span class="token operator">&gt;</span> origin.sh
+142 -rwxr-xr-x 1 root root 468 Oct  4 09:18 origin.sh
+<span class="token punctuation">[</span>root@centos8 /data/test<span class="token punctuation">]</span> <span class="token function">cat</span> origin.sh 
+<span class="token comment">#!/bin/bash</span>
+<span class="token comment">#</span>
+<span class="token comment">#*******************************************************************************</span>
+<span class="token comment">#Author:                        steveli</span>
+<span class="token comment">#QQ:                            1049103823</span>
+<span class="token comment">#Data:                      2019-10-04</span>
+<span class="token comment">#FileName:                  origin.sh</span>
+<span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+<span class="token comment">#Description:           Test scrpting.</span>
+<span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+<span class="token comment">#*******************************************************************************</span>
+
+<span class="token keyword">case</span> <span class="token variable"><span class="token variable">`</span><span class="token function">basename</span> $0<span class="token variable">`</span></span> <span class="token keyword">in</span>                         <span class="token comment"># `basename $0`取出运行该脚本的软连接名称</span>
+hello<span class="token punctuation">)</span>
+<span class="token keyword">echo</span> hello
+<span class="token punctuation">;</span><span class="token punctuation">;</span>
+hi<span class="token punctuation">)</span>
+<span class="token keyword">echo</span> hi
+<span class="token punctuation">;</span><span class="token punctuation">;</span>
+*<span class="token punctuation">)</span>
+<span class="token keyword">echo</span> error
+<span class="token punctuation">;</span><span class="token punctuation">;</span>
+esac
+
+<span class="token punctuation">[</span>root@centos8 /data/test<span class="token punctuation">]</span>./hello            <span class="token comment"># 使用软连接hello运行origin.sh</span>
+hello
+<span class="token punctuation">[</span>root@centos8 /data/test<span class="token punctuation">]</span>./hi               <span class="token comment"># 使用软连接hi运行origin.sh</span>
+hi
+</code></pre>
+<ul>
+<li>如果一个脚本期望调用它时需要一个参数而实际却没有，这可能会导致一个无法预测的结果。避免这种错误的一个方法是在使用该位置参数的赋值语句的两边都追加一个额外的字符。</li>
+</ul>
+<pre><code class="prism language-bash">variable1_<span class="token operator">=</span><span class="token variable">$1_</span>  <span class="token comment"># 而不是 variable1=$1</span>
+<span class="token comment"># 即使脚本未带参数，也不会报错</span>
+critical_argument01<span class="token operator">=</span><span class="token variable">$variable1_</span>
+<span class="token comment"># 多余的字符可以用下面的写法剥离.</span>
+variable1<span class="token operator">=</span><span class="token variable">${variable1_/_/}</span>
+<span class="token comment"># Side effects only if $variable1_ begins with an underscore.</span>
+<span class="token comment"># This uses one of the parameter substitution templates discussed later.</span>
+<span class="token comment"># (Leaving out the replacement pattern results in a deletion.)</span>
+<span class="token comment"># 更加直接的方法是测试所期望的位置参数是不是存在。</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span> -z <span class="token variable">$1</span> <span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+  <span class="token keyword">exit</span> <span class="token variable">$E_MISSING_POS_PARAM</span>
+<span class="token keyword">fi</span>
+<span class="token comment">#  然而，Fabian Kreutz 这个大佬指出这种用测试的方法</span>
+<span class="token comment"># 来确认是否有带位置参数的方法可能有副作用</span>
+<span class="token comment"># 更加合适的方法是:</span>
+<span class="token comment">#         ${1:-$DefaultVal}   # 该结构表示如果位置参数$1如果没有设置或者值为空则给$1赋值为                                  # $DefaultVal；如果$1已被设置且有值，则使用$1的原来的值</span>
+<span class="token comment"># 后面参数替换小节具体讨论</span>
+</code></pre>
+<blockquote>
+<p>例4-6. wh, whois 域名查看</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># ex18.sh</span>
+<span class="token comment"># Does a 'whois domain-name' lookup on any of 3 alternate servers:</span>
+<span class="token comment">#                    ripe.net, cw.net, radb.net</span>
+<span class="token comment"># Place this script -- renamed 'wh' -- in /usr/local/bin</span>
+<span class="token comment"># Requires symbolic links:</span>
+<span class="token comment"># ln -s /usr/local/bin/wh /usr/local/bin/wh-ripe</span>
+<span class="token comment"># ln -s /usr/local/bin/wh /usr/local/bin/wh-apnic</span>
+<span class="token comment"># ln -s /usr/local/bin/wh /usr/local/bin/wh-tucows</span>
+E_NOARGS<span class="token operator">=</span>75
+<span class="token keyword">if</span> <span class="token punctuation">[</span> -z <span class="token string">"<span class="token variable">$1</span>"</span> <span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+  <span class="token keyword">echo</span> <span class="token string">"Usage: <span class="token variable"><span class="token variable">`</span><span class="token function">basename</span> $0<span class="token variable">`</span></span> [domain-name]"</span>
+  <span class="token keyword">exit</span> <span class="token variable">$E_NOARGS</span>
+<span class="token keyword">fi</span>
+<span class="token comment"># 检查脚本名称并调用不同的服务.</span>
+<span class="token keyword">case</span> <span class="token variable"><span class="token variable">`</span><span class="token function">basename</span> $0<span class="token variable">`</span></span> <span class="token keyword">in</span>    <span class="token comment"># Or:    case ${0##*/} in</span>
+    <span class="token string">"wh"</span>       <span class="token punctuation">)</span> whois <span class="token variable">$1@whois</span>.tucows.com<span class="token punctuation">;</span><span class="token punctuation">;</span>
+    <span class="token string">"wh-ripe"</span>  <span class="token punctuation">)</span> whois <span class="token variable">$1@whois</span>.ripe.net<span class="token punctuation">;</span><span class="token punctuation">;</span>
+    <span class="token string">"wh-apnic"</span> <span class="token punctuation">)</span> whois <span class="token variable">$1@whois</span>.apnic.net<span class="token punctuation">;</span><span class="token punctuation">;</span>
+    <span class="token string">"wh-cw"</span>    <span class="token punctuation">)</span> whois <span class="token variable">$1@whois</span>.cw.net<span class="token punctuation">;</span><span class="token punctuation">;</span>
+    *          <span class="token punctuation">)</span> <span class="token keyword">echo</span> <span class="token string">"Usage: <span class="token variable"><span class="token variable">`</span><span class="token function">basename</span> $0<span class="token variable">`</span></span> [domain-name]"</span><span class="token punctuation">;</span><span class="token punctuation">;</span>
+esac 
+<span class="token keyword">exit</span> <span class="token variable">$?</span>
+</code></pre>
+<ul>
+<li>shift命令会再次指定脚本的位置参数，将位置变量依次向左移。如：$1 &lt;— $2, $2 &lt;— $3, $3 &lt;— $4,等。在脚本中执行一次shift后原来的位置变量$1会被清除，此后的$1实际上是shift未运行时的$2；但是值得注意的是<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>0</mn><mo stretchy="false">(</mo><mi mathvariant="normal">脚</mi><mi mathvariant="normal">本</mi><mi mathvariant="normal">名</mi><mi mathvariant="normal">称</mi><mo stretchy="false">)</mo><mi mathvariant="normal">不</mi><mi mathvariant="normal">变</mi><mi mathvariant="normal">。</mi><mi mathvariant="normal">多</mi><mi mathvariant="normal">次</mi><mi mathvariant="normal">执</mi><mi mathvariant="normal">行</mi><mi>s</mi><mi>h</mi><mi>i</mi><mi>f</mi><mi>t</mi><mi mathvariant="normal">后</mi><mi mathvariant="normal">可</mi><mi mathvariant="normal">以</mi><mi mathvariant="normal">访</mi><mi mathvariant="normal">问</mi></mrow><annotation encoding="application/x-tex">0(脚本名称)不变。多次执行shift后可以访问</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">0</span><span class="mopen">(</span><span class="mord cjk_fallback">脚</span><span class="mord cjk_fallback">本</span><span class="mord cjk_fallback">名</span><span class="mord cjk_fallback">称</span><span class="mclose">)</span><span class="mord cjk_fallback">不</span><span class="mord cjk_fallback">变</span><span class="mord cjk_fallback">。</span><span class="mord cjk_fallback">多</span><span class="mord cjk_fallback">次</span><span class="mord cjk_fallback">执</span><span class="mord cjk_fallback">行</span><span class="mord mathdefault">s</span><span class="mord mathdefault">h</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right: 0.10764em;">f</span><span class="mord mathdefault">t</span><span class="mord cjk_fallback">后</span><span class="mord cjk_fallback">可</span><span class="mord cjk_fallback">以</span><span class="mord cjk_fallback">访</span><span class="mord cjk_fallback">问</span></span></span></span></span>{10}以后的位置变量。</li>
+</ul>
+<blockquote>
+<p>例4-7. 使用shift</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># shft.sh: 使用 'shift' 逐步访问每个位置参数.</span>
+<span class="token comment">#  Name this script something like shft.sh,</span>
+<span class="token comment">#+ 带多个参数调用该脚本.</span>
+<span class="token comment">#+ 例如:</span>
+<span class="token comment">#      bash shft.sh a b c def 83 barndoor</span>
+<span class="token keyword">until</span> <span class="token punctuation">[</span> -z <span class="token string">"<span class="token variable">$1</span>"</span> <span class="token punctuation">]</span>  <span class="token comment"># 只到所有位置变量都已经被访问. . .</span>
+<span class="token keyword">do</span>
+  <span class="token keyword">echo</span> -n <span class="token string">"<span class="token variable">$1</span> "</span>
+  <span class="token function">shift</span>
+<span class="token keyword">done</span>
+<span class="token keyword">echo</span>               <span class="token comment"># Extra linefeed.</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$2</span>"</span>
+<span class="token comment">#  Nothing echoes!</span>
+<span class="token comment">#  当 $2 移动到 $1 (并且没有 $3 移动到 $2)</span>
+<span class="token comment">#+ 那么 $2 此时为空.</span>
+<span class="token comment">#  所以是参数'移动'，而不是'拷贝'.</span>
+<span class="token keyword">exit</span>
+
+<span class="token comment"># 运行结果</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+<span class="token punctuation">[</span>root@centos8 /data/test<span class="token punctuation">]</span>./shift_para.sh 1 2 3 as ds asd ffg
+1 2 3 as ds asd ffg
+
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+
+</code></pre>
+<ul>
+<li>shift命令可以跟一个数字n表示位置参数被左移n次</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># shift-past.sh</span>
+<span class="token function">shift</span> 3    <span class="token comment"># 左移3个位置.</span>
+<span class="token comment">#  n=3; shift $n</span>
+<span class="token comment">#  上面的写法也行.</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$1</span>"</span>
+<span class="token keyword">exit</span> 0 
+
+<span class="token comment"># 运行结果</span>
+<span class="token comment"># ======================== #</span>
+$ sh shift-past.sh 1 2 3 4 5
+4
+<span class="token comment"># ======================== # </span>
+<span class="token comment">#  然而， Eleni Fragkiadaki 大哥指出,试图位移超过脚本所带位置参数个数($#)的次数，</span>
+<span class="token comment">#+ 会导致shift命令的退出状态为1，脚本的位置参数不变，这意味着脚本可能会陷入死循环。</span>
+
+<span class="token comment">#  例如:</span>
+<span class="token comment">#      until [ -z "$1" ]</span>
+<span class="token comment">#      do</span>
+<span class="token comment">#         echo -n "$1 "</span>
+<span class="token comment">#         shift 20    #  如果位置参数个数少于 20,</span>
+<span class="token comment">#      done           #+ 那么循环永远不会停!</span>
+<span class="token comment">#</span>
+<span class="token comment"># 当有疑问时，添加一个完整性检查比较好. . . .</span>
+<span class="token comment">#           shift 20 || break</span>
+<span class="token comment">#                    ^^^^^^^^</span>
+</code></pre>
+<ul>
+<li>shift命令移动位置参数的工作方式和传送到某个函数的参数相似。</li>
+</ul>
+<h2><a id="_536"></a>注脚</h2>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>赋值(assignment)有多种形式：使用等号 = (如：var1=27)；read语句中 ；循环的头部(如：for var2 in 1 2 3) <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>Linux中的信号指的是某个进程或者内核发送给另一个进程的消息，告诉其采取一些具体动作（通常是结束进程）。例如：按下Ctrl+C键发送一个用户中断信号给某个正在运行的进程，即一个INT信号 <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p>子进程(subprocess): 一个子进程是被另一个进程所产生的进程，后者叫该进程的父进程。 <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p>符号链接(symbolic links)又叫软链接(soft links):在UNIX/linux系统中用来访问某文件或则某文件夹的另一个方法，软链接类似windows的快捷方式；在linux使用ln命令为某个文件或文件夹创建软链接。ln通过在文件系统的文件分配表中添加一个条目的附加名称来实现这一点。这样就可以使用附加的名称和原名称来访问某文或文件夹。这哥们介绍的不错<a href="https://stackabuse.com/symbolic-links-in-unix-linux/">Frank Hofmann</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
