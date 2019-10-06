@@ -20,10 +20,17 @@ val1
 |(引用)变量不出现$前缀的情况| 
 |---|
 |declared or assigned:声明其或者其被赋值[^1]|
+|let 算术语句|
 |被unset或者export|
 |在双圆括号((...))的算术运算操作结构中|
 |变量代表某个信号的特殊情况[^2]| 
-
+```bas
+[root@centos7 /data/scripts]$ m=3
+[root@centos7 /data/scripts]$ n=5
+[root@centos7 /data/scripts]$ let k=m+n      # 使用let语句时不用使用$符来取变量m和n的值
+[root@centos7 /data/scripts]$ echo $k
+8
+```
 - 将引用值包括在两个双引号("\$val")中不会影响其对变量值的引用(变量替换)。该引用方法称作"部分引用",或者叫做"弱引用"。但是使用两个单引号('\$val')则会使变量替换失效，shell按照变量名的字面意思处理其。该引用方式称为"全引用",也叫作"强引用"。第五章详细介绍。
 - **需要注意的是：\$val实际上是\${$val}的简写。某些场合前者\$val会出错，使用长格式的后者兼容性更好。**  
 \-
