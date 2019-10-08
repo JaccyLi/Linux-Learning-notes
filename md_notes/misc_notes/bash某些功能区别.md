@@ -51,3 +51,19 @@ You maybe noticed that the corrupted $PATH variable was not reset. This wouldn't
 3）/data目录有执行权限，dir目录有执行和写权限
 ```
 
+
+- facl中：mask 用来设置除所有者和other以外的用户或组的权限
+- 一旦设置了facl，所看到的的组权限实际是mask权限，使用chmod更改组权限实际是更改mask权限。
+
+
+```
+[root@centos7 /data/test]$getfacl issue.bak 
+# file: issue.bak
+# owner: root
+# group: root
+user::rw-
+user:steve:rw-
+group::---
+mask::rw-
+other::---
+```
