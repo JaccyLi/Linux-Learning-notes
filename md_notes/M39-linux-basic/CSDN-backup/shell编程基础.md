@@ -1,5 +1,4 @@
-<center><font size=214 face=黑体 color=grey>HELL脚本编程基础</font></center>
-
+﻿@[TOC](<center><font size=214 face=黑体 color=grey>HELL脚本编程基础</font></center>)
 # 一.编程基础
 
 ## 1.程序基本概念
@@ -55,7 +54,7 @@
 |高性能，运行速度快|支持夸平台，运行速度慢|
 |在语言编译阶段可以做充分的优化|不需要编译阶段，直接执行代码|
 
-![](png/different_language.png)
+[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-vsv2eEFo-1570714759925)(png/different_language.png)]
 
 
 # 二.shell脚本基础
@@ -831,7 +830,7 @@ FILE1 -ot FILE2: FILE1是否旧于FILE2
         read -p "Enter a filename: " FILE 
         echo $FILE
 
-# 条件判断if
+# 六.条件判断if
 
 ## 1.单分支结构 
 
@@ -868,7 +867,7 @@ else
 fi 
 ```
 
-# 条件判断case
+# 七.条件判断case
 
 - case语句支持glob风格的匹配
 
@@ -1047,7 +1046,7 @@ no,或是其它信息
  unset PATTERN
 ```
 
-# 配置用户环境
+# 八.配置用户环境
 
 ## 1.bash展开命令行的优先次序(优先级) 
 

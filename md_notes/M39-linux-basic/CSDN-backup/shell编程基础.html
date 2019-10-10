@@ -1,0 +1,1313 @@
+﻿<p></p><div class="toc"><h3><center><font size="214" face="黑体" color="grey">HELL脚本编程基础</font></center></h3><ul><li><a href="#_1">一.编程基础</a></li><ul><li><a href="#1_3">1.程序基本概念</a></li><li><a href="#2_20">2.不同的程序的执行方式</a></li><li><a href="#3_43">3.编译型语言和解释型语言</a></li></ul><li><a href="#shell_59">二.shell脚本基础</a></li><ul><li><a href="#1shell_61">1.shell脚本的基本结构</a></li><li><a href="#2hellshebang_72">2.hell脚本格式要求：首行shebang机制</a></li><li><a href="#3_129">3.脚本调试</a></li></ul><li><a href="#_138">三.变量</a></li><ul><li><a href="#1bash_140">1.bash中变量的种类</a></li><li><a href="#2_186">2.练习</a></li><li><a href="#3_282">3.环境变量</a></li><li><a href="#4bash_312">4.bash内建的环境变量</a></li><li><a href="#5_329">5.只读和位置变量</a></li></ul><li><a href="#bashshell_377">四.bash-shell脚本的基本算术运算</a></li><li><a href="#bash_495">五.bash中的各种测试</a></li><ul><li><a href="#1_497">1.条件测试</a></li><li><a href="#2bash_512">2.bash的数值测试</a></li><li><a href="#3bash_532">3.bash的字符串测试</a></li><li><a href="#4Bash_547">4.Bash的文件测试</a></li><li><a href="#5Bash_563">5.Bash的文件权限测试</a></li><li><a href="#6Bash_576">6.Bash的文件属性测试</a></li><li><a href="#7_588">7.双目测试：</a></li><li><a href="#8Bash_596">8.Bash的组合测试条件</a></li><li><a href="#9_621">9.练习</a></li><li><a href="#10read_819">10.read命令</a></li></ul><li><a href="#if_832">六.条件判断if</a></li><ul><li><a href="#1_834">1.单分支结构</a></li><li><a href="#2_842">2.双分支结构</a></li><li><a href="#3_853">3.多分支结构</a></li></ul><li><a href="#case_869">七.条件判断case</a></li><ul><li><a href="#_895">练习</a></li></ul><li><a href="#_1048">八.配置用户环境</a></li><ul><li><a href="#1bash_1050">1.bash展开命令行的优先次序(优先级)</a></li><li><a href="#2bash_1064">2.防止bash扩展某些特殊字符</a></li><li><a href="#3bash_1078">3.bash的配置文件</a></li><li><a href="#4shell_1113">4.shell登录两种方式</a></li><li><a href="#5_1134">5.编辑配置文件后使其生效的方式</a></li><li><a href="#6set_1154">6.set命令和$-变量</a></li><li><a href="#7_1170">7.脚本安全相关</a></li><li><a href="#8_1181">8.练习</a></li></ul></ul></div><p></p>
+<h1><a id="_1"></a>一.编程基础</h1>
+<h2><a id="1_3"></a>1.程序基本概念</h2>
+<ul>
+<li>Linux内核的编写者Linus Tovarls曾经说过：Talk is cheap, show me the code.(用代码说话);所以学shell编程的唯一办法就是写shell程序，不断的写写写。</li>
+<li>shell 编程基础主要涉及变量、基本算术运算、条件测试和条件判断等编程基础知识。在正式学习shell编程之前先了解一些程序相关的基本概念。</li>
+</ul>
+<pre><code class="prism language-py">程序的概念：
+程序：程序本质上是一系列的数据结构加上处理这些数据的算法形成的，程序的核心就是数据结构。
+算法：使用程序描述的处理数据的方式
+数据结构：数据在计算机中的类型和组织方式<span class="token punctuation">(</span>数据在内存中的存储和组织方式<span class="token punctuation">)</span>
+
+编写程序时有多种程序编程风格：
+
+过程式：以指令为中心，数据服务于指令  
+对象式：以数据为中心，指令服务于数据
+</code></pre>
+<h2><a id="2_20"></a>2.不同的程序的执行方式</h2>
+<ul>
+<li>计算机只能识别二进制指令；</li>
+<li>低级编程语言：</li>
+</ul>
+<pre><code class="prism language-py">机器语言：由二进制的<span class="token number">0</span>和<span class="token number">1</span>的序列组成，称为机器指令<span class="token punctuation">;</span>与自然语言差异太大，难懂、难写
+汇编语言：用一些助记符号替代机器指令，称为汇编语言 
+        如：ADD A<span class="token punctuation">,</span>B 将寄存器A的数与寄存器B的数相加得到的数放到寄存器A中 
+汇编语言写好的程序需要汇编程序转换成机器指令
+汇编语言稍微好理解，即机器指令对应的助记符，助记符更接近自然语言 
+</code></pre>
+<ul>
+<li>高级编程语言</li>
+</ul>
+<pre><code class="prism language-py">高级语言又有解释型和编译型语言；
+编译型语言：高级语言<span class="token operator">-</span><span class="token operator">-</span><span class="token operator">&gt;</span>编译器<span class="token operator">-</span><span class="token operator">-</span><span class="token operator">&gt;</span>机器代码<span class="token operator">-</span><span class="token operator">-</span><span class="token operator">&gt;</span>执行 
+         如：C，C<span class="token operator">+</span><span class="token operator">+</span> 
+解释语言：高级语言<span class="token operator">-</span><span class="token operator">-</span><span class="token operator">&gt;</span>执行<span class="token operator">-</span><span class="token operator">-</span><span class="token operator">&gt;</span>解释器<span class="token operator">-</span><span class="token operator">-</span><span class="token operator">&gt;</span>机器代码 
+         如： shell<span class="token punctuation">,</span>python<span class="token punctuation">,</span>php<span class="token punctuation">,</span>JavaScript<span class="token punctuation">,</span>perl<span class="token punctuation">,</span>Ruby 
+</code></pre>
+<h2><a id="3_43"></a>3.编译型语言和解释型语言</h2>
+<ul>
+<li>编译型语言将源码编译为二进制可执行文件后由计算机运行，运行时无需源码</li>
+<li>解释型语言是在程序运行时一条一条的将代码解释为计算机可识别的指令，运行时需要源码</li>
+<li>对比</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>编译型语言</th>
+<th>解释型语言</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>c,c++,Delphi,Rust</td>
+<td>shell,python,php,JavaScript,perl,Ruby</td>
+</tr>
+<tr>
+<td>一次性将源码编译为机器指令</td>
+<td>在程序执行时才一条一条的将源代码转换为机器指令</td>
+</tr>
+<tr>
+<td>高性能，运行速度快</td>
+<td>支持夸平台，运行速度慢</td>
+</tr>
+<tr>
+<td>在语言编译阶段可以做充分的优化</td>
+<td>不需要编译阶段，直接执行代码</td>
+</tr>
+</tbody>
+</table><p>[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-vsv2eEFo-1570714759925)(png/different_language.png)]</p>
+<h1><a id="shell_59"></a>二.shell脚本基础</h1>
+<h2><a id="1shell_61"></a>1.shell脚本的基本结构</h2>
+<ul>
+<li>脚本的基本结构</li>
+</ul>
+<pre><code class="prism language-bash">SHEBANG                       <span class="token comment"># SHEBANG机制，指明解释该脚本的shell程序</span>
+CONFIGURATION_VARIABLES         <span class="token comment"># 在写明解释器后，接着的行一般用来声明一些变量</span>
+FUNCTION_DEFINITIONS            <span class="token comment"># 接着定义函</span>
+MAIN_CODE                       <span class="token comment"># 接着是脚本内容</span>
+</code></pre>
+<h2><a id="2hellshebang_72"></a>2.hell脚本格式要求：首行shebang机制</h2>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span> 
+<span class="token comment">#!/usr/bin/python </span>
+<span class="token comment">#!/usr/bin/perl </span>
+</code></pre>
+<ul>
+<li>shell脚本的用途有：</li>
+</ul>
+<pre><code class="prism language-bash">自动化常用命令 
+执行系统管理和故障排除 
+创建简单的应用程序 
+处理文本或文件
+</code></pre>
+<ul>
+<li>创建shell脚本</li>
+</ul>
+<pre><code class="prism language-bash">第一步：使用文本编辑器来创建文本文件 
+      第一行必须包括shell声明序列：<span class="token comment">#! </span>
+      示例：<span class="token comment">#!/bin/bash  </span>
+      添加注释 
+          注释以<span class="token comment">#开头 </span>
+第二步：运行脚本 
+      给予执行权限，在命令行上指定脚本的绝对或相对路径 
+      直接运行解释器，将脚本作为解释器程序的参数运行 
+</code></pre>
+<ul>
+<li>脚本代码开头约定</li>
+</ul>
+<pre><code class="prism language-bash">1、第一行一般为调用使用的语言 
+2、程序名，避免更改文件名为无法找到正确的文件 
+3、版本号 
+4、更改后的时间 
+5、作者相关信息 
+6、该程序的作用，及注意事项 
+7、最后是各版本的更新简要说明 
+</code></pre>
+<ul>
+<li>shell脚本示例</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># ------------------------------------------ </span>
+<span class="token comment"># Filename:             hello.sh </span>
+<span class="token comment"># Revision:             0.99 </span>
+<span class="token comment"># Date:                 2019/09/18 </span>
+<span class="token comment"># Author:               steve </span>
+<span class="token comment"># Email:                steve@gmail.com </span>
+<span class="token comment"># Website:              suosuoli.cn</span>
+<span class="token comment"># Description:          This is my first script.</span>
+<span class="token comment"># Copyright:            2019 steve </span>
+<span class="token comment"># License:              GPL </span>
+<span class="token comment"># ------------------------------------------ </span>
+ <span class="token keyword">echo</span> -e “Hello world<span class="token operator">!</span> I'm a programmer now<span class="token operator">!</span> Wow<span class="token operator">!</span>”
+</code></pre>
+<h2><a id="3_129"></a>3.脚本调试</h2>
+<pre><code class="prism language-py">检测脚本中的语法错误 
+bash <span class="token operator">-</span>n <span class="token operator">/</span>path<span class="token operator">/</span>to<span class="token operator">/</span>some_script 
+调试执行 
+bash <span class="token operator">-</span>x <span class="token operator">/</span>path<span class="token operator">/</span>to<span class="token operator">/</span>some_script 
+</code></pre>
+<h1><a id="_138"></a>三.变量</h1>
+<h2><a id="1bash_140"></a>1.bash中变量的种类</h2>
+<ul>
+<li>在shell中根据变量的生效范围等标准划分下面变量类型</li>
+</ul>
+<pre><code class="prism language-bash">局部变量：生效范围为当前shell进程；对当前shell之外的其它shell进程，包括当前shell的子shell进程均无效 
+ 
+环境变量：生效范围为当前shell进程及其子进程 
+ 
+本地变量：生效范围为当前shell进程中某代码片断，通常指函数 
+ 
+位置变量：<span class="token variable">$1</span>, <span class="token variable">$2</span>, <span class="token punctuation">..</span>.来表示，用于让脚本在脚本代码中调用通过命令行传递给它的参数 
+ 
+特殊变量：<span class="token variable">$?</span>, <span class="token variable">$0</span>, <span class="token variable">$*</span>, <span class="token variable">$@</span>, $<span class="token comment">#,$$ </span>
+    <span class="token variable">$?</span> 存储脚本、命令或者函数的退出状态值；脚本的退出状态为脚本中最后一条命令的退出状态<span class="token punctuation">;</span>函数退出状态也为最后一条命令的退出状态<span class="token punctuation">;</span>一般成功执行退出状态为0；命令执行失败退出状态为1-255之间的整数.
+    <span class="token variable">$0</span> 执行脚本时脚本的路径名 
+    <span class="token variable">$*</span> 将所有位置参数视为单个字符串
+    <span class="token variable">$@</span> 每个位置参数存储为单独引用的字符串，分开对待每个位置参数
+    $<span class="token comment"># 脚本后所跟的参数的个数</span>
+    $$ 为PID变量，存储其出现在的脚本所属的进程的进程号
+```bash
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>$ pstree -p <span class="token operator">|</span><span class="token function">grep</span> sshd.*bash
+<span class="token operator">|</span>-sshd<span class="token punctuation">(</span>1164<span class="token punctuation">)</span>---sshd<span class="token punctuation">(</span>1842<span class="token punctuation">)</span>---bash<span class="token punctuation">(</span>1848<span class="token punctuation">)</span>---bash<span class="token punctuation">(</span>6007<span class="token punctuation">)</span>-+-grep<span class="token punctuation">(</span>6043<span class="token punctuation">)</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>$ <span class="token keyword">echo</span> $$                        <span class="token comment"># 当前所在bash进程为6007</span>
+6007
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$exit</span>                           <span class="token comment"># 退出6007号bash进程</span>
+<span class="token keyword">exit</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token variable">$echo</span> $$                        <span class="token comment"># 此时$$记录1848</span>
+1848
+</code></pre>
+<ul>
+<li>局部变量赋值和引用</li>
+</ul>
+<pre><code class="prism language-bash">变量赋值：name<span class="token operator">=</span><span class="token string">'value'</span> 
+<span class="token punctuation">(</span>1<span class="token punctuation">)</span> 可以是直接字串：name<span class="token operator">=</span><span class="token string">'root'</span> 
+<span class="token punctuation">(</span>2<span class="token punctuation">)</span> 变量引用：name<span class="token operator">=</span><span class="token string">"<span class="token variable">$USER</span>"</span> 
+<span class="token punctuation">(</span>3<span class="token punctuation">)</span> 命令引用：name<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span>COMMAND<span class="token variable">`</span></span>   
+             name<span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span>COMMAND<span class="token variable">)</span></span> 
+变量引用：<span class="token variable">${name}</span>  或者  <span class="token variable">$name</span> 
+</code></pre>
+<ul>
+<li>
+<p>显示已定义的所有变量使用set命令</p>
+</li>
+<li>
+<p>删除变量：unset name</p>
+</li>
+</ul>
+<h2><a id="2_186"></a>2.练习</h2>
+<ul>
+<li>1、编写脚本 systeminfo.sh，显示当前主机系统信息，包括主机名，IPv4地址，操作系统版本，内核版本，CPU型号，内存大小，硬盘大小</li>
+</ul>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                    steveli</span>
+ <span class="token comment">#QQ:                        1049103823</span>
+ <span class="token comment">#Data:                      2019-10-06</span>
+ <span class="token comment">#FileName:                  systemInfoForCentos678.sh</span>
+ <span class="token comment">#URL:                       https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:               Show some sys info.</span>
+ <span class="token comment">#Copyright (C):             2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+
+R_SEED<span class="token operator">=</span><span class="token variable"><span class="token variable">$((</span> $RANDOM<span class="token operator">%</span><span class="token number">7</span><span class="token operator">+</span><span class="token number">31</span> <span class="token variable">))</span></span> 
+COLOR_START<span class="token operator">=</span><span class="token string">"\e[1;<span class="token variable">${R_SEED}</span>m"</span>
+COLOR_END<span class="token operator">=</span><span class="token string">"\e[0m"</span>
+<span class="token keyword">echo</span> -e <span class="token string">"The hostname is:              <span class="token variable">${COLOR_START}</span><span class="token variable"><span class="token variable">`</span><span class="token function">hostname</span><span class="token variable">`</span></span>. <span class="token variable">${COLOR_END}</span>"</span>
+<span class="token keyword">echo</span> -e <span class="token string">"IPV4 addr is:                 <span class="token variable">${COLOR_START}</span><span class="token variable"><span class="token variable">`</span><span class="token function">ifconfig</span> <span class="token operator">|</span> <span class="token function">egrep</span> -o <span class="token string">'([0-9]{1,3}\.){3}[0-9]{,3}'</span> <span class="token operator">|</span><span class="token function">head</span> -n1<span class="token variable">`</span></span> <span class="token variable">${COLOR_END}</span>"</span>
+<span class="token keyword">echo</span> -e <span class="token string">"The OS version is:            <span class="token variable">${COLOR_START}</span><span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> /etc/redhat-release <span class="token operator">|</span> <span class="token function">egrep</span> -o <span class="token string">'[0-9]+\.[0-9]+(\.[0-9]+)?'</span><span class="token variable">`</span></span> <span class="token variable">${COLOR_END}</span>"</span>
+<span class="token keyword">echo</span> -e <span class="token string">"The kernel version is:        <span class="token variable">${COLOR_START}</span><span class="token variable"><span class="token variable">`</span> <span class="token function">uname</span> -r <span class="token variable">`</span></span>. <span class="token variable">${COLOR_END}</span>"</span>
+<span class="token function">free</span> -h <span class="token operator">|</span><span class="token function">grep</span> <span class="token string">"Mem"</span> <span class="token operator">|</span> <span class="token function">tr</span> -s <span class="token string">" "</span> <span class="token operator">|</span><span class="token function">cut</span> -d<span class="token string">" "</span>  -f2,4 <span class="token operator">&gt;</span> /tmp/total_free 
+TOTAL<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> /tmp/total_free <span class="token operator">|</span> <span class="token function">cut</span> -d<span class="token string">" "</span>  -f1<span class="token variable">`</span></span>
+FREE<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> /tmp/total_free <span class="token operator">|</span> <span class="token function">cut</span> -d<span class="token string">" "</span>  -f2<span class="token variable">`</span></span>
+<span class="token keyword">echo</span> -e <span class="token string">"The total online memory is:   <span class="token variable">${COLOR_START}</span><span class="token variable">$TOTAL</span>(<span class="token variable">${FREE}</span> free)<span class="token variable">${COLOR_END}</span>"</span>
+<span class="token keyword">echo</span> -e  <span class="token string">"\nHarddisk usage:             <span class="token variable">${COLOR_START}</span> \n\n<span class="token variable"><span class="token variable">`</span><span class="token function">df</span> -h <span class="token operator">|</span> <span class="token function">egrep</span> -e /dev/sd -e /dev/nvme<span class="token variable">`</span></span> <span class="token variable">${COLOR_END}</span>"</span>
+unset R_SEED COLOR_START COLOR_END
+unset TOTAL FREE
+</code></pre>
+<p>2、编写脚本 backup.sh，可实现每日将/etc/目录备份到/backup/etcYYYY-<br>
+mm-dd中</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:            steveli</span>
+ <span class="token comment">#QQ:                1049103823</span>
+ <span class="token comment">#Data:              2019-10-07</span>
+ <span class="token comment">#FileName:          backup.sh</span>
+ <span class="token comment">#URL:               https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:       Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+DIR<span class="token operator">=</span><span class="token string">"/data/backup/"</span>
+<span class="token keyword">echo</span> <span class="token string">"Backup starting ..."</span>
+<span class="token function">sleep</span> 1
+<span class="token function">cp</span> -av /etc/ <span class="token variable">${DIR}</span>etc<span class="token variable"><span class="token variable">`</span><span class="token function">date</span> +%F<span class="token variable">`</span></span>
+<span class="token keyword">echo</span> -e <span class="token string">"\e[1;32mBackup finished."</span>
+<span class="token keyword">echo</span> -e <span class="token string">"The backup file located at : <span class="token variable">${DIR}</span> \a\e[0m"</span>
+</code></pre>
+<p>3、编写脚本 disk.sh，显示当前硬盘分区中空间利用率最大的值</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:            steveli</span>
+ <span class="token comment">#QQ:                1049103823</span>
+ <span class="token comment">#Data:              2019-10-07</span>
+ <span class="token comment">#FileName:          disk.sh</span>
+ <span class="token comment">#URL:               https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:       Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ MAX<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">df</span> -h <span class="token operator">|</span> <span class="token function">grep</span> -E /dev/\<span class="token punctuation">(</span>sd\<span class="token operator">|</span>nvme\<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token function">egrep</span> -o <span class="token string">"[0-9]{,3}%"</span> <span class="token operator">|</span> <span class="token function">cut</span> -d% -f1 <span class="token operator">|</span> <span class="token function">sort</span> -nr <span class="token operator">|</span> <span class="token function">head</span> -n1<span class="token variable">`</span></span>
+ <span class="token keyword">echo</span> <span class="token string">"The max usage of space is <span class="token variable">$MAX</span>(%)."</span>
+</code></pre>
+<p>4、编写脚本 links.sh，显示正连接本主机的每个远程主机的IPv4地址和连接数，并按连接数从大到小排序</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:            steveli</span>
+ <span class="token comment">#QQ:                1049103823</span>
+ <span class="token comment">#Data:              2019-10-07</span>
+ <span class="token comment">#FileName:          backup.sh</span>
+ <span class="token comment">#URL:               https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:       Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> $<span class="token comment"># -gt 0 ]]; then</span>
+    FILE<span class="token operator">=</span><span class="token variable">$1</span>
+    <span class="token function">cat</span> <span class="token variable">${FILE}</span> <span class="token operator">|</span><span class="token function">grep</span> ESTAB <span class="token operator">|</span> <span class="token function">tr</span> -s <span class="token string">" "</span> <span class="token operator">|</span> <span class="token function">cut</span> -d<span class="token string">" "</span> -f5 <span class="token operator">|</span> <span class="token function">cut</span> -d: -f1 <span class="token operator">|</span> <span class="token function">sort</span> <span class="token operator">|</span> <span class="token function">uniq</span> -c <span class="token operator">|</span> <span class="token function">sort</span> -nr 
+<span class="token keyword">elif</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> $<span class="token comment"># -eq 0 ]]; then</span>
+    ss -tun <span class="token operator">|</span><span class="token function">grep</span> ESTAB <span class="token operator">|</span> <span class="token function">tr</span> -s <span class="token string">" "</span> <span class="token operator">|</span> <span class="token function">cut</span> -d<span class="token string">" "</span> -f6 <span class="token operator">|</span> <span class="token function">cut</span> -d: -f1 <span class="token operator">|</span> <span class="token function">sort</span> <span class="token operator">|</span> <span class="token function">uniq</span> -c <span class="token operator">|</span> <span class="token function">sort</span> -nr 
+<span class="token keyword">fi</span>
+</code></pre>
+<h2><a id="3_282"></a>3.环境变量</h2>
+<ul>
+<li>环境变量的声明、赋值</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">export</span> name<span class="token operator">=</span>VALUE 
+<span class="token keyword">declare</span> -x name<span class="token operator">=</span>VALUE 
+</code></pre>
+<ul>
+<li>变量引用</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token variable">$name</span>, <span class="token variable">${name}</span> 
+</code></pre>
+<ul>
+<li>显示所有环境变量</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">env</span> 
+<span class="token function">printenv</span> 
+<span class="token function">export</span> 
+<span class="token keyword">declare</span> -x 
+</code></pre>
+<ul>
+<li>删除变量</li>
+</ul>
+<pre><code class="prism language-bash">unset name 
+</code></pre>
+<h2><a id="4bash_312"></a>4.bash内建的环境变量</h2>
+<pre><code class="prism language-bash">PATH 
+SHELL 
+USER 
+UID 
+HOME 
+PWD 
+SHLVL 
+LANG 
+MAIL 
+HOSTNAME 
+HISTSIZE 
+_ :下划线 
+</code></pre>
+<h2><a id="5_329"></a>5.只读和位置变量</h2>
+<ul>
+<li>
+<p>只读变量：只能声明，但不能修改和删除</p>
+</li>
+<li>
+<p>声明只读变量：</p>
+</li>
+<li>
+<ul>
+<li>readonly name</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>declare   -r name</li>
+</ul>
+</li>
+<li>
+<p>查看只读变量：</p>
+</li>
+<li>
+<ul>
+<li>readonly  -p</li>
+</ul>
+</li>
+<li>
+<p>位置变量：在脚本代码中调用通过命令行传递给脚本的参数</p>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token variable">$1</span>, <span class="token variable">$2</span>, <span class="token punctuation">..</span>. 
+对应第1、第2等参数，shift <span class="token punctuation">[</span>n<span class="token punctuation">]</span>换位置 
+<span class="token variable">$0</span>
+    命令本身 
+<span class="token variable">$*</span>
+    传递给脚本的所有参数，全部参数合为一个字符串 
+<span class="token variable">$@</span>
+    传递给脚本的所有参数，每个参数为独立字符串 
+$<span class="token comment">#</span>
+    传递给脚本的参数的个数 
+注意：<span class="token variable">$@</span> <span class="token variable">$*</span> 只在被双引号包起来的时候才会有差异  
+<span class="token keyword">set</span> --  清空所有位置变量 
+</code></pre>
+<ul>
+<li>在linux中，进程使用退出状态来报告成功或失败;存储退出状态的环境变量使用<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">?</mo><mi mathvariant="normal">；</mi></mrow><annotation encoding="application/x-tex">?；</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mclose">?</span><span class="mord cjk_fallback">；</span></span></span></span></span>?存储的值范围为0-255。</li>
+</ul>
+<pre><code class="prism language-bash">0  代表成功
+1－255代表失败 
+示例： 
+    <span class="token function">ping</span> -c1 -W1 hostdown <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null  
+    <span class="token keyword">echo</span> <span class="token variable">$?</span> 
+</code></pre>
+<ul>
+<li>bash允许自定义退出状态码</li>
+</ul>
+<pre><code class="prism language-bash">bash自定义退出状态码 
+    <span class="token keyword">exit</span> <span class="token punctuation">[</span>n<span class="token punctuation">]</span>：自定义退出状态码 
+    注意：脚本中一旦遇到exit命令，脚本会立即终止；终止退出状态取决于exit命
+令后面的数字 
+    注意：如果未给脚本指定退出状态码，整个脚本的退出状态码取决于脚本中执
+行的最后一条命令的状态码 
+</code></pre>
+<h1><a id="bashshell_377"></a>四.bash-shell脚本的基本算术运算</h1>
+<ul>
+<li>bash中的算术运算使用let命令</li>
+</ul>
+<pre><code class="prism language-bash">基本的运算符包括：
++, -, *, /, %取模（取余）, **（乘方），乘法符号有些场景中需要转义 
+</code></pre>
+<ul>
+<li>实现算术运算</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">(</span>1<span class="token punctuation">)</span> <span class="token keyword">let</span> var<span class="token operator">=</span>算术表达式 
+<span class="token punctuation">(</span>2<span class="token punctuation">)</span> var<span class="token operator">=</span>$<span class="token punctuation">[</span>算术表达式<span class="token punctuation">]</span> 
+<span class="token punctuation">(</span>3<span class="token punctuation">)</span> var<span class="token operator">=</span><span class="token variable"><span class="token variable">$((</span>算术表达式<span class="token variable">))</span></span> 
+<span class="token punctuation">(</span>4<span class="token punctuation">)</span> var<span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">expr</span> arg1 arg2 arg3 <span class="token punctuation">..</span>.<span class="token variable">)</span></span> 
+<span class="token punctuation">(</span>5<span class="token punctuation">)</span> <span class="token keyword">declare</span> –i var <span class="token operator">=</span> 数值 
+<span class="token punctuation">(</span>6<span class="token punctuation">)</span> <span class="token keyword">echo</span> ‘算术表达式’ <span class="token operator">|</span> <span class="token function">bc</span>  
+</code></pre>
+<ul>
+<li>bash有内建的随机数生成器变量：$RANDOM（0-32767）</li>
+</ul>
+<pre><code class="prism language-bash">示例：生成 0 - 49 之间随机数 
+<span class="token keyword">echo</span> $<span class="token punctuation">[</span><span class="token variable">$RANDOM</span>%50<span class="token punctuation">]</span> 
+</code></pre>
+<ul>
+<li>bash也支持增强型赋值</li>
+</ul>
+<pre><code class="prism language-bash">增强型赋值:
++<span class="token operator">=</span>, -<span class="token operator">=</span>, *<span class="token operator">=</span>, /<span class="token operator">=</span>, %<span class="token operator">=</span> 
+
+<span class="token keyword">let</span> varOPERvalue 
+例如:let count+<span class="token operator">=</span>3 
+     自加3后自赋值 
+
+自增，自减： 
+<span class="token keyword">let</span> var+<span class="token operator">=</span>1 
+<span class="token keyword">let</span> var++ 
+<span class="token keyword">let</span> var-<span class="token operator">=</span>1 
+<span class="token keyword">let</span> var-- 
+</code></pre>
+<ul>
+<li>练习<br>
+1、编写脚本 sumid.sh，计算/etc/passwd文件中的第10个用户和第20用户的UID之和</li>
+</ul>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-06</span>
+ <span class="token comment">#FileName:                  sumid.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+
+id1<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> /etc/passwd <span class="token operator">|</span> <span class="token function">head</span> -n10 <span class="token operator">|</span> <span class="token function">tail</span> -n1 <span class="token operator">|</span> <span class="token function">cut</span> -d: -f3<span class="token variable">`</span></span>
+id2<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> /etc/passwd <span class="token operator">|</span> <span class="token function">head</span> -n20 <span class="token operator">|</span> <span class="token function">tail</span> -n1 <span class="token operator">|</span> <span class="token function">cut</span> -d: -f3<span class="token variable">`</span></span>
+<span class="token keyword">let</span> sum<span class="token operator">=</span><span class="token variable">$id1</span>+<span class="token variable">$id2</span>
+<span class="token keyword">echo</span> <span class="token variable">$sum</span>
+
+unset <span class="token variable">$id1</span>
+unset <span class="token variable">$id2</span>
+unset <span class="token variable">$sum</span>
+</code></pre>
+<p>2、编写脚本 sumspace.sh，传递两个文件路径作为参数给脚本，计算这两个文件中所有空白行之和</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-06</span>
+ <span class="token comment">#FileName:                  sumspace.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> $<span class="token comment"># -eq 2 ]]; then</span>
+     F1<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> $1 <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">"^$"</span> <span class="token operator">|</span> <span class="token function">wc</span> -l<span class="token variable">`</span></span>
+     F2<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> $2 <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">"^$"</span> <span class="token operator">|</span> <span class="token function">wc</span> -l<span class="token variable">`</span></span>
+     <span class="token keyword">echo</span> <span class="token variable"><span class="token variable">$((</span> $F1 <span class="token operator">+</span> $F2 <span class="token variable">))</span></span>
+ <span class="token keyword">else</span>
+ <span class="token keyword">echo</span> -e <span class="token string">"Please specify two files.\nUsage: <span class="token variable"><span class="token variable">`</span><span class="token function">basename</span> $0<span class="token variable">`</span></span> file1 file2"</span>
+ <span class="token keyword">fi</span>
+</code></pre>
+<p>3、编写脚本 sumfile.sh，统计/etc, /var, /usr 目录中共有多少个一级子目录和文件</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-09</span>
+ <span class="token comment">#FileName:                  sumfile.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ 
+ DIR<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">find</span> -L /var/ /etc/ /usr/ -maxdepth 1 -type d <span class="token operator">|</span> <span class="token function">wc</span> -l<span class="token variable">`</span></span>
+ FILE<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">find</span> -L /var/ /etc/ /usr/ -maxdepth 1 -type f <span class="token operator">|</span> <span class="token function">wc</span> -l<span class="token variable">`</span></span>
+ <span class="token keyword">echo</span> <span class="token string">"The total is : <span class="token variable"><span class="token variable">$((</span> $DIR<span class="token operator">+</span>$FILE<span class="token operator">-</span><span class="token number">3</span> <span class="token variable">))</span></span>"</span>
+ <span class="token keyword">echo</span> <span class="token string">"The dirnum is : <span class="token variable"><span class="token variable">$((</span> $DIR<span class="token operator">-</span><span class="token number">3</span> <span class="token variable">))</span></span>"</span>
+ <span class="token keyword">echo</span> <span class="token string">"The filenum is : <span class="token variable"><span class="token variable">$((</span> $FILE <span class="token variable">))</span></span>"</span>
+ unset <span class="token variable">$DIR</span>
+ unset <span class="token variable">$FILE</span>
+</code></pre>
+<h1><a id="bash_495"></a>五.bash中的各种测试</h1>
+<h2><a id="1_497"></a>1.条件测试</h2>
+<pre><code class="prism language-bash">- 判断某需求是否满足，需要由测试机制来实现 
+    专用的测试表达式需要由测试命令辅助完成测试过程 
+- 评估布尔声明，以便用在条件性执行中 
+    •若真，则返回0 
+    •若假，则返回1 
+测试命令： 
+    •test EXPRESSION 
+    •<span class="token punctuation">[</span> EXPRESSION <span class="token punctuation">]</span> 
+    •<span class="token punctuation">[</span><span class="token punctuation">[</span> EXPRESSION <span class="token punctuation">]</span><span class="token punctuation">]</span> 
+注意：EXPRESSION前后必须有空白字符 
+</code></pre>
+<h2><a id="2bash_512"></a>2.bash的数值测试</h2>
+<pre><code class="prism language-bash">-v VAR 
+    测试变量VAR是否设置 
+    示例：判断 NAME 变量是否定义 
+        <span class="token punctuation">[</span> -v NAME <span class="token punctuation">]</span>  
+</code></pre>
+<ul>
+<li>数值测试</li>
+</ul>
+<pre><code class="prism language-bash">-gt 是否大于 
+-ge 是否大于等于 
+-eq 是否等于 
+-ne 是否不等于
+-lt 是否小于 
+-le 是否小于等于 
+</code></pre>
+<h2><a id="3bash_532"></a>3.bash的字符串测试</h2>
+<pre><code class="prism language-bash">-z <span class="token string">"STRING"</span> 字符串是否为空，空为真，不空为假 
+-n <span class="token string">"STRING"</span> 字符串是否不空，不空为真，空为假 
+<span class="token operator">=</span>  是否等于 
+<span class="token operator">&gt;</span>  ascii码是否大于ascii码 
+<span class="token operator">&lt;</span>  是否小于 
+<span class="token operator">!=</span> 是否不等于 
+<span class="token operator">==</span> 左侧字符串是否和右侧的PATTERN相同 
+<span class="token operator">=</span>~ 左侧字符串是否能够被右侧的PATTERN所匹配 
+    注意:此表达式用于<span class="token punctuation">[</span><span class="token punctuation">[</span>  <span class="token punctuation">]</span><span class="token punctuation">]</span>中，PATTERN为通配符 
+
+</code></pre>
+<h2><a id="4Bash_547"></a>4.Bash的文件测试</h2>
+<pre><code class="prism language-bash">存在性测试  
+    -a FILE：同 -e 
+    -e FILE: 文件存在性测试，存在为真，否则为假 
+存在性及类别测试 
+    -b FILE：是否存在且为块设备文件 
+    -c FILE：是否存在且为字符设备文件 
+    -d FILE：是否存在且为目录文件 
+    -f FILE：是否存在且为普通文件 
+    -h FILE 或 -L FILE：存在且为符号链接文件 
+    -p FILE：是否存在且为命名管道文件 
+    -S FILE：是否存在且为套接字文件
+</code></pre>
+<h2><a id="5Bash_563"></a>5.Bash的文件权限测试</h2>
+<pre><code class="prism language-bash">文件权限测试： 
+    -r FILE：是否存在且可读 
+    -w FILE: 是否存在且可写 
+    -x FILE: 是否存在且可执行 
+文件特殊权限测试： 
+    -u FILE：是否存在且拥有suid权限 
+    -g FILE：是否存在且拥有sgid权限 
+    -k FILE：是否存在且拥有sticky权限 
+</code></pre>
+<h2><a id="6Bash_576"></a>6.Bash的文件属性测试</h2>
+<pre><code class="prism language-bash">文件大小测试： 
+    -s FILE: 是否存在且非空 
+文件是否打开：
+    -t fd: fd  文件描述符是否在某终端已经打开 
+    -N FILE：文件自从上一次被读取之后是否被修改过 
+    -O FILE：当前有效用户是否为文件属主 
+    -G FILE：当前有效用户是否为文件属组 
+</code></pre>
+<h2><a id="7_588"></a>7.双目测试：</h2>
+<pre><code class="prism language-bash">FILE1 -ef FILE2: FILE1是否是FILE2的硬链接 
+FILE1 -nt FILE2: FILE1是否新于FILE2（mtime） 
+FILE1 -ot FILE2: FILE1是否旧于FILE2 
+</code></pre>
+<h2><a id="8Bash_596"></a>8.Bash的组合测试条件</h2>
+<pre><code class="prism language-bash">第一种方式： 
+    <span class="token punctuation">[</span> EXPRESSION1 -a EXPRESSION2 <span class="token punctuation">]</span> 并且 
+    <span class="token punctuation">[</span> EXPRESSION1 -o EXPRESSION2 <span class="token punctuation">]</span> 或者 
+    <span class="token punctuation">[</span> <span class="token operator">!</span> EXPRESSION <span class="token punctuation">]</span>
+取反 
+   -a 和 -o 需要使用测试命令进行，<span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token punctuation">]</span><span class="token punctuation">]</span> 不支持 
+第二种方式： 
+    COMMAND1 <span class="token operator">&amp;&amp;</span> COMMAND2  并且，短路与，代表条件性的AND  THEN 
+    COMMAND1 <span class="token operator">||</span> COMMAND2  或者，短路或，代表条件性的OR  ELSE 
+<span class="token operator">!</span> COMMAND   非 
+示例： 
+ <span class="token punctuation">[</span> -f “<span class="token variable">$FILE</span>” <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">[</span><span class="token punctuation">[</span>  “<span class="token variable">$FILE</span>”<span class="token operator">=</span>~ .*\.sh$  <span class="token punctuation">]</span><span class="token punctuation">]</span> 
+示例：
+  <span class="token function">test</span>  <span class="token string">"<span class="token variable">$A</span>"</span> <span class="token operator">=</span>  <span class="token string">"<span class="token variable">$B</span>"</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"Strings are equal"</span>  
+  <span class="token function">test</span>  <span class="token string">"<span class="token variable">$A</span>"</span>-eq  <span class="token string">"<span class="token variable">$B</span>"</span>  <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"Integers are equal"</span> 
+<span class="token punctuation">[</span>  <span class="token string">"<span class="token variable">$A</span>"</span> <span class="token operator">=</span>  <span class="token string">"<span class="token variable">$B</span>"</span>  <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"Strings are equal"</span>  
+<span class="token punctuation">[</span>  <span class="token string">"<span class="token variable">$A</span>"</span> -eq <span class="token string">"<span class="token variable">$B</span>"</span> <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"Integers are equal"</span> 
+<span class="token punctuation">[</span>  -f /bin/cat -a -x /bin/cat <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token function">cat</span> /etc/fstab 
+<span class="token punctuation">[</span>  -z  <span class="token string">"<span class="token variable">$HOSTNAME</span>"</span> -o   <span class="token variable">$HOSTNAME</span> <span class="token operator">=</span> <span class="token string">"localhost.localdomain"</span>  <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token function">hostname</span> suosuoli.cn
+
+</code></pre>
+<h2><a id="9_621"></a>9.练习</h2>
+<p>1、编写脚本 argsnum.sh，接受一个文件路径作为参数；如果参数个数小于1， 则提示用户“至少应该给一个参数”，并立即退出；如果参数个数不小于1，则显示第一个参数所指向的文件中的空白行数</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-06</span>
+ <span class="token comment">#FileName:                  argsum.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token punctuation">[</span><span class="token punctuation">[</span> $<span class="token comment"># -lt 1 ]] &amp;&amp; (echo "Usage:`basename $0` /path/to/somefile" &amp;&amp; exit) || grep "^$" $1 | wc -l</span>
+</code></pre>
+<p>2、编写脚本 hostping.sh，接受一个主机的IPv4地址做为参数，测试是否可连 通。如果能ping通，则提示用户“该IP地址可访问”；如果不可ping通，则提 示用户“该IP地址不可访问”</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-06</span>
+ <span class="token comment">#FileName:                  hostping.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ 
+ IP<span class="token operator">=</span><span class="token string">"\b(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b"</span> 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token variable">$1</span> <span class="token operator">=</span>~ <span class="token variable">$IP</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+     <span class="token function">ping</span> -W1 -c1 <span class="token variable">$1</span> <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /etc/null
+     <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token variable">$?</span> -eq 0 <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+         <span class="token keyword">echo</span> -e <span class="token string">"\e[1;32mThe host is up.\e[0m"</span> 
+     <span class="token keyword">else</span>
+         <span class="token keyword">echo</span> -e <span class="token string">"\e[1;35mThe host is down!\e[0m"</span>
+     <span class="token keyword">fi</span>
+ <span class="token keyword">else</span> 
+     <span class="token keyword">echo</span> <span class="token string">"It is not a legal ip, please check your input."</span>
+ 
+ <span class="token keyword">fi</span>
+ 
+ unset IP
+</code></pre>
+<p>3、编写脚本 checkdisk.sh，检查磁盘分区空间和inode使用率，如果超过80%，就发广播警告空间将满</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-10</span>
+ <span class="token comment">#FileName:                  checkdisk.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           checkdisk.sh</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)</span>
+ <span class="token comment">#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#</span>
+ 
+ D_MAX<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">df</span> -h <span class="token operator">|</span> <span class="token function">grep</span> -E /dev/\<span class="token punctuation">(</span>sd\<span class="token operator">|</span>nvme\<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token function">egrep</span> -o <span class="token string">"[0-9]{,3}%"</span> <span class="token operator">|</span> <span class="token function">cut</span> -d% -f1 <span class="token operator">|</span> <span class="token function">sort</span> -nr <span class="token operator">|</span> <span class="token function">head</span> -n1<span class="token variable">`</span></span>
+ I_MAX<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">df</span> -hi <span class="token operator">|</span> <span class="token function">grep</span> -E /dev/\<span class="token punctuation">(</span>sd\<span class="token operator">|</span>nvme\<span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token function">egrep</span> -o <span class="token string">"[0-9]{,3}%"</span> <span class="token operator">|</span> <span class="token function">cut</span> -d% -f1 <span class="token operator">|</span> <span class="token function">sort</span> -nr <span class="token operator">|</span> <span class="token function">head</span> -n1<span class="token variable">`</span></span> 
+ THREAD_D<span class="token operator">=</span>85
+ THREAD_I<span class="token operator">=</span>85
+ 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token variable">$D_MAX</span> -gt <span class="token variable">$THREAD_D</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span> 
+     <span class="token keyword">echo</span> -e <span class="token string">"\e[1;31mWarning!\nThe disk space is almost full.\e[0m"</span>
+ <span class="token keyword">elif</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token variable">$I_MAX</span> -gt <span class="token variable">$THREAD_I</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+     <span class="token keyword">echo</span> -e <span class="token string">"\e[1;31mWarning!\nThe inode is almost full.\e[0m"</span>
+     
+ <span class="token keyword">else</span>
+     <span class="token keyword">echo</span> -e <span class="token string">"\e[1;32mNice.\e[0m"</span>
+     <span class="token keyword">exit</span> 0
+ <span class="token keyword">fi</span>
+ 
+ unset D_MAX
+ unset I_MAX
+ unset THREAD_D
+ unset THREAD_I
+
+</code></pre>
+<p>4、编写脚本 per.sh，判断当前用户对指定参数文件，是否不可读并且不可写</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-10</span>
+ <span class="token comment">#FileName:                  per.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           per.sh</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)</span>
+ <span class="token comment">#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#</span>
+ 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token operator">!</span> -r <span class="token variable">$1</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+     <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token operator">!</span> -w <span class="token variable">$1</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+         <span class="token keyword">echo</span> <span class="token string">"Not readable and not writable."</span>
+     <span class="token keyword">else</span>
+         <span class="token keyword">echo</span> <span class="token string">"Not readable but writable."</span>
+     <span class="token keyword">fi</span>
+ <span class="token keyword">elif</span> <span class="token punctuation">[</span> -r <span class="token variable">$1</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+     <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token operator">!</span> -w <span class="token variable">$1</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+         <span class="token keyword">echo</span> <span class="token string">"Readable but not writable."</span>
+     <span class="token keyword">else</span>
+         <span class="token keyword">echo</span> <span class="token string">"Readable and writable."</span>
+     <span class="token keyword">fi</span>
+ <span class="token keyword">else</span> 
+     <span class="token keyword">echo</span> <span class="token string">"ERROR!"</span>
+ <span class="token keyword">fi</span>
+</code></pre>
+<p>5、编写脚本 excute.sh ，判断参数文件是否为sh后缀的普通文件，如果是，添加所有人可执行权限，否则提示用户非脚本文件</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-10</span>
+ <span class="token comment">#FileName:                  executable.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           executable.sh</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)</span>
+ <span class="token comment">#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#</span>
+ 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token variable">$1</span> <span class="token operator">=</span>~ \.sh$ <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+     <span class="token function">chmod</span> +x <span class="token variable">$1</span>
+     <span class="token keyword">echo</span>  -e <span class="token string">"Adding executing permission to <span class="token variable">$1</span>...\nAdded."</span>
+ <span class="token keyword">else</span>
+     <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$1</span> is not executable."</span>
+ <span class="token keyword">fi</span>
+</code></pre>
+<p>6、编写脚本 nologin.sh和 login.sh，实现禁止和允许普通用户登录系统</p>
+<pre><code class="prism language-bash">
+ <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-09</span>
+ <span class="token comment">#FileName:                  nologin.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> -f /etc/nologin <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+     <span class="token keyword">echo</span> <span class="token string">"File exists,nobody but root now can login."</span>
+ <span class="token keyword">else</span>
+     <span class="token keyword">echo</span> System maintenance,deny login<span class="token operator">!</span> <span class="token operator">&gt;</span> /etc/nologin
+ <span class="token keyword">fi</span>
+ 
+ <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:                        steveli</span>
+ <span class="token comment">#QQ:                            1049103823</span>
+ <span class="token comment">#Data:                      2019-10-09</span>
+ <span class="token comment">#FileName:                  allowLogin.sh</span>
+ <span class="token comment">#URL:                   https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:           Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> -f /etc/nologin <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span> 
+     /usr/bin/rm /etc/nologin
+ <span class="token keyword">else</span>
+     <span class="token keyword">echo</span> <span class="token string">"Everyone can login."</span>
+ <span class="token keyword">fi</span>
+ 
+
+</code></pre>
+<h2><a id="10read_819"></a>10.read命令</h2>
+<ul>
+<li>使用read命令来接受输入，把输入值分配给一个或多个shell变量<br>
+-p  指定要显示的提示<br>
+-s  静默输入，一般用于密码<br>
+-n  N 指定输入的字符长度N<br>
+-d  ‘字符’  输入结束符<br>
+-t  N  TIMEOUT为N秒<br>
+read 从标准输入中读取值，给每个单词分配一个变量<br>
+所有剩余单词都被分配给最后一个变量<br>
+read -p "Enter a filename: " FILE<br>
+echo $FILE</li>
+</ul>
+<h1><a id="if_832"></a>六.条件判断if</h1>
+<h2><a id="1_834"></a>1.单分支结构</h2>
+<pre><code class="prism language-bash"><span class="token keyword">if</span> 判断条件<span class="token punctuation">;</span><span class="token keyword">then</span> 
+    条件为真的分支代码 
+<span class="token keyword">fi</span> 
+</code></pre>
+<h2><a id="2_842"></a>2.双分支结构</h2>
+<pre><code class="prism language-bash">f 判断条件<span class="token punctuation">;</span> <span class="token keyword">then</span> 
+    条件为真的分支代码 
+<span class="token keyword">else</span> 
+    条件为假的分支代码 
+<span class="token keyword">fi</span> 
+
+</code></pre>
+<h2><a id="3_853"></a>3.多分支结构</h2>
+<ul>
+<li>逐条件进行判断，第一次遇为“真”条件时，执行其分支;而后结束整个if语句</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">if</span> 判断条件1<span class="token punctuation">;</span> <span class="token keyword">then</span> 
+    条件1为真的分支代码 
+<span class="token keyword">elif</span> 判断条件2<span class="token punctuation">;</span> <span class="token keyword">then</span> 
+    条件2为真的分支代码 
+<span class="token keyword">elif</span> 判断条件3<span class="token punctuation">;</span> <span class="token keyword">then</span> 
+    条件3为真的分支代码 
+<span class="token keyword">else</span> 
+    以上条件都为假的分支代码
+<span class="token keyword">fi</span> 
+</code></pre>
+<h1><a id="case_869"></a>七.条件判断case</h1>
+<ul>
+<li>case语句支持glob风格的匹配</li>
+</ul>
+<pre><code class="prism language-bash">    *: 任意长度任意字符
+    ?: 任意单个字符
+    <span class="token punctuation">[</span><span class="token punctuation">]</span>：指定范围内的任意单个字符
+    a<span class="token operator">|</span>b: a或b
+</code></pre>
+<pre><code class="prism language-bash"><span class="token keyword">case</span> 变量引用 <span class="token keyword">in</span>
+PAT1<span class="token punctuation">)</span>
+    分支1
+<span class="token punctuation">;</span><span class="token punctuation">;</span>
+PAT2<span class="token punctuation">)</span>
+    分支2
+<span class="token punctuation">;</span><span class="token punctuation">;</span>
+    <span class="token punctuation">..</span>.
+*<span class="token punctuation">)</span>
+    默认分支
+<span class="token punctuation">;</span><span class="token punctuation">;</span>
+esac
+</code></pre>
+<h2><a id="_895"></a>练习</h2>
+<p>1、编写脚本 createuser.sh，实现如下功能：使用一个用户名做为参数，如果<br>
+指定参数的用户存在，就显示其存在，否则添加之；显示添加的用户的id号等<br>
+信息</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:            steveli</span>
+ <span class="token comment">#QQ:                1049103823</span>
+ <span class="token comment">#Data:              2019-10-10</span>
+ <span class="token comment">#FileName:          createUser.sh</span>
+ <span class="token comment">#URL:               https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:       createUser.sh</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)</span>
+ <span class="token comment">#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#</span>
+ USER_EXIST<span class="token operator">=</span>2
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> $<span class="token comment"># -eq 0 ]; then</span>
+     <span class="token keyword">echo</span> <span class="token string">"Usage:<span class="token variable"><span class="token variable">`</span><span class="token function">basename</span> $0<span class="token variable">`</span></span> user"</span>
+ <span class="token keyword">else</span>
+     <span class="token keyword">if</span> <span class="token function">id</span> <span class="token variable">$1</span> <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null<span class="token punctuation">;</span> <span class="token keyword">then</span>
+         <span class="token keyword">echo</span> <span class="token string">"User <span class="token variable">$1</span> exists.Exiting..."</span>
+         <span class="token keyword">exit</span> <span class="token variable">$USER_EXIST</span>
+     <span class="token keyword">else</span>
+         <span class="token function">useradd</span> <span class="token variable">$1</span>  
+         <span class="token punctuation">[</span> <span class="token variable">$?</span> -eq 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> -e <span class="token string">"User <span class="token variable">$1</span> added.\nThe info of <span class="token variable">$1</span> as folloes:\n"</span>
+         <span class="token function">id</span> <span class="token variable">$1</span>
+     <span class="token keyword">fi</span>  
+ <span class="token keyword">fi</span>
+ unset USER_EXIST
+</code></pre>
+<p>2、编写脚本 yesorno.sh，提示用户输入yes或no,并判断用户输入的是yes还是<br>
+no,或是其它信息</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:            steveli</span>
+ <span class="token comment">#QQ:                1049103823</span>
+ <span class="token comment">#Data:              2019-10-10</span>
+ <span class="token comment">#FileName:          yesorno.sh</span>
+ <span class="token comment">#URL:               https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:       yesorno.sh</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)</span>
+ <span class="token comment">#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#</span>
+ <span class="token function">read</span> -p <span class="token string">"Input yes or no: "</span> ANS 
+ <span class="token keyword">case</span> <span class="token variable">$ANS</span> <span class="token keyword">in</span>
+ <span class="token punctuation">[</span>Yy<span class="token punctuation">]</span><span class="token punctuation">[</span>Ee<span class="token punctuation">]</span><span class="token punctuation">[</span>Ss<span class="token punctuation">]</span><span class="token operator">|</span><span class="token punctuation">[</span>Yy<span class="token punctuation">]</span><span class="token punctuation">)</span>
+     <span class="token keyword">echo</span> <span class="token string">"You'v input yes."</span>
+ <span class="token punctuation">;</span><span class="token punctuation">;</span>
+ <span class="token punctuation">[</span>Nn<span class="token punctuation">]</span><span class="token punctuation">[</span>Oo<span class="token punctuation">]</span><span class="token operator">|</span><span class="token punctuation">[</span>Nn<span class="token punctuation">]</span><span class="token punctuation">)</span>
+     <span class="token keyword">echo</span> <span class="token string">"You'v input no."</span>
+ <span class="token punctuation">;</span><span class="token punctuation">;</span>
+ *<span class="token punctuation">)</span>
+     <span class="token keyword">echo</span> <span class="token string">"Ni hao tiao a ."</span>
+ esac
+</code></pre>
+<p>3、编写脚本 filetype.sh，判断用户输入文件路径，显示其文件类型（普通，目<br>
+录，链接，其它文件类型）</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:            steveli</span>
+ <span class="token comment">#QQ:                1049103823</span>
+ <span class="token comment">#Data:              2019-10-10</span>
+ <span class="token comment">#FileName:          exe.sh</span>
+ <span class="token comment">#URL:               https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:       Indicate file type.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)</span>
+ <span class="token comment">#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#</span>
+ 
+ NUM<span class="token operator">=</span>$<span class="token comment">#</span>
+ <span class="token keyword">declare</span> -i J<span class="token operator">=</span>0
+ 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> -f /tmp/mid <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+     <span class="token keyword">:</span> <span class="token operator">&gt;</span> /tmp/mid
+ <span class="token keyword">fi</span>
+ 
+ <span class="token punctuation">[</span> $<span class="token comment"># -eq 0 ] &amp;&amp; echo "Usage:`basename $0` FILE1 [FILE2 ...]"</span>
+ 
+ <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$*</span>"</span> <span class="token operator">|</span> <span class="token function">tr</span> -s <span class="token string">" "</span> <span class="token string">"\n"</span> <span class="token operator">&gt;&gt;</span> /tmp/mid 
+ 
+ <span class="token function">exec</span> 6<span class="token operator">&lt;</span> /tmp/mid
+ <span class="token keyword">for</span> <span class="token variable"><span class="token punctuation">((</span>j<span class="token operator">=</span><span class="token number">0</span> <span class="token punctuation">;</span> j<span class="token operator">&lt;=</span>$NUM <span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">))</span></span><span class="token punctuation">;</span> <span class="token keyword">do</span>
+ <span class="token keyword">while</span> <span class="token function">read</span> -u 6 I<span class="token punctuation">;</span> <span class="token keyword">do</span>
+         <span class="token keyword">let</span> J+<span class="token operator">=</span>1
+         <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> -d <span class="token variable">$I</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+             <span class="token keyword">echo</span> <span class="token string">"File<span class="token variable">$J</span> is a directory."</span>
+         <span class="token keyword">elif</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token operator">!</span> -e <span class="token variable">$I</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+             <span class="token keyword">echo</span> <span class="token string">"File<span class="token variable">$J</span> not exists."</span>
+         <span class="token keyword">else</span> 
+             C<span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token keyword">echo</span> <span class="token punctuation">$(</span>ls -l $I 2<span class="token operator">&gt;</span> /dev/null<span class="token variable">)</span></span> <span class="token operator">|</span> <span class="token function">cut</span> -c1<span class="token punctuation">)</span>
+             <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$C</span>"</span> <span class="token operator">=</span> <span class="token string">"-"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+                 <span class="token keyword">echo</span> <span class="token string">"File<span class="token variable">$J</span> is a normal file."</span>
+             <span class="token comment">#elif [[ "$C" = "d" ]]; then</span>
+             <span class="token comment">#    echo "File$J is a directory."</span>
+             <span class="token keyword">elif</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$C</span>"</span> <span class="token operator">=</span> <span class="token string">"b"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+                 <span class="token keyword">echo</span> <span class="token string">"File<span class="token variable">$J</span> is a block device file."</span>
+             <span class="token keyword">elif</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$C</span>"</span> <span class="token operator">=</span> <span class="token string">"c"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+                 <span class="token keyword">echo</span> <span class="token string">"File<span class="token variable">$J</span> is a character device file."</span>
+             <span class="token keyword">elif</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$C</span>"</span> <span class="token operator">=</span> <span class="token string">"l"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+                 <span class="token keyword">echo</span> <span class="token string">"File<span class="token variable">$J</span> is a symbolic link."</span>
+             <span class="token keyword">elif</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$C</span>"</span> <span class="token operator">=</span> <span class="token string">"p"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+                 <span class="token keyword">echo</span> <span class="token string">"File<span class="token variable">$J</span> is a pipe."</span>
+             <span class="token keyword">elif</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$C</span>"</span> <span class="token operator">=</span> <span class="token string">"s"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+                 <span class="token keyword">echo</span> <span class="token string">"File<span class="token variable">$J</span> is a socket."</span>
+             <span class="token keyword">fi</span>  
+         <span class="token keyword">fi</span>  
+ <span class="token keyword">done</span>
+ <span class="token keyword">done</span>
+</code></pre>
+<p>4、编写脚本 checkint.sh，判断用户输入的参数是否为正整数</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Author:            steveli</span>
+ <span class="token comment">#QQ:                1049103823</span>
+ <span class="token comment">#Data:              2019-10-06</span>
+ <span class="token comment">#FileName:          checkint.sh</span>
+ <span class="token comment">#URL:               https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:       Test scrpting.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#*******************************************************************************</span>
+ PATTERN<span class="token operator">=</span><span class="token string">"^([^-]|[0-9]+)?[0-9]+$"</span>
+ <span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token variable">$1</span> <span class="token operator">=</span>~ <span class="token variable">$PATTERN</span> <span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+     <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$1</span> is a unsigned int."</span>
+ <span class="token keyword">else</span>
+     <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$1</span> is not a unsigned int."</span>
+ <span class="token keyword">fi</span>
+ unset PATTERN
+</code></pre>
+<h1><a id="_1048"></a>八.配置用户环境</h1>
+<h2><a id="1bash_1050"></a>1.bash展开命令行的优先次序(优先级)</h2>
+<div class="mermaid"><svg xmlns="http://www.w3.org/2000/svg" id="mermaid-svg-D8LYU7K8Tp4fiNXw" height="839.375" width="225" viewBox="0 0 245 859.375"><g><g class="output"><g class="clusters"></g><g class="edgePaths"><g class="edgePath" style="opacity: 1;"><path class="path" d="M112.5,64.375L112.5,89.375L112.5,114.375" marker-end="url(#arrowhead140)" style="fill:none"></path><defs><marker id="arrowhead140" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath" style="opacity: 1;"><path class="path" d="M112.5,158.75L112.5,183.75L112.5,208.75" marker-end="url(#arrowhead141)" style="fill:none"></path><defs><marker id="arrowhead141" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath" style="opacity: 1;"><path class="path" d="M112.5,253.125L112.5,278.125L112.5,303.125" marker-end="url(#arrowhead142)" style="fill:none"></path><defs><marker id="arrowhead142" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath" style="opacity: 1;"><path class="path" d="M112.5,347.5L112.5,372.5L112.5,397.5" marker-end="url(#arrowhead143)" style="fill:none"></path><defs><marker id="arrowhead143" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath" style="opacity: 1;"><path class="path" d="M112.5,441.875L112.5,466.875L112.5,491.875" marker-end="url(#arrowhead144)" style="fill:none"></path><defs><marker id="arrowhead144" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath" style="opacity: 1;"><path class="path" d="M112.5,536.25L112.5,561.25L112.5,586.25" marker-end="url(#arrowhead145)" style="fill:none"></path><defs><marker id="arrowhead145" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath" style="opacity: 1;"><path class="path" d="M112.5,630.625L112.5,655.625L112.5,680.625" marker-end="url(#arrowhead146)" style="fill:none"></path><defs><marker id="arrowhead146" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath" style="opacity: 1;"><path class="path" d="M112.5,725L112.5,750L112.5,775" marker-end="url(#arrowhead147)" style="fill:none"></path><defs><marker id="arrowhead147" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g></g><g class="edgeLabels"><g class="edgeLabel" transform="" style="opacity: 1;"><g transform="translate(0,0)" class="label"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="" style="opacity: 1;"><g transform="translate(0,0)" class="label"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="" style="opacity: 1;"><g transform="translate(0,0)" class="label"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="" style="opacity: 1;"><g transform="translate(0,0)" class="label"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="" style="opacity: 1;"><g transform="translate(0,0)" class="label"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="" style="opacity: 1;"><g transform="translate(0,0)" class="label"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="" style="opacity: 1;"><g transform="translate(0,0)" class="label"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="" style="opacity: 1;"><g transform="translate(0,0)" class="label"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node" id="A" transform="translate(112.5,42.1875)" style="opacity: 1;"><rect rx="5" ry="5" x="-92.5" y="-22.1875" width="185" height="44.375"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-82.5,-12.1875)"><foreignObject width="165" height="24.375"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">把命令行分成单个命令词</div></foreignObject></g></g></g><g class="node" id="B" transform="translate(112.5,136.5625)" style="opacity: 1;"><rect rx="5" ry="5" x="-40" y="-22.1875" width="80" height="44.375"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-30,-12.1875)"><foreignObject width="60" height="24.375"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">展开别名</div></foreignObject></g></g></g><g class="node" id="C" transform="translate(112.5,230.9375)" style="opacity: 1;"><rect rx="5" ry="5" x="-70" y="-22.1875" width="140" height="44.375"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-60,-12.1875)"><foreignObject width="120" height="24.375"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">展开大括号的声明</div></foreignObject></g></g></g><g class="node" id="D" transform="translate(112.5,325.3125)" style="opacity: 1;"><rect rx="5" ry="5" x="-62.5" y="-22.1875" width="125" height="44.375"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-52.5,-12.1875)"><foreignObject width="105" height="24.375"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">展开波浪符声明</div></foreignObject></g></g></g><g class="node" id="E" transform="translate(112.5,419.6875)" style="opacity: 1;"><rect rx="5" ry="5" x="-40" y="-22.1875" width="80" height="44.375"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-30,-12.1875)"><foreignObject width="60" height="24.375"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">命令替换</div></foreignObject></g></g></g><g class="node" id="F" transform="translate(112.5,514.0625)" style="opacity: 1;"><rect rx="5" ry="5" x="-92.5" y="-22.1875" width="185" height="44.375"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-82.5,-12.1875)"><foreignObject width="165" height="24.375"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">再次把命令行分成命令词</div></foreignObject></g></g></g><g class="node" id="G" transform="translate(112.5,608.4375)" style="opacity: 1;"><rect rx="5" ry="5" x="-55" y="-22.1875" width="110" height="44.375"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-45,-12.1875)"><foreignObject width="90" height="24.375"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">展开文件通配</div></foreignObject></g></g></g><g class="node" id="H" transform="translate(112.5,702.8125)" style="opacity: 1;"><rect rx="5" ry="5" x="-55.8359375" y="-22.1875" width="111.671875" height="44.375"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-45.8359375,-12.1875)"><foreignObject width="91.6845703125" height="24.375"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">准备I/0重定向</div></foreignObject></g></g></g><g class="node" id="I" transform="translate(112.5,797.1875)" style="opacity: 1;"><rect rx="5" ry="5" x="-40" y="-22.1875" width="80" height="44.375"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-30,-12.1875)"><foreignObject width="60" height="24.375"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">运行命令</div></foreignObject></g></g></g></g></g></g></svg></div>
+<h2><a id="2bash_1064"></a>2.防止bash扩展某些特殊字符</h2>
+<pre><code class="prism language-bash">反斜线（\）会使随后的字符按原意解释 
+    <span class="token keyword">echo</span> Your cost: \<span class="token variable">$5</span>.00  
+     Your cost: <span class="token variable">$5</span>.00 
+加引号来防止扩展 
+•单引号（’’）防止所有扩展 
+•双引号（”“）也可防止扩展，但是以下情况例外： 
+    $（美元符号） 变量扩展 
+    <span class="token variable"><span class="token variable">`</span> <span class="token variable">`</span></span> <span class="token punctuation">(</span>反引号）    命令替换 
+    \（反斜线）   禁止单个字符扩展 
+    <span class="token operator">!</span>（叹号）     历史命令替换 
+</code></pre>
+<h2><a id="3bash_1078"></a>3.bash的配置文件</h2>
+<ul>
+<li>按生效范围划分，存在两类：</li>
+</ul>
+<pre><code class="prism language-bash">全局配置： 
+    /etc/profile 
+    /etc/profile.d/*.sh 
+    /etc/bashrc 
+个人配置： 
+    ~/.bash_profile 
+    ~/.bashrc 
+</code></pre>
+<ul>
+<li>按功能划分，存在两类：</li>
+</ul>
+<pre><code class="prism language-bash">Profile类 
+profile类：为交互式登录的shell提供配置 
+    全局：/etc/profile, /etc/profile.d/*.sh 
+    个人：~/.bash_profile 
+功用： 
+    <span class="token punctuation">(</span>1<span class="token punctuation">)</span> 用于定义环境变量 
+    <span class="token punctuation">(</span>2<span class="token punctuation">)</span> 运行命令或脚本 
+</code></pre>
+<pre><code class="prism language-bash">Bashrc类 
+bashrc类：为非交互式和交互式登录的shell提供配置 
+    全局：/etc/bashrc 
+    个人：~/.bashrc 
+功用： 
+    <span class="token punctuation">(</span>1<span class="token punctuation">)</span> 定义命令别名和函数 
+    <span class="token punctuation">(</span>2<span class="token punctuation">)</span> 定义本地变量 
+</code></pre>
+<h2><a id="4shell_1113"></a>4.shell登录两种方式</h2>
+<ul>
+<li>交互式登录：</li>
+</ul>
+<pre><code class="prism language-bash"> <span class="token punctuation">(</span>1<span class="token punctuation">)</span>直接通过终端输入账号密码登录 
+ <span class="token punctuation">(</span>2<span class="token punctuation">)</span>使用“su - UserName” 切换的用户 
+执行顺序：/etc/profile --<span class="token operator">&gt;</span> /etc/profile.d/*.sh --<span class="token operator">&gt;</span> ~/.bash_profile --<span class="token operator">&gt;</span> 
+~/.bashrc --<span class="token operator">&gt;</span> /etc/bashrc 
+</code></pre>
+<ul>
+<li>非交互式登录：</li>
+</ul>
+<pre><code class="prism language-bash"> <span class="token punctuation">(</span>1<span class="token punctuation">)</span>su UserName 
+ <span class="token punctuation">(</span>2<span class="token punctuation">)</span>图形界面下打开的终端 
+ <span class="token punctuation">(</span>3<span class="token punctuation">)</span>执行脚本 
+ <span class="token punctuation">(</span>4<span class="token punctuation">)</span>任何其它的bash实例 
+ 执行顺序： /etc/profile.d/*.sh --<span class="token operator">&gt;</span> /etc/bashrc --<span class="token operator">&gt;</span>~/.bashrc  
+</code></pre>
+<h2><a id="5_1134"></a>5.编辑配置文件后使其生效的方式</h2>
+<pre><code class="prism language-bash">修改profile和bashrc文件后需生效 
+两种方法: 
+1重新启动shell进程 
+2使用.命令或source 命令 
+例: 
+    <span class="token keyword">.</span>   ~/.bashrc 
+</code></pre>
+<ul>
+<li>退出登录时让Bash执行退出任务</li>
+</ul>
+<pre><code class="prism language-bash">任务保存在~/.bash_logout文件中（用户） 
+在退出登录shell时运行 
+作用 
+    •创建自动备份 
+    •清除临时文件 
+</code></pre>
+<h2><a id="6set_1154"></a>6.set命令和$-变量</h2>
+<ul>
+<li>$- 变量保存shell的一些功能开关</li>
+</ul>
+<pre><code class="prism language-bash">h：hashall，打开这个选项后，Shell 会将命令所在的路径hash下来，避免每
+次都要查询。通过set +h将h选项关闭 
+i：interactive-comments，包含这个选项说明当前的 shell 是一个交互式的 
+shell。所谓的交互式shell,在脚本中，i选项是关闭的 
+m：monitor，打开监控模式，就可以通过Job control来控制进程的停止、继
+续，后台或者前台执行等 
+B：braceexpand，大括号扩展 
+H：history，H选项打开，可以展开历史列表中的命令，可以通过<span class="token operator">!</span>感叹号来
+完成，例如“<span class="token operator">!</span><span class="token operator">!</span>”返回上最近的一个历史命令，“<span class="token operator">!</span>n”返回第 n 个历史命令 
+</code></pre>
+<h2><a id="7_1170"></a>7.脚本安全相关</h2>
+<ul>
+<li>使用set命令可以避免一些灾难性的错误</li>
+</ul>
+<pre><code class="prism language-bash">-u     在扩展一个没有设置的变量时，显示错误信息 
+        等同set -o nounset 
+-e    如果一个命令返回一个非0退出状态值<span class="token punctuation">(</span>失败<span class="token punctuation">)</span>就退出 
+        等同set -o errexit 
+</code></pre>
+<h2><a id="8_1181"></a>8.练习</h2>
+<p>1、让所有用户的PATH环境变量的值多出一个路径，例如：<br>
+/usr/local/apache/bin</p>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">"PATH=/usr/local/apache/bin:<span class="token variable">$PATH</span>"</span> <span class="token operator">&gt;&gt;</span> /etc/profile.d/env.sh
+</code></pre>
+<p>2、用户 root 登录时，将命令指示符变成红色，并自动启用如下别名：</p>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">"PATH=/usr/local/apache/bin:<span class="token variable">$PATH</span>"</span> <span class="token operator">&gt;&gt;</span> /etc/profile.d/env.sh 
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF
+rm=‘rm –i’ 
+cdnet=‘cd /etc/sysconfig/network-scripts/’ 
+editnet=‘vim /etc/sysconfig/network-scripts/ifcfg-eth0’ 
+######
+V=<span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> /etc/redhat-release <span class="token operator">|</span> <span class="token function">grep</span> -o <span class="token string">"[0-9]\+"</span> <span class="token operator">|</span> <span class="token function">cut</span> -d. -f1 <span class="token operator">|</span> <span class="token function">head</span> -n1<span class="token variable">`</span></span>
+NET0=iifconfig | grep -o "ens[0-9]\+" | cut -ds -f2 | head -n1 
+NET1=iifconfig | grep -o "ens[0-9]\+" | cut -ds -f2 | head -n2 | tail -n1 
+if [ <span class="token variable">$V</span> = 7 ]; then
+alias    editnet='vim /etc/sysconfig/network-scripts/ifcfg-ens33'
+elif [ <span class="token variable">$V</span> = 8 ]; then
+alias    editnet0='vim /etc/sysconfig/network-scripts/ifcfg-ens160'
+alias    editnet1='vim /etc/sysconfig/network-scripts/ifcfg-ens192'
+fi
+EOF</span>
+</code></pre>
+<p>3、任意用户登录系统时，显示红色字体的警示提醒信息“Hi,dangerous！”</p>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">'echo -e "\e[1;31mHi,dangerous!\e[0m"'</span> <span class="token operator">&gt;</span> /etc/profile.d/Warning.sh
+</code></pre>
+<p>4、编写生成脚本基本格式的脚本，包括作者，联系方式，版本，时间，描述等</p>
+<pre><code class="prism language-bash"> <span class="token keyword">set</span> number
+ <span class="token keyword">set</span> tabstop<span class="token operator">=</span>4
+ <span class="token keyword">set</span> softtabstop<span class="token operator">=</span>4
+ <span class="token keyword">set</span> shiftwidth<span class="token operator">=</span>4
+ <span class="token keyword">set</span> expandtab 
+ <span class="token keyword">set</span> ignorecase
+ <span class="token keyword">set</span> cursorline
+ <span class="token keyword">set</span> autoindent
+ autocmd BufNewFile *.sh <span class="token function">exec</span> <span class="token string">":call SetTitle()"</span>
+ func SetTitle<span class="token punctuation">(</span><span class="token punctuation">)</span>
+     <span class="token keyword">if</span> expand<span class="token punctuation">(</span><span class="token string">"%:e"</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string">'sh'</span>
+         call setline<span class="token punctuation">(</span>1,<span class="token string">"#!/bin/bash"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>2,<span class="token string">"#"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>3,<span class="token string">"#*******************************************************************************"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>4,<span class="token string">"#Author:            steveli"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>5,<span class="token string">"#QQ:                1049103823"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>6,<span class="token string">"#Data:              "</span>.strftime<span class="token punctuation">(</span><span class="token string">"%Y-%m-%d"</span><span class="token punctuation">))</span>
+         call setline<span class="token punctuation">(</span>7,<span class="token string">"#FileName:          "</span>.expand<span class="token punctuation">(</span><span class="token string">"%"</span><span class="token punctuation">))</span>
+         call setline<span class="token punctuation">(</span>8,<span class="token string">"#URL:               https://blog.csdn.net/YouOops"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>9,<span class="token string">"#Description:       "</span>.expand<span class="token punctuation">(</span><span class="token string">"%"</span><span class="token punctuation">))</span>
+         call setline<span class="token punctuation">(</span>10,<span class="token string">"#Copyright (C):        "</span>.strftime<span class="token punctuation">(</span><span class="token string">"%Y"</span><span class="token punctuation">)</span>.<span class="token string">" All rights reserved"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>11,<span class="token string">"#*******************************************************************************"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>12,<span class="token string">"#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>13,<span class="token string">"#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>14,<span class="token string">"#*******************************************************************************"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>15,<span class="token string">"#"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>16,<span class="token string">""</span><span class="token punctuation">)</span>
+         endif
+ endfunc
+ autocmd BufNewFile * normal G
+</code></pre>
+<p>5、编写用户的环境初始化脚本reset.sh，包括别名，登录提示符，vim的设置，<br>
+环境变量等</p>
+<pre><code class="prism language-bash"> <span class="token comment">#!/bin/bash</span>
+ <span class="token comment">#</span>
+ <span class="token comment">#******************************************************************************* </span>
+ <span class="token comment">#Author:            steveli</span>
+ <span class="token comment">#QQ:                1049103823</span>
+ <span class="token comment">#Data:              2019-08-29</span>
+ <span class="token comment">#FileName:          reset6.sh</span>
+ <span class="token comment">#URL:               https://blog.csdn.net/YouOops</span>
+ <span class="token comment">#Description:       This script doing some init configurations on centos7&amp;8.</span>
+ <span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+ <span class="token comment">#******************************************************************************</span>
+ <span class="token comment">#*******************************************************************************</span>
+ <span class="token comment">#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)</span>
+ <span class="token comment">#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)</span>
+ <span class="token comment">#*******************************************************************************</span>
+ VIMRC<span class="token operator">=</span>~/.vimrc
+ BASHRC<span class="token operator">=</span>~/.bashrc
+ PROMPT_PATH<span class="token operator">=</span>/etc/profile.d/
+ HOSTNAME<span class="token operator">=</span>stevenux
+ HOSTNAME_PATH<span class="token operator">=</span>/etc/hostname
+ HOSTS_PATH<span class="token operator">=</span>/etc/hosts
+ 
+ <span class="token comment">#1.Prompt configuration</span>
+ <span class="token keyword">echo</span> <span class="token string">"1.Entering to /etc/profile.d/ ..."</span>
+ 
+ <span class="token function">sleep</span> 1
+ <span class="token function">cd</span> <span class="token variable">$PROMPT_PATH</span>
+ <span class="token keyword">echo</span> <span class="token string">"Create env.sh..."</span>
+ <span class="token function">sleep</span> 1
+ 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token operator">!</span> -e <span class="token variable">${PROMPT_PATH}</span>/env.sh <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+ <span class="token function">touch</span> env.sh
+ <span class="token function">cat</span> <span class="token operator">&gt;&gt;</span> env.sh <span class="token operator">&lt;&lt;</span>EOF
+ <span class="token comment">#!/bin/bash</span>
+ PS1<span class="token operator">=</span><span class="token string">"\[\e[37;40m\][\[\e[32;40m\]\u\[\e[37;40m\]@\h \[\e[36;40m\]\w\[\e[0m\]]\$"</span>
+ EOF
+ <span class="token keyword">fi</span>
+ 
+ <span class="token keyword">echo</span> <span class="token string">"Change prompt style..."</span>
+ <span class="token keyword">.</span> /etc/profile.d/env.sh
+ <span class="token keyword">echo</span> <span class="token string">"1.done"</span>
+ <span class="token keyword">echo</span> 
+ 
+ 
+ <span class="token comment">#2.VIM style configuration</span>
+ <span class="token keyword">echo</span> <span class="token string">"2.VIM style configuration..."</span>
+ <span class="token function">sleep</span> 1
+ 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token operator">!</span> -f <span class="token variable">$VIMRC</span> <span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token keyword">then</span>
+ <span class="token function">touch</span> <span class="token variable">$VIMRC</span>
+ <span class="token function">cat</span> <span class="token operator">&gt;&gt;</span> <span class="token variable">$VIMRC</span> <span class="token operator">&lt;&lt;</span>EOF
+ <span class="token keyword">set</span> number
+ <span class="token keyword">set</span> tabstop<span class="token operator">=</span>4
+ <span class="token keyword">set</span> softtabstop<span class="token operator">=</span>4
+ <span class="token keyword">set</span> shiftwidth<span class="token operator">=</span>4
+ <span class="token keyword">set</span> expandtab 
+ <span class="token keyword">set</span> ignorecase
+ <span class="token keyword">set</span> cursorline
+ <span class="token keyword">set</span> autoindent
+ autocmd BufNewFile *.sh <span class="token function">exec</span> <span class="token string">":call SetTitle()"</span>
+ func SetTitle<span class="token punctuation">(</span><span class="token punctuation">)</span>
+     <span class="token keyword">if</span> expand<span class="token punctuation">(</span><span class="token string">"%:e"</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string">'sh'</span>
+         call setline<span class="token punctuation">(</span>1,<span class="token string">"#!/bin/bash"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>2,<span class="token string">"#"</span><span class="token punctuation">)</span>
+ call setline<span class="token punctuation">(</span>1,<span class="token string">"#!/bin/bash"</span><span class="token punctuation">)</span>                                                                                                                                                                            
+         call setline<span class="token punctuation">(</span>2,<span class="token string">"#"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>3,<span class="token string">"#*******************************************************************************"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>4,<span class="token string">"#Author:            steveli"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>5,<span class="token string">"#QQ:                1049103823"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>6,<span class="token string">"#Data:              "</span>.strftime<span class="token punctuation">(</span><span class="token string">"%Y-%m-%d"</span><span class="token punctuation">))</span>
+         call setline<span class="token punctuation">(</span>7,<span class="token string">"#FileName:          "</span>.expand<span class="token punctuation">(</span><span class="token string">"%"</span><span class="token punctuation">))</span>
+         call setline<span class="token punctuation">(</span>8,<span class="token string">"#URL:               https://blog.csdn.net/YouOops"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>9,<span class="token string">"#Description:       Test scrpting."</span><span class="token punctuation">)</span> 
+         call setline<span class="token punctuation">(</span>10,<span class="token string">"#Copyright (C):        "</span>.strftime<span class="token punctuation">(</span><span class="token string">"%Y"</span><span class="token punctuation">)</span>.<span class="token string">" All rights reserved"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>11,<span class="token string">"#******************************************************************************"</span><span class="token punctuation">)</span>
+         call setline<span class="token punctuation">(</span>12,<span class="token string">""</span><span class="token punctuation">)</span>
+         endif
+ endfunc
+ autocmd BufNewFile * normal G
+ EOF
+ <span class="token keyword">fi</span>
+ <span class="token keyword">.</span> <span class="token variable">$VIMRC</span> <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token keyword">echo</span> <span class="token string">"2.done"</span>
+ <span class="token keyword">echo</span>
+ 
+ 
+ <span class="token comment">#3.BASH style configuration.</span>
+ <span class="token keyword">echo</span> <span class="token string">"3.BASH style changing..."</span>
+ <span class="token function">sleep</span> 1
+ 
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> -e <span class="token variable">$BASHRC</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+ <span class="token function">cat</span> <span class="token operator">&gt;&gt;</span> <span class="token variable">$BASHRC</span> <span class="token operator">&lt;&lt;</span>EOF
+ <span class="token comment">#my customized command</span>
+ <span class="token function">alias</span> rm<span class="token operator">=</span><span class="token string">'rm -i'</span>
+ <span class="token function">alias</span> cp<span class="token operator">=</span><span class="token string">'cp -i'</span>
+ <span class="token function">alias</span> mv<span class="token operator">=</span><span class="token string">'mv -i'</span>
+ <span class="token function">alias</span> ll<span class="token operator">=</span><span class="token string">'ls -l'</span>
+ <span class="token function">alias</span> la<span class="token operator">=</span><span class="token string">'ls -a'</span>
+ <span class="token function">alias</span> cls<span class="token operator">=</span><span class="token string">'clear'</span>
+ <span class="token function">alias</span> scandisk<span class="token operator">=</span><span class="token string">'echo - - - &gt; /sys/clss/scsi_host/host2/scan'</span>
+ <span class="token function">alias</span> cdnet<span class="token operator">=</span><span class="token string">'cd /etc/sysconfig/network-scripts'</span>
+ <span class="token function">alias</span> netstat<span class="token operator">=</span><span class="token string">'netstat -ntupa'</span>
+ <span class="token function">alias</span> route<span class="token operator">=</span><span class="token string">'route -n'</span>
+ <span class="token function">alias</span> arp<span class="token operator">=</span><span class="token string">'arp -n'</span>
+ <span class="token function">alias</span> ipr<span class="token operator">=</span><span class="token string">'ip route'</span>
+ <span class="token function">alias</span> ipl<span class="token operator">=</span><span class="token string">'ip link'</span>
+ <span class="token function">alias</span> cdnet<span class="token operator">=</span><span class="token string">'cd /etc/sysconfig/network-scripts'</span>
+ <span class="token function">alias</span> bashn<span class="token operator">=</span><span class="token string">'bash -n'</span>
+ <span class="token function">alias</span> bashx<span class="token operator">=</span><span class="token string">'bash -x'</span>
+ <span class="token function">alias</span> freeh<span class="token operator">=</span><span class="token string">'free -h'</span>
+ <span class="token function">alias</span> yy<span class="token operator">=</span><span class="token string">'yum install -y'</span>
+ <span class="token function">alias</span> ee<span class="token operator">=</span><span class="token string">'echo <span class="token variable">$?</span>'</span>
+ EOF
+ <span class="token keyword">else</span>
+     <span class="token function">touch</span> <span class="token variable">$BASHRC</span>
+ <span class="token function">cat</span> <span class="token operator">&gt;&gt;</span> <span class="token variable">$BASHRC</span> <span class="token operator">&lt;&lt;</span>EOF
+ <span class="token comment">#my customized command</span>
+ <span class="token function">alias</span> rm<span class="token operator">=</span><span class="token string">'rm -i'</span>
+ <span class="token function">alias</span> cp<span class="token operator">=</span><span class="token string">'cp -i'</span>
+ <span class="token function">alias</span> mv<span class="token operator">=</span><span class="token string">'mv -i'</span>
+ <span class="token function">alias</span> ll<span class="token operator">=</span><span class="token string">'ls -l'</span>
+ <span class="token function">alias</span> la<span class="token operator">=</span><span class="token string">'ls -a'</span>
+ <span class="token function">alias</span> cls<span class="token operator">=</span><span class="token string">'clear'</span>
+ <span class="token function">alias</span> scandisk<span class="token operator">=</span><span class="token string">'echo - - - &gt; /sys/clss/scsi_host/host2/scan'</span>
+ <span class="token function">alias</span> cdnet<span class="token operator">=</span><span class="token string">'cd /etc/sysconfig/network-scripts'</span>
+ <span class="token function">alias</span> netstat<span class="token operator">=</span><span class="token string">'netstat -ntupa'</span>
+ <span class="token function">alias</span> route<span class="token operator">=</span><span class="token string">'route -n'</span>
+ <span class="token function">alias</span> arp<span class="token operator">=</span><span class="token string">'arp -n'</span>
+ <span class="token function">alias</span> ipr<span class="token operator">=</span><span class="token string">'ip route'</span>
+ <span class="token function">alias</span> arp<span class="token operator">=</span><span class="token string">'arp -n'</span>                                                                                                                                                                                               
+ <span class="token function">alias</span> ipr<span class="token operator">=</span><span class="token string">'ip route'</span>
+ <span class="token function">alias</span> ipl<span class="token operator">=</span><span class="token string">'ip link'</span>
+ <span class="token function">alias</span> cdnet<span class="token operator">=</span><span class="token string">'cd /etc/sysconfig/network-scripts'</span>
+ <span class="token function">alias</span> bashn<span class="token operator">=</span><span class="token string">'bash -n'</span>
+ <span class="token function">alias</span> bashx<span class="token operator">=</span><span class="token string">'bash -x'</span>
+ <span class="token function">alias</span> freeh<span class="token operator">=</span><span class="token string">'free -h'</span>
+ <span class="token function">alias</span> yy<span class="token operator">=</span><span class="token string">'yum install -y'</span>
+ <span class="token function">alias</span> ee<span class="token operator">=</span><span class="token string">'echo <span class="token variable">$?</span>'</span>
+ EOF
+ <span class="token keyword">.</span> <span class="token variable">$BASHRC</span> <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token keyword">fi</span>
+ 
+ <span class="token keyword">echo</span> <span class="token string">"3.done"</span>
+ <span class="token keyword">echo</span>
+ 
+ <span class="token comment">#4,5,6 From Jibill Chen:Contact him:http://www.jibiao.work</span>
+ <span class="token comment">#4.Configure cd_rom for yum.</span>
+ <span class="token comment">#CD_NAME=$(lsblk | grep 'sr[0-9]'|head -1 | cut -c 1,2,3)</span>
+ <span class="token comment">#[ $(df | grep 'sr' | wc -l) -ge 1 ] &amp;&amp; CD_MOUNT_POINT=$(df |sed -nr '/dev\/sr/s@^/dev.*% @@p') || { mount /dev/$CD_NAME /mnt &amp;&gt; /dev/null ; CD_MOUNT_POINT='/mnt';}</span>
+ <span class="token function">mkdir</span> -p /mnt/cdrom <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ CD_MOUNT_POINT<span class="token operator">=</span><span class="token string">"/mnt/cdrom"</span>
+ <span class="token function">umount</span> /dev/sr0 <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token function">mount</span> /dev/sr0 <span class="token variable">$CD_MOUNT_POINT</span> <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token function">rm</span> -f /etc/yum.repos.d/*.repo <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token function">cat</span> <span class="token operator">&gt;</span> /etc/yum.repos.d/cdrom.repo <span class="token operator">&lt;&lt;</span> EOF
+ <span class="token punctuation">[</span>cdrom<span class="token punctuation">]</span>
+ name<span class="token operator">=</span>cdrom
+ baseurl<span class="token operator">=</span>file://<span class="token variable">${CD_MOUNT_POINT}</span>
+         https://mirrors.aliyun.com/epel/7/x86_64/
+ enabled<span class="token operator">=</span>1
+ gpgcheck<span class="token operator">=</span>0
+ EOF
+ <span class="token punctuation">[</span> <span class="token variable">$?</span> -eq 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_GREEN}</span>Configure yum of cdrom successful!<span class="token variable">${LOR}</span>"</span> <span class="token operator">||</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_RED}</span>Configure yum of cdrom fail!<span class="token variable">${LOR}</span>"</span>
+ <span class="token function">sleep</span> 1
+ 
+ <span class="token comment">#5.Install tree screen vim bzip2  </span>
+ yum clean all <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ yum repolist <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ yum -y <span class="token function">install</span> chrony  <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token punctuation">[</span> <span class="token variable">$?</span> -eq 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_GREEN}</span>install chrony successful!<span class="token variable">${LOR}</span>"</span> <span class="token operator">||</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_RED}</span>install tree fail!<span class="token variable">${LOR}</span>"</span>
+ yum -y <span class="token function">install</span> <span class="token function">wget</span> tree <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token punctuation">[</span> <span class="token variable">$?</span> -eq 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_GREEN}</span>install wget tree successful!<span class="token variable">${LOR}</span>"</span> <span class="token operator">||</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_RED}</span>install tree fail!<span class="token variable">${LOR}</span>"</span>
+ yum -y <span class="token function">install</span> <span class="token function">screen</span> net-tools <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token punctuation">[</span> <span class="token variable">$?</span> -eq 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_GREEN}</span>install screen net-tools successful!<span class="token variable">${LOR}</span>"</span> <span class="token operator">||</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_RED}</span>install tree fail!<span class="token variable">${LOR}</span>"</span>
+ yum -y <span class="token function">install</span>  vim <span class="token function">bzip2</span> <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token punctuation">[</span> <span class="token variable">$?</span> -eq 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_GREEN}</span>install vim bzip2 successful!<span class="token variable">${LOR}</span>"</span> <span class="token operator">||</span> <span class="token keyword">echo</span> -e <span class="token string">"<span class="token variable">${CO_RED}</span>install tree fail!<span class="token variable">${LOR}</span>"</span>
+ 
+ <span class="token comment">#6.Disable iptables and firewalld</span>
+ <span class="token comment">#</span>
+ systemctl stop firewalld <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token punctuation">[</span> <span class="token variable">$?</span> -ne 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">${CO_RED}</span>stop firewalld fail<span class="token variable">${LOR}</span>"</span> 
+ systemctl disable firewalld <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token punctuation">[</span> <span class="token variable">$?</span> -ne 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">${CO_RED}</span>disable firewalld fail<span class="token variable">${LOR}</span>"</span>
+ iptables -F <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token punctuation">[</span> <span class="token variable">$?</span> -ne 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">${CO_RED}</span>shutdown iptables fail<span class="token variable">${LOR}</span>"</span>
+ <span class="token function">sed</span> -r -i <span class="token string">'s#(^SELINUX=)(.*$)#\1disabled#'</span> /etc/selinux/config <span class="token operator">&amp;</span><span class="token operator">&gt;</span> /dev/null
+ <span class="token punctuation">[</span> <span class="token variable">$?</span> -ne 0 <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">${CO_RED}</span>modify selinux/config fail<span class="token variable">${LOR}</span>"</span>
+</code></pre>
+
