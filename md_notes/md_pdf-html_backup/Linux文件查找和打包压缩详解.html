@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Linux文件查找和打包压缩详解.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<center><font size=214 face=黑体 color=grey>Linux文件查找和打包压缩详解</font></center>
+<h1 id="%E4%B8%80%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BE%E5%B7%A5%E5%85%B7locate%E5%92%8Cfind">一.文件查找工具locate和find</h1>
+<h2 id="1locate">1.locate</h2>
+<ul>
+<li>locate依靠查询系统上预建的文件索引数据库来查询某个文件，按名字来查找，速度很快</li>
+</ul>
+<blockquote>
+<p>数据库：/var/lib/mlocate/mlocate.db</p>
+</blockquote>
+<ul>
+<li>
+<p>其工作依赖于事先构建的索引</p>
+</li>
+<li>
+<p>索引的构建是在系统较为空闲时自动进行(周期性任务)，管理员手动更新数据库(updatedb 命令)</p>
+</li>
+<li>
+<p>索引构建过程需要遍历整个根文件系统，极消耗资源
+工作特点:
+•查找速度快
+•模糊查找
+•非实时查找
+•搜索的是文件的全路径，不仅仅是文件名
+•可能只搜索用户具备读取和执行权限的目录</p>
+</li>
+<li>
+<p>用法</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>locate [OPTION]... PATTERN...
+    -i 不区分大小写的搜索 
+    -n  N 只列举前N个匹配项目 
+    -r  使用基本正则表达式 
+示例 
+    搜索名称或路径中带有“conf”的文件 
+        locate  conf 
+    使用Regex来搜索以“.conf”结尾的文件 
+        locate  -r  ‘\.conf$’ 
+
+</div></code></pre>
+<h2 id="2find">2.find</h2>
+<ul>
+<li>实时查找工具，通过遍历指定路径完成文件查找</li>
+</ul>
+<pre class="hljs"><code><div>工作特点： 
+    • 查找速度略慢 
+    • 精确查找 
+    • 实时查找 
+    • 可能只搜索用户具备读取和执行权限的目录 
+</div></code></pre>
+<ul>
+<li>语法</li>
+</ul>
+<pre class="hljs"><code><div>find [OPTION]... [查找路径] [查找条件] [处理动作] 
+</div></code></pre>
+<h3 id="21%E6%9F%A5%E6%89%BE%E8%B7%AF%E5%BE%84%EF%BC%9A%E6%8C%87%E5%AE%9A%E5%85%B7%E4%BD%93%E7%9B%AE%E6%A0%87%E8%B7%AF%E5%BE%84%EF%BC%9B%E9%BB%98%E8%AE%A4%E4%B8%BA%E5%BD%93%E5%89%8D%E7%9B%AE%E5%BD%95">2.1查找路径：指定具体目标路径；默认为当前目录</h3>
+<h3 id="22%E6%9F%A5%E6%89%BE%E6%9D%A1%E4%BB%B6%EF%BC%9A%E6%8C%87%E5%AE%9A%E7%9A%84%E6%9F%A5%E6%89%BE%E6%A0%87%E5%87%86%EF%BC%8C%E5%8F%AF%E4%BB%A5%E6%96%87%E4%BB%B6%E5%90%8D%E3%80%81%E5%A4%A7%E5%B0%8F%E3%80%81%E7%B1%BB%E5%9E%8B%E3%80%81%E6%9D%83%E9%99%90%E7%AD%89%E6%A0%87%E5%87%86%E8%BF%9B%E8%A1%8C%EF%BC%9B%E9%BB%98%E8%AE%A4%E4%B8%BA%E6%89%BE%E5%87%BA%E6%8C%87%E5%AE%9A%E8%B7%AF%E5%BE%84%E4%B8%8B%E7%9A%84%E6%89%80%E6%9C%89%E6%96%87%E4%BB%B6">2.2查找条件：指定的查找标准，可以文件名、大小、类型、权限等标准进行；默认为找出指定路径下的所有文件</h3>
+<h4 id="%E6%8C%87%E5%AE%9A%E6%90%9C%E7%B4%A2%E5%B1%82%E7%BA%A7">指定搜索层级</h4>
+<pre class="hljs"><code><div>    -maxdepth  level 最大搜索目录深度,指定目录下的文件为第1级 
+    -mindepth level 最小搜索目录深度 
+</div></code></pre>
+<ul>
+<li>先处理目录内的文件，再处理指定目录</li>
+</ul>
+<pre class="hljs"><code><div>    -depth 
+</div></code></pre>
+<h4 id="%E6%A0%B9%E6%8D%AE%E6%96%87%E4%BB%B6%E5%90%8D%E5%92%8Cinode%E6%9F%A5%E6%89%BE">根据文件名和inode查找</h4>
+<pre class="hljs"><code><div>    -name <span class="hljs-string">"文件名称"</span>：支持使用glob 
+        *, ?, [], [^] 
+    -iname <span class="hljs-string">"文件名称"</span>：不区分字母大小写 
+    -inum n  按inode号查找 
+    -samefile name  相同inode号的文件 
+    -links n   链接数为n的文件 
+    -regex “PATTERN”：以PATTERN匹配整个文件路径，而非文件名称 
+</div></code></pre>
+<h4 id="%E6%A0%B9%E6%8D%AE%E5%B1%9E%E4%B8%BB%E3%80%81%E5%B1%9E%E7%BB%84%E6%9F%A5%E6%89%BE">根据属主、属组查找</h4>
+<pre class="hljs"><code><div>    user USERNAME：查找属主为指定用户(UID)的文件 
+    group GRPNAME: 查找属组为指定组(GID)的文件 
+    uid UserID：查找属主为指定的UID号的文件 
+    gid GroupID：查找属组为指定的GID号的文件 
+    nouser：查找没有属主的文件 
+    nogroup：查找没有属组的文件 
+</div></code></pre>
+<h4 id="%E6%A0%B9%E6%8D%AE%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B%E6%9F%A5%E6%89%BE">根据文件类型查找</h4>
+<pre class="hljs"><code><div>    -<span class="hljs-built_in">type</span> TYPE 
+        •f: 普通文件 
+        •d: 目录文件 
+        •l: 符号链接文件 
+        •s：套接字文件 
+        •b: 块设备文件 
+        •c: 字符设备文件 
+        •p: 管道文件 
+    空文件或目录 
+  -empty 
+    示例：find /app -<span class="hljs-built_in">type</span> d  -empty 
+</div></code></pre>
+<h4 id="%E7%BB%84%E5%90%88%E6%9D%A1%E4%BB%B6">组合条件</h4>
+<pre class="hljs"><code><div>    与：-a 
+    或：-o 
+    非：-not   !  
+德·摩根定律： 
+    (非 A) 或 (非 B) = 非(A 且 B)  
+    (非 A) 且 (非 B) = 非(A 或 B)  
+示例： 
+    !A -a !B = !(A -o B) 
+    !A -o !B = !(A -a B) 
+</div></code></pre>
+<h4 id="find-%E7%A4%BA%E4%BE%8B">find 示例</h4>
+<pre class="hljs"><code><div>    ind -name snow.png 
+    ind -iname snow.png 
+    ind / -name  “*.txt” 
+    ind /var –name “*<span class="hljs-built_in">log</span>*” 
+    ind  -user joe  -group joe 
+    ind -user joe -not -group joe 
+    ind -user joe -o -user jane 
+    ind -not  \(  -user joe -o -user jane  \) 
+    ind / -user joe -o -uid 500
+
+找出/tmp目录下，属主不是root，且文件名不以f开头的文件 
+    find /tmp \( -not -user root -a -not -name <span class="hljs-string">'f*'</span> \) -ls 
+    find /tmp -not \( -user root -o -name <span class="hljs-string">'f*'</span> \)  –ls 
+排除目录 
+查找/etc/下，除/etc/sane.d目录的其它所有.conf后缀的文件 
+    find /etc -path <span class="hljs-string">'/etc/sane.d'</span> -a -prune -o -name <span class="hljs-string">"*.conf"</span> 
+查找/etc/下，除/etc/sane.d和/etc/fonts两个目录的所有.conf后缀的文件 
+    find /etc \( -path <span class="hljs-string">"/etc/sane.d"</span> -o -path <span class="hljs-string">"/etc/fonts"</span> \) -a -prune -o -
+name <span class="hljs-string">"*.conf"</span>
+</div></code></pre>
+<h4 id="%E6%A0%B9%E6%8D%AE%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F%E6%9D%A5%E6%9F%A5%E6%89%BE">根据文件大小来查找</h4>
+<pre class="hljs"><code><div>-size [+|-]<span class="hljs-comment">#UNIT </span>
+    常用单位：k, M, G，c（byte） 
+<span class="hljs-comment">#UNIT: (#-1, #] </span>
+    如：6k 表示(5k,6k] 
+-<span class="hljs-comment">#UNIT：[0,#-1] </span>
+    如：-6k 表示[0,5k] 
++<span class="hljs-comment">#UNIT：(#,∞) </span>
+    如：+6k 表示(6k,∞)
+</div></code></pre>
+<h4 id="%E6%A0%B9%E6%8D%AE%E6%97%B6%E9%97%B4%E6%88%B3">根据时间戳</h4>
+<pre class="hljs"><code><div>以“天”为单位 
+   -atime [+|-]<span class="hljs-comment">#,</span>
+        <span class="hljs-comment">#: [#,#+1) </span>
+        +<span class="hljs-comment">#: [#+1,∞] </span>
+        -<span class="hljs-comment">#: [0,#) </span>
+    -mtime 
+    -ctime 
+以“分钟”为单位 
+    -amin 
+    -mmin 
+    -cmin
+</div></code></pre>
+<h5 id="%E6%A0%B9%E6%8D%AE%E6%9D%83%E9%99%90%E6%9F%A5%E6%89%BE">根据权限查找</h5>
+<pre class="hljs"><code><div>   -perm [/|-]MODE 
+         MODE: 精确权限匹配 
+        /MODE：任何一类(u,g,o)对象的权限中只要能一位匹配即可，或关系，+号从centos7开始淘汰 
+        -MODE：每一类对象都必须同时拥有指定权限，与关系 
+            0: 表示不关注 
+•find -perm 755 会匹配权限模式恰好是755的文件 
+•只要当任意人有写权限时，find -perm +222就会匹配 
+•只有当每个人都有写权限时，find -perm -222才会匹配 
+•只有当其它人（other）有写权限时，find -perm -002才会匹配 
+</div></code></pre>
+<h2 id="23%E5%A4%84%E7%90%86%E5%8A%A8%E4%BD%9C%EF%BC%9A%E5%AF%B9%E7%AC%A6%E5%90%88%E6%9D%A1%E4%BB%B6%E7%9A%84%E6%96%87%E4%BB%B6%E5%81%9A%E6%93%8D%E4%BD%9C%EF%BC%8C%E9%BB%98%E8%AE%A4%E8%BE%93%E5%87%BA%E8%87%B3%E5%B1%8F%E5%B9%95">2.3处理动作：对符合条件的文件做操作，默认输出至屏幕</h2>
+<pre class="hljs"><code><div>-<span class="hljs-built_in">print</span>：默认的处理动作，显示至屏幕 
+-ls：类似于对查找到的文件执行“ls -l”命令 
+-delete：删除查找到的文件 
+-fls file：查找到的所有文件的长格式信息保存至指定文件中 
+-ok COMMAND {} \; 对查找到的每个文件执行由COMMAND指定的命令，对于每个文件执行命令之前，都会交互式要求用户确认 
+-<span class="hljs-built_in">exec</span> COMMAND {} \; 对查找到的每个文件执行由COMMAND指定的命令  
+              {}: 用于引用查找到的文件名称自身 
+find传递查找到的文件至后面指定的命令时，查找到所有符合条件的文件一次性传递给后面的命令 
+</div></code></pre>
+<h2 id="24%E7%94%B1%E4%BA%8E%E5%BE%88%E5%A4%9A%E5%91%BD%E4%BB%A4%E4%B8%8D%E6%94%AF%E6%8C%81%E7%AE%A1%E9%81%93%E6%9D%A5%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0%EF%BC%8Cxargs%E7%94%A8%E4%BA%8E%E4%BA%A7%E7%94%9F%E6%9F%90%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E5%8F%82%E6%95%B0%EF%BC%8Cxargs">2.4由于很多命令不支持管道|来传递参数，xargs用于产生某个命令的参数，xargs</h2>
+<ul>
+<li>xargs可以读入stdin 的数据，并且以空格符或回车符将stdin的数据分隔成为参数;许多命令不能接受过多参数，命令执行可能会失败，xargs可以解决</li>
+<li>
+<ul>
+<li>注意：文件名或者是其他意义的名词内含有空格符的情况使用xargs需要指明其它的分隔符</li>
+</ul>
+</li>
+</ul>
+<pre class="hljs"><code><div>find和xargs的组合：find | xargs COMMAND 
+示例： 
+    ls  | xargs   rm  
+    删除当前目录下的大量文件 
+        find /sbin/ -perm +700 | ls -l       这个命令是错误的 
+        find /bin/ -perm /7000 | xargs ls -Sl  查找有特殊权限的文件，并排序 
+        find /bin/ -perm -7000 | xargs ls -Sl  此命令和上面有何区别？  
+        find -<span class="hljs-built_in">type</span> f -name “*.txt” -print0 | xargs -0 rm 以字符nul分隔 
+</div></code></pre>
+<h4 id="find%E7%A4%BA%E4%BE%8B">find示例</h4>
+<pre class="hljs"><code><div>备份配置文件，添加.orig这个扩展名 
+    find  -name  <span class="hljs-string">"*.conf"</span>  -<span class="hljs-built_in">exec</span>  cp {}  {}.orig  \; 
+提示删除存在时间超过３天以上的joe的临时文件 
+    find /tmp -ctime +3 -user joe -ok rm {} \; 
+在主目录中寻找可被其它用户写入的文件 
+    find ~ -perm -002  -<span class="hljs-built_in">exec</span> chmod o-w {} \; 
+查找/data下的权限为644，后缀为sh的普通文件，增加执行权限 
+    find /data –<span class="hljs-built_in">type</span>  f -perm 644  -name <span class="hljs-string">"*.sh"</span> –<span class="hljs-built_in">exec</span> chmod 755 {} \; 
+查看/home的目录 
+    find  /home –<span class="hljs-built_in">type</span> d -ls 
+</div></code></pre>
+<h4 id="%E7%BB%83%E4%B9%A0">练习</h4>
+<pre class="hljs"><code><div>1、查找/var目录下属主为root，且属组为mail的所有文件 
+    [root@centos7 ~]<span class="hljs-comment"># find /var/ -user root -group mail/var/spool/mail</span>
+    /var/spool/mail/root
+
+2、查找/var目录下不属于root、lp、gdm的所有文件 
+    find /var/ \( -not -user root -a -not -user lp -a -not -user gdm \) -ls
+
+3、查找/var目录下最近一周内其内容修改过，同时属主不为root，也不是postfix的文件 
+    find /var/ -mtime -7 -o \( -not -user root -a -not -user postfix \) -ls
+    
+4、查找当前系统上没有属主或属组，且最近一个周内曾被访问过的文件 
+    find / -atime -7 -nouser -o -nogroup 
+
+5、查找/etc目录下大于1M且类型为普通文件的所有文件 
+    find /etc/ -size +1M -a -<span class="hljs-built_in">type</span> f
+
+6、查找/etc目录下所有用户都没有写权限的文件 
+    find /etc/ -not -perm /222
+
+7、查找/etc目录下至少有一类用户没有执行权限的文件 
+    find /etc/ -not -perm -111
+
+8、查找/etc/init.d目录下，所有用户都有执行权限， 且其它用户有写权限的文件 
+    find /etc/init.d -perm -113
+
+</div></code></pre>
+<h1 id="%E4%BA%8C%E6%96%87%E6%9C%AC%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7tar%E5%92%8Ccpio">二.文本打包工具tar和cpio</h1>
+<h2 id="1tar">1.tar</h2>
+<ul>
+<li>tar（Tape ARchive，磁带归档的缩写）</li>
+</ul>
+<pre class="hljs"><code><div>tar [OPTION]...  
+(1) 创建归档，保留权限 
+    tar -cpvf /PATH/FILE.tar FILE... 
+(2) 追加文件至归档： 注：不支持对压缩文件追加 
+    tar -r -f /PATH/FILE.tar FILE... 
+(3) 查看归档文件中的文件列表 
+    tar -t -f /PATH/FILE.tar 
+(4) 展开归档 
+    tar -x -f /PATH/FILE.tar 
+    tar -x -f /PATH/FILE.tar -C /PATH/ 
+(5) 结合压缩工具实现：归档并压缩 
+    -j: bzip2, -z: gzip, -J: xz 
+--exclude 排除文件 
+    tar zcvf /root/a3.tgz --exclude=/app/host1 --exclude=/app/host2 /app 
+-T 选项指定输入文件  -X 选项指定包含要排除的文件列表 
+    tar zcvf mybackup.tgz -T /root/includefilelist -X /root/excludefilelist 
+split：分割一个文件为多个文件 
+       分割大的 tar 文件为多份小文件 
+    split -b  Size –d tar-file-name  prefix-name 
+    split -b 1M –d mybackup.tgz mybackup-parts 
+    split -b 1M mybackup.tgz mybackup-parts 
+合并： 
+    cat mybackup-parts* &gt; mybackup.tar.gz 
+</div></code></pre>
+<h2 id="2cpio">2.cpio</h2>
+<ul>
+<li>功能：打包文件或解包</li>
+<li>
+<ul>
+<li>cpio命令是通过重定向的方式将文件进行打包备份，还原恢复的工具，它可以解压以“.cpio”或者“.tar”结尾的文件</li>
+</ul>
+</li>
+<li>cpio [选项] &gt; 文件名或者设备名</li>
+<li>cpio [选项] &lt; 文件名或者设备名</li>
+</ul>
+<pre class="hljs"><code><div>选项 
+-o output模式，打包，将标准输入传入的文件名打包后发送到标准输出 
+-i input模式，解包，对标准输入传入的打包文件名解包到当前目录 
+-t 预览，查看标准输入传入的打包文件中包含的文件列表 
+-O filename 输出到指定的归档文件名 
+-A 向已存在的归档文件中追加文件 
+-I filename 对指定的归档文件名解压 
+-F filename 使用指定的文件名替代标准输入或输出 
+-d 解包生成目录，在cpio还原时，自动的建立目录 
+-v 显示打包过程中的文件名称
+</div></code></pre>
+<ul>
+<li>示例</li>
+</ul>
+<pre class="hljs"><code><div>将etc目录备份：  
+    find ./etc -<span class="hljs-built_in">print</span> |cpio -ov &gt;bak.cpio 
+将/data内容追加bak.cpio 
+    find /data | cpio -oA -F  bak.cpio  
+内容预览 
+    cpio –tv &lt; etc.cpio 
+解包文件  
+    cpio –idv &lt; etc.cpio 
+</div></code></pre>
+<h1 id="%E4%B8%89%E6%96%87%E4%BB%B6%E5%8E%8B%E7%BC%A9%E5%92%8C%E8%A7%A3%E5%8E%8B%E7%BC%A9%E5%B7%A5%E5%85%B7">三.文件压缩和解压缩工具</h1>
+<h2 id="1compressuncompress">1.compress,uncompress</h2>
+<pre class="hljs"><code><div>compress [-dfvcVr] [-b maxbits] [file ...] 
+    -d 解压缩，相当于uncompress 
+    -c 结果输出至标准输出,不删除原文件 
+    -v 显示详情 
+    uncompress file.Z  解压缩 
+    zcat file.Z  不显式解压缩的前提下查看文本文件内容 
+        示例：zcat file.Z &gt;file 
+</div></code></pre>
+<h2 id="2gzipgunzipzcat">2.gzip,gunzip,zcat</h2>
+<pre class="hljs"><code><div>gzip [OPTION]... FILE ... 
+    -d 解压缩，相当于gunzip 
+    -c 结果输出至标准输出，保留原文件不改变 
+    -<span class="hljs-comment"># 指定压缩比，#取值为1-9，值越大压缩比越大 </span>
+gunzip file.gz  解压缩 
+zcat file.gz 不显式解压缩的前提下查看文本文件内容 
+示例： 
+    gzip  -c  messages  &gt;messages.gz 
+    gzip -c -d messages.gz &gt; messages 
+    zcat messages.gz &gt; messages 
+    cat messages | gzip &gt; m.gz 
+</div></code></pre>
+<h2 id="3bzip2bunzip2bzcat">3.bzip2,bunzip2,bzcat</h2>
+<pre class="hljs"><code><div>bzip2 [OPTION]... FILE ... 
+-k keep, 保留原文件 
+-d 解压缩 
+-<span class="hljs-comment"># 1-9，压缩比，默认为9 </span>
+bunzip2 file.bz2  解压缩 
+bzcat file.bz2  不显式解压缩的前提下查看文本文件内容 
+</div></code></pre>
+<h2 id="4zipunzipxzcat">4.zip,unzip,xzcat</h2>
+<pre class="hljs"><code><div>xz [OPTION]... FILE ... 
+-k keep, 保留原文件 
+-d 解压缩 
+-<span class="hljs-comment"># 压缩比，取值1-9，默认为6 </span>
+unxz file.xz  解压缩 
+xzcat file.xz  不显式解压缩的前提下查看文本文件内容 
+</div></code></pre>
+
+</body>
+</html>

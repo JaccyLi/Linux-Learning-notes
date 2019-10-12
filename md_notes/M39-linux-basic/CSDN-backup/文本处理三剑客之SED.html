@@ -1,0 +1,151 @@
+﻿<p></p><div class="toc"><h3><center><font size="214" face="黑体" color="grey">文本处理三剑客之SED</font></center></h3><ul><li><a href="#Sed_2">一.Sed介绍</a></li><li><a href="#Sed_18">二.Sed用法</a></li><ul><li><a href="#1_20">1.基本选项功能和用法</a></li><li><a href="#2_33">2.地址定界和编辑命令</a></li><li><a href="#3_67">3.搜索替换</a></li><li><a href="#4sed_78">4.sed示例</a></li></ul><li><a href="#Sed_102">三.Sed高级用法</a></li></ul></div><p></p>
+<h1><a id="Sed_2"></a>一.Sed介绍</h1>
+<ul>
+<li>sed是linux下出名的行编辑器(Stream EDitor)</li>
+</ul>
+<pre><code class="prism language-bash">    简介：sed是一种流编辑器，它一次处理一行内容。处理时，把当前处理的行存储在临时
+    缓冲区中，称为“模式空间”（pattern space），接着用sed命令处理缓冲区中的
+    内容，处理完成后，把缓冲区的内容送往屏幕。然后读入下行，执行下一个循环。
+    如果没有使诸如‘D’的特殊命令，那会在两个循环之间清空模式空间，但不会清
+    空保留空间。这样不断重复，直到文件末尾。文件内容并没有改变，除非你使用重
+    定向存储输出。
+    sed主要用来自动编辑一个或多个文件,简化对文件的反复操作,编写转换程序等
+</code></pre>
+<p><a href="http://www.gnu.org/software/sed/manual/sed.html">sed详细参考手册</a></p>
+<h1><a id="Sed_18"></a>二.Sed用法</h1>
+<h2><a id="1_20"></a>1.基本选项功能和用法</h2>
+<pre><code class="prism language-bash"><span class="token function">sed</span> <span class="token punctuation">[</span>option<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token string">'script'</span> inputfile<span class="token punctuation">..</span>.
+    -n  不输出模式空间内容到屏幕，即不自动打印
+    -e  多点编辑
+    -f   /PATH/SCRIPT_FILE 从指定文件中读取编辑脚本
+    -r  支持使用扩展正则表达式
+    -i.bak  备份文件并原处编辑
+    script: <span class="token string">'地址命令'</span>
+    注意：sed的脚本、地址定界和命令都一般写在单引号中间
+</code></pre>
+<h2><a id="2_33"></a>2.地址定界和编辑命令</h2>
+<ul>
+<li>地址定界</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">(</span>1<span class="token punctuation">)</span> 不给地址：对全文进行处理
+<span class="token punctuation">(</span>2<span class="token punctuation">)</span> 单地址：
+    <span class="token comment">#：指定的行</span>
+    $：最后一行
+    /pattern/：被此处模式所能够匹配到的每一行
+<span class="token punctuation">(</span>3<span class="token punctuation">)</span> 地址范围：
+    <span class="token comment">#,#</span>
+    <span class="token comment">#,+#</span>
+    /pat1/,/pat2/ <span class="token comment">#模式1到模式2之间的行</span>
+    <span class="token comment">#,/pat1/</span>
+<span class="token punctuation">(</span>4<span class="token punctuation">)</span> ~：步进
+    1~2 奇数行
+    2~2 偶数行
+</code></pre>
+<ul>
+<li>编辑命令</li>
+</ul>
+<pre><code class="prism language-bash">    d   删除模式空间匹配的行，并立即启用下一轮循环
+    p   打印当前模式空间内容，追加到默认输出之后
+    a   <span class="token punctuation">[</span>\<span class="token punctuation">]</span>text 在指定行后面追加文本，支持使用\n实现多行追加
+    i   <span class="token punctuation">[</span>\<span class="token punctuation">]</span>text 在行前面插入文本
+    c   <span class="token punctuation">[</span>\<span class="token punctuation">]</span>text 替换行为单行或多行文本
+    w   /path/file 保存模式匹配的行至指定文件
+    r   /path/file 读取指定文件的文本至模式空间中匹配到的行后
+    <span class="token operator">=</span>   为模式空间中的行打印行号
+    <span class="token operator">!</span>   模式空间中匹配行取反处理
+</code></pre>
+<h2><a id="3_67"></a>3.搜索替换</h2>
+<pre><code class="prism language-bash">s///  
+查找替换,支持使用其它分隔符，s@@@，s<span class="token comment">###</span>
+替换标记：
+    g 行内全局替换
+    p 显示替换成功的行
+    w   /PATH/FILE 将替换成功的行保存至文件中
+</code></pre>
+<h2><a id="4sed_78"></a>4.sed示例</h2>
+<pre><code class="prism language-bash">    <span class="token function">sed</span> ‘2p’  /etc/passwd
+    <span class="token function">sed</span>  -n ‘2p’ /etc/passwd
+    <span class="token function">sed</span>  -n ‘1,4p’ /etc/passwd
+    <span class="token function">sed</span>  -n ‘/root/p’  /etc/passwd
+    <span class="token function">sed</span>  -n ‘2,/root/p’  /etc/passwd 从2行开始
+    <span class="token function">sed</span>  -n ‘/^$/<span class="token operator">=</span>’  <span class="token function">file</span> 显示空行行号
+    <span class="token function">sed</span>  -n  -e ‘/^$/p’ -e ‘/^$/<span class="token operator">=</span>’  <span class="token function">file</span>
+    Sed‘/root/a\superman’  /etc/passwd行后
+    <span class="token function">sed</span> ‘/root/i\superman’ /etc/passwd 行前
+    <span class="token function">sed</span> ‘/root/c\superman’ /etc/passwd 代替行
+
+    <span class="token function">sed</span> ‘1,10d’   <span class="token function">file</span>
+    <span class="token function">nl</span>   /etc/passwd <span class="token operator">|</span> <span class="token function">sed</span> ‘2,5d’
+    <span class="token function">nl</span>   /etc/passwd <span class="token operator">|</span> <span class="token function">sed</span> ‘2a tea’
+    <span class="token function">sed</span> <span class="token string">'s/test/mytest/g'</span> example
+    <span class="token function">sed</span> –n ‘s/root/<span class="token operator">&amp;</span>superman/p’ /etc/passwd 单词后
+    <span class="token function">sed</span> –n ‘s/root/superman<span class="token operator">&amp;</span>/p’ /etc/passwd 单词前
+    <span class="token function">sed</span> -e ‘s/dog/cat/’ -e ‘s/hi/lo/’ pets
+    <span class="token function">sed</span> –i.bak  ‘s/dog/cat/g’ pets
+</code></pre>
+<h1><a id="Sed_102"></a>三.Sed高级用法</h1>
+<ul>
+<li>高级编辑命令</li>
+</ul>
+<pre><code class="prism language-bash">    P： 打印模式空间开端至\n内容，并追加到默认输出之前
+    h:  把模式空间中的内容覆盖至保持空间中
+    H：把模式空间中的内容追加至保持空间中
+    g:  从保持空间取出数据覆盖至模式空间
+    G：从保持空间取出内容追加至模式空间
+    x:  把模式空间中的内容与保持空间中的内容进行互换
+    n:  读取匹配到的行的下一行覆盖至模式空间
+    N：读取匹配到的行的下一行追加至模式空间
+    d:  删除模式空间中的行
+    D：如果模式空间包含换行符，则删除直到第一个换行符的模式空间中的文本，并不会读取新的输入行，而使用合成的模式空间重新启动循环。如果模式空间不包含换行符，则会像发出d命令那样启动正常的新循环
+
+高级用法sed示例
+
+    <span class="token function">sed</span> -n <span class="token string">'n;p'</span> FILE
+    <span class="token function">sed</span> <span class="token string">'1!G;h;<span class="token variable">$!d</span>'</span> FILE
+    sed‘N<span class="token punctuation">;</span>D’FILE
+    <span class="token function">sed</span> <span class="token string">'<span class="token variable">$!N</span>;<span class="token variable">$!D</span>'</span> FILE
+    <span class="token function">sed</span> <span class="token string">'<span class="token variable">$!d</span>'</span> FILE
+    <span class="token function">sed</span> ‘G’ FILE
+    <span class="token function">sed</span> ‘g’ FILE
+    <span class="token function">sed</span> ‘/^$/d<span class="token punctuation">;</span>G’ FILE
+    <span class="token function">sed</span> <span class="token string">'n;d'</span> FILE  
+    <span class="token function">sed</span> -n <span class="token string">'1!G;h;<span class="token variable">$p</span>'</span> FILE
+</code></pre>
+<ul>
+<li>练习</li>
+</ul>
+<pre><code class="prism language-bash">1、删除centos7系统/etc/grub2.cfg文件中所有以空白开头的行行首的空白字符
+    <span class="token function">sed</span> -inr <span class="token string">'s#^ +(.*)#\1#p'</span> /etc/grub2.cfg
+
+2、删除/etc/fstab文件中所有以<span class="token comment">#开头，后面至少跟一个空白字符的行的行首的#</span>
+和空白字符
+    <span class="token function">sed</span> -inr <span class="token string">'s#^# +(.*)#\1#p'</span> /etc/grub2.cfg
+
+3、在centos6系统/root/install.log每一行行首增加<span class="token comment">#号</span>
+    <span class="token function">sed</span> -inr <span class="token string">'s#.*#\#&amp;#p'</span> /etc/grub2.cfg
+
+4、在/etc/fstab文件中不以<span class="token comment">#开头的行的行首增加#号</span>
+    <span class="token function">sed</span> -inr <span class="token string">'s#^[^#](.*)#\#\1#p'</span> /etc/grub2.cfg
+
+5、处理/etc/fstab路径,使用sed命令取出其目录名和基名
+    <span class="token keyword">echo</span> /etc/fstab/ <span class="token operator">|</span> <span class="token function">sed</span> -nr <span class="token string">'s#(.*/)([^/]+)/?#\1#p'</span>
+    <span class="token keyword">echo</span> /etc/fstab/ <span class="token operator">|</span> <span class="token function">sed</span> -nr <span class="token string">'s#(.*/)([^/]+)/?#\2#p'</span>
+
+6、利用sed 取出ifconfig命令中本机的IPv4地址
+    <span class="token function">ifconfig</span> eth0<span class="token operator">|</span><span class="token function">sed</span> -nr <span class="token string">'2s@[^0-9]+([.0-9]+).*@\1@p'</span>
+
+7、统计centos安装光盘中Package目录下的所有rpm文件的以.分隔倒数第二个
+字段的重复次数
+    <span class="token function">ls</span> /misc/cd/<span class="token punctuation">{</span>BaseOS,AppStream<span class="token punctuation">}</span>/Packages/ <span class="token operator">|</span> <span class="token function">sed</span> -nr <span class="token string">'s#.*\.(.*)\.rpm#\1#p'</span> <span class="token operator">|</span> <span class="token function">sort</span> <span class="token operator">|</span><span class="token function">uniq</span> -c <span class="token operator">|</span> <span class="token function">sort</span> -nr
+    <span class="token function">ls</span> /misc/cd/<span class="token punctuation">{</span>BaseOS,AppStream<span class="token punctuation">}</span>/Packages/ <span class="token operator">|</span> <span class="token function">rev</span> <span class="token operator">|</span> <span class="token function">cut</span> -d. -f2 <span class="token operator">|</span> <span class="token function">sort</span> <span class="token operator">|</span> <span class="token function">uniq</span> -c <span class="token operator">|</span> <span class="token function">uniq</span>
+
+8、统计/etc/init.d/functions文件中每个单词的出现次数，并排序（用grep和
+sed两种方法分别实现）
+    <span class="token function">grep</span> -Eow <span class="token string">"[^[:punct:]]+([[:alpha:]0-9+])"</span> /etc/init.d/functions <span class="token operator">|</span> <span class="token function">grep</span> -Eow <span class="token string">"[[:alpha:]]+|[0-9]+"</span> <span class="token operator">|</span> <span class="token function">wc</span> -l
+    <span class="token function">sed</span> -r <span class="token string">"s/[^[:alpha:]]/\n/g"</span> /etc/init.d/functions<span class="token operator">|</span> <span class="token function">sort</span> <span class="token operator">|</span> <span class="token function">uniq</span> -c <span class="token operator">|</span> <span class="token function">sort</span> -nr
+
+9、将文本文件的n和n+1行合并为一行，n为奇数行
+    <span class="token function">seq</span> 10 <span class="token operator">|</span> <span class="token function">sed</span> -nr <span class="token string">'1~2N;s/\n/ /p'</span> 
+
+</code></pre>
+

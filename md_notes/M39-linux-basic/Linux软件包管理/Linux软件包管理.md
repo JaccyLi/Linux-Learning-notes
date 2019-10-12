@@ -194,20 +194,20 @@ ldconfig
 ------ 
 (1) 系统发版的光盘或官方的服务器 
 CentOS镜像： 
-https://www.centos.org/download/ 
-http://mirrors.aliyun.com 
-http://mirrors.sohu.com 
-http://mirrors.163.com 
+[www.centos.org/download/](https://www.centos.org/download/ )
+[mirrors.aliyun.com ](http://mirrors.aliyun.com )
+[mirrors.sohu.com](http://mirrors.sohu.com )
+[mirrors.163.com ](http://mirrors.163.com )
 (2) 项目官方站点 
 (3) 第三方组织： 
 Fedora-EPEL： 
 Extra Packages for Enterprise Linux 
 Rpmforge:RHEL推荐，包很全 
 搜索引擎： 
-http://pkgs.org 
-http://rpmfind.net 
-http://rpm.pbone.net 
-https://sourceforge.net/ 
+[pkgs.org](http://pkgs.org )
+[rpmfind.net](http://rpmfind.net) 
+[rpm.pbone.net](http://rpm.pbone.net)
+[sourceforge.net](https://sourceforge.net/) 
 (4) 自己制作 
 注意：第三方包建议要检查其合法性 
 来源合法性,程序包的完整性 

@@ -1,0 +1,332 @@
+﻿<p></p><div class="toc"><h3><center><font size="214" face="黑体" color="grey">Linux文件查找和打包压缩详解</font></center></h3><ul><li><a href="#locatefind_2">一.文件查找工具locate和find</a></li><ul><li><a href="#1locate_4">1.locate</a></li><li><a href="#2find_35">2.find</a></li><ul><li><a href="#21_53">2.1查找路径：指定具体目标路径；默认为当前目录</a></li><li><a href="#22_55">2.2查找条件：指定的查找标准，可以文件名、大小、类型、权限等标准进行；默认为找出指定路径下的所有文件</a></li><ul><li><a href="#_57">指定搜索层级</a></li><li><a href="#inode_70">根据文件名和inode查找</a></li><li><a href="#_82">根据属主、属组查找</a></li><li><a href="#_93">根据文件类型查找</a></li><li><a href="#_109">组合条件</a></li><li><a href="#find__123">find 示例</a></li><li><a href="#_147">根据文件大小来查找</a></li><li><a href="#_160">根据时间戳</a></li><ul><li><a href="#_176">根据权限查找</a></li></ul></ul></ul><li><a href="#23_190">2.3处理动作：对符合条件的文件做操作，默认输出至屏幕</a></li><li><a href="#24xargsxargs_203">2.4由于很多命令不支持管道|来传递参数，xargs用于产生某个命令的参数，xargs</a></li><ul><ul><li><a href="#find_219">find示例</a></li><li><a href="#_234">练习</a></li></ul></ul></ul><li><a href="#tarcpio_264">二.文本打包工具tar和cpio</a></li><ul><li><a href="#1tar_266">1.tar</a></li><li><a href="#2cpio_296">2.cpio</a></li></ul><li><a href="#_329">三.文件压缩和解压缩工具</a></li><ul><li><a href="#1compressuncompress_331">1.compress,uncompress</a></li><li><a href="#2gzipgunzipzcat_343">2.gzip,gunzip,zcat</a></li><li><a href="#3bzip2bunzip2bzcat_359">3.bzip2,bunzip2,bzcat</a></li><li><a href="#4zipunzipxzcat_370">4.zip,unzip,xzcat</a></li></ul></ul></div><p></p>
+<h1><a id="locatefind_2"></a>一.文件查找工具locate和find</h1>
+<h2><a id="1locate_4"></a>1.locate</h2>
+<ul>
+<li>locate依靠查询系统上预建的文件索引数据库来查询某个文件，按名字来查找，速度很快</li>
+</ul>
+<blockquote>
+<p>数据库：/var/lib/mlocate/mlocate.db</p>
+</blockquote>
+<ul>
+<li>
+<p>其工作依赖于事先构建的索引</p>
+</li>
+<li>
+<p>索引的构建是在系统较为空闲时自动进行(周期性任务)，管理员手动更新数据库(updatedb 命令)</p>
+</li>
+<li>
+<p>索引构建过程需要遍历整个根文件系统，极消耗资源<br>
+工作特点:<br>
+•查找速度快<br>
+•模糊查找<br>
+•非实时查找<br>
+•搜索的是文件的全路径，不仅仅是文件名<br>
+•可能只搜索用户具备读取和执行权限的目录</p>
+</li>
+<li>
+<p>用法</p>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">locate</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. PATTERN<span class="token punctuation">..</span>.
+    -i 不区分大小写的搜索 
+    -n  N 只列举前N个匹配项目 
+    -r  使用基本正则表达式 
+示例 
+    搜索名称或路径中带有“conf”的文件 
+        <span class="token function">locate</span>  conf 
+    使用Regex来搜索以“.conf”结尾的文件 
+        <span class="token function">locate</span>  -r  ‘\.conf$’ 
+
+</code></pre>
+<h2><a id="2find_35"></a>2.find</h2>
+<ul>
+<li>实时查找工具，通过遍历指定路径完成文件查找</li>
+</ul>
+<pre><code class="prism language-bash">工作特点： 
+    • 查找速度略慢 
+    • 精确查找 
+    • 实时查找 
+    • 可能只搜索用户具备读取和执行权限的目录 
+</code></pre>
+<ul>
+<li>语法</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">find</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>查找路径<span class="token punctuation">]</span> <span class="token punctuation">[</span>查找条件<span class="token punctuation">]</span> <span class="token punctuation">[</span>处理动作<span class="token punctuation">]</span> 
+</code></pre>
+<h3><a id="21_53"></a>2.1查找路径：指定具体目标路径；默认为当前目录</h3>
+<h3><a id="22_55"></a>2.2查找条件：指定的查找标准，可以文件名、大小、类型、权限等标准进行；默认为找出指定路径下的所有文件</h3>
+<h4><a id="_57"></a>指定搜索层级</h4>
+<pre><code class="prism language-bash">    -maxdepth  level 最大搜索目录深度,指定目录下的文件为第1级 
+    -mindepth level 最小搜索目录深度 
+</code></pre>
+<ul>
+<li>先处理目录内的文件，再处理指定目录</li>
+</ul>
+<pre><code class="prism language-bash">    -depth 
+</code></pre>
+<h4><a id="inode_70"></a>根据文件名和inode查找</h4>
+<pre><code class="prism language-bash">    -name <span class="token string">"文件名称"</span>：支持使用glob 
+        *, ?, <span class="token punctuation">[</span><span class="token punctuation">]</span>, <span class="token punctuation">[</span>^<span class="token punctuation">]</span> 
+    -iname <span class="token string">"文件名称"</span>：不区分字母大小写 
+    -inum n  按inode号查找 
+    -samefile name  相同inode号的文件 
+    -links n   链接数为n的文件 
+    -regex “PATTERN”：以PATTERN匹配整个文件路径，而非文件名称 
+</code></pre>
+<h4><a id="_82"></a>根据属主、属组查找</h4>
+<pre><code class="prism language-bash">    user USERNAME：查找属主为指定用户<span class="token punctuation">(</span>UID<span class="token punctuation">)</span>的文件 
+    group GRPNAME: 查找属组为指定组<span class="token punctuation">(</span>GID<span class="token punctuation">)</span>的文件 
+    uid UserID：查找属主为指定的UID号的文件 
+    gid GroupID：查找属组为指定的GID号的文件 
+    nouser：查找没有属主的文件 
+    nogroup：查找没有属组的文件 
+</code></pre>
+<h4><a id="_93"></a>根据文件类型查找</h4>
+<pre><code class="prism language-bash">    -type TYPE 
+        •f: 普通文件 
+        •d: 目录文件 
+        •l: 符号链接文件 
+        •s：套接字文件 
+        •b: 块设备文件 
+        •c: 字符设备文件 
+        •p: 管道文件 
+    空文件或目录 
+  -empty 
+    示例：find /app -type d  -empty 
+</code></pre>
+<h4><a id="_109"></a>组合条件</h4>
+<pre><code class="prism language-bash">    与：-a 
+    或：-o 
+    非：-not   <span class="token operator">!</span>  
+德·摩根定律： 
+    <span class="token punctuation">(</span>非 A<span class="token punctuation">)</span> 或 <span class="token punctuation">(</span>非 B<span class="token punctuation">)</span> <span class="token operator">=</span> 非<span class="token punctuation">(</span>A 且 B<span class="token punctuation">)</span>  
+    <span class="token punctuation">(</span>非 A<span class="token punctuation">)</span> 且 <span class="token punctuation">(</span>非 B<span class="token punctuation">)</span> <span class="token operator">=</span> 非<span class="token punctuation">(</span>A 或 B<span class="token punctuation">)</span>  
+示例： 
+    <span class="token operator">!</span>A -a <span class="token operator">!</span>B <span class="token operator">=</span> <span class="token operator">!</span><span class="token punctuation">(</span>A -o B<span class="token punctuation">)</span> 
+    <span class="token operator">!</span>A -o <span class="token operator">!</span>B <span class="token operator">=</span> <span class="token operator">!</span><span class="token punctuation">(</span>A -a B<span class="token punctuation">)</span> 
+</code></pre>
+<h4><a id="find__123"></a>find 示例</h4>
+<pre><code class="prism language-bash">    ind -name snow.png 
+    ind -iname snow.png 
+    ind / -name  “*.txt” 
+    ind /var –name “*log*” 
+    ind  -user joe  -group joe 
+    ind -user joe -not -group joe 
+    ind -user joe -o -user jane 
+    ind -not  \<span class="token punctuation">(</span>  -user joe -o -user jane  \<span class="token punctuation">)</span> 
+    ind / -user joe -o -uid 500
+
+找出/tmp目录下，属主不是root，且文件名不以f开头的文件 
+    <span class="token function">find</span> /tmp \<span class="token punctuation">(</span> -not -user root -a -not -name <span class="token string">'f*'</span> \<span class="token punctuation">)</span> -ls 
+    <span class="token function">find</span> /tmp -not \<span class="token punctuation">(</span> -user root -o -name <span class="token string">'f*'</span> \<span class="token punctuation">)</span>  –ls 
+排除目录 
+查找/etc/下，除/etc/sane.d目录的其它所有.conf后缀的文件 
+    <span class="token function">find</span> /etc -path <span class="token string">'/etc/sane.d'</span> -a -prune -o -name <span class="token string">"*.conf"</span> 
+查找/etc/下，除/etc/sane.d和/etc/fonts两个目录的所有.conf后缀的文件 
+    <span class="token function">find</span> /etc \<span class="token punctuation">(</span> -path <span class="token string">"/etc/sane.d"</span> -o -path <span class="token string">"/etc/fonts"</span> \<span class="token punctuation">)</span> -a -prune -o -
+name <span class="token string">"*.conf"</span>
+</code></pre>
+<h4><a id="_147"></a>根据文件大小来查找</h4>
+<pre><code class="prism language-bash">-size <span class="token punctuation">[</span>+<span class="token operator">|</span>-<span class="token punctuation">]</span><span class="token comment">#UNIT </span>
+    常用单位：k, M, G，c（byte） 
+<span class="token comment">#UNIT: (#-1, #] </span>
+    如：6k 表示<span class="token punctuation">(</span>5k,6k<span class="token punctuation">]</span> 
+-<span class="token comment">#UNIT：[0,#-1] </span>
+    如：-6k 表示<span class="token punctuation">[</span>0,5k<span class="token punctuation">]</span> 
++<span class="token comment">#UNIT：(#,∞) </span>
+    如：+6k 表示<span class="token punctuation">(</span>6k,∞<span class="token punctuation">)</span>
+</code></pre>
+<h4><a id="_160"></a>根据时间戳</h4>
+<pre><code class="prism language-bash">以“天”为单位 
+   -atime <span class="token punctuation">[</span>+<span class="token operator">|</span>-<span class="token punctuation">]</span><span class="token comment">#,</span>
+        <span class="token comment">#: [#,#+1) </span>
+        +<span class="token comment">#: [#+1,∞] </span>
+        -<span class="token comment">#: [0,#) </span>
+    -mtime 
+    -ctime 
+以“分钟”为单位 
+    -amin 
+    -mmin 
+    -cmin
+</code></pre>
+<h5><a id="_176"></a>根据权限查找</h5>
+<pre><code class="prism language-bash">   -perm <span class="token punctuation">[</span>/<span class="token operator">|</span>-<span class="token punctuation">]</span>MODE 
+         MODE: 精确权限匹配 
+        /MODE：任何一类<span class="token punctuation">(</span>u,g,o<span class="token punctuation">)</span>对象的权限中只要能一位匹配即可，或关系，+号从centos7开始淘汰 
+        -MODE：每一类对象都必须同时拥有指定权限，与关系 
+            0: 表示不关注 
+•find -perm 755 会匹配权限模式恰好是755的文件 
+•只要当任意人有写权限时，find -perm +222就会匹配 
+•只有当每个人都有写权限时，find -perm -222才会匹配 
+•只有当其它人（other）有写权限时，find -perm -002才会匹配 
+</code></pre>
+<h2><a id="23_190"></a>2.3处理动作：对符合条件的文件做操作，默认输出至屏幕</h2>
+<pre><code class="prism language-bash">-print：默认的处理动作，显示至屏幕 
+-ls：类似于对查找到的文件执行“ls -l”命令 
+-delete：删除查找到的文件 
+-fls file：查找到的所有文件的长格式信息保存至指定文件中 
+-ok COMMAND <span class="token punctuation">{</span><span class="token punctuation">}</span> \<span class="token punctuation">;</span> 对查找到的每个文件执行由COMMAND指定的命令，对于每个文件执行命令之前，都会交互式要求用户确认 
+-exec COMMAND <span class="token punctuation">{</span><span class="token punctuation">}</span> \<span class="token punctuation">;</span> 对查找到的每个文件执行由COMMAND指定的命令  
+              <span class="token punctuation">{</span><span class="token punctuation">}</span>: 用于引用查找到的文件名称自身 
+find传递查找到的文件至后面指定的命令时，查找到所有符合条件的文件一次性传递给后面的命令 
+</code></pre>
+<h2><a id="24xargsxargs_203"></a>2.4由于很多命令不支持管道|来传递参数，xargs用于产生某个命令的参数，xargs</h2>
+<ul>
+<li>xargs可以读入stdin 的数据，并且以空格符或回车符将stdin的数据分隔成为参数;许多命令不能接受过多参数，命令执行可能会失败，xargs可以解决</li>
+<li>
+<ul>
+<li>注意：文件名或者是其他意义的名词内含有空格符的情况使用xargs需要指明其它的分隔符</li>
+</ul>
+</li>
+</ul>
+<pre><code class="prism language-bash">find和xargs的组合：find <span class="token operator">|</span> <span class="token function">xargs</span> COMMAND 
+示例： 
+    <span class="token function">ls</span>  <span class="token operator">|</span> <span class="token function">xargs</span>   <span class="token function">rm</span>  
+    删除当前目录下的大量文件 
+        <span class="token function">find</span> /sbin/ -perm +700 <span class="token operator">|</span> <span class="token function">ls</span> -l       这个命令是错误的 
+        <span class="token function">find</span> /bin/ -perm /7000 <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token function">ls</span> -Sl  查找有特殊权限的文件，并排序 
+        <span class="token function">find</span> /bin/ -perm -7000 <span class="token operator">|</span> <span class="token function">xargs</span> <span class="token function">ls</span> -Sl  此命令和上面有何区别？  
+        <span class="token function">find</span> -type f -name “*.txt” -print0 <span class="token operator">|</span> <span class="token function">xargs</span> -0 <span class="token function">rm</span> 以字符nul分隔 
+</code></pre>
+<h4><a id="find_219"></a>find示例</h4>
+<pre><code class="prism language-bash">备份配置文件，添加.orig这个扩展名 
+    <span class="token function">find</span>  -name  <span class="token string">"*.conf"</span>  -exec  <span class="token function">cp</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>  <span class="token punctuation">{</span><span class="token punctuation">}</span>.orig  \<span class="token punctuation">;</span> 
+提示删除存在时间超过３天以上的joe的临时文件 
+    <span class="token function">find</span> /tmp -ctime +3 -user joe -ok <span class="token function">rm</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> \<span class="token punctuation">;</span> 
+在主目录中寻找可被其它用户写入的文件 
+    <span class="token function">find</span> ~ -perm -002  -exec <span class="token function">chmod</span> o-w <span class="token punctuation">{</span><span class="token punctuation">}</span> \<span class="token punctuation">;</span> 
+查找/data下的权限为644，后缀为sh的普通文件，增加执行权限 
+    <span class="token function">find</span> /data –type  f -perm 644  -name <span class="token string">"*.sh"</span> –exec <span class="token function">chmod</span> 755 <span class="token punctuation">{</span><span class="token punctuation">}</span> \<span class="token punctuation">;</span> 
+查看/home的目录 
+    <span class="token function">find</span>  /home –type d -ls 
+</code></pre>
+<h4><a id="_234"></a>练习</h4>
+<pre><code class="prism language-bash">1、查找/var目录下属主为root，且属组为mail的所有文件 
+    <span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment"># find /var/ -user root -group mail/var/spool/mail</span>
+    /var/spool/mail/root
+
+2、查找/var目录下不属于root、lp、gdm的所有文件 
+    <span class="token function">find</span> /var/ \<span class="token punctuation">(</span> -not -user root -a -not -user lp -a -not -user gdm \<span class="token punctuation">)</span> -ls
+
+3、查找/var目录下最近一周内其内容修改过，同时属主不为root，也不是postfix的文件 
+    <span class="token function">find</span> /var/ -mtime -7 -o \<span class="token punctuation">(</span> -not -user root -a -not -user postfix \<span class="token punctuation">)</span> -ls
+    
+4、查找当前系统上没有属主或属组，且最近一个周内曾被访问过的文件 
+    <span class="token function">find</span> / -atime -7 -nouser -o -nogroup 
+
+5、查找/etc目录下大于1M且类型为普通文件的所有文件 
+    <span class="token function">find</span> /etc/ -size +1M -a -type f
+
+6、查找/etc目录下所有用户都没有写权限的文件 
+    <span class="token function">find</span> /etc/ -not -perm /222
+
+7、查找/etc目录下至少有一类用户没有执行权限的文件 
+    <span class="token function">find</span> /etc/ -not -perm -111
+
+8、查找/etc/init.d目录下，所有用户都有执行权限， 且其它用户有写权限的文件 
+    <span class="token function">find</span> /etc/init.d -perm -113
+
+</code></pre>
+<h1><a id="tarcpio_264"></a>二.文本打包工具tar和cpio</h1>
+<h2><a id="1tar_266"></a>1.tar</h2>
+<ul>
+<li>tar（Tape ARchive，磁带归档的缩写）</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">tar</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>.  
+<span class="token punctuation">(</span>1<span class="token punctuation">)</span> 创建归档，保留权限 
+    <span class="token function">tar</span> -cpvf /PATH/FILE.tar FILE<span class="token punctuation">..</span>. 
+<span class="token punctuation">(</span>2<span class="token punctuation">)</span> 追加文件至归档： 注：不支持对压缩文件追加 
+    <span class="token function">tar</span> -r -f /PATH/FILE.tar FILE<span class="token punctuation">..</span>. 
+<span class="token punctuation">(</span>3<span class="token punctuation">)</span> 查看归档文件中的文件列表 
+    <span class="token function">tar</span> -t -f /PATH/FILE.tar 
+<span class="token punctuation">(</span>4<span class="token punctuation">)</span> 展开归档 
+    <span class="token function">tar</span> -x -f /PATH/FILE.tar 
+    <span class="token function">tar</span> -x -f /PATH/FILE.tar -C /PATH/ 
+<span class="token punctuation">(</span>5<span class="token punctuation">)</span> 结合压缩工具实现：归档并压缩 
+    -j: bzip2, -z: gzip, -J: xz 
+--exclude 排除文件 
+    <span class="token function">tar</span> zcvf /root/a3.tgz --exclude<span class="token operator">=</span>/app/host1 --exclude<span class="token operator">=</span>/app/host2 /app 
+-T 选项指定输入文件  -X 选项指定包含要排除的文件列表 
+    <span class="token function">tar</span> zcvf mybackup.tgz -T /root/includefilelist -X /root/excludefilelist 
+split：分割一个文件为多个文件 
+       分割大的 <span class="token function">tar</span> 文件为多份小文件 
+    <span class="token function">split</span> -b  Size –d tar-file-name  prefix-name 
+    <span class="token function">split</span> -b 1M –d mybackup.tgz mybackup-parts 
+    <span class="token function">split</span> -b 1M mybackup.tgz mybackup-parts 
+合并： 
+    <span class="token function">cat</span> mybackup-parts* <span class="token operator">&gt;</span> mybackup.tar.gz 
+</code></pre>
+<h2><a id="2cpio_296"></a>2.cpio</h2>
+<ul>
+<li>功能：打包文件或解包</li>
+<li>
+<ul>
+<li>cpio命令是通过重定向的方式将文件进行打包备份，还原恢复的工具，它可以解压以“.cpio”或者“.tar”结尾的文件</li>
+</ul>
+</li>
+<li>cpio [选项] &gt; 文件名或者设备名</li>
+<li>cpio [选项] &lt; 文件名或者设备名</li>
+</ul>
+<pre><code class="prism language-bash">选项 
+-o output模式，打包，将标准输入传入的文件名打包后发送到标准输出 
+-i input模式，解包，对标准输入传入的打包文件名解包到当前目录 
+-t 预览，查看标准输入传入的打包文件中包含的文件列表 
+-O filename 输出到指定的归档文件名 
+-A 向已存在的归档文件中追加文件 
+-I filename 对指定的归档文件名解压 
+-F filename 使用指定的文件名替代标准输入或输出 
+-d 解包生成目录，在cpio还原时，自动的建立目录 
+-v 显示打包过程中的文件名称
+</code></pre>
+<ul>
+<li>示例</li>
+</ul>
+<pre><code class="prism language-bash">将etc目录备份：  
+    <span class="token function">find</span> ./etc -print <span class="token operator">|</span>cpio -ov <span class="token operator">&gt;</span>bak.cpio 
+将/data内容追加bak.cpio 
+    <span class="token function">find</span> /data <span class="token operator">|</span> cpio -oA -F  bak.cpio  
+内容预览 
+    cpio –tv <span class="token operator">&lt;</span> etc.cpio 
+解包文件  
+    cpio –idv <span class="token operator">&lt;</span> etc.cpio 
+</code></pre>
+<h1><a id="_329"></a>三.文件压缩和解压缩工具</h1>
+<h2><a id="1compressuncompress_331"></a>1.compress,uncompress</h2>
+<pre><code class="prism language-bash">compress <span class="token punctuation">[</span>-dfvcVr<span class="token punctuation">]</span> <span class="token punctuation">[</span>-b maxbits<span class="token punctuation">]</span> <span class="token punctuation">[</span>file <span class="token punctuation">..</span>.<span class="token punctuation">]</span> 
+    -d 解压缩，相当于uncompress 
+    -c 结果输出至标准输出,不删除原文件 
+    -v 显示详情 
+    uncompress file.Z  解压缩 
+    zcat file.Z  不显式解压缩的前提下查看文本文件内容 
+        示例：zcat file.Z <span class="token operator">&gt;</span>file 
+</code></pre>
+<h2><a id="2gzipgunzipzcat_343"></a>2.gzip,gunzip,zcat</h2>
+<pre><code class="prism language-bash"><span class="token function">gzip</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. FILE <span class="token punctuation">..</span>. 
+    -d 解压缩，相当于gunzip 
+    -c 结果输出至标准输出，保留原文件不改变 
+    -<span class="token comment"># 指定压缩比，#取值为1-9，值越大压缩比越大 </span>
+gunzip file.gz  解压缩 
+zcat file.gz 不显式解压缩的前提下查看文本文件内容 
+示例： 
+    <span class="token function">gzip</span>  -c  messages  <span class="token operator">&gt;</span>messages.gz 
+    <span class="token function">gzip</span> -c -d messages.gz <span class="token operator">&gt;</span> messages 
+    zcat messages.gz <span class="token operator">&gt;</span> messages 
+    <span class="token function">cat</span> messages <span class="token operator">|</span> <span class="token function">gzip</span> <span class="token operator">&gt;</span> m.gz 
+</code></pre>
+<h2><a id="3bzip2bunzip2bzcat_359"></a>3.bzip2,bunzip2,bzcat</h2>
+<pre><code class="prism language-bash"><span class="token function">bzip2</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. FILE <span class="token punctuation">..</span>. 
+-k keep, 保留原文件 
+-d 解压缩 
+-<span class="token comment"># 1-9，压缩比，默认为9 </span>
+bunzip2 file.bz2  解压缩 
+bzcat file.bz2  不显式解压缩的前提下查看文本文件内容 
+</code></pre>
+<h2><a id="4zipunzipxzcat_370"></a>4.zip,unzip,xzcat</h2>
+<pre><code class="prism language-bash">xz <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. FILE <span class="token punctuation">..</span>. 
+-k keep, 保留原文件 
+-d 解压缩 
+-<span class="token comment"># 压缩比，取值1-9，默认为6 </span>
+unxz file.xz  解压缩 
+xzcat file.xz  不显式解压缩的前提下查看文本文件内容 
+</code></pre>
+
