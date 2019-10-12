@@ -1,4 +1,5 @@
-# <center>Chapter4: bash变量和参数介绍
+
+<center><font size=214 face=黑体 color=grey>Chapter4: bash变量和参数介绍</font></center>
 
 >  # 概述
 - 变量可以让程序和脚本语言用来描述数据。一个变量仅仅是一个标签而已，被指定到计算机内存中存储着数据的某个位置或某些位置的标签。变量一般出现在算术运算操作和数量操纵及字符串解析中。
