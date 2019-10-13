@@ -1,4 +1,6 @@
-<center> <font face="黑体" size=4 color=grey>Chapter 5.bash引用-Quoting详细介绍</center>
+<center> <font face="黑体" size=7 color=grey>Chapter 5.bash引用-Quoting详细介绍</center>
+
+<center><font face="黑体" size=4 color=grey> </center>
 
 # 概述
 
@@ -186,12 +188,8 @@ echo $'\a'           # 警告音(beep).
 # =================================================================== #
 echo "Introducing the \$\' ... \' string-expansion construct . . . "
 echo ". . . featuring more quotation marks."
-echo $'\t \042 \t'   # Quote (") framed by tabs.
-# Note that  '\nnn' is an octal value.
-# It also works with hexadecimal values, in an $'\xhhh' construct.
-echo $'\t \x22 \t'  # Quote (") framed by tabs.
-# Thank you, Greg Keraunen, for pointing this out.
-# Earlier Bash versions allowed '\x022'.
+echo $'\t \042 \t'   # 打印左右两边分别有个tab键的双引号(").
+# '\nnn' 为八进制数.
 echo
 # 将一个ASCII字符赋值给一个变量
 # ----------------------------------------
@@ -317,7 +315,7 @@ done
 exit $?
 ```
 
-> \" 还原双引号的字面意思(就是双引号，不在用于引用)
+> \\" 还原双引号的字面意思(就是双引号，不在用于引用)
 
 ```bash
 echo "Hello"                     # Hello
@@ -345,14 +343,14 @@ echo '\'   # Results in \
 - 反斜杠\\在不同的情况下表现出不一样的行为(是否被转义；是否位于强引用中；是否在弱引用中；是否在命令替换中；是否在“here document”)
 
 ```bash
-                      #  Simple escaping and quoting
+                      #  简单的转义和引用
 echo \z               #  z
 echo \\z              # \z
 echo '\z'             # \z
 echo '\\z'            # \\z
 echo "\z"             # \z
 echo "\\z"            # \z
-                      #  Command substitution
+                      #  命令替换
 echo ècho \z`        #  z
 echo ècho \\z`       #  z
 echo ècho \\\z`      # \z
@@ -361,7 +359,7 @@ echo ècho \\\\\\z`   # \z
 echo ècho \\\\\\\z`  # \\z
 echo ècho "\z"`      # \z
 echo ècho "\\z"`     # \z
-                      # Here document
+                      # 此处文本(Here document)
 cat <<EOF              
 \z                      
 EOF                   # \z
@@ -371,36 +369,33 @@ EOF                   # \z
 # These examples supplied by Stéphane Chazelas.
 ```
 
-- Elements of a string assigned to a variable may be escaped, but the escape character alone may not be
-assigned to a variable.
+- 赋给某个变量的字符串中的某些元素可能会被(能够被)转义，但是单个被转义的字符不一定可以赋给变量。
 
 ```bash
 variable=\
 echo "$variable"
-# Will not work - gives an error message:
+# 不可行，打印一个错误提示:
 # test.sh: : command not found
-# A "naked" escape cannot safely be assigned to a variable.
+# 单独一个转义字符不可赋给变量
 #
-#  What actually happens here is that the "\" escapes the newline and
-#+ the effect is        variable=echo "$variable"
-#+                      invalid variable assignment
+#  事实上此处转义字符 "\" 转义了新行（在编写比较长的命令时就可以使用一个转义符来将命令写成多行）
+#+ 真正的行为是：        variable=echo "$variable"
+#+                      把命令赋值给变量是不允许的
 variable=\
 23skidoo
 echo "$variable"        #  23skidoo
-                        #  This works, since the second line
-                        #+ is a valid variable assignment.
+                        #  可行，因为第二行是合法的变量，且实际上第二行被转义成了第一。
 variable=\ 
-#        \^    escape followed by space
-echo "$variable"        # space
+#        \^    转义符后跟一个空格 
+echo "$variable"        # 输出空格
 variable=\\
 echo "$variable"        # \
 variable=\\\
 echo "$variable"
-# Will not work - gives an error message:
+# 行不通，出错：
 # test.sh: \: command not found
 #
-#  First escape escapes second one, but the third one is left "naked",
-#+ with same result as first instance, above.
+#  上面三个转义符中，第一个转义可第二个，但是第三个转义符还在，类似于第一个例子。
 variable=\\\\
 echo "$variable"        # \\
                         # Second and fourth escapes escaped.
@@ -408,62 +403,64 @@ echo "$variable"        # \\
 
 ```
 
+- 转义空格可以防止命令的参数列表发生词语分割。
 - Escaping a space can prevent word splitting in a command's argument list.
-file_list="/bin/cat /bin/gzip /bin/more /usr/bin/less /usr/bin/emacs-20.7"
 
 ```bash
+file_list="/bin/cat /bin/gzip /bin/more /usr/bin/less /usr/bin/emacs-20.7"
 # List of files as argument(s) to a command.
+
 # Add two files to the list, and list all.
 ls -l /usr/X11R6/bin/xsetroot /sbin/dump $file_list
 echo "-------------------------------------------------------------------------"
 # What happens if we escape a couple of spaces?
 ls -l /usr/X11R6/bin/xsetroot\ /sbin/dump\ $file_list
+输出：
+################################
+[root@centos8 ~]#ls -l /usr/X11R6/bin/xsetroot\ /sbin/dump\ $file_list
+ls: cannot access '/usr/X11R6/bin/xsetroot /sbin/dump /bin/cat': No such file or directory
+################################
 # Error: the first three files concatenated into a single argument to 'ls -l'
 #        because the two escaped spaces prevent argument (word) splitting.
 ```
 
-- The escape also provides a means of writing a multi-line command. Normally, each separate line constitutes a
-different command, but an escape at the end of a line escapes the newline character, and the command
-sequence continues on to the next line.
+- 转义也有"等待多行命令"的意思。一般的，不同的行会是不同的命令，但是行末的转义字符转义了新行的字符，命令可以一直写到下一行。
 
 ```bash
 (cd /source/directory && tar cf - . ) | \
 (cd /dest/directory && tar xpvf -)
-# Repeating Alan Cox's directory tree copy command,
-# but split into two lines for increased legibility.
-# As an alternative:
+# 该命令为Alan Cox写的拷贝命令，作两行写，增加了易读性。
+# 下面的命令同样功能:
 tar cf - -C /source/directory . |
 tar xpvf - -C /dest/directory
 # See note below.
 # (Thanks, Stéphane Chazelas.)
 ```
 
-
-- If a script line ends with a |, a pipe character, then a \, an escape, is not strictly necessary. It is, however,
-good programming practice to always escape the end of a line of code that continues to the following
-line.
+- 如果脚本行结束跟一个|,一个管道符号，那么转义字符\\，就不是那么严格的需要了。但是后面跟上转义字符是比较好的习惯。
 
 ```bash
 echo "foo
 bar" 
+##两行
 #foo
 #bar
 echo
 echo 'foo
-bar'    # No difference yet.
+bar'    # 仍然是两行
 #foo
 #bar
 echo
 echo foo\
-bar     # Newline escaped.
+bar     # 换行符被转义输出一行.
 #foobar
 echo
 echo "foo\
-bar"     # Same here, as \ still interpreted as escape within weak quotes.
+bar"     # 同样是一行，转义字符在弱引用中("\")不会丢掉其转义字符的特殊意义。
 #foobar
 echo
 echo 'foo\
-bar'     # Escape character \ taken literally because of strong quoting.
+bar'     # 两行，因为转义字符在强引用('\')中失去了转义字符的意义，被bash按照字面意义解释。
 #foo\
 #bar
 # Examples suggested by Stéphane Chazelas.
