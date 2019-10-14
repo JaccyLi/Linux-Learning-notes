@@ -1,4 +1,4 @@
-<center><font size=214 face=黑体 color=grey>Linux软件包管理</font></center>
+﻿@[TOC](<center><font size=214 face=黑体 color=grey>Linux软件包管理</font></center>)
 
 # 一.软件运行环境基础 
 
@@ -7,13 +7,13 @@
 - gcc 编译程序主要经过四个过程： 
 
 ```bash
-    处理（Pre-Processing） 
-    译 （Compiling） 
-    编 （Assembling） 
-    接 （Linking） 
+    预处理（Pre-Processing） 
+    编译 （Compiling） 
+    汇编 （Assembling） 
+    链接 （Linking） 
 ```
 
-![](png/2019-10-11-11-51-23.png)
+[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-r9bfgXpA-1571053790456)(png/2019-10-11-11-51-23.png)]
 
 - 如上图gcc编译过程 
 
@@ -33,7 +33,7 @@ gcc hello.c -o hello
 
 ## 2.C程序编译过程
 
-![](png/2019-10-11-12-03-13.png)
+[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-cUuyMMN3-1571053790458)(png/2019-10-11-12-03-13.png)]
 
 
 
@@ -60,10 +60,10 @@ libxxx.so
 ```
 
 - 静态链接和动态链接示意
-![](png/2019-10-11-11-52-49.png)
+[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-C0AVpJro-1571053790458)(png/2019-10-11-11-52-49.png)]
 
 - Java程序运行示意
-![](png/2019-10-11-19-46-56.png)
+[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-NGBYhgCR-1571053790459)(png/2019-10-11-19-46-56.png)]
 
 
 
@@ -367,7 +367,7 @@ yum的repo配置文件中可用的变量：
     http://server/centos/$releasever/$basearch/ 
     http://server/centos/7/x86_64 
     http://server/centos/6/i386
-``` 
+```
 
 ## 3.yum源 
 
@@ -437,7 +437,7 @@ yum [options] [command] [package ...]
     yum history info 6 
     yum history undo 6  
 日志 ：/var/log/yum.log 
-``` 
+```
 
 
 ```bash
@@ -594,7 +594,7 @@ c/c++编译器: gcc (GNU C Complier)
 
 ```bash
 yum install gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl  openssl-devel systemd-devel zlib-devel  vim lrzsz tree screen  lsof tcpdump wget  ntpdate net-tools iotop bc  bzip2 zip unzip nfs-utils 
-``` 
+```
 
 
 - 编译安装三步详细讲解
@@ -685,5 +685,5 @@ java-1.8.0-openjdk-headless-1.8.0.201.b09-2.el8.x86_64
 7.[root@centos8 ~/httpd-2.4.41]#curl http://`ifconfig |sed -nr 's@[^0-9]+([0-9.]+).*@\1@p' |sed -n -r '/\b(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b/p' | sed  '1!d'`/
 <html><body><h1>It works!</h1></body></html>  
 8.ooooooooooooooook
-
 ```
+

@@ -1,0 +1,461 @@
+﻿<p></p><div class="toc"><h3><center> <font face="黑体" size="7" color="grey">Chapter5.bash引用-Quoting详细介绍</font></center></h3><ul><li><a href="#_1">概述</a></li><ul><li><a href="#51_Quoting_Variables_28">5.1. 引用变量(Quoting Variables)</a></li><li><a href="#52_Escaping_127">5.2. 转义/逃逸(Escaping)</a></li></ul></ul></div><p></p>
+<h1><a id="_1"></a>概述</h1>
+<ul>
+<li>引用的字面意思就是，用引号括住一个字符串。这可以保护字符串中的特殊字符不被shell或shell脚本重新解释或扩展。(如果一个字有不同于其字面意思的解释，它就是“特殊的”。例如：星号*除了本身代表*号以外还表示文件通配和正则表达式中的通配符)。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>$ <span class="token function">ls</span> -l P*
+Pictures:
+total 0
+Public:
+total 0
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span>$ <span class="token function">ls</span> -l <span class="token string">'P*'</span>
+ls: cannot access <span class="token string">'P*'</span><span class="token keyword">:</span> No such <span class="token function">file</span> or directory
+</code></pre>
+<ul>
+<li>
+<p>在生活中用语或者书写，当我们使用双引号"引用"一个句子时，我们会区别对待该句子并赋予其特殊意义；在Bash脚本中，当我们使用双引号"string"引用一个字符串时，我们同样区别对待并保护其字面意思（一般性的意思）。</p>
+</li>
+<li>
+<p>在涉及到命令替换时，引用可以让echo输出带格式的命令结果,保留变量所带的空白符号。</p>
+</li>
+</ul>
+<pre><code class="prism language-bash">bash$ <span class="token keyword">echo</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">ls</span> -l<span class="token variable">)</span></span>                 <span class="token comment"># 无引号命令替换</span>
+total 8 -rw-rw-r-- 1 bo bo 13 Aug 21 12:57 t.sh -rw-rw-r-- 1 bo bo 78 Aug 21 12:57 u.sh
+bash$ <span class="token keyword">echo</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token function">ls</span> -l<span class="token variable">)</span></span>"</span>               <span class="token comment"># 被引用的命令替换</span>
+total 8
+ -rw-rw-r--  1 bo bo  13 Aug 21 12:57 t.sh
+ -rw-rw-r--  1 bo bo  78 Aug 21 12:57 u.sh
+</code></pre>
+<h2><a id="51_Quoting_Variables_28"></a>5.1. 引用变量(Quoting Variables)</h2>
+<ul>
+<li>
+<p>当我们引用一个变量时，比较建议的做法是使用双引号将其引用起来。这样做可以避免bash再次解析双引号中的特殊字符（只不过：$、反引号`、和反斜杠\仍然会被bash解析）。在双引号中的$符号仍然被视为特殊字符，这样做的好处是可以进行变量替换("$variable"),也就是使用变量的值替换掉变量名。</p>
+</li>
+<li>
+<p>使用双引号的另一个用途是防止单词分割。在双引号中的参数表现为单个词语(即使其包含空白字符)。</p>
+</li>
+</ul>
+<pre><code class="prism language-bash">List<span class="token operator">=</span><span class="token string">"one two three"</span>
+<span class="token keyword">for</span> a <span class="token keyword">in</span> <span class="token variable">$List</span>     <span class="token comment"># 使用空格符作为分隔符分割变量的值(字符串).</span>
+<span class="token keyword">do</span>
+  <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$a</span>"</span>
+<span class="token keyword">done</span>
+<span class="token comment"># 输出</span>
+<span class="token comment"># one</span>
+<span class="token comment"># two</span>
+<span class="token comment"># three</span>
+<span class="token keyword">echo</span> <span class="token string">"---"</span>
+<span class="token keyword">for</span> a <span class="token keyword">in</span> <span class="token string">"<span class="token variable">$List</span>"</span>   <span class="token comment"># Preserves whitespace in a single variable.</span>
+<span class="token keyword">do</span> <span class="token comment">#     ^     ^</span>
+  <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$a</span>"</span>
+<span class="token keyword">done</span>
+<span class="token comment"># 输出</span>
+<span class="token comment"># one two three</span>
+</code></pre>
+<ul>
+<li>下面是一个更加精心设计的例子</li>
+</ul>
+<pre><code class="prism language-bash">variable1<span class="token operator">=</span><span class="token string">"a variable containing five words"</span>
+COMMAND This is <span class="token variable">$variable1</span>    <span class="token comment"># 执行COMMAND命令时会被认为带了7个参数如下:</span>
+<span class="token comment"># "This" "is" "a" "variable" "containing" "five" "words"</span>
+COMMAND <span class="token string">"This is <span class="token variable">$variable1</span>"</span>  <span class="token comment"># # 执行COMMAND命令时会被认为带了1个参数如下:</span>
+<span class="token comment"># "This is a variable containing five words"</span>
+variable2<span class="token operator">=</span><span class="token string">""</span>    <span class="token comment"># 空变量.</span>
+COMMAND <span class="token variable">$variable2</span> <span class="token variable">$variable2</span> <span class="token variable">$variable2</span>
+                <span class="token comment"># COMMAND命令没带参数执行. </span>
+COMMAND <span class="token string">"<span class="token variable">$variable2</span>"</span> <span class="token string">"<span class="token variable">$variable2</span>"</span> <span class="token string">"<span class="token variable">$variable2</span>"</span>
+                <span class="token comment"># 带了三个空参数执行COMMAND命令. </span>
+COMMAND <span class="token string">"<span class="token variable">$variable2</span> <span class="token variable">$variable2</span> <span class="token variable">$variable2</span>"</span>
+                <span class="token comment"># COMMAND命令带一个参数执行(该参数为2个空格). </span>
+<span class="token comment"># 谢谢这个大佬指出:Stéphane Chazelas.</span>
+</code></pre>
+<ul>
+<li>使用echo给标准输出打印奇怪的字符</li>
+</ul>
+<blockquote>
+<p>例 5-1. echo输出奇怪的变量</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># weirdvars.sh: Echoing weird variables.</span>
+<span class="token keyword">echo</span>
+var<span class="token operator">=</span><span class="token string">"'(]\\{}\$\""</span>
+<span class="token keyword">echo</span> <span class="token variable">$var</span>        <span class="token comment"># '(]\{}$"</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$var</span>"</span>      <span class="token comment"># '(]\{}$"     结果相同.</span>
+<span class="token keyword">echo</span>
+IFS<span class="token operator">=</span><span class="token string">'\'
+echo <span class="token variable">$var</span>        # '</span><span class="token punctuation">(</span><span class="token punctuation">]</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>$<span class="token string">"     \ 变为了空格，为什么?(IFS为内部域分割符，临时使用'\'作为分隔符)
+echo "</span><span class="token variable">$var</span><span class="token string">"      # '(]\{}$"</span>
+<span class="token comment"># 以上例子来自Stephane Chazelas.</span>
+<span class="token keyword">echo</span>
+var2<span class="token operator">=</span><span class="token string">"\\\\\""</span>
+<span class="token keyword">echo</span> <span class="token variable">$var2</span>       <span class="token comment">#   "</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$var2</span>"</span>     <span class="token comment"># \\"</span>
+<span class="token keyword">echo</span>
+<span class="token comment"># 但是 ... var2="\\\\"" 是非法的？（此处四个\，位置2,4的两个刚好被转义，而剩余3个"符，所以不行）</span>
+var3<span class="token operator">=</span><span class="token string">'\\\\'</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$var3</span>"</span>     <span class="token comment"># \\\\</span>
+<span class="token comment"># 但是强引用可以.</span>
+<span class="token comment"># ************************************************************ #</span>
+<span class="token comment"># 变量嵌套替换也可以</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token keyword">echo</span> <span class="token string">'"'</span><span class="token variable">)</span></span>"</span>           <span class="token comment"># "</span>
+<span class="token comment">#    ^           ^</span>
+<span class="token comment"># 某些情况下嵌套很有用</span>
+var1<span class="token operator">=</span><span class="token string">"Two bits"</span>
+<span class="token keyword">echo</span> <span class="token string">"\<span class="token variable">$var1</span> = "</span><span class="token variable">$var1</span><span class="token string">""</span>      <span class="token comment"># $var1 = Two bits</span>
+<span class="token comment">#    ^                ^</span>
+<span class="token comment"># Or, as Chris Hiestand points out ...</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token function">du</span> <span class="token string">"<span class="token variable">$My_File1</span>"</span><span class="token variable">)</span></span>"</span> -gt <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token function">du</span> <span class="token string">"<span class="token variable">$My_File2</span>"</span><span class="token variable">)</span></span>"</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token comment">#     ^     ^         ^ ^     ^     ^         ^ ^</span>
+<span class="token keyword">then</span>
+  <span class="token punctuation">..</span>.
+<span class="token keyword">fi</span>
+<span class="token comment"># ************************************************************ #</span>
+</code></pre>
+<ul>
+<li>
+<p>单引号(’ ')的工作机制类似于双引号，但是在单括号中不允许变量替换，因为$符的特殊意义被关闭了。在单引号中任何特殊的符号都按照字面意思解释(除了’单引号自身)。</p>
+</li>
+<li>
+<p>由于转义符(逃逸符)在单引号中都失去了转义的意义，所以试图在单引号中括单引号是不行的，下面的例子可以实现输出单引号。</p>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">"Why can't I write 's between single quotes"</span>
+<span class="token keyword">echo</span>
+<span class="token comment"># The roundabout method.</span>
+<span class="token keyword">echo</span> <span class="token string">'Why can'</span>\<span class="token string">''</span>t I <span class="token function">write</span> <span class="token string">'"'</span>"<span class="token string">'s between single quotes'</span>
+<span class="token comment">#    |-------|  |----------|   |-----------------------|</span>
+<span class="token comment"># 上面使用了三个单引号组；一个转义的单引号和一个双引号引起的单引号.</span>
+</code></pre>
+<h2><a id="52_Escaping_127"></a>5.2. 转义/逃逸(Escaping)</h2>
+<ul>
+<li>转义是一种用来引用单个字符的方法。在字符前的反斜杠\告诉shell以字面意思解析该字符。</li>
+</ul>
+<blockquote>
+<p>注意：在echo或者sed这些程序命令中，转义某个字符可能有相反的作用，可以触发某种特殊意义。</p>
+</blockquote>
+<blockquote>
+<p>特定的被转义的字符所具有的意义如下:</p>
+</blockquote>
+<pre><code class="prism language-bash">used with <span class="token keyword">echo</span> and <span class="token function">sed</span>
+\n 新行<span class="token punctuation">(</span>means newline<span class="token punctuation">)</span>
+\r 回车<span class="token punctuation">(</span>means return<span class="token punctuation">)</span>
+\t tab键
+\v 垂直tab键<span class="token punctuation">(</span>means vertical tab<span class="token punctuation">)</span>
+\b 退格<span class="token punctuation">(</span>means backspace<span class="token punctuation">)</span>
+\a 报警<span class="token punctuation">(</span>means alert <span class="token punctuation">(</span>beep or flash<span class="token punctuation">))</span>
+\0xx 将反斜杠后的数字视为八进制的ASCII码值
+</code></pre>
+<ul>
+<li>$’ … ’ :该符号结构的机制是使用转义的八进制或者十六进制值将ASCII码赋给变量；例如：quote=$’\042’.</li>
+</ul>
+<blockquote>
+<p>例5-2. 被转义的字符(Escaped Characters)</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># escaped.sh: escaped characters</span>
+<span class="token comment">#############################################################</span>
+<span class="token comment">### First, let's show some basic escaped-character usage. ###</span>
+<span class="token comment">#############################################################</span>
+<span class="token comment"># Escaping a newline.</span>
+<span class="token comment"># ------------------</span>
+<span class="token keyword">echo</span> <span class="token string">""</span>
+<span class="token keyword">echo</span> <span class="token string">"This will print
+as two lines."</span>
+<span class="token comment"># 上面的写法将会打印两行</span>
+<span class="token keyword">echo</span> <span class="token string">"This will print \
+as one line."</span>
+<span class="token comment"># 上面的写法将会打印一行</span>
+<span class="token keyword">echo</span><span class="token punctuation">;</span> <span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">"============="</span>
+<span class="token keyword">echo</span> <span class="token string">"\v\v\v\v"</span>      <span class="token comment"># 按照字面意思打印 \v\v\v\v .</span>
+<span class="token comment"># 使用 -e 选项 打印转义字符所代表的字符</span>
+<span class="token keyword">echo</span> <span class="token string">"============="</span>
+<span class="token keyword">echo</span> <span class="token string">"VERTICAL TABS"</span> <span class="token comment"># 垂直tab键</span>
+<span class="token keyword">echo</span> -e <span class="token string">"\v\v\v\v"</span>   <span class="token comment"># 此时将会打印四个垂直tab</span>
+<span class="token keyword">echo</span> <span class="token string">"=============="</span>
+<span class="token keyword">echo</span> <span class="token string">"QUOTATION MARK"</span>
+<span class="token keyword">echo</span> -e <span class="token string">"\042"</span>       <span class="token comment"># 打印一个双引号 " (quote, 八进制的 ASCII 值:42;代表一个双引号).</span>
+<span class="token keyword">echo</span> <span class="token string">"=============="</span>
+<span class="token comment"># 使用该结构 $'\X' 使得-e选项不在需要</span>
+<span class="token keyword">echo</span><span class="token punctuation">;</span> <span class="token keyword">echo</span> <span class="token string">"NEWLINE and (maybe) BEEP"</span>
+<span class="token keyword">echo</span> $<span class="token string">'\n'</span>           <span class="token comment"># 新行.</span>
+<span class="token keyword">echo</span> $<span class="token string">'\a'</span>           <span class="token comment"># 警告音(beep).</span>
+                     <span class="token comment"># May only flash, not beep, depending on terminal.</span>
+<span class="token comment"># We have seen $'\nnn" string expansion, and now . . .</span>
+<span class="token comment"># =================================================================== #</span>
+<span class="token comment"># $'\nnn' 该种字符串展开的机制在bash2.0中引进</span>
+<span class="token comment"># =================================================================== #</span>
+<span class="token keyword">echo</span> <span class="token string">"Introducing the \$\' ... \' string-expansion construct . . . "</span>
+<span class="token keyword">echo</span> <span class="token string">". . . featuring more quotation marks."</span>
+<span class="token keyword">echo</span> $<span class="token string">'\t \042 \t'</span>   <span class="token comment"># 打印左右两边分别有个tab键的双引号(").</span>
+<span class="token comment"># '\nnn' 为八进制数.</span>
+<span class="token keyword">echo</span>
+<span class="token comment"># 将一个ASCII字符赋值给一个变量</span>
+<span class="token comment"># ----------------------------------------</span>
+quote<span class="token operator">=</span>$<span class="token string">'\042'</span>        <span class="token comment"># " 赋值给一个变量</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$quote</span> Quoted string <span class="token variable">$quote</span> and this lies outside the quotes."</span>
+<span class="token keyword">echo</span>
+<span class="token comment"># Concatenating ASCII chars in a variable.</span>
+triple_underline<span class="token operator">=</span>$<span class="token string">'\137\137\137'</span>  <span class="token comment"># 137 是八进制的ASCII值，代表'_'.</span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$triple_underline</span> UNDERLINE <span class="token variable">$triple_underline</span>"</span>
+<span class="token keyword">echo</span>
+ABC<span class="token operator">=</span>$<span class="token string">'\101\102\103\010'</span>           <span class="token comment"># 101, 102, 103 分别代表 A, B, C.</span>
+<span class="token keyword">echo</span> <span class="token variable">$ABC</span>
+<span class="token keyword">echo</span>
+escape<span class="token operator">=</span>$<span class="token string">'\033'</span>                    <span class="token comment"># 033 是escape的八进制表示.</span>
+<span class="token keyword">echo</span> <span class="token string">"\"escape\" echoes as <span class="token variable">$escape</span>"</span>
+<span class="token comment">#                                   并无可视化的输出.</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">exit</span> 0
+</code></pre>
+<ul>
+<li>一个更加精心设计的例子</li>
+</ul>
+<blockquote>
+<p>例5-3. 检测按键(Detecting key-presses)</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># Author: Sigurd Solaas, 20 Apr 2011</span>
+<span class="token comment"># Used in ABS Guide with permission.</span>
+<span class="token comment"># Requires version 4.2+ of Bash.</span>
+key<span class="token operator">=</span><span class="token string">"no value yet"</span>
+<span class="token keyword">while</span> <span class="token boolean">true</span><span class="token punctuation">;</span> <span class="token keyword">do</span>
+  <span class="token function">clear</span>
+  <span class="token keyword">echo</span> <span class="token string">"Bash Extra Keys Demo. Keys to try:"</span>
+        <span class="token comment">#Bash 识别按键的demo.可以识别一下按键:</span>
+  <span class="token keyword">echo</span>
+  <span class="token keyword">echo</span> <span class="token string">"* Insert, Delete, Home, End, Page_Up and Page_Down"</span>
+  <span class="token keyword">echo</span> <span class="token string">"* The four arrow keys"</span>
+        <span class="token comment">#四个方向键</span>
+  <span class="token keyword">echo</span> <span class="token string">"* Tab, enter, escape, and space key"</span>
+        <span class="token comment">#tab,回车，返回，空格键</span>
+  <span class="token keyword">echo</span> <span class="token string">"* The letter and number keys, etc."</span>
+        <span class="token comment">#标点按键</span>
+  <span class="token keyword">echo</span>
+  <span class="token keyword">echo</span> <span class="token string">"    d = show date/time"</span>
+  <span class="token keyword">echo</span> <span class="token string">"    q = quit"</span>
+  <span class="token keyword">echo</span> <span class="token string">"================================"</span>
+  <span class="token keyword">echo</span>
+ <span class="token comment"># Convert the separate home-key to home-key_num_7:</span>
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$key</span>"</span> <span class="token operator">=</span> $<span class="token string">'\x1b\x4f\x48'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+  key<span class="token operator">=</span>$<span class="token string">'\x1b\x5b\x31\x7e'</span>
+  <span class="token comment">#   Quoted string-expansion construct. </span>
+ <span class="token keyword">fi</span>
+ <span class="token comment"># Convert the separate end-key to end-key_num_1.</span>
+ <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$key</span>"</span> <span class="token operator">=</span> $<span class="token string">'\x1b\x4f\x46'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+  key<span class="token operator">=</span>$<span class="token string">'\x1b\x5b\x34\x7e'</span>
+ <span class="token keyword">fi</span>
+ <span class="token keyword">case</span> <span class="token string">"<span class="token variable">$key</span>"</span> <span class="token keyword">in</span>
+  $<span class="token string">'\x1b\x5b\x32\x7e'</span><span class="token punctuation">)</span>  <span class="token comment"># Insert</span>
+   <span class="token keyword">echo</span> Insert Key
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b\x5b\x33\x7e'</span><span class="token punctuation">)</span>  <span class="token comment"># Delete</span>
+   <span class="token keyword">echo</span> Delete Key
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b\x5b\x31\x7e'</span><span class="token punctuation">)</span>  <span class="token comment"># Home_key_num_7</span>
+   <span class="token keyword">echo</span> Home Key
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b\x5b\x34\x7e'</span><span class="token punctuation">)</span>  <span class="token comment"># End_key_num_1</span>
+   <span class="token keyword">echo</span> End Key
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b\x5b\x35\x7e'</span><span class="token punctuation">)</span>  <span class="token comment"># Page_Up</span>
+   <span class="token keyword">echo</span> Page_Up
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b\x5b\x36\x7e'</span><span class="token punctuation">)</span>  <span class="token comment"># Page_Down</span>
+   <span class="token keyword">echo</span> Page_Down
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b\x5b\x41'</span><span class="token punctuation">)</span>  <span class="token comment"># Up_arrow</span>
+   <span class="token keyword">echo</span> Up arrow
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b\x5b\x42'</span><span class="token punctuation">)</span>  <span class="token comment"># Down_arrow</span>
+   <span class="token keyword">echo</span> Down arrow
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b\x5b\x43'</span><span class="token punctuation">)</span>  <span class="token comment"># Right_arrow</span>
+   <span class="token keyword">echo</span> Right arrow
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b\x5b\x44'</span><span class="token punctuation">)</span>  <span class="token comment"># Left_arrow</span>
+   <span class="token keyword">echo</span> Left arrow
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x09'</span><span class="token punctuation">)</span>  <span class="token comment"># Tab</span>
+   <span class="token keyword">echo</span> Tab Key
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x0a'</span><span class="token punctuation">)</span>  <span class="token comment"># Enter</span>
+   <span class="token keyword">echo</span> Enter Key
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x1b'</span><span class="token punctuation">)</span>  <span class="token comment"># Escape</span>
+   <span class="token keyword">echo</span> Escape Key
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  $<span class="token string">'\x20'</span><span class="token punctuation">)</span>  <span class="token comment"># Space</span>
+   <span class="token keyword">echo</span> Space Key
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  d<span class="token punctuation">)</span>
+   <span class="token function">date</span>
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  q<span class="token punctuation">)</span>
+  <span class="token keyword">echo</span> Time to quit<span class="token punctuation">..</span>.
+  <span class="token keyword">echo</span>
+  <span class="token keyword">exit</span> 0
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+  *<span class="token punctuation">)</span>
+   <span class="token keyword">echo</span> You pressed: \'<span class="token string">"<span class="token variable">$key</span>"</span>\'
+  <span class="token punctuation">;</span><span class="token punctuation">;</span>
+ esac
+ <span class="token keyword">echo</span>
+ <span class="token keyword">echo</span> <span class="token string">"================================"</span>
+ unset K1 K2 K3
+ <span class="token function">read</span> -s -N1 -p <span class="token string">"Press a key: "</span>
+ K1<span class="token operator">=</span><span class="token string">"<span class="token variable">$REPLY</span>"</span>
+ <span class="token function">read</span> -s -N2 -t 0.001
+ K2<span class="token operator">=</span><span class="token string">"<span class="token variable">$REPLY</span>"</span>
+ <span class="token function">read</span> -s -N1 -t 0.001
+ K3<span class="token operator">=</span><span class="token string">"<span class="token variable">$REPLY</span>"</span>
+ key<span class="token operator">=</span><span class="token string">"<span class="token variable">$K1</span><span class="token variable">$K2</span><span class="token variable">$K3</span>"</span>
+<span class="token keyword">done</span>
+<span class="token keyword">exit</span> <span class="token variable">$?</span>
+</code></pre>
+<blockquote>
+<p>\" 还原双引号的字面意思(就是双引号，不在用于引用)</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">"Hello"</span>                     <span class="token comment"># Hello</span>
+<span class="token keyword">echo</span> <span class="token string">"\"Hello\" ... he said."</span>    <span class="token comment"># "Hello" ... he said.</span>
+</code></pre>
+<blockquote>
+<p>$ 还原$符的字面意思，意思是在$后的变量不会被替换</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">"\<span class="token variable">$variable01</span>"</span>           <span class="token comment"># $variable01</span>
+<span class="token keyword">echo</span> <span class="token string">"The book cost \<span class="token variable">$7</span>.98."</span>  <span class="token comment"># The book cost $7.98.</span>
+</code></pre>
+<blockquote>
+<p>\\ 还原\的字面意思</p>
+</blockquote>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">"\\"</span>  <span class="token comment"># Results in \</span>
+<span class="token comment"># Whereas . . .</span>
+<span class="token keyword">echo</span> "\"   <span class="token comment"># Invokes secondary prompt from the command-line.</span>
+           <span class="token comment"># In a script, gives an error message.</span>
+<span class="token comment"># However . . .</span>
+<span class="token keyword">echo</span> '\'   <span class="token comment"># Results in \</span>
+</code></pre>
+<ul>
+<li>反斜杠\在不同的情况下表现出不一样的行为(是否被转义；是否位于强引用中；是否在弱引用中；是否在命令替换中；是否在“here document”)</li>
+</ul>
+<pre><code class="prism language-bash">                      <span class="token comment">#  简单的转义和引用</span>
+<span class="token keyword">echo</span> \z               <span class="token comment">#  z</span>
+<span class="token keyword">echo</span> \\z              <span class="token comment"># \z</span>
+<span class="token keyword">echo</span> <span class="token string">'\z'</span>             <span class="token comment"># \z</span>
+<span class="token keyword">echo</span> <span class="token string">'\\z'</span>            <span class="token comment"># \\z</span>
+<span class="token keyword">echo</span> <span class="token string">"\z"</span>             <span class="token comment"># \z</span>
+<span class="token keyword">echo</span> <span class="token string">"\\z"</span>            <span class="token comment"># \z</span>
+                      <span class="token comment">#  命令替换</span>
+<span class="token keyword">echo</span> ècho \z<span class="token variable"><span class="token variable">`</span>        #  z
+<span class="token keyword">echo</span> ècho \\z<span class="token variable">`</span></span>       <span class="token comment">#  z</span>
+<span class="token keyword">echo</span> ècho \\\z<span class="token variable"><span class="token variable">`</span>      # \z
+<span class="token keyword">echo</span> ècho \\\\z<span class="token variable">`</span></span>     <span class="token comment"># \z</span>
+<span class="token keyword">echo</span> ècho \\\\\\z<span class="token variable"><span class="token variable">`</span>   # \z
+<span class="token keyword">echo</span> ècho \\\\\\\z<span class="token variable">`</span></span>  <span class="token comment"># \\z</span>
+<span class="token keyword">echo</span> ècho <span class="token string">"\z"</span><span class="token variable"><span class="token variable">`</span>      # \z
+<span class="token keyword">echo</span> ècho <span class="token string">"\\z"</span><span class="token variable">`</span></span>     <span class="token comment"># \z</span>
+                      <span class="token comment"># 此处文本(Here document)</span>
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF              
+\z                      
+EOF</span>                   <span class="token comment"># \z</span>
+<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF              
+\\z                     
+EOF</span>                   <span class="token comment"># \z</span>
+<span class="token comment"># These examples supplied by Stéphane Chazelas.</span>
+</code></pre>
+<ul>
+<li>赋给某个变量的字符串中的某些元素可能会被(能够被)转义，但是单个被转义的字符不一定可以赋给变量。</li>
+</ul>
+<pre><code class="prism language-bash">variable<span class="token operator">=</span>\
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$variable</span>"</span>
+<span class="token comment"># 不可行，打印一个错误提示:</span>
+<span class="token comment"># test.sh: : command not found</span>
+<span class="token comment"># 单独一个转义字符不可赋给变量</span>
+<span class="token comment">#</span>
+<span class="token comment">#  事实上此处转义字符 "\" 转义了新行（在编写比较长的命令时就可以使用一个转义符来将命令写成多行）</span>
+<span class="token comment">#+ 真正的行为是：        variable=echo "$variable"</span>
+<span class="token comment">#+                      把命令赋值给变量是不允许的</span>
+variable<span class="token operator">=</span>\
+23skidoo
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$variable</span>"</span>        <span class="token comment">#  23skidoo</span>
+                        <span class="token comment">#  可行，因为第二行是合法的变量，且实际上第二行被转义成了第一。</span>
+variable<span class="token operator">=</span>\ 
+<span class="token comment">#        \^    转义符后跟一个空格 </span>
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$variable</span>"</span>        <span class="token comment"># 输出空格</span>
+variable<span class="token operator">=</span>\\
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$variable</span>"</span>        <span class="token comment"># \</span>
+variable<span class="token operator">=</span>\\\
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$variable</span>"</span>
+<span class="token comment"># 行不通，出错：</span>
+<span class="token comment"># test.sh: \: command not found</span>
+<span class="token comment">#</span>
+<span class="token comment">#  上面三个转义符中，第一个转义可第二个，但是第三个转义符还在，类似于第一个例子。</span>
+variable<span class="token operator">=</span>\\\\
+<span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$variable</span>"</span>        <span class="token comment"># \\</span>
+                        <span class="token comment"># Second and fourth escapes escaped.</span>
+                        <span class="token comment"># This is o.k.</span>
+
+</code></pre>
+<ul>
+<li>转义空格可以防止命令的参数列表发生词语分割。</li>
+<li>Escaping a space can prevent word splitting in a command’s argument list.</li>
+</ul>
+<pre><code class="prism language-bash">file_list<span class="token operator">=</span><span class="token string">"/bin/cat /bin/gzip /bin/more /usr/bin/less /usr/bin/emacs-20.7"</span>
+<span class="token comment"># List of files as argument(s) to a command.</span>
+
+<span class="token comment"># Add two files to the list, and list all.</span>
+<span class="token function">ls</span> -l /usr/X11R6/bin/xsetroot /sbin/dump <span class="token variable">$file_list</span>
+<span class="token keyword">echo</span> <span class="token string">"-------------------------------------------------------------------------"</span>
+<span class="token comment"># What happens if we escape a couple of spaces?</span>
+<span class="token function">ls</span> -l /usr/X11R6/bin/xsetroot\ /sbin/dump\ <span class="token variable">$file_list</span>
+输出：
+<span class="token comment">################################</span>
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ls -l /usr/X11R6/bin/xsetroot\ /sbin/dump\ $file_list</span>
+ls: cannot access <span class="token string">'/usr/X11R6/bin/xsetroot /sbin/dump /bin/cat'</span><span class="token keyword">:</span> No such <span class="token function">file</span> or directory
+<span class="token comment">################################</span>
+<span class="token comment"># Error: the first three files concatenated into a single argument to 'ls -l'</span>
+<span class="token comment">#        because the two escaped spaces prevent argument (word) splitting.</span>
+</code></pre>
+<ul>
+<li>转义也有"等待多行命令"的意思。一般的，不同的行会是不同的命令，但是行末的转义字符转义了新行的字符，命令可以一直写到下一行。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">(</span>cd /source/directory <span class="token operator">&amp;&amp;</span> <span class="token function">tar</span> cf - <span class="token keyword">.</span> <span class="token punctuation">)</span> <span class="token operator">|</span> \
+<span class="token punctuation">(</span>cd /dest/directory <span class="token operator">&amp;&amp;</span> <span class="token function">tar</span> xpvf -<span class="token punctuation">)</span>
+<span class="token comment"># 该命令为Alan Cox写的拷贝命令，作两行写，增加了易读性。</span>
+<span class="token comment"># 下面的命令同样功能:</span>
+<span class="token function">tar</span> cf - -C /source/directory <span class="token keyword">.</span> <span class="token operator">|</span>
+<span class="token function">tar</span> xpvf - -C /dest/directory
+<span class="token comment"># See note below.</span>
+<span class="token comment"># (Thanks, Stéphane Chazelas.)</span>
+</code></pre>
+<ul>
+<li>如果脚本行结束跟一个|,一个管道符号，那么转义字符\，就不是那么严格的需要了。但是后面跟上转义字符是比较好的习惯。</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> <span class="token string">"foo
+bar"</span> 
+<span class="token comment">##两行</span>
+<span class="token comment">#foo</span>
+<span class="token comment">#bar</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">'foo
+bar'</span>    <span class="token comment"># 仍然是两行</span>
+<span class="token comment">#foo</span>
+<span class="token comment">#bar</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span> foo\
+bar     <span class="token comment"># 换行符被转义输出一行.</span>
+<span class="token comment">#foobar</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">"foo\
+bar"</span>     <span class="token comment"># 同样是一行，转义字符在弱引用中("\")不会丢掉其转义字符的特殊意义。</span>
+<span class="token comment">#foobar</span>
+<span class="token keyword">echo</span>
+<span class="token keyword">echo</span> <span class="token string">'foo\
+bar'</span>     <span class="token comment"># 两行，因为转义字符在强引用('\')中失去了转义字符的意义，被bash按照字面意义解释。</span>
+<span class="token comment">#foo\</span>
+<span class="token comment">#bar</span>
+<span class="token comment"># Examples suggested by Stéphane Chazelas.</span>
+</code></pre>
+<hr>
+<p><a href="https://github.com/JaccyLi/M39-Slides-Edited-notes">您可以在这里(github)获取markdown格式的笔记，包括我所有学习linux的记录。转载请注明出处！</a></p>
+

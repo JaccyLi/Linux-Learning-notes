@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Linux软件包管理.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<center><font size=214 face=黑体 color=grey>Linux软件包管理</font></center>
+<h1 id="%E4%B8%80%E8%BD%AF%E4%BB%B6%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83%E5%9F%BA%E7%A1%80">一.软件运行环境基础</h1>
+<h2 id="1gcc%E7%BC%96%E8%AF%91%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%A4%A7%E8%87%B4%E8%BF%87%E7%A8%8B">1.gcc编译程序的大致过程</h2>
+<ul>
+<li>gcc 编译程序主要经过四个过程：</li>
+</ul>
+<pre class="hljs"><code><div>    处理（Pre-Processing） 
+    译 （Compiling） 
+    编 （Assembling） 
+    接 （Linking） 
+</div></code></pre>
+<p><img src="png/2019-10-11-11-51-23.png" alt=""></p>
+<ul>
+<li>如上图gcc编译过程</li>
+</ul>
+<pre class="hljs"><code><div>gcc -E hello.c -o hello.i  
+    对hello.c文件进行预处理，生成了hello.i 文件 
+gcc -S hello.i -o hello.s  
+    对预处理文件进行编译，生成了汇编文件 
+gcc -c hello.s -o hello.o  
+    对汇编文件进行编译，生成了目标文件 
+gcc hello.o -o hello  
+
+gcc hello.c -o hello  
+    或者直接编译链接成可执行目标文件 
+
+</div></code></pre>
+<h2 id="2c%E7%A8%8B%E5%BA%8F%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B">2.C程序编译过程</h2>
+<p><img src="png/2019-10-11-12-03-13.png" alt=""></p>
+<h2 id="3%E9%9D%99%E6%80%81%E5%92%8C%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5">3.静态和动态链接</h2>
+<ul>
+<li>链接主要作用是把各个模块之间相互引用的部分处理好，使得各个模块之间能够正确地衔接，分为静态链接和动态链接</li>
+<li>静态链接</li>
+</ul>
+<pre class="hljs"><code><div>把程序对应的依赖库复制一份到包 
+libxxx.a 
+嵌入程序包 
+升级难，需重新编译 
+占用较多空间，迁移容易 
+</div></code></pre>
+<ul>
+<li>动态链接</li>
+</ul>
+<pre class="hljs"><code><div>只把依赖加做一个动态链接 
+libxxx.so 
+连接指向 
+占用较少空间，升级方便 
+</div></code></pre>
+<ul>
+<li>
+<p>静态链接和动态链接示意
+<img src="png/2019-10-11-11-52-49.png" alt=""></p>
+</li>
+<li>
+<p>Java程序运行示意
+<img src="png/2019-10-11-19-46-56.png" alt=""></p>
+</li>
+</ul>
+<h1 id="%E4%BA%8C%E8%BD%AF%E4%BB%B6%E5%8C%85%E5%9F%BA%E7%A1%80">二.软件包基础</h1>
+<h2 id="1%E5%8C%85%E5%92%8C%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8">1.包和包管理器</h2>
+<ul>
+<li>早期只提供.tar.gz的打包的源码文件，用户必须自已编译每个想在
+GNU/Linux上运行的软件。用户急需系统能提供一种更加便利的方法来
+管理这些软件;当Debian诞生时，这样一个管理工具也就应运而生，它
+被命名为dpkg,从而著名的“package”概念第一次出现在GNU/Linux
+系统中，在这之后Red Hat才开发自己的“rpm”包管理系统</li>
+<li>包的组成<br>
+二进制文件、库文件、配置文件、帮助文件</li>
+<li>程序包管理器：</li>
+</ul>
+<pre class="hljs"><code><div>debian： deb文件, dpkg包管理器 
+redhat： rpm文件, rpm包管理器 
+    rpm：Redhat Package Manager 
+    后改名为RPM  Package Manager 
+</div></code></pre>
+<h2 id="2rpm%E5%8C%85%E7%9A%84%E5%91%BD%E5%90%8D%E8%A7%84%E5%88%99%E5%92%8C%E7%9B%B8%E5%85%B3%E5%B7%A5%E5%85%B7">2.rpm包的命名规则和相关工具</h2>
+<ul>
+<li>源代码</li>
+</ul>
+<pre class="hljs"><code><div>    name-VERSION.tar.gz|bz2|xz 
+    VERSION: major.minor.release 
+</div></code></pre>
+<ul>
+<li>rpm包命名方式</li>
+</ul>
+<pre class="hljs"><code><div>    name-VERSION-release.arch.rpm  
+    例：bash-4.2.46-19.el7.x86_64.rpm 
+    VERSION: major.minor.release 
+    release：release.OS 
+</div></code></pre>
+<ul>
+<li>常见的arch</li>
+</ul>
+<pre class="hljs"><code><div>    x86: i386, i486, i586, i686 
+    x86_64: x64, x86_64, amd64 
+    powerpc: ppc 
+    跟平台无关：noarch 
+</div></code></pre>
+<ul>
+<li>包：分类和拆包</li>
+</ul>
+<pre class="hljs"><code><div>    Application-VERSION-ARCH.rpm: 主包 
+    Application-devel-VERSION-ARCH.rpm 开发子包 
+    Application-utils-VERSION-ARHC.rpm 其它子包 
+    Application-libs-VERSION-ARHC.rpm 其它子包 
+    包之间：可能存在依赖关系，甚至循环依赖 
+    所以需要解决依赖的包管理工具： 
+    yum：rpm包管理器的前端工具 
+    apt：deb包管理器前端工具 
+    zypper：suse上的rpm前端管理工具 
+    dnf：Fedora 18+ rpm包管理器前端管理工具 
+</div></code></pre>
+<h2 id="3%E5%BA%93%E6%96%87%E4%BB%B6">3.库文件</h2>
+<p>查看二进制程序所依赖的库文件</p>
+<p>ldd /PATH/TO/BINARY_FILE
+管理及查看本机装载的库文件</p>
+<p>ldconfig</p>
+<p>加载配置文件中指定的库文件</p>
+<p>/sbin/ldconfig –p 显示本机已经缓存的所有可用库文件名及文件路径
+映射关系</p>
+<p>配置文件：/etc/ld.so.conf, /etc/ld.so.conf.d/*.conf</p>
+<p>缓存文件：/etc/ld.so.cache</p>
+<h1 id="%E4%B8%89rpm%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8">三.rpm包管理器</h1>
+<h2 id="1rpm%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8%E4%BB%8B%E7%BB%8D">1.rpm包管理器介绍</h2>
+<h2 id="%E7%A8%8B%E5%BA%8F%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8">程序包管理器</h2>
+<p>功能：将编译好的应用程序的各组成文件打包一个或几个程序包文件，从而
+方便快捷地实现程序包的安装、卸载、查询、升级和校验等管理操作</p>
+<h2 id="%E5%8C%85%E6%96%87%E4%BB%B6%E7%BB%84%E6%88%90-%E6%AF%8F%E4%B8%AA%E5%8C%85%E7%8B%AC%E6%9C%89">包文件组成 (每个包独有)</h2>
+<ul>
+<li>RPM包内的文件</li>
+<li>RPM的元数据，如名称，版本，依赖性，描述等</li>
+<li>安装或卸载时运行的脚本</li>
+<li>数据库(公共)：/var/lib/rpm</li>
+<li>
+<ul>
+<li>程序包名称及版本</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>依赖关系</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>功能说明</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>包安装后生成的各文件路径及校验码信</li>
+</ul>
+</li>
+</ul>
+<h2 id="%E7%A8%8B%E5%BA%8F%E5%8C%85%E7%9A%84%E6%9D%A5%E6%BA%90">程序包的来源</h2>
+<p>管理程序包的方式：
+使用包管理器：rpm
+使用前端工具：yum, dnf</p>
+<h2 id="%E8%8E%B7%E5%8F%96%E7%A8%8B%E5%BA%8F%E5%8C%85%E7%9A%84%E9%80%94%E5%BE%84%EF%BC%9A">获取程序包的途径：</h2>
+<p>(1) 系统发版的光盘或官方的服务器
+CentOS镜像：<br>
+<a href="https://www.centos.org/download/">www.centos.org</a><br>
+<a href="http://mirrors.aliyun.com">mirrors.aliyun.com </a><br>
+<a href="http://mirrors.sohu.com">mirrors.sohu.com</a><br>
+<a href="http://mirrors.163.com">mirrors.163.com </a><br>
+(2) 项目官方站点
+(3) 第三方组织：
+Fedora-EPEL：
+Extra Packages for Enterprise Linux
+Rpmforge:RHEL推荐，包很全
+搜索引擎：<br>
+<a href="http://pkgs.org">pkgs.org</a><br>
+<a href="http://rpmfind.net">rpmfind.net</a><br>
+<a href="http://rpm.pbone.net">rpm.pbone.net</a><br>
+<a href="https://sourceforge.net/">sourceforge.net</a><br>
+(4) 自己制作
+注意：第三方包建议要检查其合法性
+来源合法性,程序包的完整性</p>
+<h2 id="2rpm%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8%E4%BD%BF%E7%94%A8">2.rpm包管理器使用</h2>
+<h3 id="21%E4%BD%BF%E7%94%A8rpm%E5%8F%AF%E4%BB%A5%E5%AE%9E%E7%8E%B0%E8%BD%AF%E4%BB%B6%E7%9A%84%E5%AE%89%E8%A3%85%E3%80%81%E5%8D%B8%E8%BD%BD%E3%80%81%E5%8D%87%E7%BA%A7%E3%80%81%E6%9F%A5%E8%AF%A2%E3%80%81%E6%A0%A1%E9%AA%8C%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E7%BB%B4%E6%8A%A4">2.1使用rpm可以实现软件的安装、卸载、升级、查询、校验、数据库维护</h3>
+<h4 id="211%E5%AE%89%E8%A3%85">2.1.1安装</h4>
+<pre class="hljs"><code><div>rpm {-i|--install} [install-options] PACKAGE_FILE…  
+
+    -v: verbose 
+    -vv:显示更多信息
+    -vvv:显示更更多信息  
+    -h: 以<span class="hljs-comment">#显示程序包管理执行进度 </span>
+    rpm -ivh PACKAGE_FILE ...
+    [install-options] 
+        --<span class="hljs-built_in">test</span>: 测试安装，但不真正执行安装，即dry run模式 
+        --nodeps：忽略依赖关系 
+        --replacepkgs | replacefiles 
+        --nosignature: 不检查来源合法性 
+        --nodigest：不检查包完整性 
+        --noscripts：不执行程序包脚本 
+        %pre: 安装前脚本     --nopre 
+        %post: 安装后脚本    --nopost 
+        %preun: 卸载前脚本   --nopreun 
+        %postun: 卸载后脚本  --nopostun  
+</div></code></pre>
+<h4 id="212%E5%8D%87%E7%BA%A7">2.1.2升级</h4>
+<pre class="hljs"><code><div>rpm {-U|--upgrade} [install-options] PACKAGE_FILE... 
+rpm {-F|--freshen} [install-options] PACKAGE_FILE... 
+    upgrade：安装有旧版程序包，则“升级” 
+             如果不存在旧版程序包，则“安装” 
+    freshen：安装有旧版程序包，则“升级” 
+             如果不存在旧版程序包，则不执行升级操作 
+    rpm -Uvh PACKAGE_FILE ... 
+    rpm -Fvh PACKAGE_FILE ... 
+        --oldpackage：降级 
+</div></code></pre>
+<h2 id="%E5%8D%87%E7%BA%A7%E6%B3%A8%E6%84%8F%E9%A1%B9">升级注意项</h2>
+<p>注意：
+(1) 不要对内核做升级操作；Linux支持多内核版本并存，因此直接安装新版本内核
+(2) 如果原程序包的配置文件安装后曾被修改，升级时，新版本提供的同一个配置文件不会直接覆盖老版本的配置文件，而把新版本文件重命名(FILENAME.rpmnew)后保留</p>
+<h4 id="213%E5%8C%85%E6%9F%A5%E8%AF%A2">2.1.3包查询</h4>
+<pre class="hljs"><code><div>rpm {-q|--query} [select-options] [query-options] 
+
+[select-options] 
+    -a：所有包 
+    -f：查看指定的文件由哪个程序包安装生成 
+    -p rpmfile：针对尚未安装的程序包文件做查询操作 
+    --whatprovides CAPABILITY：查询指定的CAPABILITY由哪个包所提供 
+    --whatrequires CAPABILITY：查询指定的CAPABILITY被哪个包所依赖 
+    rpm2cpio 包文件|cpio –itv  预览包内文件 
+    rpm2cpio 包文件|cpio –id  “*.conf” 释放包内文件
+[query-options] 
+    --changelog：查询rpm包的changelog 
+    -c：查询程序的配置文件 
+    -d：查询程序的文档 
+    -i：information 
+    -l：查看指定的程序包安装后生成的所有文件 
+    --scripts：程序包自带的脚本 
+    --provides：列出指定程序包所提供的CAPABILITY 
+    -R：查询指定的程序包所依赖的CAPABILITY
+</div></code></pre>
+<ul>
+<li>常用查询用法</li>
+</ul>
+<pre class="hljs"><code><div>    -qi PACKAGE, -qf FILE, -qc PACKAGE, -ql PACKAGE, -qd PACKAGE 
+    -qpi PACKAGE_FILE, -qpl PACKAGE_FILE, ... 
+    -qa 
+包卸载： 
+    rpm {-e|--erase} [--allmatches] [--nodeps] [--noscripts] [--notriggers] [--<span class="hljs-built_in">test</span>] PACKAGE_NAME ... 
+        当包卸载时，对应的配置文件不会删除， 以FILENAME.rpmsave形式保留 
+</div></code></pre>
+<h4 id="214%E5%8C%85%E6%A0%A1%E9%AA%8C">2.1.4包校验</h4>
+<pre class="hljs"><code><div>rpm {-V|--verify} [select-options] [verify-options] 
+    S file Size differs 
+    M Mode differs (includes permissions and file <span class="hljs-built_in">type</span>) 
+    5 digest (formerly MD5 sum) differs 
+    D Device major/minor number mismatch 
+    L readLink(2) path mismatch 
+    U User ownership differs 
+    G Group ownership differs 
+    T mTime differs 
+    P capabilities differ 
+</div></code></pre>
+<h4 id="215%E5%8C%85%E6%A0%A1%E9%AA%8C">2.1.5包校验</h4>
+<pre class="hljs"><code><div>包来源的合法性验证及完整性验证 
+    完整性验证：SHA256 
+    来源合法性验证：RSA 
+
+公钥加密 
+    对称加密：加密、解密使用同一密钥 
+    非对称加密：密钥是成对儿的 
+    public key: 公钥，公开所有人 
+    secret key: 私钥, 不能公开 
+
+导入所需要公钥 
+    rpm  -K|checksig  rpmfile  检查包的完整性和签名 
+    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 
+    CentOS 7发行版光盘提供：RPM-GPG-KEY-CentOS-7 
+    rpm -qa “gpg-pubkey*” 
+</div></code></pre>
+<h2 id="2rpm%E6%95%B0%E6%8D%AE%E5%BA%93">2.rpm数据库</h2>
+<ul>
+<li>rpm数据库非常重要，一般不要动</li>
+</ul>
+<pre class="hljs"><code><div>数据库重建： 
+    /var/lib/rpm 
+    rpm {--initdb|--rebuilddb} 
+    initdb: 初始化 
+        如果事先不存在数据库，则新建之;否则，不执行任何操作 
+    rebuilddb：重建已安装的包头的数据库索引目录 
+</div></code></pre>
+<h1 id="%E5%9B%9Byum%E7%AE%A1%E7%90%86">四.yum管理</h1>
+<h2 id="1yum%E4%BB%8B%E7%BB%8D">1.yum介绍</h2>
+<ul>
+<li>centos系列的前端包管理器都是使用yum；而CentOS8则是使用dnf,但是在命令表现上任然是yum.</li>
+<li>YUM: Yellowdog Update Modifier，rpm的前端程序，可解决软件包相关依赖性，可在多个库之间定位软件包，up2date的替代工具</li>
+<li>yum repository: yum repo，存储了众多rpm包，以及包的相关的元数据
+文件（放置于特定目录repodata下）</li>
+</ul>
+<h2 id="2um%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">2.um配置文件</h2>
+<ul>
+<li>yum客户端配置文件：</li>
+</ul>
+<pre class="hljs"><code><div>/etc/yum.conf：为所有仓库提供公共配置 
+/etc/yum.repos.d/*.repo：为仓库的指向提供配置 
+ 
+仓库指向的定义： 
+    [repositoryID] 
+    name=Some name <span class="hljs-keyword">for</span> this repository 
+    baseurl=url://path/to/repository/ 
+    enabled={1|0} 
+    gpgcheck={1|0} 
+    gpgkey=URL 
+    enablegroups={1|0} 
+    failovermethod={roundrobin|priority} 
+    roundrobin：意为随机挑选，默认值 
+    priority:按顺序访问 
+    cost=   默认为1000 
+
+yum的repo配置文件中可用的变量： 
+    releasever: 当前OS的发行版的主版本号 
+    arch: 平台，i386,i486,i586,x86_64等 
+    basearch：基础平台；i386, x86_64 
+    YUM0-<span class="hljs-variable">$YUM9</span>:自定义变量 
+示例： 
+    http://server/centos/<span class="hljs-variable">$releasever</span>/<span class="hljs-variable">$basearch</span>/ 
+    http://server/centos/7/x86_64 
+    http://server/centos/6/i386
+</div></code></pre>
+<h2 id="3yum%E6%BA%90">3.yum源</h2>
+<pre class="hljs"><code><div>阿里云repo文件 
+    http://mirrors.aliyun.com/repo/ 
+CentOS系统的yum源 
+    阿里云：https://mirrors.aliyun.com/centos/<span class="hljs-variable">$releasever</span>/os/x86_64/  
+    清华大学：https://mirrors.tuna.tsinghua.edu.cn/centos/<span class="hljs-variable">$releasever</span>/os/x86_64/ 
+EPEL的yum源 
+    阿里云：https://mirrors.aliyun.com/epel/<span class="hljs-variable">$releasever</span>/x86_64 
+阿里巴巴开源软件: https://opsx.alibaba.com/ 
+</div></code></pre>
+<h2 id="4yum-config-manager">4.yum-config-manager</h2>
+<pre class="hljs"><code><div>生成172.16.0.1_cobbler_ks_mirror_CentOS-X-x86_64_.repo 
+    yum-config-manager   --add-repo= http://172.16.0.1/cobbler/ks_mirror/7/   
+    yum-config-manager --<span class="hljs-built_in">disable</span> “仓库名<span class="hljs-string">"  禁用仓库 
+    yum-config-manager --enable  “仓库名” 启用仓库
+</span></div></code></pre>
+<h2 id="5yum%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8">5.yum命令使用</h2>
+<ul>
+<li>基本用法</li>
+</ul>
+<pre class="hljs"><code><div>yum [options] [<span class="hljs-built_in">command</span>] [package ...] 
+显示仓库列表： 
+    yum repolist [all|enabled|disabled] 
+显示程序包： 
+    yum list 
+    yum list [all | glob_exp1] [glob_exp2] [...] 
+    yum list {available|installed|updates} [glob_exp1] [...] 
+安装程序包： 
+    yum install package1 [package2] [...] 
+    yum reinstall package1 [package2] [...]  (重新安装) 
+升级程序包： 
+    yum update [package1] [package2] [...] 
+    yum downgrade package1 [package2] [...] (降级) 
+检查可用升级： 
+    yum check-update 
+卸载程序包： 
+    yum remove | erase package1 [package2] [...]
+</div></code></pre>
+<pre class="hljs"><code><div>查看程序包information： 
+    yum info [...] 
+查看指定的特性(可以是某文件)是由哪个程序包所提供： 
+    yum provides | whatprovides feature1 [feature2] [...] 
+清理本地缓存： 
+    清除/var/cache/yum/<span class="hljs-variable">$basearch</span>/<span class="hljs-variable">$releasever</span>缓存 
+    yum clean [ packages | metadata | expire-cache | rpmdb | plugins | all ] 
+构建缓存： 
+    yum makecache 
+搜索
+    yum search string1 [string2] [...] 
+    以指定的关键字搜索程序包名及summary信息 
+查看指定包所依赖的capabilities： 
+    yum deplist package1 [package2] [...] 
+查看yum事务历史： 
+    yum <span class="hljs-built_in">history</span> [info|list|packages-list|packages-info|summary|addon-info|redo|undo| 
+    rollback|new|sync|stats] 
+    yum <span class="hljs-built_in">history</span> 
+    yum <span class="hljs-built_in">history</span> info 6 
+    yum <span class="hljs-built_in">history</span> undo 6  
+日志 ：/var/<span class="hljs-built_in">log</span>/yum.log 
+</div></code></pre>
+<pre class="hljs"><code><div>安装及升级本地程序包： 
+    yum localinstall rpmfile1 [rpmfile2] [...] 
+ (用install替代) 
+    yum localupdate rpmfile1 [rpmfile2] [...] 
+ (用update替代) 
+包组管理的相关命令： 
+    yum groupinstall group1 [group2] [...] 
+    yum groupupdate group1 [group2] [...] 
+    yum grouplist [hidden] [groupwildcard] [...] 
+    yum groupremove group1 [group2] [...] 
+    yum groupinfo group1 [...] 
+</div></code></pre>
+<ul>
+<li>yum的命令行选项</li>
+</ul>
+<pre class="hljs"><code><div>    --nogpgcheck：禁止进行gpg check 
+    -y: 自动回答为“yes” 
+    -q：静默模式 
+    --disablerepo=repoidglob：临时禁用此处指定的repo 
+    --enablerepo=repoidglob：临时启用此处指定的repo 
+    --noplugins：禁用所有插件
+</div></code></pre>
+<h2 id="6%E7%B3%BB%E7%BB%9F%E5%85%89%E7%9B%98yum%E4%BB%93%E5%BA%93">6.系统光盘yum仓库</h2>
+<ul>
+<li>系统安装光盘作为本地yum仓库：</li>
+</ul>
+<pre class="hljs"><code><div>(1) 挂载光盘至某目录，例如/mnt/cdrom 
+    mount /dev/cdrom /mnt/cdrom 
+(2) 创建配置文件 
+    [CentOS7] 
+    name= 
+    baseurl= 
+    gpgcheck= 
+    enabled= 
+创建yum仓库： 
+    createrepo [options] &lt;directory&gt;
+</div></code></pre>
+<h1 id="%E4%BA%94%E5%AE%9A%E5%88%B6yum%E4%BB%93%E5%BA%93">五.定制yum仓库</h1>
+<h1 id="%E5%85%ADdnf%E5%91%BD%E4%BB%A4">六.dnf命令</h1>
+<ul>
+<li>Centos8中使用dnf代替yum作为包的前端管理工具，其命令与yum相同，配置文件有所变更；</li>
+</ul>
+<pre class="hljs"><code><div>DNF (DaNdiFied)
+DNF 介绍：新一代的RPM软件包管理器。DNF 发行日期是2015年5月11日，DNF 包管理器采
+用Python 编写，发行许可为GPL v2，首先出现在Fedora 18 发行版中。
+在 RHEL 8.0 版本正式 取代了 YUM，DNF包管理器克服了YUM包管理器的一些瓶颈，提升了包括用户体验，内存占用，
+依赖分析，运行速度等 
+下载安装所需软件包，或者利用extras仓库安装 
+    wget http://springdale.math.ias.edu/data/puias/unsupported/7/x86_64/dnf-conf-0.6.4-
+    2.sdl7.noarch.rpm  
+    wget http://springdale.math.ias.edu/data/puias/unsupported/7/x86_64/dnf-0.6.4-
+    2.sdl7.noarch.rpm  
+    wget http://springdale.math.ias.edu/data/puias/unsupported/7/x86_64/python-dnf-
+    0.6.4-2.sdl7.noarch.rpm  
+    wget https://mirrors.aliyun.com/centos/7/extras/x86_64/Packages/python2-libcomps-
+    0.1.8-12.el7.x86_64.rpm 
+    wget https://mirrors.aliyun.com/centos/7/extras/x86_64/Packages/libcomps-0.1.8-
+    12.el7.x86_64.rpm 
+
+配置文件：/etc/dnf/dnf.conf
+仓库文件：/etc/yum.repos.d/ *.repo
+日志： /var/<span class="hljs-built_in">log</span>/dnf.rpm.log，/var/<span class="hljs-built_in">log</span>/dnf.log
+
+DNF 常用子命令：
+帮助：man dnf 
+    dnf   [options]  &lt;<span class="hljs-built_in">command</span>&gt;  [&lt;arguments&gt;...] 
+    dnf  --version 
+    dnf  repolist 
+    dnf  install httpd 
+    dnf  remove httpd 
+    dnf  clean all 
+    dnf  makecache 
+    dnf  list installed 
+    dnf  list available 
+    dnf  search nano 
+    dnf  <span class="hljs-built_in">history</span> undo 1 
+</div></code></pre>
+<h1 id="%E4%B8%83%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85">七.编译安装</h1>
+<h2 id="1%E7%A8%8B%E5%BA%8F%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E7%AE%80%E4%BB%8B">1.程序源码编译安装简介</h2>
+<pre class="hljs"><code><div>程序包编译安装： 
+Application-VERSION-release.src.rpm --&gt; 安装后，使用rpmbuild命令制作成二进制格式的rpm包，而后再安装 
+源代码--&gt;预处理--&gt;编译--&gt;汇编--&gt;链接--&gt;执行 
+源代码组织格式： 
+多文件：文件中的代码之间，很可能存在跨文件依赖关系 
+C、C++：make 项目管理器 
+configure脚本 --&gt; Makefile.in --&gt; Makefile 
+java: maven 
+</div></code></pre>
+<h2 id="2%E4%B8%80%E8%88%AC%E6%BA%90%E4%BB%A3%E7%A0%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B8%89%E5%A4%A7%E6%AD%A5">2.一般源代码编译安装三大步</h2>
+<pre class="hljs"><code><div>1、./configure 
+    (1) 通过选项传递参数，指定启用特性、安装路径等；执行时会参考用户的 指定以及Makefile.in文件生成Makefile 
+        如：./configure --prefix=/app/apache --sysconfdir=/etc/apache
+        表示在安装时将软件安装在/app/apache目录下；配置文件放在/etc/apache文件夹下
+    (2) 检查依赖到的外部环境，如依赖的软件包 
+2、make  
+    根据Makefile文件，构建应用程序 
+3、make install  
+    复制文件到相应路径 
+
+在编译安装时所需要的configure脚本也是使用相应的开发工具所生成的： 
+    autoconf: 生成configure脚本 
+    automake：生成Makefile.in 
+注意：安装前查看README，INSTALL 
+</div></code></pre>
+<pre class="hljs"><code><div>开源程序源代码的获取： 
+    apache.org (ASF：Apache Software Foundation) 
+    mariadb.org 
+    ... 
+代码托管： 
+    SourceForge.net 
+    Github.com 
+    code.google.com 
+开发工具
+c/c++编译器: gcc (GNU C Complier) 
+</div></code></pre>
+<h2 id="3%E6%BA%90%E4%BB%A3%E7%A0%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85">3.源代码编译安装</h2>
+<ul>
+<li>准备：提供开发工具及开发环境</li>
+</ul>
+<pre class="hljs"><code><div>开发工具：make, gcc等 
+开发环境：开发库，头文件 
+        glibc：标准库 
+实现：通过“包组”提供开发组件 
+    Development Tools 
+    Server Platform Development 
+    eg：dnf groupinstall <span class="hljs-string">"Development Tools"</span>
+</div></code></pre>
+<ul>
+<li>生产实践：基于最小化安装的系统建议安装下面相关包</li>
+</ul>
+<pre class="hljs"><code><div>yum install gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl  openssl-devel systemd-devel zlib-devel  vim lrzsz tree screen  lsof tcpdump wget  ntpdate net-tools iotop bc  bzip2 zip unzip nfs-utils 
+</div></code></pre>
+<ul>
+<li>编译安装三步详细讲解</li>
+</ul>
+<pre class="hljs"><code><div>第一步：configure脚本
+选项：指定安装位置、指定启用的特性
+    --<span class="hljs-built_in">help</span>: 获取其支持使用的选项
+选项分类：
+安装路径设定：
+    --prefix=/PATH：指定默认安装位置,默认为/usr/<span class="hljs-built_in">local</span>/
+    --sysconfdir=/PATH：配置文件安装位置
+    System types：支持交叉编译
+ 
+编译安装的可选特性:
+Optional Features: 可选特性
+   --<span class="hljs-built_in">disable</span>-FEATURE
+   --<span class="hljs-built_in">enable</span>-FEATURE[=ARG]
+编译安装的可选包:
+Optional Packages: 可选包
+    --with-PACKAGE[=ARG] 依赖包
+    --without-PACKAGE 禁用依赖关系
+注意：通常被编译操作依赖的程序包，需要安装此程序包的“开发”组件， 其包名一般类似于name-devel-VERSION
+eg: ./configure --prefix=/app/httpd2 --sysconfdir=/etc/httpd2 --<span class="hljs-built_in">enable</span>-ssl
+
+第二步：make
+
+第三步：make install
+</div></code></pre>
+<ul>
+<li>安装后的配置</li>
+</ul>
+<pre class="hljs"><code><div>(1) 二进制程序目录导入至PATH环境变量中
+    编辑文件/etc/profile.d/NAME.sh
+    <span class="hljs-built_in">export</span> PATH=/PATH/TO/BIN:<span class="hljs-variable">$PATH</span>
+(2) 导入帮助手册
+    编辑/etc/man.config|man_db.conf文件
+    添加一个MANPATH  
+</div></code></pre>
+<h1 id="%E5%85%AB%E7%BB%83%E4%B9%A0">八.练习</h1>
+<p>1、查询命令java来自于哪个rpm包</p>
+<pre class="hljs"><code><div>[root@centos8 ~]<span class="hljs-comment"># which java</span>
+/usr/bin/java
+[root@centos8 ~]<span class="hljs-comment"># rpm -qf /usr/bin/java</span>
+file /usr/bin/java is not owned by any package
+[root@centos8 ~]<span class="hljs-comment"># which /usr/bin/java  </span>
+/usr/bin/java
+[root@centos8 ~]<span class="hljs-comment"># ll /usr/bin/java</span>
+lrwxrwxrwx 1 root root 22 Oct 14 19:15 /usr/bin/java -&gt; /etc/alternatives/java
+[root@centos8 ~]<span class="hljs-comment"># rpm -qf /etc/alternatives/java</span>
+file /etc/alternatives/java is not owned by any package
+[root@centos8 ~]<span class="hljs-comment"># ll /etc/alternatives/java</span>
+lrwxrwxrwx 1 root root 71 Oct 14 19:15 /etc/alternatives/java -&gt; /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.201.b09-2.el8.x86_64/jre/bin/java
+[root@centos8 ~]<span class="hljs-comment"># rpm -qf /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.201.b09-2.el8.x86_64/jre/bin/java</span>
+java-1.8.0-openjdk-headless-1.8.0.201.b09-2.el8.x86_64
+</div></code></pre>
+<p>2、yum的配置和使用,包括yum仓库的创建</p>
+<pre class="hljs"><code><div>对于centos7来说：
+1.配置文件位于：/etc/yum.conf
+2.yum源配置文件：/etc/yum.repos.d
+对于centos8来说:
+1.配置文件位于：/etc/dnf/dnf.conf
+2.源配置文件位于：/etc/yum.repos.d
+</div></code></pre>
+<p>3、编写系统初始化脚本 reset.sh，包括别名，提示符颜色，yum仓库配置文件, 安装tree,ftp,lftp,telnet等包</p>
+<blockquote>
+<p><a href="https://blog.csdn.net/YouOops/article/details/102491465">见这篇文章末尾</a></p>
+</blockquote>
+<p>4、在CentOS 7上编译安装 apache 2.4.25 源码包,并启动此服务</p>
+<pre class="hljs"><code><div>
+1.wget http://mirrors.tuna.tsinghua.edu.cn/apache//httpd/httpd-2.4.41.tar.bz2
+2.tar -xvvvf httpd-2.4.41.tar.bz2
+3.cd httpd-2.4.41
+4../configure --prefix=/data/app/httpd2 --sysconfdir=/etc/httpd2 --<span class="hljs-built_in">enable</span>-ssl
+5.make &amp;&amp; make install
+6./data/app/httpd2/bin/apachectl start
+7.[root@centos8 ~/httpd-2.4.41]<span class="hljs-comment">#curl http://`ifconfig |sed -nr 's@[^0-9]+([0-9.]+).*@\1@p' |sed -n -r '/\b(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b/p' | sed  '1!d'`/</span>
+&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;  
+8.ooooooooooooooook
+
+</div></code></pre>
+
+</body>
+</html>
