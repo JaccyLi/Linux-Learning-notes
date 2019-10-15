@@ -686,4 +686,19 @@ java-1.8.0-openjdk-headless-1.8.0.201.b09-2.el8.x86_64
 <html><body><h1>It works!</h1></body></html>  
 8.ooooooooooooooook
 
+5.破坏MBR分区，恢复之
+
+1.dd if=/dev/sda of=./mbr bs=1 skip=446                 #备份分区表
+2.scp ./mbr root@172.20.1.164:/data/                    #将备份拷贝到远程机器备用
+3.dd if=/dev/zero of=/dev/sda bs=1 seek=446 count=66    #破坏
+4.reboot
+5.此时无法识别系统引导分区，光盘启动，进入:Troubeshooting
+6.Rescue a istalled system
+7.3) skip to a shell
+8.此时进入一个shell中，lsblk查看一下硬盘
+9.ip a 发现无地址，scp远程拷贝用不了
+10.ip a a 172.20.1.254/24 dev ens33                     #临时配个地址
+11.scp root@172.20.1.164:/data/mbr .                    #从远程机器拷贝原来的备份 
+12.dd if=/dev/sda of=./mbr bs=1 seek=446
+13.reboot
 ```
