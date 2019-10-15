@@ -670,7 +670,7 @@ java-1.8.0-openjdk-headless-1.8.0.201.b09-2.el8.x86_64
 
 3、编写系统初始化脚本 reset.sh，包括别名，提示符颜色，yum仓库配置文件, 安装tree,ftp,lftp,telnet等包  
 
-> [见这篇文章末尾](https://blog.csdn.net/YouOops/article/details/102491465)
+> [见之前的文章末尾](https://blog.csdn.net/YouOops/article/details/102491465)
 
 4、在CentOS 7上编译安装 apache 2.4.25 源码包,并启动此服务
 
@@ -685,7 +685,11 @@ java-1.8.0-openjdk-headless-1.8.0.201.b09-2.el8.x86_64
 7.[root@centos8 ~/httpd-2.4.41]#curl http://`ifconfig |sed -nr 's@[^0-9]+([0-9.]+).*@\1@p' |sed -n -r '/\b(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b/p' | sed  '1!d'`/
 <html><body><h1>It works!</h1></body></html>  
 8.ooooooooooooooook
+```
 
+> [Centos7/8一键编译安装httpd脚本移步](http://suosuoli.cn/suo/scripts/install_httpd02.sh)
+
+```bash
 5.破坏MBR分区，恢复之
 
 1.dd if=/dev/sda of=./mbr bs=1 skip=446                 #备份分区表
