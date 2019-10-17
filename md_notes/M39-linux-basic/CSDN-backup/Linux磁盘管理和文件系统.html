@@ -1,0 +1,1109 @@
+﻿<p></p><div class="toc"><h3><center> <font face="黑体" size="7" color="grey">Linux磁盘管理和文件系统详细笔记</font></center></h3><ul><li><a href="#linux_1">一.linux磁盘设备概述</a></li><li><a href="#_74">二.分区结构类型</a></li><ul><li><a href="#1MBR_78">1.MBR</a></li><li><a href="#2MBR_91">2.MBR分区结构组织</a></li><li><a href="#3GPT_108">3.GPT分区</a></li><li><a href="#4BIOSUEFI_117">4.BIOS和UEFI</a></li><li><a href="#5BIOSMBRUEFIGPT_130">5.BIOS+MBR与UEFI+GPT</a></li></ul><li><a href="#_133">三.分区管理</a></li><ul><li><a href="#1_135">1.查看磁盘设备和分区信息</a></li><ul><li><a href="#lsblk_137">lsblk</a></li><li><a href="#fdisk_l_devsdabc_168">fdisk -l /dev/sd[abc...]</a></li><li><a href="#blkid_170">blkid</a></li></ul><li><a href="#2_174">2.创建分区</a></li><ul><li><a href="#fdisk_MBR__gdisk_GPT_176">fdisk 创建MBR分区 | gdisk 创建GPT分区</a></li><li><a href="#parted__199">parted 高级分区操作</a></li></ul><li><a href="#3_212">3.同步分区表</a></li></ul><li><a href="#_232">四.管理文件系统</a></li><ul><li><a href="#1_234">1.文件系统</a></li><li><a href="#2_247">2.文件系统类型</a></li><li><a href="#3linux_268">3.linux文件系统分类</a></li><li><a href="#4linuxVFS_281">4.linux的VFS</a></li><li><a href="#5linux_284">5.linux文件系统的选择</a></li><li><a href="#5ext_306">5.创建ext文件系统</a></li><ul><li><a href="#mke2fsext_308">mke2fs：ext系列文件系统专用管理工具</a></li><li><a href="#mkfs_338">mkfs命令</a></li></ul><li><a href="#6_350">6.文件系统标签</a></li><ul><li><a href="#e2labelextLABEL_354">e2label：管理ext系列文件系统的LABEL</a></li></ul><li><a href="#7tune2fs_370">7.tune2fs</a></li><li><a href="#8_400">8.文件系统检测和修复</a></li><li><a href="#9_422">9.常见工具</a></li><ul><li><a href="#dfdu_424">文件系统空间占用等信息的查看工具df/du</a></li><li><a href="#dd_440">工具dd</a></li></ul></ul><li><a href="#_526">五.挂载/卸载磁盘设备</a></li><ul><li><a href="#1mount_528">1.挂载mount</a></li><li><a href="#2mount_539">2.用mount命令挂载文件系统</a></li><li><a href="#3_587">3.卸载命令</a></li><li><a href="#4etcfstab_602">4.挂载点和/etc/fstab</a></li><li><a href="#5_628">5.移动介质的挂载/卸载和使用</a></li><ul><li><a href="#_639">使用光盘</a></li><li><a href="#USB_666">挂载USB介质</a></li></ul></ul><li><a href="#_680">六.管理虚拟内存</a></li><ul><li><a href="#1_682">1.处理交换文件和分区</a></li><li><a href="#2_693">2.挂载交换分区</a></li><li><a href="#3SWAP_709">3.SWAP的优先级</a></li></ul><li><a href="#_718">七.练习</a></li><li><a href="#RAID_830">八.RAID管理</a></li><ul><li><a href="#RAID_855">RAID级别</a></li><ul><li><a href="#RAID0_869">RAID-0</a></li><li><a href="#RAID1_879">RAID-1</a></li><li><a href="#RAID5_892">RAID-5</a></li><li><a href="#RAID6_902">RAID-6</a></li><li><a href="#RAID10_912">RAID-10</a></li><li><a href="#RAID01_922">RAID-01</a></li><li><a href="#RAID50_927">RAID-50</a></li><li><a href="#JBODJust_a_Bunch_Of_Disks_933">JBOD：Just a Bunch Of Disks</a></li><li><a href="#RAID7_941">RAID7</a></li></ul><li><a href="#RAID_949">软RAID</a></li><ul><li><a href="#RAID_958">软件RAID的实现</a></li><li><a href="#RAID_987">软RAID配置示例</a></li><li><a href="#RAID_1001">软RAID测试和修复</a></li><li><a href="#RAID_1015">软RAID管理</a></li></ul></ul><li><a href="#LVM_1025">九.LVM管理</a></li><ul><li><a href="#1LVM_1027">1.逻辑卷管理器LVM简介</a></li><li><a href="#2_1054">2.逻辑卷管理工具</a></li><ul><li><a href="#pv_1056">pv管理工具</a></li><li><a href="#vg_1068">vg管理工具</a></li><li><a href="#lv_1084">lv管理工具</a></li><li><a href="#_1102">扩展和缩减逻辑卷</a></li><li><a href="#_1117">创建逻辑卷示例</a></li><li><a href="#_1131">跨主机迁移卷组</a></li></ul></ul><li><a href="#LVM_1147">十.LVM快照</a></li><ul><ul><li><a href="#_1149">逻辑卷管理器快照介绍</a></li><li><a href="#_1160">逻辑卷管理器快照</a></li><li><a href="#LVM_1168">使用LVM快照</a></li></ul></ul><li><a href="#_1185">十一.练习</a></li></ul></div><p></p>
+<h1><a id="linux_1"></a>一.linux磁盘设备概述</h1>
+<ul>
+<li>
+<p>在linux中一切皆为文件，设备也不例外；linux使用/dev/文件夹下的设备文件来与相关的设备建立联系，访问某个设备文件就是访问该设备。</p>
+</li>
+<li>
+<p>linux设备类型包括:</p>
+</li>
+</ul>
+<pre><code class="prism language-bash">    块设备：block，存取单位“块”，磁盘 
+    字符设备：char，存取单位“字符”，键盘 
+</code></pre>
+<ul>
+<li>
+<p>设备文件：关联至一个设备驱动程序，进而能够跟与之对应硬件设备进行通信</p>
+</li>
+<li>
+<p>设备号码</p>
+</li>
+</ul>
+<pre><code class="prism language-bash">    主设备号：major number, 标识设备类型 
+    次设备号：minor number, 标识同一类型下的不同设备 
+</code></pre>
+<ul>
+<li>linux磁盘设备命名</li>
+</ul>
+<pre><code class="prism language-bash">磁盘设备的设备文件命名：/dev/DEV_FILE 
+SCSI, SATA, SAS, IDE,USB: /dev/sd 
+某些云服务器虚拟磁盘：/dev/vd 、/dev/xvd 
+不同磁盘标识：a-z,aa,ab… 
+    /dev/sda, /dev/sdb, <span class="token punctuation">..</span>. 
+同一设备上的不同分区：1,2, <span class="token punctuation">..</span>. 
+    /dev/sda1, /dev/sda5 
+硬盘存储术语 
+    head：磁头 
+    track：磁道 
+    sector：扇区，512bytes 
+    cylinder：柱面 
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/2019101716543573.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<pre><code class="prism language-bash">比如：
+    hexdump -C -512 /dev/sda1 
+    该命令就访问了磁盘的第一个分区的前512个字节，即MBR分区<span class="token punctuation">(</span>实际上该分区只有512字节<span class="token punctuation">)</span>；
+    在linux中磁盘使用/dev/sda<span class="token punctuation">[</span>b<span class="token operator">|</span>c<span class="token operator">|</span>d<span class="token punctuation">..</span>.<span class="token punctuation">]</span> 设备文件来访问。
+
+在操作系统的上层应用访问磁盘时，会通过系统调用来读写磁盘，如：
+    open<span class="token punctuation">(</span><span class="token punctuation">)</span>, read<span class="token punctuation">(</span><span class="token punctuation">)</span>, write<span class="token punctuation">(</span><span class="token punctuation">)</span>, close<span class="token punctuation">(</span><span class="token punctuation">)</span> 
+</code></pre>
+<ul>
+<li>在linux中使用某磁盘需要经过以下几步:</li>
+</ul>
+<pre><code class="prism language-bash">1.设备识别,识别出的硬盘设备在/dev目录下
+2.设备分区 
+3.创建文件系统 
+4.标记文件系统 
+5.在/etc/fstab文件中创建条目 
+6.挂载新的文件系统 
+</code></pre>
+<ul>
+<li>分区所带来的好处</li>
+</ul>
+<pre><code class="prism language-bash">1.优化I/O性能 
+2.多个分区可以实现磁盘空间配额限制 
+3.提高修复速度 
+4.隔离系统和程序 
+5.多个分区可以安装多个OS 
+6.采用不同文件系统 
+</code></pre>
+<h1><a id="_74"></a>二.分区结构类型</h1>
+<ul>
+<li>目前主流的操作系统和相对应的硬件使用MBR和GPT分区方式中的一种，GPT分区格式比较新，所支持的容量更大，具备图形配置界面，所以大部分已经从传统的MBR分区格式转为使用GPT格式；而MBR分区格式需要配合传统的BIOS硬件；GPT则搭配较新的UEFI固件接口。</li>
+</ul>
+<h2><a id="1MBR_78"></a>1.MBR</h2>
+<ul>
+<li>MBR：Master Boot Record，1982年出现，使用32位表示扇区数，分区不超过2T</li>
+</ul>
+<pre><code class="prism language-bash">MBR按柱面大小作为分区的基本容量单位；
+MBR的元数据存放在0磁道0扇区：512bytes<span class="token punctuation">(</span>整块硬盘的前512字节<span class="token punctuation">)</span> 
+前446bytes: boot loader 
+紧接着的64bytes：分区表，其中每16bytes标识一个分区 
+最后2bytes: 55AA <span class="token punctuation">(</span>第511和512字节<span class="token punctuation">)</span>
+MBR分区中一块硬盘最多有4个主分区，也可以3主分区+1扩展<span class="token punctuation">(</span>N个逻辑分区<span class="token punctuation">)</span> 
+</code></pre>
+<h2><a id="2MBR_91"></a>2.MBR分区结构组织</h2>
+<p><img src="https://img-blog.csdnimg.cn/20191017165510899.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<pre><code class="prism language-bash">硬盘主引导记录MBR由4个部分组成 
+1.主引导程序（偏移地址0000H--0088H），它负责从活动分区中装载，并运行系统引导程序 
+2.出错信息数据区，偏移地址0089H--00E1H为出错信息，00E2H--01BDH全为0字节 
+3.分区表（DPT,Disk Partition Table）含4个分区项，偏移地址01BEH--01FDH, 每个分区表项长16个字节，共64字节为分区项1、分区项2、分区项3、分区项4 
+4.结束标志字，偏移地址01FE--01FF的2个字节值为结束标志55AA 
+</code></pre>
+<ul>
+<li>
+<p>各个区所对应的16位地址<br>
+<img src="https://img-blog.csdnimg.cn/20191017165535904.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+<li>
+<p>MBR主分区表中的分区表项具体含义<br>
+<img src="https://img-blog.csdnimg.cn/20191017165555840.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h2><a id="3GPT_108"></a>3.GPT分区</h2>
+<pre><code class="prism language-bash">1.GPT：GUID（Globals Unique Identifiers） partition table 支持128个分区使用64位，支持8Z（ 512Byte/block ）64Z （ 4096Byte/block） 
+2.使用128位UUID<span class="token punctuation">(</span>Universally Unique Identifier<span class="token punctuation">)</span> 表示磁盘和分区 GPT分区表 自动备份在头和尾两份，并有CRC校验位 
+3.UEFI <span class="token punctuation">(</span>Unified Extensible Firmware Interface 统一可扩展固件接口<span class="token punctuation">)</span>硬件支持 GPT，使操作系统启动
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20191017165614255.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2><a id="4BIOSUEFI_117"></a>4.BIOS和UEFI</h2>
+<pre><code class="prism language-bash">1.BIOS是固化在电脑主板上一个程序，主要用于开机系统自检和引导操作系统。 目前新式的电脑基本上都是UEFI启动 
+2.BIOS（Basic Input Output System 基本输入输出系统）对于普通用户来说，主要完成系统硬件自检和引导操作系统，
+操作系统开始启动之后，BIOS的任务就完成了。系统硬件自检：如果系统硬件有故障，主板上的扬声器就会发出长短不同的“滴滴”音，
+可以简单的判断硬件故障，比如“1长1短”通常表示内存故障，“1长3短”通常表示显卡故障  
+3.BIOS在1975年就诞生了，使用汇编语言编写，当初只有16位，因此只能访问 1M的内存，其中前640K称为基本内存，
+后384K内存留给开机和各类BIOS本身 使用。BIOS只能识别到主引导记录（MBR）初始化的硬盘，最大支持2T的硬盘，
+4个主分区（逻辑分区中的扩展分区除外），而目前普遍实现了64位系统，传统
+的BIOS已经无法满足需求了，这时英特尔主导的EFI就诞生了
+</code></pre>
+<h2><a id="5BIOSMBRUEFIGPT_130"></a>5.BIOS+MBR与UEFI+GPT</h2>
+<p><img src="https://img-blog.csdnimg.cn/20191017165627870.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h1><a id="_133"></a>三.分区管理</h1>
+<h2><a id="1_135"></a>1.查看磁盘设备和分区信息</h2>
+<h3><a id="lsblk_137"></a>lsblk</h3>
+<pre><code class="prism language-bash1">blkid [OPTION]... [DEVICE] 
+    -U UUID 根据指定的UUID来查找对应的设备 
+    -L LABEL 根据指定的LABEL来查找对应的设备 
+</code></pre>
+<ul>
+<li>man 一下</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token variable">$lsblk</span> -o NAME,ALIGNMENT,MIN-IO,OPT-IO,PHY-SEC,LOG-SEC,ROTA,SCHED,RQ-SIZE /dev/sda
+NAME   ALIGNMENT MIN-IO OPT-IO PHY-SEC LOG-SEC ROTA SCHED RQ-SIZE
+sda            0    512      0     512     512    1 cfq       128
+├─sda1         0    512      0     512     512    1 cfq       128
+├─sda2         0    512      0     512     512    1 cfq       128
+├─sda3         0    512      0     512     512    1 cfq       128
+├─sda4         0    512      0     512     512    1 cfq       128
+└─sda5         0    512      0     512     512    1 cfq       128
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token variable">$lsblk</span> -t
+NAME   ALIGNMENT MIN-IO OPT-IO PHY-SEC LOG-SEC ROTA SCHED RQ-SIZE   RA
+sr0            0    512      0     512     512    1 cfq       128  128
+sda            0    512      0     512     512    1 cfq       128  128
+├─sda1         0    512      0     512     512    1 cfq       128  128
+├─sda2         0    512      0     512     512    1 cfq       128  128
+├─sda3         0    512      0     512     512    1 cfq       128  128
+├─sda4         0    512      0     512     512    1 cfq       128  128
+└─sda5         0    512      0     512     512    1 cfq       128  128
+sdb            0    512      0     512     512    1 cfq       128  128
+</code></pre>
+<h3><a id="fdisk_l_devsdabc_168"></a>fdisk -l /dev/sd[abc…]</h3>
+<h3><a id="blkid_170"></a>blkid</h3>
+<ul>
+<li>locate/print block device attributes</li>
+</ul>
+<h2><a id="2_174"></a>2.创建分区</h2>
+<h3><a id="fdisk_MBR__gdisk_GPT_176"></a>fdisk 创建MBR分区 | gdisk 创建GPT分区</h3>
+<pre><code class="prism language-bash">gdisk /dev/sdb 类fdisk 的GPT分区工具 
+<span class="token function">fdisk</span> -l <span class="token punctuation">[</span>-u<span class="token punctuation">]</span> <span class="token punctuation">[</span>device<span class="token punctuation">..</span>.<span class="token punctuation">]</span> 查看分区 
+<span class="token function">fdisk</span> /dev/sdb  管理分区 
+子命令： 
+p  分区列表 
+t  更改分区类型 
+n  创建新分区 
+d  删除分区 
+<span class="token function">v</span>  校验分区 
+u  转换单位 
+w  保存并退出 
+q  不保存并退出 
+</code></pre>
+<ul>
+<li>也可以使用非交互式的方式来创建分区，这种方法适合用在脚本中</li>
+</ul>
+<pre><code class="prism language-bash">    <span class="token keyword">echo</span> -e <span class="token string">"n\np\n1\n\n\nw\n"</span> <span class="token operator">|</span> <span class="token function">fdisk</span> /dev/sdb <span class="token comment"># 将在/dev/sdb上创建一个新分区，使用/dev/sdb的所有空间</span>
+</code></pre>
+<h3><a id="parted__199"></a>parted 高级分区操作</h3>
+<pre><code class="prism language-bash">注意：parted的操作都是实时生效的，小心使用 
+用法：parted <span class="token punctuation">[</span>选项<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>设备 <span class="token punctuation">[</span>命令 <span class="token punctuation">[</span>参数<span class="token punctuation">]</span><span class="token punctuation">..</span>.<span class="token punctuation">]</span><span class="token punctuation">..</span>.<span class="token punctuation">]</span>  
+    parted /dev/sdb  mklabel gpt<span class="token operator">|</span>msdos 
+    parted /dev/sdb  print 
+    parted /dev/sdb  mkpart primary 1 200 （默认M） 
+    parted /dev/sdb  <span class="token function">rm</span> 1 
+    parted –l   列出分区信息 
+</code></pre>
+<h2><a id="3_212"></a>3.同步分区表</h2>
+<ul>
+<li>
+<p>分区完成后使用partprobe更新分区信息</p>
+</li>
+<li>
+<p>在centos6中方法不同：</p>
+</li>
+</ul>
+<pre><code class="prism language-bash">查看内核是否已经识别新的分区 
+    <span class="token function">cat</span> /proc/partations 
+centos6通知内核重新读取硬盘分区表 
+    新增分区用  
+        partx -a  /dev/DEVICE 
+        kpartx -a /dev/DEVICE -f: force 
+    删除分区用 
+        partx -d --nr M-N /dev/DEVICE 
+CentOS 5，7: 使用partprobe 
+    qpartprobe <span class="token punctuation">[</span>/dev/DEVICE<span class="token punctuation">]</span> 
+</code></pre>
+<h1><a id="_232"></a>四.管理文件系统</h1>
+<h2><a id="1_234"></a>1.文件系统</h2>
+<ul>
+<li>文件系统是操作系统用于明确存储设备或分区上的文件的方法和数据结构；即<br>
+在存储设备上组织文件的方法。操作系统中负责管理和存储文件信息的软件结<br>
+构称为文件管理系统，简称文件系统</li>
+<li>从系统角度来看，文件系统是对文件存储设备的空间进行组织和分配，负责文<br>
+件存储并对存入的文件进行保护和检索的系统。具体地说，它负责为用户建立<br>
+文件，存入、读出、修改、转储文件，控制文件的存取，安全控制，日志，压<br>
+缩，加密等</li>
+<li>查看linux支持的文件系统：/lib/modules/ùname –r`/kernel/fs</li>
+<li><a href="https://en.wikipedia.org/wiki/Comparison_of_file_systems">wikipedia所罗列的各种文件系统</a></li>
+<li>帮助：man 5 fs</li>
+</ul>
+<h2><a id="2_247"></a>2.文件系统类型</h2>
+<pre><code class="prism language-bash">Linux文件系统：  
+    1.ext2<span class="token punctuation">(</span>Extended <span class="token function">file</span> system<span class="token punctuation">)</span>：适用于那些分区容量不是太大，更新也不频繁的情况，
+        例如 /boot 分区 
+    2.ext3：是 ext2 的改进版本，其支持日志功能，能够帮助系统从非正常关机导致的异常
+    中恢复。它通常被用作通用的文件系统 
+    3.ext4：是 ext 文件系统的最新版。提供了很多新的特性，包括纳秒级时间戳、创建和
+    使用巨型文件<span class="token punctuation">(</span>16TB<span class="token punctuation">)</span>、最大1EB的文件系统，以及速度的提升 
+    4.xfs：SGI，支持最大8EB的文件系统 
+    5.btrfs（Oracle）, reiserfs, jfs（AIX）, swap 
+    6.光盘：iso9660 
+7.Windows：FAT32, NTFS，exFAT 
+8.Unix：FFS（fast）, UFS（unix）, JFS2 
+9.网络文件系统：NFS, CIFS 
+10.集群文件系统：GFS2, OCFS2（oracle） 
+11.分布式文件系统：fastdfs,ceph, moosefs, mogilefs, glusterfs, Lustre 
+12.RAW：未经处理或者未经格式化产生的文件系统
+</code></pre>
+<h2><a id="3linux_268"></a>3.linux文件系统分类</h2>
+<pre><code class="prism language-bash">根据其是否支持<span class="token string">"journal"</span>功能分： 
+    日志型文件系统: ext3, ext4, xfs, <span class="token punctuation">..</span>. 
+    非日志型文件系统: ext2, vfat 
+文件系统的组成部分： 
+    内核中的模块：ext4, xfs, vfat 
+    用户空间的管理工具：mkfs.ext4, mkfs.xfs,mkfs.vfat 
+Linux的虚拟文件系统：VFS 
+查看目前支持的文件系统：cat /proc/filesystems 
+</code></pre>
+<h2><a id="4linuxVFS_281"></a>4.linux的VFS</h2>
+<p><img src="https://img-blog.csdnimg.cn/20191017165652243.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2><a id="5linux_284"></a>5.linux文件系统的选择</h2>
+<pre><code class="prism language-bash">文件系统选择 
+1.EXT3 
+    最多只能支持32TB的文件系统和2TB的文件，实际只能容纳2TB的文件系统和16GB的文件 
+    Ext3目前只支持32000个子目录 
+    Ext3文件系统使用32位空间记录块数量和inode数量 
+    当数据写入到Ext3文件系统中时，Ext3的数据块分配器每次只能分配一个4KB的块 
+2.EXT4：EXT4是Linux系统下的日志文件系统，是EXT3文件系统的后继版本 
+    Ext4的文件系统容量达到1EB，而文件容量则达到16TB 
+    理论上支持无限数量的子目录 
+    Ext4文件系统使用64位空间记录块数量和 inode数量 
+    Ext4的多块分配器支持一次调用分配多个数据块 
+    修复速度更快 
+3.XFS 
+    根据所记录的日志在很短的时间内迅速恢复磁盘文件内容 
+    采用优化算法，日志记录对整体文件操作影响非常小 
+    是一个全64-bit的文件系统，最大可以支持8EB的文件系统 
+    能以接近裸设备I/O的性能存储数据 
+</code></pre>
+<h2><a id="5ext_306"></a>5.创建ext文件系统</h2>
+<h3><a id="mke2fsext_308"></a>mke2fs：ext系列文件系统专用管理工具</h3>
+<ul>
+<li>用法：</li>
+</ul>
+<pre><code class="prism language-bash">       mke2fs <span class="token punctuation">[</span> -c <span class="token operator">|</span> -l filename <span class="token punctuation">]</span> <span class="token punctuation">[</span> -b block-size <span class="token punctuation">]</span> <span class="token punctuation">[</span> -C cluster-size <span class="token punctuation">]</span> <span class="token punctuation">[</span> -d root-directory <span class="token punctuation">]</span> <span class="token punctuation">[</span> -D <span class="token punctuation">]</span> <span class="token punctuation">[</span> -g blocks-per-group <span class="token punctuation">]</span> <span class="token punctuation">[</span> -G
+       number-of-groups <span class="token punctuation">]</span> <span class="token punctuation">[</span> -i bytes-per-inode <span class="token punctuation">]</span> <span class="token punctuation">[</span> -I inode-size <span class="token punctuation">]</span> <span class="token punctuation">[</span> -j <span class="token punctuation">]</span> <span class="token punctuation">[</span> -J journal-options <span class="token punctuation">]</span> <span class="token punctuation">[</span> -N number-of-inodes <span class="token punctuation">]</span> <span class="token punctuation">[</span> -n <span class="token punctuation">]</span>  <span class="token punctuation">[</span>
+       -m  reserved-blocks-percentage  <span class="token punctuation">]</span> <span class="token punctuation">[</span> -o creator-os <span class="token punctuation">]</span> <span class="token punctuation">[</span> -O <span class="token punctuation">[</span>^<span class="token punctuation">]</span>feature<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span>  <span class="token punctuation">]</span> <span class="token punctuation">[</span> -q <span class="token punctuation">]</span> <span class="token punctuation">[</span> -r fs-revision-level <span class="token punctuation">]</span> <span class="token punctuation">[</span> -E extended-
+       options <span class="token punctuation">]</span> <span class="token punctuation">[</span> -v <span class="token punctuation">]</span> <span class="token punctuation">[</span> -F <span class="token punctuation">]</span> <span class="token punctuation">[</span> -L volume-label <span class="token punctuation">]</span> <span class="token punctuation">[</span> -M last-mounted-directory <span class="token punctuation">]</span> <span class="token punctuation">[</span> -S <span class="token punctuation">]</span> <span class="token punctuation">[</span> -t fs-type <span class="token punctuation">]</span> <span class="token punctuation">[</span> -T usage-type <span class="token punctuation">]</span> <span class="token punctuation">[</span> -U UUID
+       <span class="token punctuation">]</span> <span class="token punctuation">[</span> -V <span class="token punctuation">]</span> <span class="token punctuation">[</span> -e errors-behavior <span class="token punctuation">]</span> <span class="token punctuation">[</span> -z undo_file <span class="token punctuation">]</span> device <span class="token punctuation">[</span> fs-size <span class="token punctuation">]</span>
+
+       mke2fs -O journal_dev <span class="token punctuation">[</span> -b block-size <span class="token punctuation">]</span> <span class="token punctuation">[</span> -L volume-label <span class="token punctuation">]</span> <span class="token punctuation">[</span> -n <span class="token punctuation">]</span> <span class="token punctuation">[</span> -q <span class="token punctuation">]</span> <span class="token punctuation">[</span> -v <span class="token punctuation">]</span> external-journal <span class="token punctuation">[</span> fs-size <span class="token punctuation">]</span>
+</code></pre>
+<ul>
+<li>选项：</li>
+</ul>
+<pre><code class="prism language-bash">-t <span class="token punctuation">{</span>ext2<span class="token operator">|</span>ext3<span class="token operator">|</span>ext4<span class="token punctuation">}</span>   指定文件系统类型  
+-b <span class="token punctuation">{</span>1024<span class="token operator">|</span>2048<span class="token operator">|</span>4096<span class="token punctuation">}</span>   指定块大小 
+-L ‘LABEL’   设置卷标 
+-j 相当于 -t ext3 
+   mkfs.ext3 <span class="token operator">=</span> mkfs -t ext3 <span class="token operator">=</span> mke2fs -j <span class="token operator">=</span> mke2fs -t ext3 
+-i <span class="token comment"># :为数据空间中每多少个字节创建一个inode；不应该小于block大小 </span>
+-N <span class="token comment"># :指定分区中创建多少个inode </span>
+-I  一个inode记录占用的磁盘空间大小，128---4096 
+-m <span class="token comment"># :默认5%,为管理人员预留空间占总空间的百分比 </span>
+-O FEATURE<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span> 启用指定特性 
+-O ^FEATURE 关闭指定特性 
+</code></pre>
+<h3><a id="mkfs_338"></a>mkfs命令</h3>
+<pre><code class="prism language-bash"><span class="token punctuation">(</span>1<span class="token punctuation">)</span> mkfs.FS_TYPE /dev/DEVICE 
+    ext4 
+    xfs 
+    btrfs 
+    vfat 
+<span class="token punctuation">(</span>2<span class="token punctuation">)</span> mkfs -t FS_TYPE /dev/DEVICE 
+    -L <span class="token string">'LABEL'</span> 设定卷标 
+</code></pre>
+<h2><a id="6_350"></a>6.文件系统标签</h2>
+<ul>
+<li>文件系统标签是指向设备的另一种方法,与设备无关</li>
+</ul>
+<h3><a id="e2labelextLABEL_354"></a>e2label：管理ext系列文件系统的LABEL</h3>
+<pre><code class="prism language-bash">e2label DEVICE <span class="token punctuation">[</span>LABEL<span class="token punctuation">]</span> 
+eg: e2label /dev/sdb /home
+
+findfs ：查找分区 
+    findfs <span class="token punctuation">[</span>options<span class="token punctuation">]</span> LABEL<span class="token operator">=</span><span class="token operator">&lt;</span>label<span class="token operator">&gt;</span> 
+    findfs <span class="token punctuation">[</span>options<span class="token punctuation">]</span> UUID<span class="token operator">=</span><span class="token operator">&lt;</span>uuid<span class="token operator">&gt;</span> 
+eg:
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token variable">$findfs</span> UUID<span class="token operator">=</span>41f73bce-f100-421f-b8a0-d2aad312e5a5
+/dev/sdb
+<span class="token punctuation">[</span>root@centos6 ~<span class="token punctuation">]</span><span class="token variable">$findfs</span> LABEL<span class="token operator">=</span>/home
+/dev/sdb
+</code></pre>
+<h2><a id="7tune2fs_370"></a>7.tune2fs</h2>
+<ul>
+<li>
+<p>tune2fs：重新设定ext系列文件系统可调整参数的值</p>
+</li>
+<li>
+<p>用法</p>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token comment">#tune2fs - adjust tunable filesystem parameters on ext2/ext3/ext4 filesystems</span>
+tune2fs  <span class="token punctuation">[</span>  -l <span class="token punctuation">]</span> <span class="token punctuation">[</span> -c max-mount-counts <span class="token punctuation">]</span> <span class="token punctuation">[</span> -e errors-behavior <span class="token punctuation">]</span> <span class="token punctuation">[</span> -f <span class="token punctuation">]</span> <span class="token punctuation">[</span> -i interval-between-checks <span class="token punctuation">]</span> <span class="token punctuation">[</span> -j <span class="token punctuation">]</span> <span class="token punctuation">[</span> -J
+journal-options <span class="token punctuation">]</span> <span class="token punctuation">[</span> -m reserved-blocks-percentage <span class="token punctuation">]</span> <span class="token punctuation">[</span> -o <span class="token punctuation">[</span>^<span class="token punctuation">]</span>mount-options<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span>  <span class="token punctuation">]</span> <span class="token punctuation">[</span> -r reserved-blocks-count <span class="token punctuation">]</span> <span class="token punctuation">[</span>
+-s  sparse-super-flag  <span class="token punctuation">]</span> <span class="token punctuation">[</span> -u user <span class="token punctuation">]</span> <span class="token punctuation">[</span> -g group <span class="token punctuation">]</span> <span class="token punctuation">[</span> -C mount-count <span class="token punctuation">]</span> <span class="token punctuation">[</span> -E extended-options <span class="token punctuation">]</span> <span class="token punctuation">[</span> -L volume-name <span class="token punctuation">]</span> <span class="token punctuation">[</span>
+-M last-mounted-directory <span class="token punctuation">]</span> <span class="token punctuation">[</span> -O <span class="token punctuation">[</span>^<span class="token punctuation">]</span>feature<span class="token punctuation">[</span>,<span class="token punctuation">..</span>.<span class="token punctuation">]</span>  <span class="token punctuation">]</span> <span class="token punctuation">[</span> -T time-last-checked <span class="token punctuation">]</span> <span class="token punctuation">[</span> -U UUID <span class="token punctuation">]</span> device
+options:
+    -l 查看指定文件系统超级块信息；super block 
+    -L 'LABEL’ 修改卷标 
+    -m <span class="token comment"># 修预留给管理员的空间百分比 </span>
+    -j 将ext2升级为ext3 
+    -O 文件系统属性启用或禁用, –O ^has_journal 
+    -o 调整文件系统的默认挂载选项，–o âcl  
+    -U UUID 修改UUID号 
+</code></pre>
+<ul>
+<li>
+<p>dumpe2fs：显示ext文件系统信息，将磁盘块分组管理<br>
+-h：查看超级块信息，不显示分组信息</p>
+</li>
+<li>
+<p>xfs_info：显示已挂载的 xfs 文件系统信息<br>
+xfs_info mountpoint</p>
+</li>
+<li>
+<p>超级块和INODE TABLE在磁盘中的大致组织结构<br>
+<img src="https://img-blog.csdnimg.cn/20191017165713960.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h2><a id="8_400"></a>8.文件系统检测和修复</h2>
+<ul>
+<li>文件系统夹故障常发生于死机或者非正常关机之后，挂载为文件系统标记为“no clean”;这时就需要文件系统修复</li>
+<li>注意：一定不要在挂载状态下执行下面命令修复</li>
+</ul>
+<pre><code class="prism language-bash">fsck: File System Check
+fsck.FS_TYPE
+<span class="token function">fsck</span> -t FS_TYPE  
+    注意：FS_TYPE 一定要与分区上已经文件类型相同 
+    -a 自动修复 
+    -r 交互式修复错误  
+e2fsck：ext系列文件专用的检测修复工具 
+    -y 自动回答为yes 
+    -f 强制修复 
+    -p 自动进行安全的修复文件系统问题 
+xfs_repair：xfs文件系统专用检测修复工具 
+    -f 修复文件，而设备 
+    -n 只检查 
+    -d 允许修复只读的挂载设备，在单用户下修复 / 时使用，然后立即reboot 
+</code></pre>
+<h2><a id="9_422"></a>9.常见工具</h2>
+<h3><a id="dfdu_424"></a>文件系统空间占用等信息的查看工具df/du</h3>
+<pre><code class="prism language-bash"><span class="token function">df</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>FILE<span class="token punctuation">]</span><span class="token punctuation">..</span>. 
+    -H 以10为单位 
+    -T 文件系统类型 
+    -h human-readable 
+    -i inodes instead of blocks 
+    -P 以Posix兼容的格式输出  
+查看某目录总体空间占用状态 
+<span class="token function">du</span> <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. DIR 
+    -h  human-readable 
+    -s   summary   
+    --max-depth<span class="token operator">=</span><span class="token comment">#   指定最大目录层级 </span>
+</code></pre>
+<h3><a id="dd_440"></a>工具dd</h3>
+<ul>
+<li>
+<p>dd 命令：convert and copy a file</p>
+</li>
+<li>
+<p>用法：</p>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">dd</span> if<span class="token operator">=</span>/PATH/FROM/SRC of<span class="token operator">=</span>/PATH/TO/DEST  bs<span class="token operator">=</span><span class="token comment"># count=# </span>
+    if<span class="token operator">=</span>file      从所命名文件读取而不是从标准输入 
+    of<span class="token operator">=</span>file      写到所命名的文件而不是到标准输出 
+    ibs<span class="token operator">=</span>size     一次读size个byte 
+    obs<span class="token operator">=</span>size     一次写size个byte 
+    bs<span class="token operator">=</span>size      block size, 指定块大小（既是是ibs也是obs<span class="token punctuation">)</span> 
+    cbs<span class="token operator">=</span>size     一次转化size个byte 
+    skip<span class="token operator">=</span>blocks  从开头忽略blocks个ibs大小的块 
+    seek<span class="token operator">=</span>blocks  从开头忽略blocks个obs大小的块 
+    count<span class="token operator">=</span>n      复制n个bs 
+
+conv<span class="token operator">=</span>conversion<span class="token punctuation">[</span>,conversion<span class="token punctuation">..</span>.<span class="token punctuation">]</span> 用指定的参数转换文件  
+转换参数:  
+    ascii     转换 EBCDIC 为 ASCII 
+    ebcdic    转换 ASCII 为 EBCDIC 
+    lcase     把大写字符转换为小写字符 
+    ucase     把小写字符转换为大写字符 
+    nocreat   不创建输出文件 
+    noerror   出错时不停止 
+    notrunc   不截短输出文件 
+    <span class="token function">sync</span>      把每个输入块填充到ibs个字节，不足部分用空<span class="token punctuation">(</span>NUL<span class="token punctuation">)</span>字符补齐 
+    fdatasync 写完成前，物理写入输出文件 
+</code></pre>
+<ul>
+<li>使用dd命令备份MBR</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">dd</span> if<span class="token operator">=</span>/dev/sda of<span class="token operator">=</span>/tmp/mbr.bak bs<span class="token operator">=</span>512 count<span class="token operator">=</span>1 
+</code></pre>
+<ul>
+<li>破坏MBR中的bootloader</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">dd</span> if<span class="token operator">=</span>/dev/zero of<span class="token operator">=</span>/dev/sda bs<span class="token operator">=</span>64 count<span class="token operator">=</span>1 seek<span class="token operator">=</span>446 
+</code></pre>
+<ul>
+<li>有一个大与2K的二进制文件fileA。现在想从第64个字节位置开始读取，需要读<br>
+取的大小是128Byts。又有fileB, 想把上面读取到的128Bytes写到第32个字节开<br>
+始的位置，替换128Bytes，实现如下</li>
+</ul>
+<blockquote>
+<p>dd if=fileA of=fileB bs=1 count=128 skip=63 seek=31 conv=notrunc</p>
+</blockquote>
+<ul>
+<li>使用dd命令备份：</li>
+</ul>
+<pre><code class="prism language-bsh">dd if=/dev/sdx of=/dev/sdy 
+将本地的/dev/sdx整盘备份到/dev/sdy  
+dd if=/dev/sdx of=/path/to/image 
+将/dev/sdx全盘数据备份到指定路径的image文件  
+dd if=/dev/sdx | gzip &gt;/path/to/image.gz 
+备份/dev/sdx全盘数据，并利用gzip压缩，保存到指定路径  
+</code></pre>
+<ul>
+<li>使用dd命令恢复：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">dd</span> if<span class="token operator">=</span>/path/to/image of<span class="token operator">=</span>/dev/sdx 
+将备份文件恢复到指定盘  
+<span class="token function">gzip</span> -dc /path/to/image.gz <span class="token operator">|</span> <span class="token function">dd</span> of<span class="token operator">=</span>/dev/sdx 
+将压缩的备份文件恢复到指定盘 
+</code></pre>
+<pre><code class="prism language-bash">拷贝内存资料到硬盘  
+    <span class="token function">dd</span> if<span class="token operator">=</span>/dev/mem of<span class="token operator">=</span>/root/mem.bin bs<span class="token operator">=</span>1024 
+    将内存里的数据拷贝到root目录下的mem.bin文件  
+
+从光盘拷贝iso镜像  
+    <span class="token function">dd</span> if<span class="token operator">=</span>/dev/cdrom of<span class="token operator">=</span>/root/cdrom.iso 
+    拷贝光盘数据到root文件夹下，并保存为cdrom.iso文件 
+
+销毁磁盘数据  
+    <span class="token function">dd</span> if<span class="token operator">=</span>/dev/urandom of<span class="token operator">=</span>/dev/sda1 
+    利用随机的数据填充硬盘，在某些必要的场合可以用来销毁数据，执行此操作
+    以后，/dev/sda1将无法挂载，创建和拷贝操作无法执行
+</code></pre>
+<h1><a id="_526"></a>五.挂载/卸载磁盘设备</h1>
+<h2><a id="1mount_528"></a>1.挂载mount</h2>
+<ul>
+<li>挂载:将额外文件系统与根文件系统某现存的目录建立起关联关系，进而使得此<br>
+目录做为其它文件访问入口的行为</li>
+<li>卸载:为解除此关联关系的过程</li>
+<li>把设备关联挂载点：mount Point</li>
+<li>卸载时：可使用设备，也可以使用挂载点<br>
+umount  设备名|挂载点</li>
+<li>挂载点下原有文件在挂载完成后会被临时隐藏</li>
+<li>挂载点目录一般为空</li>
+</ul>
+<h2><a id="2mount_539"></a>2.用mount命令挂载文件系统</h2>
+<ul>
+<li>挂载方法：mount DEVICE MOUNT_POINT</li>
+<li>mount命令实际上是通过查看/etc/mtab文件显示当前已挂载的所有设备</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">mount</span> <span class="token punctuation">[</span>-fnrsvw<span class="token punctuation">]</span> <span class="token punctuation">[</span>-t vfstype<span class="token punctuation">]</span> <span class="token punctuation">[</span>-o options<span class="token punctuation">]</span> device <span class="token function">dir</span> 
+device：指明要挂载的设备； 
+    <span class="token punctuation">(</span>1<span class="token punctuation">)</span> 设备文件：例如/dev/sda5 
+    <span class="token punctuation">(</span>2<span class="token punctuation">)</span> 卷标：-L <span class="token string">'LABEL'</span>, 例如 -L <span class="token string">'MYDATA'</span> 
+    <span class="token punctuation">(</span>3<span class="token punctuation">)</span> UUID, -U <span class="token string">'UUID'</span>：例如 -U <span class="token string">'0c50523c-43f1-45e7-85c0-a126711d406e'</span> 
+    <span class="token punctuation">(</span>4<span class="token punctuation">)</span> 伪文件系统名称：proc, sysfs, devtmpfs, configfs 
+dir：挂载点 
+    事先存在，建议使用空目录 
+    进程正在使用中的设备无法被卸载 
+
+mount常用命令选项:
+    -t vsftype  指定要挂载的设备上的文件系统类型 
+    -r  readonly，只读挂载 
+    -w  <span class="token function">read</span> and write, 读写挂载 
+    -n  不更新/etc/mtab，mount不可见 
+    -a  自动挂载所有支持自动挂载的设备<span class="token punctuation">(</span>定义在了/etc/fstab文件中，且挂载选项中有auto功能<span class="token punctuation">)</span> 
+    -L <span class="token string">'LABEL'</span>  以卷标指定挂载设备 
+    -U <span class="token string">'UUID'</span>   以UUID指定要挂载的设备 
+    -B, --bind  绑定目录到另一个目录上 
+查看内核追踪到的已挂载的所有设备 
+    <span class="token function">cat</span> /proc/mounts 
+
+<span class="token function">mount</span> 的-o子命令：
+-o options：<span class="token punctuation">(</span>挂载文件系统的选项<span class="token punctuation">)</span>，多个选项使用逗号分隔 
+    async               异步模式  
+    <span class="token function">sync</span>                同步模式,内存更改时，同时写磁盘 
+    atime/noatime       包含目录和文件 
+    diratime/nodiratime 目录的访问时间戳 
+    auto/noauto         是否支持自动挂载,是否支持-a选项 
+    exec/noexec         是否支持将文件系统上运行应用程序 
+    dev/nodev           是否支持在此文件系统上使用设备文件 
+    suid/nosuid         是否支持suid和sgid权限 
+    remount             重新挂载 
+    ro 只读  
+    rw 读写 
+    user/nouser         是否允许普通用户挂载此设备，/etc/fstab使用 
+    acl                 启用此文件系统上的acl功能 
+    loop                使用loop设备 
+    _netdev             当网络可用时才对网络资源进行挂载，如：NFS文件系统
+    defaults            相当于rw, suid, dev, exec, auto, nouser, async 
+</code></pre>
+<h2><a id="3_587"></a>3.卸载命令</h2>
+<pre><code class="prism language-bash">- 查看挂载情况 
+    findmnt   MOUNT_POINT<span class="token operator">|</span>device 
+- 查看正在访问指定文件系统的进程 
+    <span class="token function">lsof</span> MOUNT_POINT 
+    <span class="token function">fuser</span> -v MOUNT_POINT 
+- 终止所有在正访问指定的文件系统的进程 
+    <span class="token function">fuser</span> -km MOUNT_POINT 
+- 卸载 
+    <span class="token function">umount</span> DEVICE 
+    <span class="token function">umount</span> MOUNT_POINT 
+</code></pre>
+<h2><a id="4etcfstab_602"></a>4.挂载点和/etc/fstab</h2>
+<ul>
+<li>
+<p>使用mount  -a 命令挂载/etc/fstab中的所有文件系统</p>
+</li>
+<li>
+<p>/etc/fstab每行定义一个要挂载的文件系统</p>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token comment">## /etc/fstab</span>
+1、要挂载的设备或伪文件系统 
+设备文件 
+LABEL：LABEL<span class="token operator">=</span><span class="token string">""</span> 
+UUID：UUID<span class="token operator">=</span><span class="token string">""</span> 
+伪文件系统名称：proc, sysfs 
+2、挂载点  
+3、文件系统类型：ext4，xfs，iso9660，nfs，none 
+4、挂载选项：defaults ，acl，bind 
+5、转储频率：
+    0：不做备份 
+    1：每天转储 
+    2：每隔一天转储 
+6、fsck检查的文件系统的顺序：允许的数字是0 1 2 
+    0：不自检  
+    1：首先自检；一般只有rootfs才用 
+    2：非rootfs使用
+</code></pre>
+<h2><a id="5_628"></a>5.移动介质的挂载/卸载和使用</h2>
+<pre><code class="prism language-bash">挂载意味着使外来的文件系统看起来如同是主目录树的一部分 
+访问前，介质必须被挂载 
+摘除时，介质必须被卸载 
+按照默认设置，非根用户只能挂载某些设备（光盘、DVD、软
+盘、USB等等） 
+挂载点通常在/media 或/mnt下 
+</code></pre>
+<h3><a id="_639"></a>使用光盘</h3>
+<pre><code class="prism language-bash">在图形环境下自动启动挂载/run/media/<span class="token operator">&lt;</span>user<span class="token operator">&gt;</span>/<span class="token operator">&lt;</span>label<span class="token operator">&gt;</span> 
+否则就必须被手工挂载 
+    <span class="token function">mount</span> /dev/cdrom  /mnt/ 
+操作光盘： 
+    <span class="token function">eject</span> 弹出光盘 
+    <span class="token function">eject</span> -t 弹入光盘  
+创建ISO文件 
+    <span class="token function">cp</span> /dev/cdrom  /root/centos.iso 
+    <span class="token function">mkisofs</span>  -r  -o  /root/etc.iso /etc 
+刻录光盘 
+    wodim –v –eject centos.iso 
+</code></pre>
+<ul>
+<li>mkisofs实际指向/usr/bin/genisoimage</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#which mkisofs</span>
+/usr/bin/mkisofs
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ll `which mkisofs`</span>
+lrwxrwxrwx. 1 root root 25 Sep 25 10:22 /usr/bin/mkisofs -<span class="token operator">&gt;</span> /etc/alternatives/mkisofs
+<span class="token punctuation">[</span>root@centos8 ~<span class="token punctuation">]</span><span class="token comment">#ll /etc/alternatives/mkisofs</span>
+lrwxrwxrwx. 1 root root 20 Sep 25 10:22 /etc/alternatives/mkisofs -<span class="token operator">&gt;</span> /usr/bin/genisoimage
+</code></pre>
+<h3><a id="USB_666"></a>挂载USB介质</h3>
+<pre><code class="prism language-bash">查看USB设备是否识别 
+    •lsusb  
+被内核探测为SCSI设备 
+    •/dev/sdaX、/dev/sdbX或类似的设备文件 
+在图形环境中自动挂载 
+    •图标在<span class="token punctuation">[</span>计算机<span class="token punctuation">]</span>窗口中创建 
+    •挂载在/run/media/<span class="token operator">&lt;</span>user<span class="token operator">&gt;</span>/<span class="token operator">&lt;</span>label<span class="token operator">&gt;</span> 
+手动挂载 
+    •mount /dev/sdb1 /mnt 
+</code></pre>
+<h1><a id="_680"></a>六.管理虚拟内存</h1>
+<h2><a id="1_682"></a>1.处理交换文件和分区</h2>
+<ul>
+<li>
+<p>swap交换分区是系统RAM的补充，swap 分区支持虚拟内存。当没有足够的<br>
+RAM 保存系统处理的数据时会将数据写入 swap 分区</p>
+</li>
+<li>
+<p>当系统缺乏 swap 空间时，内核会因 RAM 内存耗尽而终止进程。配置过多<br>
+swap 空间会造成存储设备处于分配状态但闲置，造成浪费，过多 swap 空<br>
+间还会掩盖内存泄露</p>
+</li>
+<li>
+<p>推荐的不同情况下系统swap空间大小<br>
+<img src="https://img-blog.csdnimg.cn/20191017165830281.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h2><a id="2_693"></a>2.挂载交换分区</h2>
+<pre><code class="prism language-bash">基本设置包括： 
+    •创建交换分区或者文件 
+    •使用mkswap写入特殊签名 
+    •在/etc/fstab文件中添加适当的条目 
+    •使用swapon -a 激活交换空间 
+启用：swapon 
+swapon <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>DEVICE<span class="token punctuation">]</span> 
+    -a：激活所有的交换分区 
+    -p PRIORITY：指定优先级 
+/etc/fstab  在第4列中：pri<span class="token operator">=</span>value 
+    禁用：swapoff <span class="token punctuation">[</span>OPTION<span class="token punctuation">]</span><span class="token punctuation">..</span>. <span class="token punctuation">[</span>DEVICE<span class="token punctuation">]</span> 
+</code></pre>
+<h2><a id="3SWAP_709"></a>3.SWAP的优先级</h2>
+<ul>
+<li>可以指定swap分区0到32767的优先级，值越大优先级越高</li>
+<li>如果用户没有指定，那么核心会自动给swap指定一个优先级，这个优先级从<br>
+-1开始，每加入一个新的没有用户指定优先级的swap，会给这个优先级减一</li>
+<li>先添加的swap的缺省优先级比较高，除非用户自己指定一个优先级，而用户<br>
+指定的优先级(是正数)永远高于核心缺省指定的优先级(是负数)</li>
+<li>优化swap的性能：分布存放，高性能磁盘存放</li>
+</ul>
+<h1><a id="_718"></a>七.练习</h1>
+<p>1、创建一个2G的文件系统，块大小为2048byte，预留1%可用空间,文件系统<br>
+ext4，卷标为TEST，要求此分区开机后自动挂载至/test目录，且默认有acl挂载<br>
+选项</p>
+<pre><code class="prism language-bash">    <span class="token keyword">echo</span> -e <span class="token string">"n\np\n1\n+2G\nw\n"</span> <span class="token operator">|</span> <span class="token function">fdisk</span> /dev/sdb 
+    6:partx -a /dev/sdb
+      kpartx -a /dev/sdb -f
+    7/8:partprobe
+    mkfs.ext4 -b 2048 -m 1 -L <span class="token string">"TEST"</span> /dev/sdb1
+    <span class="token keyword">echo</span> <span class="token string">"/dev/sdb1  /test   ext4  defaults,acl  0 0"</span> <span class="token operator">&gt;&gt;</span> /etc/fstab
+</code></pre>
+<p>2、写一个脚本，完成如下功能：<br>
+(1) 列出当前系统识别到的所有磁盘设备<br>
+(2) 如磁盘数量为1，则显示其空间使用信息;否则，则显示最后一个磁盘上的空间使用信息</p>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment">#</span>
+<span class="token comment">#*******************************************************************************</span>
+<span class="token comment">#Author:            steveli</span>
+<span class="token comment">#QQ:                1049103823</span>
+<span class="token comment">#Data:              2019-10-17</span>
+<span class="token comment">#FileName:          list_disks.sh</span>
+<span class="token comment">#URL:               https://blog.csdn.net/YouOops</span>
+<span class="token comment">#Description:       list_disks.sh</span>
+<span class="token comment">#Copyright (C):     2019 All rights reserved</span>
+<span class="token comment">#*******************************************************************************</span>
+<span class="token comment">#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)</span>
+<span class="token comment">#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)</span>
+<span class="token comment">#*******************************************************************************</span>
+<span class="token comment">#</span>
+OS_VER<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">cat</span> /etc/redhat-release <span class="token operator">|</span> <span class="token function">sed</span> -nr <span class="token string">'s/.*([0-9]+)\.[0-9]+\..*/\1/p'</span><span class="token variable">`</span></span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$OS_VER</span>"</span> -eq 8 <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+DISK<span class="token operator">=</span><span class="token string">"nvme..."</span>
+<span class="token keyword">else</span>
+DISK<span class="token operator">=</span><span class="token string">"sd."</span>
+<span class="token keyword">fi</span>
+N<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span>lsblk <span class="token operator">|</span> <span class="token function">grep</span> -w <span class="token string">"<span class="token variable">$DISK</span>"</span> <span class="token operator">|</span> <span class="token function">wc</span> -l<span class="token variable">`</span></span>
+SD_1<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span>lsblk <span class="token operator">|</span> <span class="token function">grep</span> -w <span class="token string">"<span class="token variable">$DISK</span>"</span> <span class="token operator">|</span> <span class="token function">head</span> -n1<span class="token variable">`</span></span>
+SD_END<span class="token operator">=</span><span class="token variable"><span class="token variable">`</span>lsblk <span class="token operator">|</span> <span class="token function">grep</span> -w <span class="token string">"<span class="token variable">$DISK</span>"</span> <span class="token operator">|</span> <span class="token function">tail</span>  -n1<span class="token variable">`</span></span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token variable">$N</span> -eq 1 <span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+    <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$SD_1</span>"</span> <span class="token operator">|</span> <span class="token function">tr</span> -s <span class="token string">" "</span> <span class="token keyword">:</span> <span class="token operator">|</span> <span class="token function">cut</span> -d: -f1,5
+<span class="token keyword">else</span>
+    <span class="token keyword">echo</span> <span class="token string">"<span class="token variable">$SD_END</span>"</span>  <span class="token operator">|</span> <span class="token function">tr</span> -s <span class="token string">" "</span> <span class="token keyword">:</span> <span class="token operator">|</span> <span class="token function">cut</span> -d: -f1,5
+<span class="token keyword">fi</span>
+</code></pre>
+<p>3、将CentOS6的CentOS-6.10-x86_64-bin-DVD1.iso和CentOS-6.10-<br>
+x86_64-bin-DVD2.iso两个文件，合并成一个CentOS-6.10-x86_64-<br>
+Everything.iso文件，并将其配置为yum源</p>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /mnt/cd<span class="token punctuation">]</span><span class="token comment">#ll /misc/cd/ /mnt/cd/</span>
+/misc/cd/:
+total 566
+-r--r--r-- 2 root root     14 Jun 29  2018 CentOS_BuildTag
+dr-xr-xr-x 3 root root   2048 Jun 30  2018 EFI
+-r--r--r-- 2 root root    212 Nov 27  2013 EULA
+-r--r--r-- 2 root root  18009 Nov 27  2013 GPL
+dr-xr-xr-x 3 root root   2048 Jun 30  2018 images
+dr-xr-xr-x 2 root root   2048 Jun 30  2018 isolinux
+dr-xr-xr-x 2 root root 536576 Jun 30  2018 Packages
+-r--r--r-- 2 root root   1363 Jun 29  2018 RELEASE-NOTES-en-US.html
+dr-xr-xr-x 2 root root   4096 Jun 30  2018 repodata
+-r--r--r-- 2 root root   1706 Nov 27  2013 RPM-GPG-KEY-CentOS-6
+-r--r--r-- 2 root root   1730 Nov 27  2013 RPM-GPG-KEY-CentOS-Debug-6
+-r--r--r-- 2 root root   1730 Nov 27  2013 RPM-GPG-KEY-CentOS-Security-6
+-r--r--r-- 2 root root   1734 Nov 27  2013 RPM-GPG-KEY-CentOS-Testing-6
+-r--r--r-- 1 root root   3380 Jun 30  2018 TRANS.TBL
+
+/mnt/cd/:
+total 570
+-r--r--r-- 1 root root     14 Jun 29  2018 CentOS_BuildTag
+-r--r--r-- 1 root root    212 Nov 27  2013 EULA
+dr-xr-xr-x 2 root root 571392 Jun 30  2018 Packages
+-r--r--r-- 1 root root   1706 Nov 27  2013 RPM-GPG-KEY-CentOS-6
+-r--r--r-- 1 root root   1730 Nov 27  2013 RPM-GPG-KEY-CentOS-Debug-6
+-r--r--r-- 1 root root   1730 Nov 27  2013 RPM-GPG-KEY-CentOS-Security-6
+-r--r--r-- 1 root root   1734 Nov 27  2013 RPM-GPG-KEY-CentOS-Testing-6
+-r--r--r-- 1 root root   2056 Jun 30  2018 TRANS.TBL
+<span class="token function">cp</span> /mnt/cd/Packages/*rpm cd3/Packages/
+<span class="token function">cat</span> /mnt/cd/Packages/TRANS.TBL <span class="token operator">&gt;&gt;</span> /mnt/cd3/Packages/TRANS.TBL 
+<span class="token function">mv</span> /mnt/cd3/Packages/<span class="token punctuation">{</span>TRANS.TBL,TRANS.TBL.BAK<span class="token punctuation">}</span> 
+<span class="token function">sort</span> /mnt/cd3/Packages/TRANS.TBL.BAK <span class="token operator">&gt;</span> /mnt/cd3/Packages/TRANS.TBL
+\rm -rf /mnt/cd3/Packages/TRANS.TBL.BAK 
+<span class="token function">mkdir</span> iso 
+<span class="token function">mkisofs</span> -r -o /mnt/iso/CentOS-6.8-x86_64-Everything.iso /mnt/cd3
+<span class="token punctuation">[</span>root@centos7 /mnt<span class="token punctuation">]</span><span class="token comment">#ll iso -h</span>
+total 5.8G
+-rw-r--r-- 1 root root 5.8G Oct 17 17:40 CentOS-6.8-x86_64-Everything.iso
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#mount /mnt/iso/CentOS-6.8-x86_64-Everything.iso /mnt/test/</span>
+mount: /dev/loop1 is write-protected, mounting read-only
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ll /mnt/test/</span>
+total 1122
+-r--r--r-- 1 root root      14 Jun 29  2018 CentOS_BuildTag
+dr-xr-xr-x 3 root root    2048 Jun 30  2018 EFI
+-r--r--r-- 1 root root     212 Nov 27  2013 EULA
+-r--r--r-- 1 root root   18009 Nov 27  2013 GPL
+dr-xr-xr-x 3 root root    2048 Jun 30  2018 images
+dr-xr-xr-x 2 root root    2048 Jun 30  2018 isolinux
+dr-xr-xr-x 2 root root 1105920 Oct 17 17:38 Packages
+-r--r--r-- 1 root root    1363 Jun 29  2018 RELEASE-NOTES-en-US.html
+dr-xr-xr-x 2 root root    4096 Jun 30  2018 repodata
+-r--r--r-- 1 root root    1706 Nov 27  2013 RPM-GPG-KEY-CentOS-6
+-r--r--r-- 1 root root    1730 Nov 27  2013 RPM-GPG-KEY-CentOS-Debug-6
+-r--r--r-- 1 root root    1730 Nov 27  2013 RPM-GPG-KEY-CentOS-Security-6
+-r--r--r-- 1 root root    1734 Nov 27  2013 RPM-GPG-KEY-CentOS-Testing-6
+-r--r--r-- 1 root root    3380 Jun 30  2018 TRANS.TBL
+</code></pre>
+<h1><a id="RAID_830"></a>八.RAID管理</h1>
+<ul>
+<li>
+<p>什么是RAID<br>
+RAID：Redundant Arrays of Inexpensive（Independent） Disks<br>
+1988年由加利福尼亚大学伯克利分校（University of California-<br>
+Berkeley） “A Case for Redundant Arrays of Inexpensive Disks”<br>
+多个磁盘合成一个“阵列”来提供更好的性能、冗余，或者两者都提供<br>
+<img src="https://img-blog.csdnimg.cn/20191017165812902.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+<li>
+<p>RAID的作用</p>
+</li>
+</ul>
+<pre><code class="prism language-bash">提高IO能力 
+    磁盘并行读写 
+提高耐用性 
+    磁盘冗余来实现 
+级别
+    多块磁盘组织在一起的工作方式有所不同 
+
+RAID实现的方式 
+    外接式磁盘阵列：通过扩展卡提供适配能力 
+    内接式RAID：主板集成RAID控制器，安装OS前在BIOS里配置 
+    软件RAID：通过OS实现 
+</code></pre>
+<h2><a id="RAID_855"></a>RAID级别</h2>
+<pre><code class="prism language-bash">RAID-0：条带卷，strip 
+RAID-1：镜像卷，mirror 
+RAID-2 
+<span class="token punctuation">..</span>. 
+RAID-4 
+RAID-5 
+RAID-6 
+RAID-10 
+RAID-01 
+</code></pre>
+<h3><a id="RAID0_869"></a>RAID-0</h3>
+<pre><code class="prism language-bash">读、写性能提升 
+可用空间：N*min<span class="token punctuation">(</span>S1,S2,<span class="token punctuation">..</span>.<span class="token punctuation">)</span> 
+无容错能力 
+最少磁盘数：2, 2+ 
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20191017165759268.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3><a id="RAID1_879"></a>RAID-1</h3>
+<ul>
+<li>RAID-4：在raid-1的基础上增加一个校验盘；多块数据盘异或运算值存于专用校验盘</li>
+</ul>
+<pre><code class="prism language-bash">读性能提升、写性能略有下降 
+可用空间：1*min<span class="token punctuation">(</span>S1,S2,<span class="token punctuation">..</span>.<span class="token punctuation">)</span> 
+有冗余能力 
+最少磁盘数：2, 2N 
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20191017165846668.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3><a id="RAID5_892"></a>RAID-5</h3>
+<pre><code class="prism language-bash">读、写性能提升 
+可用空间：<span class="token punctuation">(</span>N-1<span class="token punctuation">)</span>*min<span class="token punctuation">(</span>S1,S2,<span class="token punctuation">..</span>.<span class="token punctuation">)</span> 
+有容错能力：允许最多1块磁盘损坏 
+最少磁盘数：3, 3+
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20191017165920686.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3><a id="RAID6_902"></a>RAID-6</h3>
+<pre><code class="prism language-bash">读、写性能提升 
+可用空间：<span class="token punctuation">(</span>N-2<span class="token punctuation">)</span>*min<span class="token punctuation">(</span>S1,S2,<span class="token punctuation">..</span>.<span class="token punctuation">)</span> 
+有容错能力：允许最多2块磁盘损坏 
+最少磁盘数：4, 4+ 
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20191017165937780.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3><a id="RAID10_912"></a>RAID-10</h3>
+<pre><code class="prism language-bash">读、写性能提升 
+可用空间：N*min<span class="token punctuation">(</span>S1,S2,<span class="token punctuation">..</span>.<span class="token punctuation">)</span>/2 
+有容错能力：每组镜像最多只能坏一块 
+最少磁盘数：4, 4+ 
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20191017165948926.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3><a id="RAID01_922"></a>RAID-01</h3>
+<p>多块磁盘先实现RAID0,再组合成RAID1<br>
+<img src="https://img-blog.csdnimg.cn/20191017170002576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3><a id="RAID50_927"></a>RAID-50</h3>
+<p>多块磁盘先实现RAID5,再组合成RAID0<br>
+<img src="https://img-blog.csdnimg.cn/20191017170049115.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3><a id="JBODJust_a_Bunch_Of_Disks_933"></a>JBOD：Just a Bunch Of Disks</h3>
+<pre><code class="prism language-bash">功能：将多块磁盘的空间合并一个大的连续空间使用 
+可用空间：sum<span class="token punctuation">(</span>S1,S2,<span class="token punctuation">..</span>.<span class="token punctuation">)</span> 
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/20191017170019381.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3><a id="RAID7_941"></a>RAID7</h3>
+<pre><code class="prism language-bash">可以理解为一个独立存储计算机，自身带有操作系统和管理工具，可以独立
+运行，理论上性能最高的RAID模式 
+常用级别：RAID-0, RAID-1, RAID-5, RAID-10, RAID-50, JBOD 
+</code></pre>
+<h2><a id="RAID_949"></a>软RAID</h2>
+<pre><code class="prism language-bash">mdadm：为软RAID提供管理界面 
+为空余磁盘添加冗余 
+结合内核中的md<span class="token punctuation">(</span>multi devices<span class="token punctuation">)</span> 
+RAID设备可命名为/dev/md0、/dev/md1、/dev/md2、/dev/md3等 
+</code></pre>
+<h3><a id="RAID_958"></a>软件RAID的实现</h3>
+<pre><code class="prism language-bash">mdadm：模式化的工具
+命令的语法格式：mdadm <span class="token punctuation">[</span>mode<span class="token punctuation">]</span> <span class="token operator">&lt;</span>raiddevice<span class="token operator">&gt;</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>component-devices<span class="token operator">&gt;</span> 
+支持的RAID级别：LINEAR, RAID0, RAID1, RAID4, RAID5, RAID6, RAID10  
+模式：
+    创建：-C 
+    装配：-A 
+    监控：-F 
+    管理：-f, -r, -a 
+    <span class="token operator">&lt;</span>raiddevice<span class="token operator">&gt;</span>: /dev/md<span class="token comment"># </span>
+    <span class="token operator">&lt;</span>component-devices<span class="token operator">&gt;</span>: 任意块设备 
+
+-C: 创建模式 
+-n <span class="token comment">#: 使用#个块设备来创建此RAID </span>
+-l <span class="token comment">#：指明要创建的RAID的级别 </span>
+-a <span class="token punctuation">{</span>yes<span class="token operator">|</span>no<span class="token punctuation">}</span>：自动创建目标RAID设备的设备文件 
+-c CHUNK_SIZE: 指明块大小,单位k 
+-x <span class="token comment">#: 指明空闲盘的个数 </span>
+-D：显示raid的详细信息  
+mdadm -D /dev/md<span class="token comment"># </span>
+管理模式： 
+-f: 标记指定磁盘为损坏 
+-a: 添加磁盘 
+-r: 移除磁盘 
+观察md的状态： <span class="token function">cat</span> /proc/mdstat 
+</code></pre>
+<h3><a id="RAID_987"></a>软RAID配置示例</h3>
+<pre><code class="prism language-bash">使用mdadm创建并定义RAID设备 
+    mdadm -C  /dev/md0 -a <span class="token function">yes</span> -l 5 -n 3 -x 1  /dev/sd<span class="token punctuation">{</span>b,c,d,e<span class="token punctuation">}</span>1 
+用文件系统对每个RAID设备进行格式化 
+    mkfs.xfs /dev/md0 
+测试RAID设备 
+使用mdadm检查RAID设备的状况 
+    mdadm --detail<span class="token operator">|</span>D  /dev/md0 
+增加新的成员 
+    mdadm –G /dev/md0 –n4  -a /dev/sdf1 
+</code></pre>
+<h3><a id="RAID_1001"></a>软RAID测试和修复</h3>
+<pre><code class="prism language-bash">模拟磁盘故障 
+    mdadm  /dev/md0  -f  /dev/sda1 
+移除磁盘 
+    mdadm   /dev/md0 –r /dev/sda1 
+从软件RAID磁盘修复磁盘故障 
+    •替换出故障的磁盘然后开机 
+    •在备用驱动器上重建分区 
+    •mdadm  /dev/md0  -a  /dev/sda1 
+mdadm、/proc/mdstat及系统日志信息 
+</code></pre>
+<h3><a id="RAID_1015"></a>软RAID管理</h3>
+<pre><code class="prism language-bash">生成配置文件：mdadm –D –s  <span class="token operator">&gt;&gt;</span> /etc/mdadm.conf 
+停止设备：mdadm –S /dev/md0 
+激活设备：mdadm –A –s /dev/md0 激活 
+强制启动：mdadm –R /dev/md0 
+删除raid信息：mdadm --zero-superblock /dev/sdb1 
+</code></pre>
+<h1><a id="LVM_1025"></a>九.LVM管理</h1>
+<h2><a id="1LVM_1027"></a>1.逻辑卷管理器LVM简介</h2>
+<ul>
+<li>
+<p>LVM允许对卷进行方便操作的抽象层，包括重新设定文件系统的大小 允许在多个物理设备间重新组织文件系统</p>
+</li>
+<li>
+<p>将设备指定为物理卷</p>
+</li>
+<li>
+<p>用一个或者多个物理卷来创建一个卷组</p>
+</li>
+<li>
+<p>物理卷是用固定大小的物理区域（Physical Extent，PE）来定义的</p>
+</li>
+<li>
+<p>在物理卷上创建的逻辑卷是由物理区域（PE）组成的</p>
+</li>
+<li>
+<p>可以在逻辑卷上创建文件系统<br>
+<img src="https://img-blog.csdnimg.cn/20191017170110334.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+<li>
+<p>LVM: Logical Volume Manager， Version 2</p>
+</li>
+<li>
+<p>dm: device mapper，linux中将一个或多个底层块设备组织成一个逻辑设备的模块</p>
+</li>
+<li>
+<p>设备名：/dev/dm-#</p>
+</li>
+<li>
+<p>相关的软链接：</p>
+</li>
+</ul>
+<pre><code class="prism language-bash">/dev/mapper/VG_NAME-LV_NAME 
+/dev/mapper/vol0-root 
+/dev/VG_NAME/LV_NAME 
+/dev/vol0/root 
+</code></pre>
+<ul>
+<li>
+<p>LVM可以弹性的更改LVM的容量</p>
+</li>
+<li>
+<p>通过交换PE来进行资料的转换，将原来LV内的PE转移到其他的 设备中以降低LV的容量，或将其他设备中的PE加到LV中以容量<br>
+<img src="https://img-blog.csdnimg.cn/20191017170130563.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h2><a id="2_1054"></a>2.逻辑卷管理工具</h2>
+<h3><a id="pv_1056"></a>pv管理工具</h3>
+<pre><code class="prism language-bash">显示pv信息 
+    pvs：简要pv信息显示 
+    pvdisplay 
+创建pv 
+    pvcreate /dev/DEVICE 
+删除pv 
+    pvremove /dev/DEVICE 
+</code></pre>
+<h3><a id="vg_1068"></a>vg管理工具</h3>
+<pre><code class="prism language-bash">显示卷组 
+    vgs 
+    vgdisplay 
+创建卷组 
+    vgcreate  <span class="token punctuation">[</span>-s <span class="token comment">#[kKmMgGtTpPeE]] VolumeGroupName  </span>
+    PhysicalDevicePath <span class="token punctuation">[</span>PhysicalDevicePath<span class="token punctuation">..</span>.<span class="token punctuation">]</span> 
+管理卷组 
+    vgextend  VolumeGroupName  PhysicalDevicePath <span class="token punctuation">[</span>PhysicalDevicePath<span class="token punctuation">..</span>.<span class="token punctuation">]</span> 
+    vgreduce  VolumeGroupName  PhysicalDevicePath <span class="token punctuation">[</span>PhysicalDevicePath<span class="token punctuation">..</span>.<span class="token punctuation">]</span> 
+删除卷组 
+    先做pvremove，再做vgremove 
+</code></pre>
+<h3><a id="lv_1084"></a>lv管理工具</h3>
+<pre><code class="prism language-bash">显示逻辑卷 
+    lvs 
+    Lvdisplay 
+创建逻辑卷 
+    lvcreate -L <span class="token comment">#[mMgGtT] -n NAME VolumeGroup </span>
+    lvcreate -l 60%VG -n mylv testvg 
+    lvcreate -l 100%FREE -n yourlv testvg 
+删除逻辑卷 
+    lvremove /dev/VG_NAME/LV_NAME 
+重设文件系统大小 
+    fsadm <span class="token punctuation">[</span>options<span class="token punctuation">]</span> resize device <span class="token punctuation">[</span>new_size<span class="token punctuation">[</span>BKMGTEP<span class="token punctuation">]</span><span class="token punctuation">]</span> 
+    resize2fs <span class="token punctuation">[</span>-f<span class="token punctuation">]</span> <span class="token punctuation">[</span>-F<span class="token punctuation">]</span> <span class="token punctuation">[</span>-M<span class="token punctuation">]</span> <span class="token punctuation">[</span>-P<span class="token punctuation">]</span> <span class="token punctuation">[</span>-p<span class="token punctuation">]</span> device <span class="token punctuation">[</span>new_size<span class="token punctuation">]</span> 
+    xfs_growfs  /mountpoint
+</code></pre>
+<h3><a id="_1102"></a>扩展和缩减逻辑卷</h3>
+<pre><code class="prism language-bash">扩展逻辑卷： 
+    lvextend -L <span class="token punctuation">[</span>+<span class="token punctuation">]</span><span class="token comment">#[mMgGtT] /dev/VG_NAME/LV_NAME </span>
+    resize2fs /dev/VG_NAME/LV_NAME 
+    lvresize -r -l +100%FREE /dev/VG_NAME/LV_NAME 
+缩减逻辑卷： 
+    <span class="token function">umount</span> /dev/VG_NAME/LV_NAME 
+    e2fsck -f /dev/VG_NAME/LV_NAME 
+    resize2fs /dev/VG_NAME/LV_NAME <span class="token comment">#[mMgGtT] </span>
+    lvreduce -L <span class="token punctuation">[</span>-<span class="token punctuation">]</span><span class="token comment">#[mMgGtT] /dev/VG_NAME/LV_NAME </span>
+    <span class="token function">mount</span> 
+</code></pre>
+<h3><a id="_1117"></a>创建逻辑卷示例</h3>
+<pre><code class="prism language-bash">创建物理卷 
+    pvcreate  /dev/sda3 
+为卷组分配物理卷 
+    vgcreate  vg0  /dev/sda3 
+从卷组创建逻辑卷 
+    lvcreate  -L  256M  -n data  vg0 
+    mkfs.xfs   /dev/vg0/data 
+挂载 
+    <span class="token function">mount</span>  /dev/vg0/data /mnt/data 
+</code></pre>
+<h3><a id="_1131"></a>跨主机迁移卷组</h3>
+<p>源计算机上<br>
+1 在旧系统中，umount所有卷组上的逻辑卷<br>
+2 禁用卷组<br>
+vgchange –a n vg0<br>
+lvdisplay<br>
+3 导出卷组<br>
+vgexport vg0<br>
+pvscan<br>
+vgdisplay<br>
+拆下旧硬盘<br>
+在目标计算机上<br>
+4 在新系统中安装旧硬盘，并导入卷组：vgimport vg0<br>
+5 vgchange –ay vg0  启用<br>
+6 mount所有卷组上的逻辑卷</p>
+<h1><a id="LVM_1147"></a>十.LVM快照</h1>
+<h3><a id="_1149"></a>逻辑卷管理器快照介绍</h3>
+<ul>
+<li>快照是特殊的逻辑卷，它是在生成快照时存在的逻辑卷的准确拷贝</li>
+<li>对于需要备份或者复制的现有数据临时拷贝以及其它操作来说，快照是最合适的选择</li>
+<li>快照只有在它们和原来的逻辑卷不同时才会消耗空间</li>
+<li>在生成快照时会分配给它一定的空间，但只有在原来的逻辑卷或者快照有所改变才会使用这些空间</li>
+<li>当原来的逻辑卷中有所改变时，会将旧的数据复制到快照中</li>
+<li>快照中只含有原来的逻辑卷中更改的数据或者自生成快照后的快照中更改的数据</li>
+<li>建立快照的卷大小小于等于原始逻辑卷,也可以使用lvextend扩展快照</li>
+</ul>
+<h3><a id="_1160"></a>逻辑卷管理器快照</h3>
+<ul>
+<li>快照就是将当时的系统信息记录下来，就好像照相一般，若将来有任何数据<br>
+改动了，则原始数据会被移动到快照区，没有改动的区域则由快照区和文件<br>
+系统<br>
+<img src="https://img-blog.csdnimg.cn/20191017170147216.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>
+由于快照区与原本的LV共用很多PE的区块，因此快照与被快照的LV必须在同<br>
+一个VG中.系统恢复的时候的文件数量不能高于快照区的实际容量 共享</li>
+</ul>
+<h3><a id="LVM_1168"></a>使用LVM快照</h3>
+<pre><code class="prism language-bash">为现有逻辑卷创建快照 
+    lvcreate -l 64 -s -n data-snapshot -p r /dev/vg0/data 
+挂载快照 
+    <span class="token function">mkdir</span>  -p  /mnt/snap 
+    <span class="token function">mount</span> -o ro /dev/vg0/data-snapshot   /mnt/snap 
+恢复快照 
+    <span class="token function">umount</span> /dev/vg0/data-snapshot 
+    <span class="token function">umount</span> /dev/vg0/data 
+    lvconvert --merge /dev/vg0/data-snapshot  
+删除快照 
+    <span class="token function">umount</span>  /mnt/databackup 
+    lvremove  /dev/vg0/databackup 
+</code></pre>
+<h1><a id="_1185"></a>十一.练习</h1>
+<p>1、创建一个至少有两个PV组成的大小为20G的名为testvg的VG；要求PE大小<br>
+为16MB, 而后在卷组中创建大小为5G的逻辑卷testlv；挂载至/users目录</p>
+<pre><code class="prism language-bash"><span class="token keyword">echo</span> -e <span class="token string">"n\np\n\n\n+10G\nt\n\n8e\nw\n"</span> <span class="token operator">|</span><span class="token function">fdisk</span> /dev/sdb1
+<span class="token keyword">echo</span> -e <span class="token string">"n\np\n\n\n+10G\nt\n\nfd\nw\n"</span> <span class="token operator">|</span><span class="token function">fdisk</span> /dev/sdb2
+pvcreat /dev/sdb1 /dev/sdb2
+vgcreat -s 16M /dev/vg0 /dev/sdb<span class="token punctuation">{</span>1,2<span class="token punctuation">}</span>
+lvcreat -L 5G -n testlv /dev/vg0 
+mkfs.ext4 /dev/vg0/testlv
+<span class="token function">mkdir</span> /users 
+<span class="token function">mount</span> /dev/vg0/testlv /users 
+</code></pre>
+<p>2、 新建用户archlinux，要求其家目录为/users/archlinux，而后su切换至<br>
+archlinux用户，复制/etc/pam.d目录至自己的家目录</p>
+<pre><code class="prism language-bash"><span class="token function">useradd</span> -d /users/archlinux archlinux 
+<span class="token function">su</span> archlinux
+<span class="token function">cp</span> -r /etc/pam.d <span class="token keyword">.</span>
+</code></pre>
+<p>3、扩展testlv至7G，要求archlinux用户的文件不能丢失</p>
+<pre><code class="prism language-bash">lvextend -L 7G /dev/vg0/testlv
+resize2fs /dev/vg0/test/lv
+</code></pre>
+<p>4、收缩testlv至3G，要求archlinux用户的文件不能丢失</p>
+<pre><code class="prism language-bash"><span class="token function">umount</span> /dev/vg0/testlv
+e2fsck /dev/vg0/testlv -f
+resize2fs /dev/vg0/testlv 3G
+lvreduce -L 3G /dev/vg0/testlv
+<span class="token function">mount</span> /dev/vg0/testlv /users
+
+</code></pre>
+<p>5、对testlv创建快照，并尝试基于快照备份数据，验证快照的功能</p>
+<pre><code class="prism language-bash">lvcreate -L 1G -s -n snap1 /dev/vg0/testlv1 
+<span class="token function">umount</span> /users 
+lvconvert --merge /dev/vg0/snap1
+v/vg0/data-snapshot 
+    <span class="token function">umount</span> /dev/vg0/data 
+    lvconvert --merge /dev/vg0/data-snapshot  
+删除快照 
+    <span class="token function">umount</span>  /mnt/databackup 
+    lvremove  /dev/vg0/databackup 
+</code></pre>
+
