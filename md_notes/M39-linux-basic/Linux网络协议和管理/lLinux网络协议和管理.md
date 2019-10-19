@@ -3,13 +3,14 @@
 <center><font face="黑体" size=4 color=grey> </center>
 
 
-# 一.网络基本概念 
 
-# 二.OSI参考模型模型 
+# 一.网络设备基本知识 
 
-# 三.网络设备基本知识 
+![](png/网络设备基本知识.png)
 
-# 四.TCP/IP协议栈简介 
+# 二.TCP/IP协议栈简介 
+
+![](png/TCP-IP协议栈.png)
 
 # 五.IP地址规划 
 
