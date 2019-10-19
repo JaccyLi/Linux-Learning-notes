@@ -74,10 +74,10 @@ var=-2 && (( var+=2 )) && echo $var     # 此处由于算术表达式为0，退�
                           # Will not echo $var!
 ```
 
-- An if can test any command, not just conditions enclosed within brackets.
+- if不仅仅可以测试中括号中的条件，还可以测试任何命令
 
 ```bash
-if cmp a b &> /dev/null  # Suppress output.
+if cmp a b &> /dev/null  # 压缩标准输出和错误输出.
 then echo "Files a and b are identical."
 else echo "Files a and b differ."
 fi
@@ -101,13 +101,12 @@ if COMMAND_WHOSE_EXIT_STATUS_IS_0_UNLESS_ERROR_OCCURRED
 fi
 ```
 
-> Example 7-1. What is truth?
+> 例7-1. 什么才是真?
 
 ```bash
 #!/bin/bash
 #  Tip:
-#  If you're unsure how a certain condition might evaluate,
-#+ test it in an if-test.
+#  如果你不确定某个条件的结果，那最好在if测试结构中测试其。
 echo
 echo "Testing \"0\""
 if [ 0 ]      # zero
@@ -115,7 +114,7 @@ then
   echo "0 is true."
 else          # Or else ...
   echo "0 is false."
-fi            # 0 is true.
+fi            # 0 为真.
 echo
 echo "Testing \"1\""
 if [ 1 ]      # one
@@ -123,81 +122,78 @@ then
   echo "1 is true."
 else
   echo "1 is false."
-fi            # 1 is true.
+fi            # 1 为真.
 echo
 echo "Testing \"-1\""
-if [ -1 ]     # minus one
+if [ -1 ]     # -1
 then
   echo "-1 is true."
 else
   echo "-1 is false."
-fi            # -1 is true.
+fi            # -1 为真.
 echo
 echo "Testing \"NULL\""
-if [ ]        # NULL (empty condition)
+if [ ]        # NULL (空条件)
 then
   echo "NULL is true."
 else
   echo "NULL is false."
-fi            # NULL is false.
+fi            # NULL 空位假。
 echo
 echo "Testing \"xyz\""
-if [ xyz ]    # string
+if [ xyz ]    # 随机字符串
 then
   echo "Random string is true."
 else
   echo "Random string is false."
-fi            # Random string is true.
+fi            # 随机字符串为真.
 echo
 echo "Testing \"\$xyz\""
-if [ $xyz ]   # Tests if $xyz is null, but...
-              # it's only an uninitialized variable.
+if [ $xyz ]   # 测试变量$xyz是否为空, 但是...
+              # $xyz只是一个未初始化的变量.
 then
   echo "Uninitialized variable is true."
 else
   echo "Uninitialized variable is false."
-fi            # Uninitialized variable is false.
+fi            # 未初始化的字符串为假.
 echo
 echo "Testing \"-n \$xyz\""
-if [ -n "$xyz" ]            # More pedantically correct.
+if [ -n "$xyz" ]            # 有点卖弄学问的做法.
 then
   echo "Uninitialized variable is true."
 else
   echo "Uninitialized variable is false."
-fi            # Uninitialized variable is false.
+fi            # 同样未初始化的字符串为假.
 echo
-xyz=          # Initialized, but set to null value.
+xyz=          # 初始化了,但是值为空.
 echo "Testing \"-n \$xyz\""
 if [ -n "$xyz" ]
 then
   echo "Null variable is true."
 else
   echo "Null variable is false."
-fi            # Null variable is false.
+fi            # 空变量为假.
 echo
-# When is "false" true?
+# 什么时候'假'为真呢？(When is "false" true?)
 echo "Testing \"false\""
-if [ "false" ]              #  It seems that "false" is just a string ...
+if [ "false" ]              # 此处 "false" 只是一个字符串而已...
 then
-  echo "\"false\" is true." #+ and it tests true.
+  echo "\"false\" is true." #+ 结果为真啦啦啦.
 else
   echo "\"false\" is false."
-fi            # "false" is true.
+fi            # 这时候'假'为真.
 echo
-echo "Testing \"\$false\""  # Again, uninitialized variable.
+echo "Testing \"\$false\""  # 再次测试'假',此时的'假'为未初始化的变量.
 if [ "$false" ]
 then
   echo "\"\$false\" is true."
 else
   echo "\"\$false\" is false."
-fi            # "$false" is false.
-              # Now, we get the expected result.
+fi            # 此时测试结构为假.
 #  What would happen if we tested the uninitialized variable "$true"?
 echo
 exit 0
 ```
-
-> Exercise. Explain the behavior of Example 7-1, above.
 
 ```bash
 if [ condition-true ]
@@ -205,25 +201,22 @@ then
    command 1
    command 2
    ...
-else  # Or else ...
-      # Adds default code block executing if original condition tests false.
+else  # 或者Or else ...
+      # 在下面写测试条件为假时的代码.
    command 3
    command 4
    ...
 fi
 ```
 
-- When if and then are on same line in a condition test, a semicolon must terminate the if statement. Both if
-and then are keywords. Keywords (or commands) begin statements, and before a new statement on the
-same line begins, the old one must terminate.
+- 条件测试结构中当if和then在同一行时，必须使用分号结束if语句。if和then都为bash关键字。关键字(或者命令)所开始的语句，必须在同一行的下一个语句前使用分号结束。
 
 ```bash
 if [ -x "$filename" ]; then
 ```
 
 - Else if and elif
-- elif
-- elif is a contraction for else if. The effect is to nest an inner if/then construct within an outer one.
+- elif 是 else if 的简写.用来实现嵌套语句.
 
 ```bash
 if [ condition1 ]
@@ -241,13 +234,10 @@ else
 fi
 ```
 
-- The if test condition-true construct is the exact equivalent of if [ condition-true ]. As
-it happens, the left bracket, [ , is a token[33] which invokes the test command. The closing right bracket, ] , in
-an if/test should not therefore be strictly necessary, however newer versions of Bash require it.
-
-- 特别指出：The test command is a Bash builtin which tests file types and compares strings. Therefore, in a Bash
-script, test does not call the external /usr/bin/test binary, which is part of the sh-utils package.
-Likewise, [ does not call /usr/bin/[, which is linked to /usr/bin/test.
+- 结构'if test condition-true'和结构'if [ condition-true ]'完全等价。当使用后者时，左中括号'['会调用test命令。
+  所以右中括号在if/test结构中不是严格需要的，然而新版本的bash要求必须跟上。
+- 特别指出：test命令时bash内置命令。其用来测试文件类型和比较字符串。因此，
+  在bash脚本中test命令不会调用外部二进制命令/usr/bin/test，此时的test命令是sh-utils包的一部分。
 
 ```bash
 bash$ type test
@@ -260,8 +250,597 @@ bash$ type ']]'
 ]] is a shell keyword
 bash$ type ']'
 bash: type: ]: not found
-If, for some reason, you wish to use /usr/bin/test in a Bash script, then specify it by full
-pathname.
 ```
 
-> Example 7-2. Equivalence of test, /usr/bin/test, [ ], and /usr/bin/[
+- 如果由于某些原因，你希望在脚本中使用/usr/bin/test，那可以使用完整的路径名指明.
+
+> 例7-2.test,/usr/bin/test,[ ],和/usr/bin/[
+
+```bash
+#!/bin/bash
+echo
+if test -z "$1"
+then
+  echo "No command-line arguments."
+else
+  echo "First command-line argument is $1."
+  fi
+echo
+if /usr/bin/test -z "$1"      # 和内置命令"test"等价.
+#  ^^^^^^^^^^^^^              # 指明了完整的路径.
+then
+  echo "No command-line arguments."
+else
+  echo "First command-line argument is $1."
+fi
+echo
+if [ -z "$1" ]                # 和上面的代码块功能相同.
+#   if [ -z "$1"              # 该代码应该可以正常工作，但是...
+#+  Bash说后面的右中括号必须带，哎.
+then
+  echo "No command-line arguments."
+else
+  echo "First command-line argument is $1."
+fi
+echo
+if /usr/bin/[ -z "$1" ]       # 和上面的代码块功能相同.
+then
+  echo "No command-line arguments."
+else
+  echo "First command-line argument is $1."
+fi
+echo
+exit 0
+```
+
+- 相比'[ ]'，'[\[ ]]'测试结构更加健壮。则是扩展的test命令，从ksh88版本中借鉴而来。
+- 在'[\[ ]]' 结构中不允许文件名展开或者单词分割，但是允许参数展开和命令替换。
+
+```bash
+file=/etc/passwd
+if [[ -e $file ]]
+then
+  echo "Password file exists."
+fi
+```
+
+- 使用'[\[ ... ]]'测试结构，而不使用'[ ... ]'可以避免脚本中很多逻辑错误。
+  比如：`&&,||,<,>操作符`在'[\[ ]]'结构中适用，但是在'[ ]'结构中报错。
+- 对于八进制/十六进制的算术运算在'[\[ ]]'结构中亦支持。
+
+```bash
+# [[ 八进制/十六进制运算 ]]
+# Thank you, Moritz Gronbach, for pointing this out.
+decimal=15
+octal=017   # = 15 (decimal)
+hex=0x0f    # = 15 (decimal)
+if [ "$decimal" -eq "$octal" ]
+then
+  echo "$decimal equals $octal"
+else
+  echo "$decimal is not equal to $octal"       # 结果是15不等于017
+fi      # 在单中括号结构中不计算 [ single brackets ]!
+if [[ "$decimal" -eq "$octal" ]]
+then
+  echo "$decimal equals $octal"                # 15 等于 017
+else
+  echo "$decimal is not equal to $octal"
+fi      # 双中括号中计算 [[ double brackets ]]!
+if [[ "$decimal" -eq "$hex" ]]
+then
+  echo "$decimal equals $hex"                  # 15 等于 0x0f
+else
+  echo "$decimal is not equal to $hex"
+fi      # [[ $hexadecimal ]] 单独引用一个十六进制数，也会自动计算为十进制!
+```
+
+- 在if后，要么test命令要么测试中括号都是必须存在的([] [\[ ]])。
+
+```bash
+dir=/home/bozo
+if cd "$dir" 2>/dev/null; then   # "2>/dev/null"将会重定向标准错误.
+  echo "Now in $dir."
+else
+  echo "Can't change to $dir."
+fi
+```
+
+- 如上面例子，"if 命令"结构会返回命令的退出状态。
+- 同样，下面在多个结构的组合用法中，一个处于中括号内的测试条件可以不需要if。
+
+```bash
+var1=20
+var2=22
+[ "$var1" -ne "$var2" ] && echo "$var1 is not equal to $var2"
+home=/home/bozo
+[ -d "$home" ] || echo "$home directory does not exist."
+```
+
+- 双圆括号结构(( ))展开并计算数学运算表达式。如果表达式运算结果为0，则其返回一个为1的退出状态，或者假"false"。一个非0的计算值则返回一个退出状态0，或者真"true"。
+
+> 例7-3.使用(( ))结构测试算术运算结果
+
+```bash
+#!/bin/bash
+# arith-tests.sh
+# Arithmetic tests.
+# (( ... ))结构计算并测试数学运算表达
+# (( ... ))结构对于数学运算表达式的测试结果退出状态与[ ... ]结构相反!
+# (( ... ))结构中运算结果非0为真，运算结果为0时退出状态为假。
+(( 0 ))
+echo "Exit status of \"(( 0 ))\" is $?."         # 1
+(( 1 ))
+echo "Exit status of \"(( 1 ))\" is $?."         # 0
+(( 5 > 4 ))                                      # true
+echo "Exit status of \"(( 5 > 4 ))\" is $?."     # 0
+(( 5 > 9 ))                                      # false
+echo "Exit status of \"(( 5 > 9 ))\" is $?."     # 1
+(( 5 == 5 ))                                     # true
+echo "Exit status of \"(( 5 == 5 ))\" is $?."    # 0
+# (( 5 = 5 ))  gives an error message.
+(( 5 - 5 ))                                      # 0
+echo "Exit status of \"(( 5 - 5 ))\" is $?."     # 1
+(( 5 / 4 ))                                      # Division o.k.
+echo "Exit status of \"(( 5 / 4 ))\" is $?."     # 0
+(( 1 / 2 ))                                      # 除法结果小于1.
+echo "Exit status of \"(( 1 / 2 ))\" is $?."     # 小于1的结果被圆整为0.
+                                                 # 1
+(( 1 / 0 )) 2>/dev/null                          # 使用0作为除数非法.
+#           ^^^^^^^^^^^
+echo "Exit status of \"(( 1 / 0 ))\" is $?."     # 1
+# ======================================= #
+# (( ... )) 该结构也常常被用在 if-then 测试结构中.
+var1=5
+var2=4
+if (( var1 > var2 ))
+then #^      ^      Note: Not $var1, $var2. Why?
+  echo "$var1 is greater than $var2"
+fi     # 5 is greater than 4
+exit 0
+```
+
+## 7.2. File test operators
+
+- if... 如果测试条件为真则返回退出状态值0
+
+-e 测试文件是否存在
+-a 同上,以被弃用，不推荐使用
+-f 测试文件是否为普通文件(不是文件夹或者设备文件)
+-s 测试文件是否非空(大小不是0)
+-d 测试文件是否是一个文件夹
+-b 测试文件是否是一个块设备
+-c 测试文件是否是一个字符设备
+####################
+device0="/dev/sda2"    # /   (root directory)
+if [ -b "$device0" ]
+then
+  echo "$device0 is a block device."
+fi
+# /dev/sda2 is a block device.
+device1="/dev/ttyS1"   # PCMCIA modem card.
+if [ -c "$device1" ]
+then
+  echo "$device1 is a character device."
+fi
+# /dev/ttyS1 is a character device.
+##################
+-p
+file is a pipe
+#################
+function show_input_type()
+{
+   [ -p /dev/fd/0 ] && echo PIPE || echo STDIN
+}
+show_input_type "Input"                           # STDIN
+echo "Input" | show_input_type                    # PIPE
+# This example courtesy of Carl Anderson.
+#################
+-h
+file is a symbolic link
+-L
+file is a symbolic link
+-S
+file is a socket
+-t
+file (descriptor) is associated with a terminal device
+This test option  may be used to check whether the stdin[ -t 0 ] or stdout[ -t 1 ] in a
+given script is a terminal.
+-r
+file has read permission (for the user running the test)
+-w
+file has write permission (for the user running the test)
+-x
+file has execute permission (for the user running the test)
+-g
+set-group-id (sgid) flag set on file or directory
+If a directory has the sgid flag set, then a file created within that directory belongs to the group that
+owns the directory, not necessarily to the group of the user who created the file. This may be useful
+for a directory shared by a workgroup.
+-u
+set-user-id (suid) flag set on file
+A binary owned by root with set-user-id flag set runs with root privileges, even when an
+ordinary user invokes it. [35] This is useful for executables (such as pppd and cdrecord) that need to
+access system hardware. Lacking the suid flag, these binaries could not be invoked by a non-root
+user.
+#################
+-rwsr-xr-t    1 root       178236 Oct  2  2000 /usr/sbin/pppd
+#################
+- A file with the suid flag set shows an s in its permissions.
+-k
+sticky bit set
+Commonly known as the sticky bit, the save-text-mode flag is a special type of file permission. If a
+file has this flag set, that file will be kept in cache memory, for quicker access. [36] If set on a
+directory, it restricts write permission. Setting the sticky bit adds a t to the permissions on the file or
+directory listing. This restricts altering or deleting specific files in that directory to the owner of those
+files.
+drwxrwxrwt    7 root         1024 May 19 21:26 tmp/
+If a user does not own a directory that has the sticky bit set, but has write permission in that directory,
+she can only delete those files that she owns in it. This keeps users from inadvertently overwriting or
+deleting each other's files in a publicly accessible directory, such as /tmp. (The owner of the
+directory or root can, of course, delete or rename files there.)
+-O
+you are owner of file
+-G
+group-id of file same as yours
+
+-N
+file modified since it was last read
+f1 -nt f2
+file f1 is newer than f2
+f1 -ot f2
+file f1 is older than f2
+f1 -ef f2
+files f1 and f2 are hard links to the same file
+!
+"not" -- reverses the sense of the tests above (returns true if condition absent).
+
+> Example 7-4. Testing for broken links
+
+```bash
+#!/bin/bash
+# broken-link.sh
+# Written by Lee bigelow <ligelowbee@yahoo.com>
+# Used in ABS Guide with permission.
+#  A pure shell script to find dead symlinks and output them quoted
+#+ so they can be fed to xargs and dealt with :)
+#+ eg. sh broken-link.sh /somedir /someotherdir|xargs rm
+#
+#  This, however, is a better method:
+#
+#  find "somedir" -type l -print0|\
+#  xargs -r0 file|\
+#  grep "broken symbolic"|
+#  sed -e 's/^\|: *broken symbolic.*$/"/g'
+#
+#+ but that wouldn't be pure Bash, now would it.
+#  Caution: beware the /proc file system and any circular links!
+################################################################
+#  If no args are passed to the script set directories-to-search 
+#+ to current directory.  Otherwise set the directories-to-search 
+#+ to the args passed.
+######################
+[ $# -eq 0 ] && directorys=`pwd` || directorys=$@
+#  Setup the function linkchk to check the directory it is passed 
+#+ for files that are links and don't exist, then print them quoted.
+#  If one of the elements in the directory is a subdirectory then 
+#+ send that subdirectory to the linkcheck function.
+##########
+linkchk () {
+    for element in $1/*; do
+      [ -h "$element" -a ! -e "$element" ] && echo \"$element\"
+      [ -d "$element" ] && linkchk $element
+    # Of course, '-h' tests for symbolic link, '-d' for directory.
+    done
+}
+#  Send each arg that was passed to the script to the linkchk() function
+#+ if it is a valid directoy.  If not, then print the error message
+#+ and usage info.
+##################
+for directory in $directorys; do
+    if [ -d $directory ]
+        then linkchk $directory
+        else 
+            echo "$directory is not a directory"
+            echo "Usage: $0 dir1 dir2 ..."
+    fi
+done
+exit $?
+```
+
+## 7.3. Other Comparison Operators
+
+- A binary comparison operator compares two variables or quantities. Note that integer and string comparison
+use a different set of operators.
+
+- integer comparison
+-eq
+is equal to
+if [ "$a" -eq "$b" ]
+-ne
+is not equal to
+if [ "$a" -ne "$b" ]
+-gt
+is greater than
+if [ "$a" -gt "$b" ]
+-ge
+is greater than or equal to
+if [ "$a" -ge "$b" ]
+-lt
+is less than
+if [ "$a" -lt "$b" ]
+-le
+is less than or equal to
+if [ "$a" -le "$b" ]
+<
+is less than (within double parentheses)
+(("$a" < "$b"))
+<=
+is less than or equal to (within double parentheses)
+(("$a" <= "$b"))
+>
+is greater than (within double parentheses)
+(("$a" > "$b"))
+>=
+is greater than or equal to (within double parentheses)
+(("$a" >= "$b"))
+
+- string comparison
+=
+is equal to
+if [ "$a" = "$b" ]
+Note the whitespace framing the =.
+if [ "$a"="$b" ] is not equivalent to the above.
+==
+is equal to
+if [ "$a" == "$b" ]
+This is a synonym for =.
+
+- The == comparison operator behaves differently within a double-brackets test than
+within single brackets.
+
+```bash
+[[ $a == z* ]]   # True if $a starts with an "z" (pattern matching).
+[[ $a == "z*" ]] # True if $a is equal to z* (literal matching).
+[ $a == z* ]     # File globbing and word splitting take place.
+[ "$a" == "z*" ] # True if $a is equal to z* (literal matching).
+# Thanks, Stéphane Chazelas
+```
+!=
+is not equal to
+if [ "$a" != "$b" ]
+This operator uses pattern matching within a [[ ... ]] construct.
+<
+is less than, in ASCII alphabetical order
+if [[ "$a" < "$b" ]]
+if [ "$a" \< "$b" ]
+Note that the "<" needs to be escaped within a [ ] construct.
+>
+is greater than, in ASCII alphabetical order
+if [[ "$a" > "$b" ]]
+if [ "$a" \> "$b" ]
+Note that the ">" needs to be escaped within a [ ] construct.
+See Example 27-11 for an application of this comparison operator.
+-z
+string is null, that is, has zero length
+```bash
+String=''   # Zero-length ("null") string variable.
+if [ -z "$String" ]
+then
+  echo "\$String is null."
+else
+  echo "\$String is NOT null."
+fi     # $String is null.
+```
+-n
+string is not null.
+
+- The -n test requires that the string be quoted within the test brackets. Using an
+unquoted string with ! -z, or even just the unquoted string alone within test brackets
+(see Example 7-6) normally works, however, this is an unsafe practice. Always quote a
+tested string. [
+
+> Example 7-5. Arithmetic and string comparisons
+
+```bash
+#!/bin/bash
+a=4
+b=5
+#  Here "a" and "b" can be treated either as integers or strings.
+#  There is some blurring between the arithmetic and string comparisons,
+#+ since Bash variables are not strongly typed.
+#  Bash permits integer operations and comparisons on variables
+#+ whose value consists of all-integer characters.
+#  Caution advised, however.
+echo
+if [ "$a" -ne "$b" ]
+then
+  echo "$a is not equal to $b"
+  echo "(arithmetic comparison)"
+fi
+echo
+if [ "$a" != "$b" ]
+then
+  echo "$a is not equal to $b."
+  echo "(string comparison)"
+  #     "4"  != "5"
+  # ASCII 52 != ASCII 53
+fi
+# In this particular instance, both "-ne" and "!=" work.
+echo
+exit 0
+```
+
+> Example 7-6. Testing whether a string is null
+
+```bash
+#!/bin/bash
+#  str-test.sh: Testing null strings and unquoted strings,
+#+ but not strings and sealing wax, not to mention cabbages and kings . . .
+# Using   if [ ... ]
+# If a string has not been initialized, it has no defined value.
+# This state is called "null" (not the same as zero!).
+if [ -n $string1 ]    # string1 has not been declared or initialized.
+then
+  echo "String \"string1\" is not null."
+else  
+  echo "String \"string1\" is null."
+fi                    # Wrong result.
+# Shows $string1 as not null, although it was not initialized.
+echo
+# Let's try it again.
+if [ -n "$string1" ]  # This time, $string1 is quoted.
+then
+  echo "String \"string1\" is not null."
+else  
+  echo "String \"string1\" is null."
+fi                    # Quote strings within test brackets!
+echo
+if [ $string1 ]       # This time, $string1 stands naked.
+then
+  echo "String \"string1\" is not null."
+else  
+  echo "String \"string1\" is null."
+fi                    # This works fine.
+# The [ ... ] test operator alone detects whether the string is null.
+# However it is good practice to quote it (if [ "$string1" ]).
+#
+# As Stephane Chazelas points out,
+#    if [ $string1 ]    has one argument, "]"
+#    if [ "$string1" ]  has two arguments, the empty "$string1" and "]" 
+echo
+string1=initialized
+if [ $string1 ]       # Again, $string1 stands unquoted.
+then
+  echo "String \"string1\" is not null."
+else  
+  echo "String \"string1\" is null."
+fi                    # Again, gives correct result.
+# Still, it is better to quote it ("$string1"), because . . .
+string1="a = b"
+if [ $string1 ]       # Again, $string1 stands unquoted.
+then
+  echo "String \"string1\" is not null."
+else  
+  echo "String \"string1\" is null."
+fi                    # Not quoting "$string1" now gives wrong result!
+exit 0   # Thank you, also, Florian Wisser, for the "heads-up".
+```
+
+> Example 7-7. zmore
+
+```bash
+#!/bin/bash
+# zmore
+# View gzipped files with 'more' filter.
+E_NOARGS=85
+E_NOTFOUND=86
+E_NOTGZIP=87
+if [ $# -eq 0 ] # same effect as:  if [ -z "$1" ]
+# $1 can exist, but be empty:  zmore "" arg2 arg3
+then
+  echo "Usage: `basename $0` filename" >&2
+  # Error message to stderr.
+  exit $E_NOARGS
+  # Returns 85 as exit status of script (error code).
+fi  
+filename=$1
+if [ ! -f "$filename" ]   # Quoting $filename allows for possible spaces.
+then
+  echo "File $filename not found!" >&2   # Error message to stderr.
+  exit $E_NOTFOUND
+fi  
+if [ ${filename##*.} != "gz" ]
+# Using bracket in variable substitution.
+then
+  echo "File $1 is not a gzipped file!"
+  exit $E_NOTGZIP
+fi  
+zcat $1 | more
+# Uses the 'more' filter.
+# May substitute 'less' if desired.
+exit $?   # Script returns exit status of pipe.
+#  Actually "exit $?" is unnecessary, as the script will, in any case,
+#+ return the exit status of the last command executed.
+```
+- compound comparison
+
+-a
+logical and
+exp1 -a exp2 returns true if both exp1 and exp2 are true.
+-o
+logical or
+exp1 -o exp2 returns true if either exp1 or exp2 is true.
+
+- These are similar to the Bash comparison operators && and ||, used within double brackets.
+```bash
+[[ condition1 && condition2 ]]
+```
+- The -o and -a operators work with the test command or occur within single test brackets.
+```bash
+if [ "$expr1" -a "$expr2" ]
+then
+  echo "Both expr1 and expr2 are true."
+else
+  echo "Either expr1 or expr2 is false."
+fi
+```
+
+- But, as rihad points out:
+```bash
+[ 1 -eq 1 ] && [ -n "ècho true 1>&2`" ]   # true
+[ 1 -eq 2 ] && [ -n "ècho true 1>&2`" ]   # (no output)
+# ^^^^^^^ False condition. So far, everything as expected.
+# However ...
+[ 1 -eq 2 -a -n "ècho true 1>&2`" ]       # true
+# ^^^^^^^ False condition. So, why "true" output?
+# Is it because both condition clauses within brackets evaluate?
+[[ 1 -eq 2 && -n "ècho true 1>&2`" ]]     # (no output)
+# No, that's not it.
+# Apparently && and || "short-circuit" while -a and -o do not.
+```
+
+## 7.4. Nested if/then Condition Tests
+
+- Condition tests using the if/then construct may be nested. The net result is equivalent to using the &&
+compound comparison operator.
+
+```bash
+a=3
+if [ "$a" -gt 0 ]
+then
+  if [ "$a" -lt 5 ]
+  then
+    echo "The value of \"a\" lies somewhere between 0 and 5."
+  fi
+fi
+# Same result as:
+if [ "$a" -gt 0 ] && [ "$a" -lt 5 ]
+then
+  echo "The value of \"a\" lies somewhere between 0 and 5."
+fi
+```
+
+## 7.5. Testing Your Knowledge of Tests
+
+- The systemwide xinitrc file can be used to launch the X server. This file contains quite a number of if/then
+tests. The following is excerpted from an "ancient" version of xinitrc (Red Hat 7.1, or thereabouts).
+
+```bash
+if [ -f $HOME/.Xclients ]; then
+  exec $HOME/.Xclients
+elif [ -f /etc/X11/xinit/Xclients ]; then
+  exec /etc/X11/xinit/Xclients
+else
+     # failsafe settings.  Although we should never get here
+     # (we provide fallbacks in Xclients as well) it can't hurt.
+     xclock -geometry 100x100-5+5 &
+     xterm -geometry 80x50-50+150 &
+     if [ -f /usr/bin/netscape -a -f /usr/share/doc/HTML/index.html ]; then
+             netscape /usr/share/doc/HTML/index.html &
+     fi
+fi
+```
+- Explain the test constructs in the above snippet, then examine an updated version of the file,
+/etc/X11/xinit/xinitrc, and analyze the if/then test constructs there. You may need to refer ahead to
+the discussions of grep, sed, and regular expressions.
+
