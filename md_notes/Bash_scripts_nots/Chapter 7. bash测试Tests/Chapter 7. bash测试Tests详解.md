@@ -10,9 +10,12 @@
 
 - 一个if/then语句结构测试一个或多个命令的退出状态是否为0(因为在unix系统中0表示'执行成功')，如果为0，就执行语句后面的命令。
 
-- Bash中有个专用的命令叫[(左中括号，bash特殊字符之一)。它是内置命令test别名，同时也是不是bash的内置命令，这样做可以提升bash的效率。该命令视其接受的参数为比较表达式或文件测试(测试文件是否存在、文件类型、文件权限等)并且返回一个对应于比较结果的退出状态(如果比较或测试结果为真则返回0，否则返回1)。
+- Bash中有个专用的命令叫[(左中括号，bash特殊字符之一)。它是内置命令test别名，同时也是不是bash的内置命令，这样做可以提升bash的效率。
+&emsp;&emsp;该命令视其接受的参数为比较表达式或文件测试(测试文件是否存在、文件类型、文件权限等)并且返回一个对应于比较结果的退出状态
+&emsp;&emsp;(如果比较或测试结果为真则返回0，否则返回1)。
 
-- 在bash2.02版本中，bash新增了\[[ ... ]]叫扩展的test测试命令，其进行比较时更贴合其他编程语言的风格。需要注意的是\[[是一个bash关键字而非命令。bash视\[[ $a -lt \$b ]]为单个元素，返回一个退出状态。
+- 在bash2.02版本中，bash新增了\[[ ... ]]叫扩展的test测试命令，其进行比较时更贴合其他编程语言的风格。需要注意的是\[[是一个bash关键字而非命令。
+&emsp;&emsp;bash视\[[ $a -lt \$b ]]为单个元素，返回一个退出状态。
 
 ```bash
 [root@centos8 ~]#type [[
@@ -209,7 +212,8 @@ else  # 或者Or else ...
 fi
 ```
 
-- 条件测试结构中当if和then在同一行时，必须使用分号结束if语句。if和then都为bash关键字。关键字(或者命令)所开始的语句，必须在同一行的下一个语句前使用分号结束。
+- 条件测试结构中当if和then在同一行时，必须使用分号结束if语句。if和then都为bash关键字。
+&emsp;&emsp;关键字(或者命令)所开始的语句，必须在同一行的下一个语句前使用分号结束。
 
 ```bash
 if [ -x "$filename" ]; then
@@ -410,65 +414,54 @@ exit 0
 -d 测试文件是否是一个文件夹
 -b 测试文件是否是一个块设备
 -c 测试文件是否是一个字符设备
-####################
-device0="/dev/sda2"    # /   (root directory)
+```bash
+device0="/dev/sda2"
 if [ -b "$device0" ]
 then
   echo "$device0 is a block device."
 fi
-# /dev/sda2 is a block device.
-device1="/dev/ttyS1"   # PCMCIA modem card.
+# /dev/sda2 是一个块设备.
+
+device1="/dev/ttyS1"  
 if [ -c "$device1" ]
 then
   echo "$device1 is a character device."
 fi
-# /dev/ttyS1 is a character device.
-##################
--p
-file is a pipe
-#################
+# /dev/ttyS1 是一个字符设备.
+```
+
+-p 测试文件是否为管道文件.
+
+```bash
 function show_input_type()
 {
-   [ -p /dev/fd/0 ] && echo PIPE || echo STDIN
+   [ -p /dev/fd/0 ] && echo PIPE || echo STDIN    # 此处/dev/fd/0表示标准输出
 }
-show_input_type "Input"                           # STDIN
-echo "Input" | show_input_type                    # PIPE
-# This example courtesy of Carl Anderson.
-#################
--h
-file is a symbolic link
--L
-file is a symbolic link
--S
-file is a socket
--t
-file (descriptor) is associated with a terminal device
-This test option  may be used to check whether the stdin[ -t 0 ] or stdout[ -t 1 ] in a
-given script is a terminal.
--r
-file has read permission (for the user running the test)
--w
-file has write permission (for the user running the test)
--x
-file has execute permission (for the user running the test)
--g
-set-group-id (sgid) flag set on file or directory
-If a directory has the sgid flag set, then a file created within that directory belongs to the group that
-owns the directory, not necessarily to the group of the user who created the file. This may be useful
-for a directory shared by a workgroup.
--u
-set-user-id (suid) flag set on file
-A binary owned by root with set-user-id flag set runs with root privileges, even when an
-ordinary user invokes it. [35] This is useful for executables (such as pppd and cdrecord) that need to
-access system hardware. Lacking the suid flag, these binaries could not be invoked by a non-root
-user.
-#################
+show_input_type "Input"                           # STDIN 标准输入
+echo "Input" | show_input_type                    # PIPE  管道
+```
+
+-h 测试文件是否是一个符号链接
+-L 测试文件是否是一个符号
+-S 测试文件是否是一个socket文
+-t 测试文件(或者文件描述符)是否与某个终端关联
+&emsp;&emsp;该测试可以测试脚本中的标准输入[ -t 0 ]或者标准输出[ -t 1 ]是否是一个终端。
+-r 运行本测试的用户是否对文件有读权限
+-w 写权限
+-x 执行权限
+-g 文件或者文件夹是否设置sgid
+   set-group-id (sgid) flag set on file or directory If a directory has the sgid flag set, then a file created within that directory belongs to the group that owns the directory, not necessarily to the group of the user who created the file. This may be useful or a directory shared by a workgroup.
+-u 文件或者文件夹是否设置suid
+set-user-id (suid) flag set on file A binary owned by root with set-user-id flag set runs with root privileges, even when an
+ordinary user invokes it. [35] This is useful for executables (such as pppd and cdrecord) that need to access system hardware. Lacking the suid flag, these binaries could not be invoked by a non-root user.
+
+```bash
 -rwsr-xr-t    1 root       178236 Oct  2  2000 /usr/sbin/pppd
-#################
+```
+
 - A file with the suid flag set shows an s in its permissions.
--k
-sticky bit set
-Commonly known as the sticky bit, the save-text-mode flag is a special type of file permission. If a
+
+-k sticky bit set Commonly known as the sticky bit, the save-text-mode flag is a special type of file permission. If a
 file has this flag set, that file will be kept in cache memory, for quicker access. [36] If set on a
 directory, it restricts write permission. Setting the sticky bit adds a t to the permissions on the file or
 directory listing. This restricts altering or deleting specific files in that directory to the owner of those
@@ -478,13 +471,10 @@ If a user does not own a directory that has the sticky bit set, but has write pe
 she can only delete those files that she owns in it. This keeps users from inadvertently overwriting or
 deleting each other's files in a publicly accessible directory, such as /tmp. (The owner of the
 directory or root can, of course, delete or rename files there.)
--O
-you are owner of file
--G
-group-id of file same as yours
+-O you are owner of file
+-G group-id of file same as yours
 
--N
-file modified since it was last read
+-N file modified since it was last read
 f1 -nt f2
 file f1 is newer than f2
 f1 -ot f2
