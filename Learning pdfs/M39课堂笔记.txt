@@ -2,11 +2,18 @@
 命令列表
 a
 alias 
+apt apg-get 
 b
+bzip 
+bunzip
+bzcat 
+bzip2
+bunzip2
 bc 
 bash
 basename 
-
+blkid 
+uuidgen
 c
 cat /etc/redhat-release /etc/motd 
 cd 
@@ -23,20 +30,47 @@ chage
 chfn
 chsh 
 chpasswd 
+cut
+cpio
+compress uncompress  
+case  in  easc 
+createrepo 
+./configure 脚本
+curl 
 d
 dd 
+du 
 df 
 date
 dirname
+dnf install remove repolist list search groupinstall grouplist info history 
+diff 
+declare -i -r -x 
+du -sh 
 dnf 
+dpkg ubuntu rpm 
+dmesg
+dumpe2fs 
 e
 echo $SHELL $PATH @PS1
 enable
 exit
+export 
+expr 
+egrep = grep -E 扩展正则表达式
+eject 
+e2label 
+resize2fs 
 f
 free
 file
 finger 
+fgrep = grep -F
+find 
+fdisk 
+fsck 
+findmnt 
+fuser 
 g
 gedit
 groups
@@ -48,6 +82,12 @@ groupdel
 grpck
 getent passwd|shadow|group|gshadow xxx 
 getenforce  /etc/selinux/config disabled 
+grep 
+getfacl 
+gzip 
+gunzip 
+gcc 
+gdisk 
 h
 hash
 hostname
@@ -61,6 +101,8 @@ init 0 6 3 5
 ip a 
 id wang 
 info ls
+if else elif  fi 
+ifconfig 
 j
 k
 
@@ -72,7 +114,20 @@ lsblk
 logout
 ln -s 
 lsattr 
+less 
+let 
+locate 
+ldd /bin/ls 
+lvcreate
+lvs
+lvdisplay 
+lsof 
+lvextend 
+lvreduce
+lvremove 
+lvconvert --merge 
 m
+more 
 mv
 man 
 mandb centos7 
@@ -80,10 +135,18 @@ makewhatis  centos6
 mkdir -pv
 mount 
 mail 
+make &&  make install
+mountpoint  
+mkfs -t xfs 
+mount   /etc/fstab
+mkswap  
+mkisofs 
 n
 nano
 newgrp
 newusers
+nl cat -b 
+ntpdate 
 o
 od 
 p
@@ -92,6 +155,16 @@ pwd
 passwd 
 pwunconv
 pwconv 
+patch 
+paste 
+pvcreate 
+pvs 
+pvdisplay
+parted 
+partx 
+pvmove 
+pvremove 
+partprobe 
 q
 quit
 r
@@ -104,6 +177,11 @@ rm -rf /*
 rename 
 readelf 
 rz
+rev 
+read 
+rpm 
+rpm2cpio 
+route 
 s
 su
 seq 
@@ -118,6 +196,15 @@ shred
 set +C 
 sz 
 setup
+sort 
+setfacl
+scp 
+split 
+sed 
+systemctl disable --now firewalld  systemctl enable --now autofs 
+swapon 
+swapoff 
+
 t
 tr
 tee
@@ -126,17 +213,37 @@ tree
 type 
 touch 
 timedatectl 
+tac 
+tail 
+tailf 
+tar 
+time 
+tune2fs 
+ 
 u
 unalias
 useradd
 usermod
 userdel 
 umask 
+uniq 
+unset 
+updatedb
+unxz 
+unzip  
+uuidgen 
+umount
 v
 vi
 vim 
 vipw
 vigrp 
+vgcreate
+vgs
+vgdisplay
+vgreduce
+vgextend 
+vgremove 
 w
 whoami
 who am i
@@ -145,12 +252,23 @@ w
 which
 whereis
 whatis 
+wc 
+wget 
 x
 xxd 
 xclock 
+xz
+xzcat 
+xargs 
+xfs_replair
+xfs_info 
+xfs_growfs
 y
-yum install xclock 
+yum install xclock remove repolist list 
 z
+zip 
+zcat 
+
 
 
 
@@ -459,3 +577,683 @@ sgid:
 正则表达式，重点难点
 脚本：重点难点
 
+
+
+mask: 设置除所有者和other以外的用户或组的最高权限
+
+所有者，ACL中自定义用户，ACL自定义的组，所属组，other 
+
+
+[root@centos7 data]#cut -d" " -f1 access_log |sort |uniq -c |sort -nr|head -n3
+   4870 172.20.116.228
+   3429 172.20.116.208
+   2834 172.20.0.222
+   
+[root@centos8 data]#tr -s " "  : <  ss.log |cut -d: -f6|sort |uniq -c |sort -nr|head -3
+     44 127.0.0.1
+     10 113.234.28.244
+      8 124.64.18.135
+
+
+
+[root@centos8 data]#cat f1.log f2.log |sort |uniq -d
+a
+c
+d
+[root@centos8 data]#grep -f f1.log f2.log
+a
+c
+d
+
+
+[root@centos8 data]#cat f1.log f2.log |sort |uniq -u
+1
+2
+3
+4
+b
+e
+
+grep -v "^[[:space:]]*#" /etc/httpd/conf/httpd.conf  |grep -v "^$"
+grep -v "^\( *#\|$\)" /etc/httpd/conf/httpd.conf
+grep -Ev "^( *#|$)" /etc/httpd/conf/httpd.conf
+
+
+
+
+[root@centos8 data]#grep "^\(.*\)\>.*\<\1$" /etc/passwd
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+bash:x:1008:1008::/home/bash:/bin/bash
+nologin:x:1011:1011::/home/nologin:/sbin/nologin
+
+
+[root@centos8 data]#grep -E "^(.*)\>.*\<\1$" /etc/passwd
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+bash:x:1008:1008::/home/bash:/bin/bash
+nologin:x:1011:1011::/home/nologin:/sbin/nologin
+[root@centos8 data]#egrep  "^(.*)\>.*\<\1$" /etc/passwd
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+bash:x:1008:1008::/home/bash:/bin/bash
+nologin:x:1011:1011::/home/nologin:/sbin/nologin
+
+[0-9] [[:digit:]]
+[1-9][0-9]
+1[0-9]{2}
+2[0-4][0-9]
+25[0-5]
+
+(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])
+
+ifconfig eth0 | grep -Eo  "(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])" |head -n1
+
+[root@centos8 script39]#echo -e "\033[1;$[RANDOM%7+31]mCOLOR\033[0m"
+
+
+student_name
+StudentName
+studentName
+
+
+正则表达式表示
+1、QQ号
+2、身份证号
+3、邮箱
+4、邮政编码
+
+10&12
+
+1010
+1100
+1000
+
+10|12
+1010
+1100
+1110
+
+1^1=0
+1^0=1
+
+
+10^12
+
+1010 10
+1100 12
+0110
+
+
+1100 12
+0110  6
+1010  10
+
+0110  6
+1010  10
+1100  12
+
+[root@centos8 ~]#A=100;B=200;((A=A^B));((B=A^B));((A=A^B));echo A=$A; echo B=$B
+A=200
+B=100
+
+
+cmd1 && cmd2 短路与
+如果 cmd1 成功，则执行 cmd2，如果cmd1 失败，则无需执行cmd2
+
+cmd1 || cmd2 短路或
+如果 cmd1 成功，则无需执行 cmd2，如果cmd1 失败，则执行cmd2
+
+[root@centos8 ~]#HOST=172.30.0.100; ping -W1 -c1 $HOST &> /dev/null && echo $HOST is accessable　||  echo $HOST is not  accessable
+172.30.0.100 is accessable
+
+[root@centos8 ~]#HOST=172.30.0.100; ping -W1 -c1 $HOST &> /dev/null || echo $HOST is not accessable　&&   echo $HOST is  accessable
+172.30.0.100 is accessable
+[root@centos8 ~]#HOST=172.30.0.111; ping -W1 -c1 $HOST &> /dev/null || echo $HOST is not accessable　&&   echo $HOST is  accessable
+172.30.0.111 is not accessable　
+172.30.0.111 is accessable
+
+[root@centos8 script39]#FILE=hello.sh; [[ "$FILE" =~ \.(sh|txt)$ ]] && echo txt or sh file
+txt or sh file
+
+[root@centos8 script39]#echo mage ceo | { read NAME TITLE; echo $NAME $TITLE; }
+mage ceo
+
+read -p "请输入体重(kg): " WEIGHT
+read -p "请输入身高(m): " HIGTH
+BMI=`echo $WEIGHT/$HIGTH^2 |bc`
+if [ $BMI -lt 18 ] ;then
+	echo "偏瘦"
+elif  [ $BMI -lt 24 ] ;then
+	echo "标准身材"
+elif  [ $BMI -lt 27 ] ;then
+	echo "偏胖"
+elif [ $BMI -lt 30 ] ;then
+	echo "肥胖"
+else
+	echo "太胖了！"
+fi
+
+
+
+牛肉面 和 石锅拌饭 20 
+拉面 刀削面 蛋炒饭 15 
+汉堡王 30 
+
+if 1 or 2  
+	echo 20 
+elif  menu=3 or  menu=4 or menu=5 
+	echo 15 
+	
+1+2*3
+
+[root@centos8 linux-5.3.5]#cat `find  -name "*.c" ` |wc -l
+18744090
+[root@centos8 linux-5.3.5]#find  -name "*.c" |xargs -n1 cat |wc -l
+18744090
+[root@centos8 linux-5.3.5]#find  -name "*.c" |xargs  cat |wc -l
+18744090
+
+
+[root@centos8 ~]#ifconfig eth0|sed -n '2s@.*inet @@p'|sed -n 's/ net.*//p'
+192.168.39.8 
+
+
+[root@centos8 ~]#ifconfig eth0|sed -ne '2s@.*inet @@' -e  's/ net.*//p'
+192.168.39.8 
+
+[root@centos8 ~]#ifconfig eth0|sed -nr '2s@(.*inet )(.*)( netmask.*)@\3@p'
+ netmask 255.255.255.0  broadcast 192.168.39.255
+[root@centos8 ~]#ifconfig eth0|sed -nr '2s@.*inet (.*) netmask.*@\1@p'
+192.168.39.8
+
+[root@centos8 ~]#ifconfig eth0|sed -nr '2s@[^0-9]+([.0-9]{7,15}).*@\1@p'
+192.168.39.8
+[root@centos8 ~]#ifconfig eth0|sed -nr '2s@[^0-9]+([.0-9]+).*@\1@p'
+192.168.39.8
+
+[root@centos8 ~]#echo /etc/sysconfig/network-scripts/ | sed -nr 's#^(/.*/)([^/]+)/?#\1#p'
+/etc/sysconfig/
+[root@centos8 ~]#echo /etc/sysconfig/network-scripts/ | sed -nr 's#^(/.*/)([^/]+)/?#\2#p'
+network-scripts
+
+
+实验：修改centos7,8的网卡为传统网卡名eth0,1
+sed -ri '/GRUB_CMDLINE_LINUX/s@^(.*)"@\1 net.ifnames"@' /etc/default/grub
+sed -ir '/GRUB_CMDLINE_LINUX/s@"$@ net.ifnames=0"@' /etc/default/grub
+
+grub2-mkconfig -o /etc/grub2.cfg
+
+
+sed  -r  '/^(#|$)/d'  /etc/httpd/conf/httpd.conf
+sed  -r  '/^#|^$/d'  /etc/httpd/conf/httpd.conf 
+
+sed -n  '/24\/May\/2018:11:56:30/,/24\/May\/2018:11:56:40/p' access_log
+
+
+[root@centos8 ~]#seq 10 | sed -n 'n;p'
+2
+4
+6
+8
+10
+
+
+find  -name "*.rpm"  | sed -rn 's#.*\.([^.]+)\.rpm#\1#p'|sort | uniq -c
+[root@centos8 cd]#find  -name "*.rpm" | rev |cut -d. -f2|rev|sort | uniq -c
+   1254 i686
+   2111 noarch
+   3303 x86_64
+   
+   https://www.elrepo.org/elrepo-release-8.0-2.el8.elrepo.noarch.rpm
+   https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+   
+rpm -ivh  -e  -ql -qi -qf -q --scripts -qa -qp --force --nodeps 
+
+实验：删除虚拟网卡
+yum remove libvirt-daemon 
+
+
+https://mirrors.aliyun.com/centos/6/os/x86_64/
+https://mirrors.aliyun.com/centos/7/os/x86_64/
+
+
+baseurl=https://mirrors.aliyun.com/centos/$releasever/os/$basearch
+
+实验:yum仓库：本地光盘，基于网络http服务
+
+
+dnf|yum install remove list search info clean all repolist 
+
+故障排错：troubleshooting: yum dnf失败原因
+1，yum的配置文件格式或路径
+2，cacche ，yum clean all
+3，网络不通，网卡配置
+
+
+实验：将dnf相关的包，建立自定义的yum仓库
+
+实验:编译安装tree1.8，并实现一键编译安装install_tree.sh 
+
+1 安装相关的依赖包
+dnf install gcc 
+
+2 下载源码并解压
+tar xvf tree-1.8.0.tgz
+
+3 进入解压缩的目录，README和INSTALL 
+cd tree-1.8.0/
+cat README INSTALL 
+
+4 vim Makefile
+prefix = /app/tree
+
+5 make 
+ 
+6 make install 安装，复制对应的目录下
+
+7 配置PATH
+vim  /etc/profile.d/tree.sh 
+PATH=/app/tree/bin:$PATH
+
+. /etc/profile.d/tree.sh
+
+实验：cmatrix编译安装
+1 安装包
+dnf install make ncurses-devel
+
+2 下载并解压缩包
+ tar xvf cmatrix-1.2a.tar.gz
+ 
+3 配置 
+ ./configure --prefix=/app/matrix
+
+4 编译并安装
+make &&  make install 
+
+5 配置环境
+echo 'PATH=/app/matrix/bin:$PATH' > /etc/profile.d/matrix.sh
+. /etc/profile.d/matrix.sh
+
+6运行
+cmatrix -a -b -C yellow
+
+
+实验：centos8 编译安装httpd-2.4.41,并实现一键安装脚本install_httpd.sh
+
+1 安装包
+dnf install gcc make apr-devel apr-util-devel pcre-devel openssl-devel
+
+2 下载并解压缩包
+tar xvf httpd-2.4.41.tar.bz2
+ 
+3 配置 
+cd httpd-2.4.41/
+./configure --prefix=/app/apache --sysconfdir=/etc/apache --enable-ssl
+
+4 编译并安装
+make -j 4 &&  make install 
+
+5 配置环境
+echo 'PATH=/app/apache/bin:$PATH' > /etc/profile.d/apache.sh
+. /etc/profile.d/apache.sh
+
+6运行
+apachectl 
+
+7 指定用apache用户运行
+useradd -r -s /sbin/nologin apache
+vim /etc/apache/httpd.conf
+user apache
+group apache
+
+apachectl stop
+apachectl
+ps aux 查看
+
+http://192.168.39.8
+
+
+for i in `ls /sys/class/scsi_host/host* -d`;do echo '- - -' > $i/scan;done
+
+
+255 heads, 63 sectors/track, 26108 cylinders
+chs:cylinders,head,sector
+
+
+实验：ubuntu  dpkg apt 
+
+理论：head track sector cylinder 
+
+理论：MBR结构，GPT
+
+实验：备份mbr，破坏MBR并恢复之 
+
+实验：分区退出后一定同步分区表
+centos6 
+增加分区的同步法
+partx -a /dev/sda 
+删除分区同步法
+partx -d --nr 6-8 /dev/sda
+
+除了centos6其它版本，同步方法
+partprobe 
+
+
+/dev/sdb1  /mnt/sdb1 
+mkdir /mnt/sdb1/dir1 
+mount /dev/sdb1  /mnt/sdb1/dir1 
+
+OOM out of Memory 
+
+分区创建
+ 
+
+实验：从分区，格式化，挂载（持久）
+
+实验：swap分区管理
+
+实验：lvs 实现
+
+实验：扩展LV
+对ext系列
+lvextend -l +100%free /dev/vg0/mysql
+resize2fs /dev/vg0/mysql 
+对xfs
+lvextend  -l +100 /dev/vg0/binlog
+xfs_growfs /mnt/binlog
+
+对ext和xfs都支持
+lvextend  -L +1G -r /dev/vg0/mysql 
+
+实验：离线缩减LV，针对ext
+ umount /mnt/mysql
+ fsck -f /dev/vg0/mysql
+ resize2fs /dev/vg0/mysql  5G
+ lvreduce -L 5G /dev/vg0/mysql 
+ mount -a
+
+实验：删除LV中硬盘
+pvmove /dev/sdd
+vgreduce vg0 /dev/sdd
+pvremove /dev/sdd
+
+
+实验：初始环境要求
+systemctl disable firwalld centos7,8
+chkconfig iptables off  centos6 
+
+vim /etc/selinux/config
+SELINUX=disabled 
+
+
+实验：ext4快照实现
+lvcreate  -n mysql_snapshot -s -L 1G /dev/vg0/mysql
+mount -r /dev/vg0/mysql_snapshot  /mnt/mysql_snapshot
+还原逻辑卷
+umount /mnt/mysql 
+umount /mnt/mysql_snapshot 
+lvconvert --merge /dev/vg0/mysql_snapshot
+
+
+xfs文件系统
+lvcreate  -n binlog_snapshot -L 1G  -s /dev/vg0/binlog
+mount -r -o  nouuid  /dev/vg0/binlog_snapshot /mnt/binlog_snapshot/
+
+umount /mnt/binlog
+umount /mnt/binlog_snapshot 
+lvconvert  --merge /dev/vg0/binlog_snapshot
+
+
+
+switch 
+router 
+
+
+ISO  
+OSI 
+IOS
+
+
+单工：单向传输 ------>
+半双工:轮流双向传输----> <-----
+全双工:同时双向传输 <---->
+
+单播：目标是一个unicast
+广播：目标是所有 broadcast
+多播（组）：目标是多个（加入组） multicast
+
+media access control MAC 物理地址
+
+
+冲突域
+广播域：
+
+novell 网络 netware OS ipx/spx 
+windows nt tcp/ip 
+http://www.magedu.com/
+
+DDos 拒绝服务
+
+0086 010  62985600 网络ID
+62985600 主机ID
+
+192.168.39.8 
+网络ID+主机ID
+
+A类
+0XXXXXXX.X.Y.Z
+00000000 0
+01111111 127
+1-126.X.Y.Z
+
+最高8位是网络ID
+后续24位是主机ID
+netmask:255.0.0.0
+
+10.0.0.100
+10.0.0.200
+8.8.8.8
+10.0.0.1-10.255.255.254
+一个A网络的最多的主机数=2^24-2=16777214
+
+一个网络的最多的主机数＝2^主机ID位数-2
+
+B类
+10XXXXXX.XXXXXXXX.Y.Z
+2^14=16384
+10000000 128
+10111111  191
+128-191.X.Y.Z
+
+最高16位是网络ID
+后续16位是主机ID
+netmask:255.255.0.0
+一个B网络的最多的主机数网络的最多的主机数=2^16-2=65534
+
+C类
+110XXXXX.XXXXXXXX.XXXXXXXX.Z
+网段数：2097152
+11000000 192
+11011111  223
+192-223.X.Y.Z
+
+最高24位是网络ID
+后续8位是主机ID
+netmask:255.255.255.0
+一个C网络的最多的主机数网络的最多的主机数网络的最多的主机数网络的最多的主机数=2^8-2=254
+
+
+D类多播地址
+1110XXXX.X.Y.Z
+224-239.X.Y.Z
+
+E类
+240-255
+
+
+
+无类：网络ID位不确定
+子网掩码：32bit 二进制数字，和IP成对使用，对应于IP中网络ID相应的位为1，对应于主机ID相应的位为0
+
+A：8
+B：16
+C:24
+
+32-11=21
+
+2000台netmask=255.255.248.0
+
+172.30.123.100/21
+255.255.248.0 
+172.30.120.0  netid
+10101100
+11111111
+
+01111011
+11111000
+01111000
+
+
+A:192.168.39.100/24 netid=192.168.39.0
+B:192.168.38.200/16 netid=192.168.38.0
+
+A--->B
+1)192.168.39.0
+2)192.168.38.200 与 24=192.168.38.0
+
+B---->A
+192.168.38.200/16  192.168.0.0
+192.168.39.100/16  192.168.0.0
+
+
+
+1 判断是否在一个网段
+2 路由？
+3 ARP
+4 三次握手
+5 DATA
+
+
+
+10.00000000.0.0
+10.0.0.1-10.255.255.254
+10.0.0.0/8
+
+10.00000  000.0.0  10.0.0.0/9
+10.01 000000.0.0  10.128.0.0/9
+10.10 000000.0.0
+10.11 000000.0.0
+
+公式：
+一个网络的最多的主机数＝2^主机ID位数-2
+网络（段）数=2^网络ID中可变的位数
+网络ID=IP与netmask
+CIDR无类域间路由表示法：IP/网络ID位数
+判断对方主机是否在同一个网段：用自已的子网掩码分别和自已的IP及对方的IP相与，比较结果，相同则同一网络，不同则不同网段
+划分子网：将一个大的网络（主机数多）划分成多个小的网络（主机数少），主机ID位数变少，网络ID位数变多，网络ID位向主机ID位借位
+合并超网：将多个小网络合并成一个大网，主机ID位向网络ID位借位
+
+中国移动10.0.0.0/8 给32个各省公司划分对应的子网
+1）每个省公司的子网的netmask？
+2^5>=32 借5位网络ID
+8+5=13
+255.248.0.0
+2)每个省公司的子网的主机数有多少？
+2^(32-13)-2=524286
+3）河南省得到第10个子网，网络ID？
+10.00000 000.0.0/13 
+10.01001 000.0.0/13 
+10.72.0.0/13 
+
+4）河南省得到第10个子网的最小IP和最大的IP？
+10.01001 000.0.1
+10.01001 111.11111111.11111110
+
+10.72.0.1---10.79.255.254
+
+
+5）所有子网中最大，最小的子网的netid？
+10.00000 000.0.0/13 10.0.0.0/13
+10.11111 000.0.0/13 10.248.0.0/13
+
+
+中国移动10.0.0.0/8 给32个各省公司划分对应的子网,河南省得到第10个子网,再给省内的16个地市划分子网
+1）每个市公司的子网的netmask？
+2)每个市公司的子网的主机数有多少？
+3）各地市的最小netid和最大的netid？
+4）洛阳市第2个子网，最小IP和最大IP？
+
+
+220.78.10101 000.0
+220.78.10101 001.0
+
+
+220.78.10101 111.0
+
+220.78.168.0/21
+
+220.78.169.0
+220.78.170.0
+220.78.171.0
+220.78.172.0
+220.78.173.0
+220.78.174.0
+220.78.175.0
+
+
+172.0001 0000.0.0/16
+172.0001 0001.0.0/16
+172.0001 0010.0.0/16
+
+
+172.0001 1111.0.0/16
+
+172.16.0.0/12
+
+
+路由表：一行即为一条路由记录，每条记录路由
+Destination：目标网络ID，主机ip,0.0.0.0/0 默认路由   
+Genmask：netmask
+Iface：接口，表示从当前设备哪个网卡发出去，才能到达Destination
+Gateway: 交给下一个路由器邻近当前设备的接口IP
+Metric：花费，越小优先越高
+
+
+实验：实现路由
+
+环境：四台主机
+A---R1----R2----B
+A
+ifconfig eth0 172.20.0.8/16
+route add -net 172.20.0.0/16 dev eth0
+route add default gw 172.20.0.111 dev eth0
+route -n 
+ip a 
+
+R1
+ifconfig eth0 172.20.0.111/16
+ifconfig eth1 10.0.0.1/8
+route add -net 172.20.0.0/16 dev eth0
+route add -net 10.0.0.0/8 dev eth1
+route add -net 192.168.39.0/24 gw 10.0.0.2 dev eth1 
+echo 1 > /proc/sys/net/ipv4/ip_forward 
+
+R2
+ifconfig eth0 192.168.39.111/24
+ifconfig eth1 10.0.0.2/8
+route add -net 192.168.39.0/24 dev eth0
+route add -net 10.0.0.0/8 dev eth1
+route add -net 172.20.0.0/16 gw 10.0.0.1 dev eth1 
+echo 1 > /proc/sys/net/ipv4/ip_forward 
+
+
+B
+ifconfig eth0 192.168.39.6/24
+route add -net 192.168.39.0/24 dev eth0
+route add default gw 192.168.39.111 dev eth0
+route -n 
+ip a 

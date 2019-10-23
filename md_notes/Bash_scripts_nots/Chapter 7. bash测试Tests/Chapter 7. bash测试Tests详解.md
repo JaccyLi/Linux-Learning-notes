@@ -403,17 +403,18 @@ fi     # 5 is greater than 4
 exit 0
 ```
 
-## 7.2. File test operators
+## 7.2. 文件测试操作(File test operators)
 
-- if... 如果测试条件为真则返回退出状态值0
+- if [ ... ] 如果测试条件...为真则返回退出状态值0
 
 -e 测试文件是否存在
--a 同上,以被弃用，不推荐使用
+-a 同上,已经被弃用，不推荐使用
 -f 测试文件是否为普通文件(不是文件夹或者设备文件)
 -s 测试文件是否非空(大小不是0)
 -d 测试文件是否是一个文件夹
 -b 测试文件是否是一个块设备
 -c 测试文件是否是一个字符设备
+
 ```bash
 device0="/dev/sda2"
 if [ -b "$device0" ]
@@ -449,71 +450,60 @@ echo "Input" | show_input_type                    # PIPE  管道
 -r 运行本测试的用户是否对文件有读权限
 -w 写权限
 -x 执行权限
--g 文件或者文件夹是否设置sgid
-   set-group-id (sgid) flag set on file or directory If a directory has the sgid flag set, then a file created within that directory belongs to the group that owns the directory, not necessarily to the group of the user who created the file. This may be useful or a directory shared by a workgroup.
+-g 文件或者文件夹是否设置SGID标志位
+&emsp;&emsp;如果某个文件或者文件夹上设置有SGID权限，那么在该文件夹下创建的文件属主为该文件夹的属主。
 -u 文件或者文件夹是否设置suid
-set-user-id (suid) flag set on file A binary owned by root with set-user-id flag set runs with root privileges, even when an
-ordinary user invokes it. [35] This is useful for executables (such as pppd and cdrecord) that need to access system hardware. Lacking the suid flag, these binaries could not be invoked by a non-root user.
+&emsp;&emsp;如果某个属于root的二进制文件上被root设置了SUID标志位，则不管是谁运行，该可执行文件都以root权限运行；
+&emsp;&emsp;单某个可执行文件必须要访问系统硬件时此功能非常有用。如果缺失SUID标志位，这些二进制文件不能被非root用户运行。
+
+![](png/2019-10-21-12-40-31.png)
+
+&emsp;&emsp;如上图：有SUID标志位的文件权限模式的执行权限位标识为s而不再是x(rwx --> rws).
+
+-k 测试sticky位是否设置
+&emsp;&emsp;如果一个文件设置了sticky位，那么该问价会被保存在cache内便于访问
+&emsp;&emsp;如果某个文件夹被设置了sticky位，那么该文件夹的写权限将会被限制。
+&emsp;&emsp;设置sticky位后，其他用户的执行权限模式不在表现为x而是t(rwx --> rwt)
+![](png/2019-10-21-12-56-29.png)
+&emsp;&emsp;也就是说：如果一个用户对某个设置有sticky位的目录有读权限但不是该目录的属主，那么他只能删除该目录下其拥有
+&emsp;&emsp;的文件。这样做可以防止用户在公共文件夹意外删除别人的文件,例如/tmp文件夹。(当然，root用户是可以删除和更改的)
+-O 测试自己是否是文件属主
+-G 测试文件的GID是否和自己相同
+-N 测试文件自最后一次读以来是否被修改过
+f1 -nt f2 测试文件f1是否是比f2新
+f1 -ot f2 测试文件f1是否是比f2旧
+f1 -ef f2 测试文件f1和f2是否都是同一个文件的硬链接
+! 对上面所列的条件取反。(如果条件为空，返回真,如下面例子)
 
 ```bash
--rwsr-xr-t    1 root       178236 Oct  2  2000 /usr/sbin/pppd
+[root@centos8 ~]#if [[ ！ ]]; then echo true; fi
+true
 ```
 
-- A file with the suid flag set shows an s in its permissions.
-
--k sticky bit set Commonly known as the sticky bit, the save-text-mode flag is a special type of file permission. If a
-file has this flag set, that file will be kept in cache memory, for quicker access. [36] If set on a
-directory, it restricts write permission. Setting the sticky bit adds a t to the permissions on the file or
-directory listing. This restricts altering or deleting specific files in that directory to the owner of those
-files.
-drwxrwxrwt    7 root         1024 May 19 21:26 tmp/
-If a user does not own a directory that has the sticky bit set, but has write permission in that directory,
-she can only delete those files that she owns in it. This keeps users from inadvertently overwriting or
-deleting each other's files in a publicly accessible directory, such as /tmp. (The owner of the
-directory or root can, of course, delete or rename files there.)
--O you are owner of file
--G group-id of file same as yours
-
--N file modified since it was last read
-f1 -nt f2
-file f1 is newer than f2
-f1 -ot f2
-file f1 is older than f2
-f1 -ef f2
-files f1 and f2 are hard links to the same file
-!
-"not" -- reverses the sense of the tests above (returns true if condition absent).
-
-> Example 7-4. Testing for broken links
+> 例7-4. 测试失效的链接(Testing for broken links)
 
 ```bash
 #!/bin/bash
 # broken-link.sh
 # Written by Lee bigelow <ligelowbee@yahoo.com>
 # Used in ABS Guide with permission.
-#  A pure shell script to find dead symlinks and output them quoted
-#+ so they can be fed to xargs and dealt with :)
-#+ eg. sh broken-link.sh /somedir /someotherdir|xargs rm
-#
-#  This, however, is a better method:
-#
+#  该脚本找出失效的符号链接并引用后输出。以便于给xargs处理。
+#+ 例如. sh broken-link.sh /somedir /someotherdir|xargs rm
+#  只不过更加推荐下面的方法：
 #  find "somedir" -type l -print0|\
 #  xargs -r0 file|\
 #  grep "broken symbolic"|
 #  sed -e 's/^\|: *broken symbolic.*$/"/g'
 #
-#+ but that wouldn't be pure Bash, now would it.
-#  Caution: beware the /proc file system and any circular links!
+#  注意: 谨慎对待 /proc 文件系统和任何循环链接
 ################################################################
-#  If no args are passed to the script set directories-to-search 
-#+ to current directory.  Otherwise set the directories-to-search 
-#+ to the args passed.
+#  下面的语句表示如果没有指定目录参数传给脚本就将路径设置为当前的工作
+#  目录。否则使用指定的目录参数进行搜索。
 ######################
 [ $# -eq 0 ] && directorys=`pwd` || directorys=$@
-#  Setup the function linkchk to check the directory it is passed 
-#+ for files that are links and don't exist, then print them quoted.
-#  If one of the elements in the directory is a subdirectory then 
-#+ send that subdirectory to the linkcheck function.
+
+#  下面的函数检查传给脚本的目录中为符号链接并且不存在的文件，检查到后引用起来并打印。
+#  如果是目录中的子目录，则将该目录再次传给函数检查。
 ##########
 linkchk () {
     for element in $1/*; do
@@ -522,9 +512,8 @@ linkchk () {
     # Of course, '-h' tests for symbolic link, '-d' for directory.
     done
 }
-#  Send each arg that was passed to the script to the linkchk() function
-#+ if it is a valid directoy.  If not, then print the error message
-#+ and usage info.
+
+#  下面将每个传给脚本的合法目录参数传给linkchk()函数，如果不是合法目录，则打印错误信息和用法。
 ##################
 for directory in $directorys; do
     if [ -d $directory ]
@@ -537,53 +526,55 @@ done
 exit $?
 ```
 
-## 7.3. Other Comparison Operators
+## 7.3. 其它的比较操作
 
-- A binary comparison operator compares two variables or quantities. Note that integer and string comparison
-use a different set of operators.
+- 一个二进制比较操作符号比较两个变量或者比较数量。整数或者字符串的比较使用特定的符号集合。
 
-- integer comparison
--eq
-is equal to
+- 整数比较
+
+```bash
+-eq 是否相等
 if [ "$a" -eq "$b" ]
--ne
-is not equal to
-if [ "$a" -ne "$b" ]
--gt
-is greater than
-if [ "$a" -gt "$b" ]
--ge
-is greater than or equal to
-if [ "$a" -ge "$b" ]
--lt
-is less than
-if [ "$a" -lt "$b" ]
--le
-is less than or equal to
-if [ "$a" -le "$b" ]
-<
-is less than (within double parentheses)
-(("$a" < "$b"))
-<=
-is less than or equal to (within double parentheses)
-(("$a" <= "$b"))
->
-is greater than (within double parentheses)
-(("$a" > "$b"))
->=
-is greater than or equal to (within double parentheses)
-(("$a" >= "$b"))
 
-- string comparison
-=
-is equal to
+-ne 是否不等
+if [ "$a" -ne "$b" ]
+
+-gt $a是否大于$b
+if [ "$a" -gt "$b" ]
+
+-ge $a是否大于或等于$b
+if [ "$a" -ge "$b" ]
+
+-lt $a是否小于$b
+if [ "$a" -lt "$b" ]
+
+-le $a是否小于或等于$b
+if [ "$a" -le "$b" ]
+
+< 小于(必须在双圆括号结构中)
+ (("$a" < "$b"))
+ 
+<= 小于或等于(必须在双圆括号结构中)
+(("$a" <= "$b"))
+
+> 大于(必须在双圆括号结构中)
+(("$a" > "$b"))
+
+>= 大于或等于(必须在双圆括号结构中)
+(("$a" >= "$b"))
+```
+
+- 字符串比较
+
+```bash
+= is equal to
 if [ "$a" = "$b" ]
 Note the whitespace framing the =.
 if [ "$a"="$b" ] is not equivalent to the above.
-==
-is equal to
+== is equal to
 if [ "$a" == "$b" ]
 This is a synonym for =.
+```
 
 - The == comparison operator behaves differently within a double-brackets test than
 within single brackets.
@@ -595,23 +586,25 @@ within single brackets.
 [ "$a" == "z*" ] # True if $a is equal to z* (literal matching).
 # Thanks, Stéphane Chazelas
 ```
-!=
-is not equal to
+
+```bash
+!= is not equal to
 if [ "$a" != "$b" ]
 This operator uses pattern matching within a [[ ... ]] construct.
-<
-is less than, in ASCII alphabetical order
+< is less than, in ASCII alphabetical order
 if [[ "$a" < "$b" ]]
 if [ "$a" \< "$b" ]
 Note that the "<" needs to be escaped within a [ ] construct.
->
-is greater than, in ASCII alphabetical order
+> is greater than, in ASCII alphabetical order
 if [[ "$a" > "$b" ]]
 if [ "$a" \> "$b" ]
-Note that the ">" needs to be escaped within a [ ] construct.
+```
+
+- Note that the ">" needs to be escaped within a [ ] construct.
 See Example 27-11 for an application of this comparison operator.
--z
-string is null, that is, has zero length
+
+-z string is null, that is, has zero length
+
 ```bash
 String=''   # Zero-length ("null") string variable.
 if [ -z "$String" ]
@@ -621,8 +614,8 @@ else
   echo "\$String is NOT null."
 fi     # $String is null.
 ```
--n
-string is not null.
+
+-n string is not null.
 
 - The -n test requires that the string be quoted within the test brackets. Using an
 unquoted string with ! -z, or even just the unquoted string alone within test brackets

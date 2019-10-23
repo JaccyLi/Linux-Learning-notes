@@ -23,6 +23,7 @@
 （2）为ARP模块发送ARP请求和接收ARP应答；
 （3）为RARP发送RARP请求和接收RARP应答。
 ```
+
 - TCP/IP支持多种不同的链路层协议，这取决于网络所使用的硬件，
 &emsp;&emsp;如以 太网、令牌环网、FDDI（光纤分布式数据接口）及RS-232串行线路等。
 
@@ -32,14 +33,92 @@
 - PPP数据帧的格式
 ![](visio/PPP数据帧的格式.svg)
 
+## 3.网络层
+
+- IP报文头部格式
+
+- ICMP
+
+- IGMP
+ 
+## 4.传输层
+
+- TCP头部格式
+
+- UDP头部格式
+
+
 # 五.IP地址规划 
+
+## 1.传统的IP地址分类
+
+## 2.CIDR表示的网络地址
+
+## 3.子网的划分
+
+## 4.路由的概念
 
 # 六.Linux网络配置详解 
 
+## 1.Linux网络管理命令及配置文件概览
+
+### 命令概览
+
+```bash
+ifconfig
+route
+netstat
+ip: object {link, addr, route}
+ss
+tc  
+system-config-network-tui
+setup
+nmcli
+nm-connection-editor
+```
+
+### 配置文件概览
+
+## 2.命令详细介绍
+
+
+
 # 七.多网卡绑定技术 
 
-# 八.网桥 
+## 1.概念
 
-# 九.Linux下测试网络 
+## 2.实现
 
-# 十.Linux下的网络工具 
+
+# 八.Linux软件网桥
+
+## 1.概念
+
+## 2.实现
+
+
+# 九.Linux下的网络测试工具
+
+## hostname显示主机名 
+
+hostname 
+
+## ping测试网络连通性 
+
+ping  
+
+## ip/route显示正确的路由表 
+
+ip route 
+
+## 跟踪路由 
+
+traceroute 
+tracepath 
+mtr 
+
+## 确定名称服务器
+
+nslookup 
+host 
+dig 
