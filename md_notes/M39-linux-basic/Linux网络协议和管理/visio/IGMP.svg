@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 由 Microsoft Visio, SVG Export 生成 IGMP.svg Page-1 -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
+		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="5.90065in" height="1.96582in"
+		viewBox="0 0 424.846 141.539" xml:space="preserve" color-interpolation-filters="sRGB" class="st10">
+	<v:documentProperties v:langID="2052" v:metric="true" v:viewMarkup="false">
+		<v:userDefs>
+			<v:ud v:nameU="msvSubprocessMaster" v:prompt="" v:val="VT4(Rectangle)"/>
+			<v:ud v:nameU="msvNoAutoConnect" v:val="VT0(1):26"/>
+		</v:userDefs>
+	</v:documentProperties>
+
+	<style type="text/css">
+	<![CDATA[
+		.st1 {fill:#4672c4;stroke:#c7c8c8;stroke-width:0.25}
+		.st2 {fill:#feffff;font-family:微软雅黑;font-size:1.16666em}
+		.st3 {fill:#feffff;font-family:Calibri;font-size:1.16666em}
+		.st4 {font-family:微软雅黑;font-size:1em}
+		.st5 {font-size:1em}
+		.st6 {fill:#feffff;font-family:Calibri;font-size:0.666664em}
+		.st7 {fill:none;stroke:none;stroke-width:0.25}
+		.st8 {fill:#4672c4;font-family:Calibri;font-size:1.00001em}
+		.st9 {fill:#4672c4;font-family:Calibri;font-size:1.16666em}
+		.st10 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}
+	]]>
+	</style>
+
+	<g v:mID="0" v:index="1" v:groupContext="foregroundPage">
+		<v:userDefs>
+			<v:ud v:nameU="msvThemeOrder" v:val="VT0(0):26"/>
+		</v:userDefs>
+		<title>页-1</title>
+		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50394"
+				v:shadowOffsetY="-8.50394"/>
+		<v:layer v:name="尺寸" v:index="0"/>
+		<g id="shape9-1" v:mID="9" v:groupContext="shape" transform="translate(214.407,-72.2657)">
+			<title>矩形.9</title>
+			<desc>检验和</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="91.8425" cy="124.531" width="183.69" height="34.0157"/>
+			<rect x="0" y="107.524" width="183.685" height="34.0157" class="st1"/>
+			<text x="70.84" y="128.78" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>检验和</text>		</g>
+		<g id="shape10-4" v:mID="10" v:groupContext="shape" transform="translate(30.7224,-38.25)">
+			<title>矩形.10</title>
+			<desc>32位组地址(D类IP地址)</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="183.685" cy="124.531" width="367.38" height="34.0157"/>
+			<rect x="0" y="107.524" width="367.37" height="34.0157" class="st1"/>
+			<text x="113.66" y="128.78" class="st3" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>32<tspan class="st4">位组地址</tspan>(<tspan
+						class="st5" v:langID="1033">D</tspan><tspan class="st4">类</tspan><tspan class="st5" v:langID="1033">IP</tspan><tspan
+						class="st4">地址</tspan>)</text>		</g>
+		<g id="shape12-12" v:mID="12" v:groupContext="shape" transform="translate(128.354,-72.2657)">
+			<title>矩形.12</title>
+			<desc>未用</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="43.0269" cy="124.531" width="86.06" height="34.0157"/>
+			<rect x="0" y="107.524" width="86.0539" height="34.0157" class="st1"/>
+			<text x="29.03" y="128.78" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>未用</text>		</g>
+		<g id="shape13-15" v:mID="13" v:groupContext="shape" transform="translate(85.0394,-72.2657)">
+			<title>矩形.13</title>
+			<desc>4位IGMP类型(1-2)</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="21.6571" cy="124.531" width="43.32" height="34.0157"/>
+			<rect x="0" y="107.524" width="43.3142" height="34.0157" class="st1"/>
+			<text x="6.61" y="122.1" class="st6" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>4<tspan class="st4">位</tspan>IGMP<tspan
+						x="5.95" dy="1.215em" class="st4">类型</tspan>(1-2)</text>		</g>
+		<g id="shape14-20" v:mID="14" v:groupContext="shape" transform="translate(18.25,-102.03)">
+			<title>工作表.14</title>
+			<desc>0</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="13.6063" cy="131.539" width="27.22" height="20"/>
+			<rect x="0" y="121.539" width="27.2126" height="20" class="st7"/>
+			<text x="10.57" y="135.14" class="st8" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>0</text>		</g>
+		<g id="shape15-23" v:mID="15" v:groupContext="shape" transform="translate(110.719,-102.03)">
+			<title>工作表.15</title>
+			<desc>7</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="13.6063" cy="131.539" width="27.22" height="20"/>
+			<rect x="0" y="121.539" width="27.2126" height="20" class="st7"/>
+			<text x="10.57" y="135.14" class="st8" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>7</text>		</g>
+		<g id="shape16-26" v:mID="16" v:groupContext="shape" transform="translate(120.864,-102.03)">
+			<title>工作表.16</title>
+			<desc>8</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="13.6063" cy="131.539" width="27.22" height="20"/>
+			<rect x="0" y="121.539" width="27.2126" height="20" class="st7"/>
+			<text x="10.57" y="135.14" class="st8" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>8</text>		</g>
+		<g id="shape17-29" v:mID="17" v:groupContext="shape" transform="translate(192.581,-103.289)">
+			<title>工作表.17</title>
+			<desc>15</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="13.6063" cy="131.539" width="27.22" height="20"/>
+			<rect x="0" y="121.539" width="27.2126" height="20" class="st7"/>
+			<text x="7.52" y="135.14" class="st8" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>15</text>		</g>
+		<g id="shape18-32" v:mID="18" v:groupContext="shape" transform="translate(209.305,-103.289)">
+			<title>工作表.18</title>
+			<desc>16</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="13.6063" cy="131.539" width="27.22" height="20"/>
+			<rect x="0" y="121.539" width="27.2126" height="20" class="st7"/>
+			<text x="7.52" y="135.14" class="st8" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>16</text>		</g>
+		<g id="shape19-35" v:mID="19" v:groupContext="shape" transform="translate(379.384,-101.951)">
+			<title>工作表.19</title>
+			<desc>31</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="13.6063" cy="131.539" width="27.22" height="20"/>
+			<rect x="0" y="121.539" width="27.2126" height="20" class="st7"/>
+			<text x="7.52" y="135.14" class="st8" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>31</text>		</g>
+		<g id="shape22-38" v:mID="22" v:groupContext="shape" transform="translate(149.862,-18.25)">
+			<title>工作表.22</title>
+			<desc>IGMP报文字段格式</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="64.546" cy="131.539" width="129.1" height="20"/>
+			<rect x="0" y="121.539" width="129.092" height="20" class="st7"/>
+			<text x="6.77" y="135.79" class="st9" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>IGMP<tspan class="st4">报文字段格式</tspan></text>		</g>
+		<g id="shape23-42" v:mID="23" v:groupContext="shape" transform="translate(30.7224,-72.2657)">
+			<title>矩形.23</title>
+			<desc>4位IGMP版本(1)</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="27.1585" cy="124.531" width="54.32" height="34.0157"/>
+			<rect x="0" y="107.524" width="54.3169" height="34.0157" class="st1"/>
+			<text x="4.11" y="122.16" class="st6" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>4<tspan class="st4">位</tspan>IGMP<tspan
+						class="st4">版本</tspan><tspan x="22.71" dy="1.204em" class="st5">(1)</tspan></text>		</g>
+		<g id="shape25-48" v:mID="25" v:groupContext="shape" transform="translate(66.3606,-101.323)">
+			<title>工作表.25</title>
+			<desc>3</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="13.6063" cy="131.539" width="27.22" height="20"/>
+			<rect x="0" y="121.539" width="27.2126" height="20" class="st7"/>
+			<text x="10.57" y="135.14" class="st8" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>3</text>		</g>
+		<g id="shape26-51" v:mID="26" v:groupContext="shape" transform="translate(76.5056,-101.323)">
+			<title>工作表.26</title>
+			<desc>4</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="13.6063" cy="131.539" width="27.22" height="20"/>
+			<rect x="0" y="121.539" width="27.2126" height="20" class="st7"/>
+			<text x="10.57" y="135.14" class="st8" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>4</text>		</g>
+	</g>
+</svg>
