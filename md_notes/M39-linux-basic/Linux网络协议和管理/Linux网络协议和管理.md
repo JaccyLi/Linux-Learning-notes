@@ -234,7 +234,7 @@ IP层或者更高层协议(TCP/UDP)使用。某些ICMP报文用来将差错报�
 
 ### 路径MTU
 
-当在同一个网络上的两台主机互相进行通信时，该网络的MTU是非常重要的。但是如果
+- 当在同一个网络上的两台主机互相进行通信时，该网络的MTU是非常重要的。但是如果
 两台主机之间的通信要通过多个网络，那么每个网络的链路层就可能有不同的MTU。重要的
 不是两台主机所在网络的MTU的值，重要的是两台通信主机路径中的最小MTU。它被称作
 路径MTU。两台主机之间的路径MTU不一定是个常数。它取决于当时所选择的路由。而选
@@ -391,6 +391,51 @@ TCP连接的另一端。
 由客户端决定何时终止连接，因为客户进程通常由用户交互控制，用户会键入诸如“quit”一样的
 命令来终止进程。在图2.4.3中，可以改变上边的标识，将左方定为服务器，右方定为客户，一切仍将像显示的一样工作。
 
+#### TCP的状态变迁图(有限状态机)
+
+![](png/2019-10-24-16-58-05.png)
+<center><font face="黑体" size=4 color=grey>图2.4.4-TCP的状态变迁图</font></center>
+
+- 如上图所示，所有有关发起和终止TCP连接的规则都可以在图中得到。
+- 图2.4.4中使用粗的实线箭头表示正常的客户端状态变迁，用粗的虚线箭头表示正常的
+服务器状态变迁。
+- 两个导致进入ESTABLISHED状态的变迁对应打开一个连接，而两个导致从ESTABLISHED
+状态离开的变迁对应关闭一个连接。ESTABLISHED状态是连接双方能够进行双向数据传递的状
+态。
+
+##### 2MSL等待状态
+
+- TIME_WAIT状态也称为2MSL等待状态。每个具体TCP实现必须选择一个报文段最大生
+存时间MSL（Maximum Segment Lifetime）。它是任何报文段被丢弃前在网络内的最长时
+间。我们知道这个时间是有限的，因为TCP报文段以IP数据报在网络内传输，而IP数据报则有
+限制其生存时间的TTL字段。
+
+|RFC 793 [Postel 1981c] 指出MSL为2分钟。然而，实现中的常用值是30秒，1分钟，或2分钟。||
+|:---|---|
+
+- 在实际应用中，对IP数据报TTL的限制是基于跳数，而不是定时器。对一个具体实现所给定
+的MSL值，处理的原则是：当TCP执行一个主动关闭，并发回最后一个ACK，该连接必须在TIME_WAIT
+状态停留的时间为2倍的MSL。这样可让TCP再次发送最后的ACK以防这个ACK丢失（另一端超时并
+重发最后的FIN）
+- 这种2MSL等待的另一个结果是这个TCP连接在2MSL等待期间，定义这个连接的插口（客户的IP地址
+和端口号，服务器的IP地址和端口号）不能再被使用。这个连接只能在2MSL结束后才能再被使用。
+
+![](png/2019-10-24-17-27-12.png)
+<center><font face="黑体" size=4 color=grey>图2.4.5-TCP正常连接建立和终止所对应的状态</font></center>
+
+- 在连接处于2MSL等待时，任何迟到的报文段将被丢弃。因为处于2MSL等待的、由该插
+口对(socketpair)定义的连接在这段时间内不能被再用，因此当要建立一个有效的连接时，来
+自该连接的一个较早替身（incarnation）的迟到报文段作为新连接的一部分不可能不被曲解
+（一个连接由一个插口对来定义。一个连接的新的实例（instance）称为该连接的替身）
+- 我们说图2.4.5中客户执行主动关闭并进入TIME_WAIT是正常的。服务器通常执行被动
+关闭，不会进入TIME_WAIT状态。这暗示如果我们终止一个客户程序，并立即重新启动这个
+客户程序，则这个新客户程序将不能重用相同的本地端口。这不会带来什么问题，因为客户
+使用本地端口，而并不关心这个端口号是什么。
+- 然而，对于服务器，情况就有所不同，因为服务器使用熟知端口。如果我们终止一个已
+经建立连接的服务器程序，并试图立即重新启动这个服务器程序，服务器程序将不能把它的
+这个熟知端口赋值给它的端点，因为那个端口是处于2MSL连接的一部分。在重新启动服务器
+程序前，它需要在1~4分钟。
+
 ### UDP协议
 
 - UDP是一个简单的面向数据报的运输层协议：进程的每个输出操作都正好产生一个UDP
@@ -398,90 +443,518 @@ TCP连接的另一端。
 程序产生的全体数据与真正发送的单个IP数据报可能没有什么联系。UDP数据报被封装成一份
 IP数据报的格式,如图2.4.4所示。
 ![](visio/UDP首部.svg)
-<center><font face="黑体" size=4 color=grey>图2.4.4-UDP头部字段格式</font></center>
+<center><font face="黑体" size=4 color=grey>图2.4.6-UDP头部字段格式</font></center>
 
-
-## 5.应用层
-
-
-# 五.IP地址规划 
+# 三.IP地址规划
 
 ## 1.传统的IP地址分类
 
-## 2.CIDR表示的网络地址
+- 传统的地址分类方法分为A、B、C、D和E类地址，E类保留未使用。如图3.1
 
-## 3.子网的划分
+![](png/2019-10-24-17-47-29.png)
+<center><font face="黑体" size=4 color=grey>图3.1.1-IPV4地址划分</font></center>
+
+- 具体的网络数、所容纳的主机数及私网地址等如下：
+
+```bash
+1.A类地址：
+  0000 0000 - 0111 1111: 1-127 
+  网络数：126, 127 
+  每个网络中的主机数：2^24-2 
+  默认子网掩码：255.0.0.0 
+  私网地址：10.0.0.0 
+2.B类地址：
+  1000 0000 - 1011 1111：128-191 
+  网络数：2^14
+  每个网络中的主机数：2^16-2 
+  默认子网掩码：255.255.0.0 
+  私网地址：172.16.0.0-172.31.0.0 
+3.C类地址：
+  1100 0000 - 1101 1111: 192-223 
+  网络数：2^21 
+  每个网络中的主机数：2^8-2 
+  默认子网掩码：255.255.255.0 
+  私网地址：192.168.0.0-192.168.255.0 
+4.D类地址：
+  D类地址为组播地址
+  1110 0000 - 1110 1111: 224-239 
+
+```
+
+- 公有地址
+- 每个公网地址都是独立拥有的，例如49.235.246.92这个地址目前就只有我能用:)，所以公网地址数量地有限的。
+![](png/2019-10-24-18-57-00.png)
+<center><font face="黑体" size=4 color=grey>图3.1.2-IPV4公有地址</font></center>
+
+- 私有地址
+- 为了节省IP，避免每台电脑都分配一个公网地址，还提供了私有地址。任何人都可以拥有私有地址，只能用于局域网而不能用于公网。
+- A、B和C类地址中都保留了一些范围的地址作为私有地址。
+![](png/2019-10-24-18-57-23.png)
+<center><font face="黑体" size=4 color=grey>图3.1.3-IPV4私有地址</font></center>
+
+- 特殊地址
+
+```bash
+0.0.0.0 
+	0.0.0.0不是一个真正意义上的IP地址。它表示所有不清楚的主机和目的网络 
+255.255.255.255 
+	限制广播地址。对本机来说，这个地址指本网段内(同一广播域)的所有主机 
+127.0.0.1～127.255.255.254 
+	本机回环地址，主要用于测试。在传输介质上永远不应该出现目的地址为“127.0.0.1”的数据包 
+224.0.0.0到239.255.255.255 
+	组播地址，224.0.0.1特指所有主机，224.0.0.2特指所有路由器。224.0.0.5指OSPF路由器，地址多用于一些特定的程序以及多媒体程序 
+169.254.x.x 
+	如果Windows主机使用了DHCP自动分配IP地址，而又无法从DHCP服务器获取地 址，系统会为主机分配这样地址
+```
+
+## 2.子网掩码
+
+- 子网掩码用来表示IP地址中的那些位是网络位，那些位是主机位。所以，子网掩码是决定IP地址
+属于哪个网段的。子网掩码必须结合IP地址使用，否则是没有意义的。
+- 在子网掩码中连续为1的高位表示网络位，连续全为0的低位表示主机位。
+- 子网掩码非常重要，配置错误的主机一定会出现通讯问题：每次主机之间通讯时先根据自己的IP
+地址和子网掩码来判断出自己的网段，再用自己的子网掩码和对方的IP地址计算目标所在网段，如
+果在同一网段，那么在链路层以太网数据封装成帧时封装的是目标主机的MAC地址，如果不在同一
+个网段，则封装的是本地路由器的MAC地址作为目标MAC地址。
+
+## 3.CIDR表示的网络地址
+
+- CIDR全称为：无类域内路由选择（Classless Inter-Domain Routing）
+- 描述IP和网段时，子网掩码一般和IP成对出现，例如：192.168.123.234 255.255.255.0
+但是这种表示方法比较长，另一种比较方便的表示方法就叫CIDR表示法。其直接将子网掩码为1的位数写在IP地址的后面。例如：192.168.123.234 255.255.255.0 可以改写为：192.168.123.234/24(24就是子网掩码全为1的位数)。
 
 ## 4.路由的概念
 
-# 六.Linux网络配置详解 
+- 每个数据包要在不同网络中传输，都需要进行路由，每次路由时都根据路由表中的记录决定
+下一跳该给谁。
+- 路由分为：
+  - 主机路由
+  - 网段路由
+  - 默认路由
+
+# 四.Linux网络配置详解
 
 ## 1.Linux网络管理命令及配置文件概览
 
 ### 命令概览
 
-```bash
-ifconfig
-route
-netstat
-ip: object {link, addr, route}
-ss
-tc  
-system-config-network-tui
-setup
-nmcli
-nm-connection-editor
-```
+![](png/Linux网络配置管理命令.png)
+<center><font face="黑体" size=4 color=grey>图4.1.1-IPV4私有地址</font></center>
 
 ### 配置文件概览
 
+![](png/Linux网络相关配置文件.png)
+<center><font face="黑体" size=4 color=grey>图4.1.2-IPV4私有地址</font></center>
+- /etc/sysconfig/network-scripts/ifcfg-ethX
+![](png/2019-10-24-21-39-27.png)
+
 ## 2.命令详细介绍
 
+### ifconfig
 
-# 七.多网卡绑定技术 
+- ifconfig命令 
+
+```bash 
+ifconfig [interface] 
+ifconfig -a 
+ifconfig IFACE [up|down] 
+		ifconfig interface [aftype] options | address ... 
+		ifconfig IFACE IP/netmask [up] 
+		ifconfig IFACE IP netmask NETMASK 
+注意：该命令更改后立即生效 
+启用混杂模式：[-]promisc 
+```
+
+### route
+
+- 路由管理命令 
+
+```bash
+查看：route -n 
+添加：route add 
+	route add  [-net|-host]  target [netmask Nm] [gw Gw] [[dev] If] 
+目标：192.168.1.3  网关：172.16.0.1 
+	route add -host 192.168.1.3 gw 172.16.0.1 dev eth0 
+目标：192.168.0.0 网关：172.16.0.1 
+	route add -net 192.168.0.0 netmask 255.255.255.0 gw 172.16.0.1 dev eth0 
+	route add -net 192.168.0.0/24 gw 172.16.0.1 dev eth0 
+默认路由，网关：172.16.0.1 
+	route add -net 0.0.0.0 netmask 0.0.0.0 gw 172.16.0.1 
+	route add default gw 172.16.0.1 
+删除：route del 
+	route del [-net|-host] target [gw Gw] [netmask Nm] [[dev] If] 
+目标：192.168.1.3  网关：172.16.0.1 
+	route del -host 192.168.1.3 
+目标：192.168.0.0 网关：172.16.0.1 
+	route del -net 192.168.0.0 netmask 255.255.255.0 
+```
+
+### ip
+
+- 配置Linux网络属性：ip 命令 
+```bash
+ip - show / manipulate routing, devices, policy routing and tunnels 
+ip [ OPTIONS ] OBJECT { COMMAND | help } 
+OBJECT := { link | addr | route } 
+ip link - network device configuration 
+	set dev IFACE 
+		可设置属性：
+		up and down：激活或禁用指定接口 
+			ifup/ifdown 
+	show [dev IFACE]：指定接口 
+		[up]：仅显示处于激活状态的接口 
+		
+ip addr { add | del } IFADDR dev STRING 
+	[label LABEL]：添加地址时指明网卡别名 
+	[scope {global|link|host}]：指明作用域 
+		global: 全局可用 
+		link: 仅链接可用 
+		host: 本机可用 
+	[broadcast ADDRESS]：指明广播地址  
+	ip addr add 172.16.100.100/16 dev eth0 label eth0:0 
+	ip addr del 172.16.100.100/16 dev eth0 label eth0:0 
+
+ip address show - look at protocol addresses 
+	[dev DEVICE] 
+	[label PATTERN] 
+	[primary and secondary] 
+	
+ip addr flush   使用格式同show 
+	ip addr flush dev eth0
+
+ip route - routing table management 
+	添加路由：ip route add 
+	ip route add TARGET via GW dev IFACE src SOURCE_IP 
+		TARGET: 
+		主机路由：IP 
+		网络路由：NETWORK/MASK 
+		ip route add 192.168.0.0/24 via 172.16.0.1 
+		ip route add 192.168.1.100 via 172.16.0.1 
+		添加网关：ip route add default via GW dev IFACE 
+		ip route add  default via 172.16.0.1 
+	删除路由：ip route del TARGET  
+	显示路由：ip route show|list 
+	清空路由表：ip route flush [dev IFACE]  [via PREFIX] 
+		  ip route flush dev eth0 
+```
+
+### netstat
+
+- 显示网络连接
+
+```bash 
+netstat [--tcp|-t] [--udp|-u] [--raw|-w] [--listening|-l] [--all|-a] [--
+numeric|-n] [--extend|-e[--extend|-e]]  [--program|-p] 
+	-t: tcp协议相关 
+	-u: udp协议相关 
+	-w: raw socket相关 
+	-l: 处于监听状态 
+	-a: 所有状态 
+	-n: 以数字显示IP和端口 
+	-e：扩展格式 
+	-p: 显示相关进程及PID 
+常用组合： 
+	-tan, -uan, -tnl, -unl 
+显示路由表： 
+	netstat  {--route|-r} [--numeric|-n] 
+		-r: 显示内核路由表 
+		-n: 数字格式 
+显示接口统计数据： 
+netstat  {--interfaces|-I|-i} [iface] [--all|-a] [--extend|-e] [--program|-p] 
+[--numeric|-n]  
+	netstat -i 
+	netstat –I=IFACE 
+	ifconfig -s eth0 
+```
+
+### ss
+
+- 格式：ss [OPTION]... [FILTER] 
+- netstat通过遍历proc来获取socket信息，ss使用netlink与内核tcp_diag模块
+通信获取socket信息 
+
+```bash 
+	-t: tcp协议相关 
+	-u: udp协议相关 
+	-w: 裸套接字相关 
+	-x：unix sock相关 
+	-l: listen状态的连接 
+	-a: 所有 
+	-n: 数字格式 
+	-p: 相关的程序及PID 
+	-e: 扩展的信息 
+	-m：内存用量 
+	-o：计时器信息
+FILTER :  [ state TCP-STATE ] [ EXPRESSION ] 
+TCP的常见状态:(tcp finite state machine) 
+	LISTEN: 监听 
+	ESTABLISHED：已建立的连接 
+	FIN_WAIT_2 
+	SYN_SENT 
+	SYN_RECV 
+	CLOSED 
+EXPRESSION: 
+	dport =  
+	sport =  
+	示例：'( dport = :ssh or sport = :ssh )' 
+常用组合：
+-tan, -tanl, -tanlp, -uan 
+常见用法 
+	ss -l 显示本地打开的所有端口 
+	ss -pl 显示每个进程具体打开的socket 
+	ss -t -a 显示所有tcp socket 
+	ss -u -a 显示所有的UDP Socekt 
+	ss -o state established '( dport = :ssh or sport = :ssh )' 显示所有已建立的ssh连接 
+	ss -o state established '( dport = :http or sport = :http )' 显示所有已建立的HTTP连接 
+	ss -s 列出当前socket详细信息
+```
+
+### nmcli
+
+- 功能强大的地址配置工具：nmcli 
+
+```bash
+nmcli  [ OPTIONS ] OBJECT { COMMAND | help } 
+	device - show and manage network interfaces 
+	nmcli device help 
+	connection - start, stop, and manage network connections 
+	nmcli connection help 
+修改IP地址等属性： 
+	nmcli connection modify IFACE [+|-]setting.property value 
+		setting.property: 
+		ipv4.addresses 
+		ipv4.gateway 
+		ipv4.dns1   ipv4.method manual | auto 
+修改配置文件执行生效：systemctl restart network 
+	nmcli con reload 
+nmcli命令生效： nmcli con down eth0 ;nmcli con up eth0 
+显示所有包括不活动连接 
+	nmcli con show 
+显示所有活动连接 
+	nmcli con show --active 
+显示网络连接配置 
+	nmcli con show  "System eth0" 
+显示设备状态 
+	nmcli  dev  status  
+显示网络接口属性 
+	nmcli  dev show eth0 
+创建新连接default，IP自动通过dhcp获取 
+	nmcli  con add con-name default  type Ethernet ifname eth0 
+删除连接 
+	nmcli con del default 
+创建新连接static ，指定静态IP，不自动连接 
+	nmcti con add con-name static   ifname eth0 autoconnect no type Ethernet ipv4.addresses 172.25.X.10/24 ipv4.gateway   172.25.X.254 
+启用static连接配置 
+	nmcli con up static 
+启用default连接配置 
+	nmcli con up default 
+查看帮助 
+	nmcli con add help 
+修改连接设置 
+    nmcli con mod “static” connection.autoconnect no 
+    nmcli con mod “static”  ipv4.dns 172.25.X.254 
+    nmcli con mod “static”  +ipv4.dns  8.8.8.8 
+    nmcli con mod “static”  -ipv4.dns  8.8.8.8 
+    nmcli con mod “static” ipv4.addresses “172.16.X.10/24  172.16.X.254” 
+    nmcli con mod “static”  +ipv4.addresses 10.10.10.10/16 
+DNS设置，存放在/etc/resolv.conf文件中 
+	PEERDNS=no 表示当IP通过dhcp自动获取时，dns仍是手动设置，不自动获取
+等价于下面命令： 
+	nmcli con mod “system eth0” ipv4.ignore-auto-dns yes 
+修改连接配置后，需要重新加载配置 
+	nmcli  con reload 
+	nmcli  con down “system eth0” 可被自动激活 
+	nmcli  con up  “system eth0” 
+	nmcli dev dis eth0 禁用网卡，访止被自动激活 
+图形工具 
+	nm-connection-editor 
+字符工具 
+	nmtui 
+	nmtui-connect    
+	nmtui-edit       
+	nmtui-hostname 
+```
+
+
+# 五.多网卡绑定技术
 
 ## 1.概念
 
-## 2.实现
+- 将多块网卡绑定同一IP地址对外提供服务，可以实现高可用或者负载均衡。直接给两块网卡设置同
+一IP地址是不可以的。通过bonding，虚拟一块网卡对外提供连接，物理网卡的被修改为相同的MAC地址。
+- Bonding工作模式 
+  - 共7种模式：0-6 Mode 
 
+|||
+|---|:---|
+|Mode 0 (balance-rr)|轮询（Round-robin）策略，从头到尾顺序的在每 一个slave接口上面发送数据包。本模式提供负载均衡和容错的能力|
+|Mode 1 (active-backup)|活动-备份（主备）策略，只有一个slave被激活，当且仅当活动的slave接口失败时才会激活其他slave.为了避免交换机发生混乱此时绑定的MAC地址只有一个外部端口上可见|
+|Mode 3 (broadcast)|广播策略，在所有的slave接口上传送所有的报文,提供容错能力 |
+|active-backup、balance-tlb 和 balance-alb 模式不需要交换机的任何特殊配置。其他绑定模式需要配置交换机以便整合链接。如：Cisco 交换机需要在模式 0、2 和 3 中使用 EtherChannel，但在模式4中需要LACP和EtherChannel ||
 
-# 八.Linux软件网桥
+## 2.修改配置文件实现bond0
+
+- 创建bonding设备的配置文件结合网卡硬件就可以实现bond0
+
+```bash
+/etc/sysconfig/network-scripts/ifcfg-bond0 
+	DEVICE=bond0 
+	BOOTPROTO=none 
+	BONDING_OPTS="miimon=100  mode=0" 
+/etc/sysconfig/network-scripts/ifcfg-eth0 
+	DEVICE=eth0 
+	BOOTPROTO=none 
+	MASTER=bond0 
+	SLAVE=yes 
+	USERCTL=no 
+/etc/sysconfig/network-scripts/ifcfg-eth1 
+	DEVICE=eth1 
+	BOOTPROTO=none 
+	MASTER=bond0 
+	SLAVE=yes 
+	USERCTL=no 
+查看bond0状态：/proc/net/bonding/bond0
+miimon 是用来进行链路监测的。如果miimon=100，那么系统每100ms 监测 
+一次链路连接状态，如果有一条线路不通就转入另一条线路 
+删除bond0 
+	ifconfig bond0 down 
+	rmmod bonding 
+详细帮助： 
+	/usr/share/doc/kernel-doc- version/Documentation/networking/bonding.txt 
+	https://www.kernel.org/doc/Documentation/networking/bonding.txt 
+```
+## 3.使用nmcli实现bonding 
+
+- 添加bonding接口 
+`nmcli con add type bond con-name mybond0 ifname bond0 mode active-backup` 
+- 添加从属接口 
+`nmcli con add type bond-slave ifname ens7 master bond0` 
+`nmcli con add type bond-slave ifname ens3 master bond0` 
+   注：如无为从属接口提供连接名，则该名称是接口名称加类型构成 
+- 要启动绑定，则必须首先启动从属接口 
+`nmcli con up bond-slave-eth0` 
+`nmcli con up bond-slave-eth1` 
+- 启动绑定 
+`nmcli con up mybond0` 
+
+# 六.Linux软件网桥
 
 ## 1.概念
 
+- 桥接：把一台机器上的若干个网络接口“连接”起来。其结果是，其中一个网
+收到的报文会被复制给其他网口并发送出去。以使得网口之间的报文能够互
+相转发。网桥就是这样一个设备，它有若干个网口，并且这些网口是桥接起来
+的。与网桥相连的主机就能通过交换机的报文转发而互相通信。 
+- 如图6.1.1所示，主机A发送的报文被送到交换机S1的eth0口，由于eth0与eth1、
+eth2桥接在一起，故而报文被复制到eth1和eth2，并且发送出去，然后被主机B和交换机S2
+接收到。而S2又会将报文转发给主机C、D。
+
+![](png/2019-10-24-22-13-01.png)
+<center><font face="黑体" size=4 color=grey>图6.1.1-交换机示意</font></center>
+
 ## 2.实现
 
+- 创建软件网桥 
+    nmcli con add con-name mybr0 type bridge ifname br0 
+    nmcli con modify mybr0 ipv4.addresses 192.168.0.100/24 ipv4.method manual 
+    nmcli con add con-name br0-port0 type bridge-slave  ifname eth0 master br0 
+- 查看配置文件 
+    cat  /etc/sysconfig/network-scripts/ifcfg-br0 
+    cat  /etc/sysconfig/network-scripts/ifcfg-br0-port0 
+- 工具包 
+yum install bridge-utils 
+- 查看网桥 
+	brctl  show 
+- 查看CAM表 
+	brctl  showmacs br0 
+- 添加和删除网桥    
+	brctl addbr | delbr br0  
+- 添加和删除网桥中网卡   
+	brctl addif | delif br0 eth0 
+	注意：NetworkManager只支持以太网接口接口连接到网桥，不支持聚合接口 
 
-# 九.Linux下的网络测试工具
+# 七.Ubuntu的网络设置
+
+## 网卡名称
+- 默认ubuntu的网卡名称和CentOS 7类似，如：ens33，ens38等 
+修改网卡名称为传统命名方式： 
+```
+	vim /etc/default/grub 
+	GRUB_CMDLINE_LINUX="net.ifnames=0"  
+生效新的grub.cfg文件 
+	grub-mkconfig -o /boot/grub/grub.cfg  
+reboot  
+```
+- Ubuntu的.yaml网络配置文件需要严格控制缩进
+```
+官网文档： 
+https://help.ubuntu.com/lts/serverguide/network-configuration.html.zh-CN 
+
+配置自动获取IP 
+cat /etc/netplan/01-netcfg.yaml 
+network: 
+    version: 2 
+    renderer: networkd 
+    ethernets: 
+       ens33: 
+           dhcp4: yes 
+修改网卡配置文件后需执行命令生效：netplan apply 
+
+配置静态IP： 
+cat /etc/netplan/01-netcfg.yaml 
+network: 
+    version: 2 
+    renderer: networkd 
+    ethernets: 
+        eth0: 
+            addresses: 
+				- 192.168.6.10/24 
+				- 10.10.10.10/24 
+            gateway4: 192.168.6.1 
+            nameservers: 
+                search: [mydomain, otherdomain] 
+                addresses: [223.5.5.5, 8.8.8.8, 1.1.1.1] 
+```
+
+- 查看ip和gateway 
+```
+	ip addr 
+	route -n 
+查看DNS 
+	ls -l /etc/resolv.conf  
+	lrwxrwxrwx 1 root root 39 Dec 12 11:36 /etc/resolv.conf -> ../run/systemd/resolve/stub-resolv.conf 
+	
+	systemd-resolve --status 
+修改主机名 
+	hostnamectl set-hostname  ubuntu1904 
+```
+
+# 八.Linux下的网络测试工具
 
 ## hostname显示主机名 
 
-hostname 
+man hostname
 
 ## ping测试网络连通性 
 
-ping  
+man ping  
 
 ## ip/route显示正确的路由表 
 
-ip route 
-
 ## 跟踪路由 
 
-traceroute 
-tracepath 
-mtr 
+man traceroute 
+man tracepath 
+man mtr 
 
 ## 确定名称服务器
 
-nslookup 
-host 
-dig 
-
+man nslookup 
+man host 
+man dig 
 
 注脚
 ---------------------------
-
 [^1]:当目的主机收到一个以太网数据帧时，数据就开始从协议栈中由底向上升，同时去掉
 各层协议加上的报文首部。每层协议盒都要去检查报文首部中的协议标识，以确定接收数据
 的上层协议。这个过程称作分用(Demultiplexing)
