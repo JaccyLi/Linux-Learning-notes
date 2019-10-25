@@ -2,7 +2,7 @@
 
 # 一.网络设备基本知识 
 
-![](png/网络设备基本知识.png)
+![](https://img-blog.csdnimg.cn/20191025084721344.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=2 color=grey>图1-网络设备基本知识</font></center>
 
 # 二.TCP/IP协议栈简介 
@@ -34,7 +34,7 @@ TCP为两台主机提供高可靠性的数据通信。它所做的工作包括�
 	•SMTP简单邮件传送协议。
 	•SNMP简单网络管理协议。
 
-![](png/TCP-IP协议栈.png)
+![](https://img-blog.csdnimg.cn/20191025084847262.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=2 color=grey>图2.1-TCP/IP协议栈所在的4层</font></center>
 
 ## 2.数据链路层
@@ -77,7 +77,8 @@ Ctrl字段的值设为3。随后的3个字节orgcode都置为0。再接下来的
 至少为38字节，而对于以太网，则要求最少要有46字节。
 
 - IEEE802.2-802.3和以太网的数据帧封装格式
-![](visio/IEEE802.2-802.3和以太网的封装格式.svg)
+![](https://img-blog.csdnimg.cn/20191025085117561.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
 <center><font face="黑体" size=4 color=grey>图2.2.1</font></center>
 
 ### 串行接口链路层协议SLIP
@@ -99,7 +100,8 @@ Ctrl字段的值设为3。随后的3个字节orgcode都置为0。再接下来的
 IPNCP允许双方商定是否对报文首部进行压缩，类似于CSLIP（缩写词NCP也可用在TCP的前面）。
 
 - PPP数据帧的格式
-![](visio/PPP数据帧的格式.svg)
+
+![](https://img-blog.csdnimg.cn/20191025085339441.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图2.2.2</font></center>
 
 - PPP数据帧字段
@@ -134,7 +136,7 @@ IPNCP允许双方商定是否对报文首部进行压缩，类似于CSLIP（缩�
 程，只是当IP数据报离开网络层时把它返回给自己。
 - 图2.2.3是环回接口处理IP数据报的简单过程
 
-![](png/loopback.jpg)
+![](https://img-blog.csdnimg.cn/20191025085448576.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图2.2.3环回接口处理IP数据报的过程</font></center>
 
 - 图中需要指出的关键点有：
@@ -175,7 +177,7 @@ IPNCP允许双方商定是否对报文首部进行压缩，类似于CSLIP（缩�
 如果一信源向相同的信宿发送两个连续的数据报（先是A，然后是B），每个数据报都是独立地
 进行路由选择，可能选择不同的路线，因此B可能在A到达之前先到达。
 
-![](visio/IP首部.svg)
+![](https://img-blog.csdnimg.cn/20191025085607291.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图2.3.1-IP报文头部格式</font></center>
 
 - 头部各字节的具体含义如下:
@@ -196,7 +198,8 @@ IPNCP允许双方商定是否对报文首部进行压缩，类似于CSLIP（缩�
 |32位目的地址|数据的目的主机IP地址|
 |选项|最后一个字段是任选项，是数据报中的一个可变长的可选信息。目前，这些任选项定义这些选项很少被使用，并非所有的主机和路由器都支持这些选项。|
 
-![](png/2019-10-24-09-19-05.png)
+![](https://img-blog.csdnimg.cn/20191025090010222.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
 <center><font face="黑体" size=4 color=grey>图2.3.2-不同应用建议的TOS值</font></center>
 
 - Telnet和Rlogin这两个交互应用要求最小的传输时延，因为人们主要用它们来传输少量的
@@ -207,7 +210,9 @@ IPNCP允许双方商定是否对报文首部进行压缩，类似于CSLIP（缩�
 
 - ICMP协议全称为：Internet控制报文协议，主要用于传递差错报文和其他信息。ICMP报文通常被
 IP层或者更高层协议(TCP/UDP)使用。某些ICMP报文用来将差错报文传给用户进程。图2.3.3位ICMP报文格式。
-![](visio/ICMP.svg)
+
+![](https://img-blog.csdnimg.cn/20191025090133818.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
 <center><font face="黑体" size=4 color=grey>图2.3.3-ICMP报文格式</font></center>
 
 ### IGMP协议
@@ -219,7 +224,9 @@ IP层或者更高层协议(TCP/UDP)使用。某些ICMP报文用来将差错报�
 - 图3.4是版本为1的IGMP。IGMP类型为1说明是由多播路由器发出的查询报文，为2说明是主机发出的报告报文。
 检验和的计算和ICMP协议相同。组地址为D类IP地址。在查询报文中组地址设置为0，在报告报文中组地址
 为要参加的组地址。
-![](visio/IGMP.svg)
+
+![](https://img-blog.csdnimg.cn/20191025090558527.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
 <center><font face="黑体" size=4 color=grey>图2.3.4-IGMP报文格式</font></center>
 
 ### 最大传输单元MTU
@@ -229,7 +236,7 @@ IP层或者更高层协议(TCP/UDP)使用。某些ICMP报文用来将差错报�
 - 如果I P层有一个数据报要传，而且数据的长度比链路层的MTU还大，那么IP层
 就需要进行分片（fragmentation），把数据报分成若干片，这样每一片都小于MTU。
 
-![](png/2019-10-24-14-27-27.png)
+![](https://img-blog.csdnimg.cn/20191025104428460.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图2.3.5几种常见的MTU</font></center>
 
 ### 路径MTU
@@ -284,7 +291,7 @@ TCP连接的另一端。
 |:---|---|
 
 - TCP数据被封装在一个IP数据报中,TCP头部字段格式见图2.4.1
-![](visio/TCP首部.svg)
+![](https://img-blog.csdnimg.cn/2019102511005542.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><fontface="黑体"size=4color=grey>图2.4.1-TCP头部字段格式</font></center>
 
 - 每个TCP段都包含源端和目的端的端口号，用于寻找发端和收端应用进程。这两个值加
@@ -360,7 +367,7 @@ TCP连接的另一端。
   - 3)客户必须将确认序号设置为服务器的ISN加1以对服务器的SYN报文段进行确认（报文段3）。
 - 通过这三个报文后就建立连接了。这个过程也称为三次握手(three-way handshake)。
 - 图2.4.4记录了客户端使用telnet连接服务器后再使用quit命令关闭连接的过程。
-![](png/2019-10-24-15-54-22.png)
+![](https://img-blog.csdnimg.cn/20191025110255379.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><fontface="黑体"size=4color=grey>图2.4.2-TCP建立连接的三步和断开连接的四步</font></center>
 
 #### 四次握手断开连接
@@ -378,7 +385,7 @@ TCP连接的另一端。
 - 图2.4.2中的报文段4发起终止连接，它由Telnet客户端关闭连接时发出。这在键入quit
 命令后发生。它将导致TCP客户端发送一个FIN，用来关闭从客户到服务器的数据传送。
 
-![](png/2019-10-24-16-16-29.png)
+![](https://img-blog.csdnimg.cn/20191025110430125.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><fontface="黑体"size=4color=grey>图2.4.3-连接终止期间报文段的交换过程</font></center>
 
 - 当服务器收到这个FIN，它发回一个ACK，确认序号为收到的序号加1（报文段5）。和SYN一样，
@@ -393,7 +400,7 @@ TCP连接的另一端。
 
 #### TCP的状态变迁图(有限状态机)
 
-![](png/2019-10-24-16-58-05.png)
+![](https://img-blog.csdnimg.cn/20191025110522940.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图2.4.4-TCP的状态变迁图</font></center>
 
 - 如上图所示，所有有关发起和终止TCP连接的规则都可以在图中得到。
@@ -420,7 +427,7 @@ TCP连接的另一端。
 - 这种2MSL等待的另一个结果是这个TCP连接在2MSL等待期间，定义这个连接的插口（客户的IP地址
 和端口号，服务器的IP地址和端口号）不能再被使用。这个连接只能在2MSL结束后才能再被使用。
 
-![](png/2019-10-24-17-27-12.png)
+![](https://img-blog.csdnimg.cn/2019102513421861.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图2.4.5-TCP正常连接建立和终止所对应的状态</font></center>
 
 - 在连接处于2MSL等待时，任何迟到的报文段将被丢弃。因为处于2MSL等待的、由该插
@@ -442,7 +449,9 @@ TCP连接的另一端。
 数据报，并组装成一份待发送的IP数据报。这与面向流字符的协议不同，如TCP，应用
 程序产生的全体数据与真正发送的单个IP数据报可能没有什么联系。UDP数据报被封装成一份
 IP数据报的格式,如图2.4.4所示。
-![](visio/UDP首部.svg)
+
+![](https://img-blog.csdnimg.cn/20191025134419478.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
 <center><font face="黑体" size=4 color=grey>图2.4.6-UDP头部字段格式</font></center>
 
 # 三.IP地址规划
@@ -451,7 +460,7 @@ IP数据报的格式,如图2.4.4所示。
 
 - 传统的地址分类方法分为A、B、C、D和E类地址，E类保留未使用。如图3.1
 
-![](png/2019-10-24-17-47-29.png)
+![](https://img-blog.csdnimg.cn/20191025134509580.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图3.1.1-IPV4地址划分</font></center>
 
 - 具体的网络数、所容纳的主机数及私网地址等如下：
@@ -483,13 +492,15 @@ IP数据报的格式,如图2.4.4所示。
 
 - 公有地址
 - 每个公网地址都是独立拥有的，例如49.235.246.92这个地址目前就只有我能用:)，所以公网地址数量地有限的。
-![](png/2019-10-24-18-57-00.png)
+
+![](https://img-blog.csdnimg.cn/20191025134547901.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图3.1.2-IPV4公有地址</font></center>
 
 - 私有地址
 - 为了节省IP，避免每台电脑都分配一个公网地址，还提供了私有地址。任何人都可以拥有私有地址，只能用于局域网而不能用于公网。
 - A、B和C类地址中都保留了一些范围的地址作为私有地址。
-![](png/2019-10-24-18-57-23.png)
+
+![](https://img-blog.csdnimg.cn/20191025134623976.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图3.1.3-IPV4私有地址</font></center>
 
 - 特殊地址
@@ -538,14 +549,15 @@ IP数据报的格式,如图2.4.4所示。
 
 ### 命令概览
 
-![](png/Linux网络配置管理命令.png)
-<center><font face="黑体" size=4 color=grey>图4.1.1-IPV4私有地址</font></center>
+![](https://img-blog.csdnimg.cn/20191025134727495.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+<center><font face="黑体" size=4 color=grey>图4.1.1-Linux网络相关配置命令</font></center>
 
 ### 配置文件概览
 
 ![](png/Linux网络相关配置文件.png)
-<center><font face="黑体" size=4 color=grey>图4.1.2-IPV4私有地址</font></center>
+<center><font face="黑体" size=4 color=grey>图4.1.2-Linux网络相关配置文件</font></center>
 - /etc/sysconfig/network-scripts/ifcfg-ethX
+
 ![](png/2019-10-24-21-39-27.png)
 
 ## 2.命令详细介绍
@@ -849,7 +861,7 @@ miimon 是用来进行链路监测的。如果miimon=100，那么系统每100ms 
 eth2桥接在一起，故而报文被复制到eth1和eth2，并且发送出去，然后被主机B和交换机S2
 接收到。而S2又会将报文转发给主机C、D。
 
-![](png/2019-10-24-22-13-01.png)
+![](https://img-blog.csdnimg.cn/20191025135151873.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 <center><font face="黑体" size=4 color=grey>图6.1.1-交换机示意</font></center>
 
 ## 2.实现
