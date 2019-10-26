@@ -1,0 +1,133 @@
+{
+    "pasteImage.path": "${currentFileDir}/png",
+    "window.zoomLevel": 1,
+    "vim.highlightedyank.enable": true,
+    "vim.history": 100,
+    "vim.ignorecase": false,
+    "editor.fontSize": 16,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 100000,
+    "files.defaultLanguage": "english",
+    "vim.enableNeovim": true,
+    "vim.disableExtension": false,
+    "vim.neovimPath": "C:\\Program Files\\Neovim\\bin\\nvim.exe"
+}
+
+
+"vim.insertModeKeyBindings": [
+    {
+        "before": ["j", "j"],
+        "after": ["<Esc>"]
+    }
+]
+
+"vim.normalModeKeyBindings": [
+    {
+        "before": ["£"],
+        "after": ["#"]
+    }
+]
+
+"vim.normalModeKeyBindingsNonRecursive": [
+    {
+        "before": [":"],
+        "commands": [
+            "workbench.action.showCommands",
+        ]
+    }
+]
+
+"vim.normalModeKeyBindingsNonRecursive": [
+    {
+        "before": ["<leader>", "m"],
+        "commands": [
+            "bookmarks.toggle"
+        ]
+    },
+    {
+        "before": ["<leader>", "b"],
+        "commands": [
+            "bookmarks.list"
+        ]
+    }
+]
+
+
+"vim.normalModeKeyBindingsNonRecursive": [
+    {
+        "before": ["Z", "Z"],
+        "commands": [
+            ":wq"
+        ]
+    }
+]
+
+"vim.normalModeKeyBindingsNonRecursive": [
+    {
+        "before":["<C-n>"],
+        "commands": [
+            ":nohl",
+        ]
+    },
+    {
+        "before": ["leader", "w"],
+        "commands": [
+            "workbench.action.files.save",
+        ]
+    }
+]
+
+"vim.visualModeKeyBindingsNonRecursive": [
+    {
+        "before": [
+            "p",
+        ],
+        "after": [
+            "p",
+            "g",
+            "v",
+            "y"
+        ]
+    }
+],
+
+"vim.visualModeKeyBindingsNonRecursive": [
+    {
+        "before": [
+            ">"
+        ],
+        "commands": [
+            "editor.action.indentLines"
+        ]
+    },
+    {
+        "before": [
+            "<"
+        ],
+        "commands": [
+            "editor.action.outdentLines"
+        ]
+    },
+]
+
+"vim.visualModeKeyBindingsNonRecursive": [
+    {
+        "before": [
+            "<leader>", "v", "i", "m"
+        ],
+        "commands": [
+            {
+                "command": "git.clone",
+                "args": [ "https://github.com/VSCodeVim/Vim.git" ]
+            }
+        ]
+    }
+]
+"vim.insertModeKeyBindingsNonRecursive"/"normalModeKeyBindingsNonRecursive"/"visualModeKeyBindingsNonRecursive"
+
+"vim.normalModeKeyBindingsNonRecursive": [
+    {
+        "before": ["j"],
+        "after": ["g", "j"]
+    }
+]
