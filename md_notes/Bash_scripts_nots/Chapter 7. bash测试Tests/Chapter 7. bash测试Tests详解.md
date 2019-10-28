@@ -552,7 +552,7 @@ if [ "$a" -lt "$b" ]
 if [ "$a" -le "$b" ]
 
 < 小于(必须在双圆括号结构中)
- (("$a" < "$b"))
+(("$a" < "$b"))
  
 <= 小于或等于(必须在双圆括号结构中)
 (("$a" <= "$b"))
@@ -569,18 +569,15 @@ if [ "$a" -le "$b" ]
 ```bash
 = is equal to
 if [ "$a" = "$b" ]
-Note the whitespace framing the =.
-if [ "$a"="$b" ] is not equivalent to the above.
+  注意=两边的空格.
+if [ "$a"="$b" ] # 注意：该写法与上面的不等价.
 == is equal to
 if [ "$a" == "$b" ]
-This is a synonym for =.
+该写法是 = 的近似写法.
 ```
 
-- The == comparison operator behaves differently within a double-brackets test than
-within single brackets.
-
 ```bash
-[[ $a == z* ]]   # True if $a starts with an "z" (pattern matching).
+[[ $a == z* ]]   # 如果 $a 以字母"z"开头则为真(pattern matching).
 [[ $a == "z*" ]] # True if $a is equal to z* (literal matching).
 [ $a == z* ]     # File globbing and word splitting take place.
 [ "$a" == "z*" ] # True if $a is equal to z* (literal matching).

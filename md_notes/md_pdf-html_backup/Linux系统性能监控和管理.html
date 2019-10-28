@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Linux系统性能监控和管理.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<center> <font face="黑体" size=6 color=grey>Linux系统性能监控和管理</font></center>
+<h2 id="1top%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F%E8%BF%9B%E7%A8%8B">1.top监控系统进程</h2>
+<ul>
+<li>top 命令查看进程时可自定义刷新频率，比较直观</li>
+<li>用法</li>
+</ul>
+<pre class="hljs"><code><div>SYNOPSIS
+       top -hv|-bcHiOSs -d secs -n max -u|U user -p pid -o fld -w [cols]
+[root@centos7 ~]<span class="hljs-comment">#top</span>
+top - 17:39:10 up 23:05,  4 users,  load average: 0.00, 0.01, 0.05
+Tasks: 290 total,   1 running, 289 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.2 us,  0.1 sy,  0.0 ni, 99.8 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem : 71.5/1526208  [|||||||||||||||||||||||||||||||||||||||||               ]
+KiB Swap:  0.9/3145724  [                                                        ]
+
+   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+  2152 root      20   0 3605496 183924  32756 S   1.0 12.1   2:05.55 gnome-shell
+  2435 root      20   0 1371916  75124   8116 S   0.0  4.9   0:06.11 gnome-softwa+
+  1531 root      20   0  419092  69204  31728 S   0.0  4.5   0:08.68 X
+  2593 root      20   0  752624  27920   9716 S   0.0  1.8   0:03.07 gnome-termin+
+  ...
+</div></code></pre>
+<ul>
+<li>对某列信息排序</li>
+</ul>
+<pre class="hljs"><code><div>P：以占据的CPU百分比,%CPU 
+M：占据内存百分比,%MEM 
+T：累积占据CPU时长,TIME+ 
+首部信息显示： 
+   uptime信息：l命令 
+   tasks及cpu信息：t命令 
+   cpu分别显示：1 (数字) 
+   memory信息：m命令 
+退出命令：q 
+修改刷新时间间隔：s 
+终止指定进程：k 
+保存文件：W 
+</div></code></pre>
+<ul>
+<li>%Cpu(s)栏位信息简介</li>
+</ul>
+<pre class="hljs"><code><div>us：用户空间  
+sy：内核空间 
+ni：调整nice时间 
+id：空闲 
+wa：等待IO时间 
+hi：硬中断  
+si：软中断（模式切换） 
+st：虚拟机偷走的时间 
+</div></code></pre>
+<ul>
+<li>选项</li>
+</ul>
+<pre class="hljs"><code><div>-d <span class="hljs-comment"># 指定刷新时间间隔，默认为3秒 </span>
+-b 全部显示所有进程 
+-n <span class="hljs-comment"># 刷新多少次后退出 </span>
+-H  线程模式，示例：top -H -p `pidof mysqld` 
+</div></code></pre>
+<ul>
+<li>htop命令：其使用不同的颜色来标识不同的信息，甚至支持鼠标点击相应的选项；来自EPEL源</li>
+</ul>
+<pre class="hljs"><code><div>选项： 
+  -d <span class="hljs-comment">#: 指定延迟时间； </span>
+  -u UserName: 仅显示指定用户的进程 
+  -s COLUME: 以指定字段进行排序 
+ 进入程序后的子命令： 
+  s：跟踪选定进程的系统调用 
+  l：显示选定进程打开的文件列表 
+  a：将选定的进程绑定至某指定CPU核心 
+  t：显示进程树
+</div></code></pre>
+<h2 id="2free%E5%91%BD%E4%BB%A4%E6%9F%A5%E7%9C%8B%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5">2.free命令查看内存空间使用情况</h2>
+<ul>
+<li>用法</li>
+</ul>
+<pre class="hljs"><code><div>free [OPTION] 
+
+  -b  以字节为单位 
+  -m  以MB为单位 
+  -g  以GB为单位 
+  -h  易读格式 
+  -o  不显示-/+buffers/cache行 
+  -t   显示RAM + swap的总和 
+  -s  n  刷新间隔为n秒 
+  -c  n  刷新n次后即退出 
+
+[root@centos7 ~]<span class="hljs-comment">#free -ht</span>
+              total        used        free      shared  buff/cache   available
+Mem:           1.5G        829M        139M         55M        522M        432M
+Swap:          3.0G         29M        3.0G
+Total:         4.5G        858M        3.1G
+
+</div></code></pre>
+<ul>
+<li>free命令所显示的各部分图示</li>
+</ul>
+<p><img src="png/2019-10-27-17-47-44.png" alt=""></p>
+<h2 id="3vmstat%E5%91%BD%E4%BB%A4%E6%9F%A5%E7%9C%8B%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BF%A1%E6%81%AF">3.vmstat命令查看虚拟内存信息</h2>
+<pre class="hljs"><code><div>[root@centos8 ~]<span class="hljs-comment">#vmstat</span>
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   <span class="hljs-keyword">in</span>   cs us sy id wa st
+ 1  0 351744 221400     48 310228    0    3    12    10   96  123  0  1 99  0  0
+</div></code></pre>
+<ul>
+<li>分栏说明</li>
+</ul>
+<pre class="hljs"><code><div>procs
+  r：可运行（正运行或等待运行）进程的个数，和核心数有关 
+  b：处于不可中断睡眠态的进程个数(被阻塞的队列的长度) 
+memory
+  swpd: 交换内存的使用总量  
+  free：空闲物理内存总量 
+  buffer：用于buffer的内存总量 
+  cache：用于cache的内存总量 
+swap
+  si：从磁盘交换进内存的数据速率(kb/s) 
+  so：从内存交换至磁盘的数据速率(kb/s) 
+io
+  bi：从块设备读入数据到系统的速率(kb/s) 
+  bo: 保存数据至块设备的速率 
+system
+  <span class="hljs-keyword">in</span>: interrupts  中断速率，包括时钟 
+  cs: context switch  进程切换速率 
+cpu
+  us:Time spent running non-kernel code 
+  sy: Time spent running kernel code 
+  id: Time spent idle. Linux 2.5.41前,包括IO-wait time. 
+  wa: Time spent waiting <span class="hljs-keyword">for</span> IO.  2.5.41前，包括<span class="hljs-keyword">in</span> idle. 
+  st: Time stolen from a virtual machine.  2.6.11前, unknown. 
+选项
+  -s: 显示内存的统计数据
+</div></code></pre>
+<pre class="hljs"><code><div>[root@centos8 ~]<span class="hljs-comment">#vmstat -s</span>
+      1601624 K total memory
+      1070076 K used memory
+       304720 K active memory
+       355440 K inactive memory
+       220684 K free memory
+           48 K buffer memory
+       310816 K swap cache
+      3145724 K total swap
+       351488 K used swap
+      2794236 K free swap
+        23953 non-nice user cpu ticks
+          283 nice user cpu ticks
+        51189 system cpu ticks
+     15032629 idle cpu ticks
+          450 IO-wait cpu ticks
+        22150 IRQ cpu ticks
+         9239 softirq cpu ticks
+            0 stolen cpu ticks
+      1831057 pages paged <span class="hljs-keyword">in</span>
+      1529731 pages paged out
+        15528 pages swapped <span class="hljs-keyword">in</span>
+       103783 pages swapped out
+     14519323 interrupts
+     18668588 CPU context switches
+   1572022693 boot time
+       175270 forks
+</div></code></pre>
+<h2 id="4%E4%BD%BF%E7%94%A8iostat%E7%BB%9F%E8%AE%A1cpu%E5%92%8C%E8%AE%BE%E5%A4%87io%E4%BF%A1%E6%81%AF">4.使用iostat统计CPU和设备IO信息</h2>
+<ul>
+<li>iostat # 指定刷新频率为#秒刷新一次</li>
+</ul>
+<pre class="hljs"><code><div>[root@centos8 ~]<span class="hljs-comment">#iostat</span>
+Linux 4.18.0-80.el8.x86_64 (centos8.suosuoli)   10/26/19        _x86_64_        (4 CPU)
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           0.16    0.00    0.55    0.00    0.00   99.29
+
+Device             tps    kB_read/s    kB_wrtn/s    kB_read    kB_wrtn
+nvme0n1           1.64        48.17        40.38    1830027    1534327
+scd0              0.00         0.03         0.00       1106          0
+</div></code></pre>
+<h2 id="5iftop%E6%98%BE%E7%A4%BA%E5%B8%A6%E5%AE%BD%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5">5.iftop显示带宽使用情况</h2>
+<pre class="hljs"><code><div>                  12.5Kb            25.0Kb             37.5Kb            50.0Kb       62.5Kb
+└─────────────────┴─────────────────┴──────────────────┴─────────────────┴──────────────────centos8.suosuoli                 =&gt; 172.20.1.1                       1.70Kb  1.77Kb  1.97Kb
+                                 &lt;=                                   184b    258b    299b
+centos8.suosuoli                 =&gt; public1.alidns.com                284b    343b    318b
+                                 &lt;=                                   592b    690b    628b
+224.0.0.251                      =&gt; 172.20.1.156                        0b      0b      0b
+                                 &lt;=                                     0b    275b    172b
+172.20.255.255                   =&gt; 172.20.2.20                         0b      0b      0b
+                                 &lt;=                                     0b    187b    117b
+172.20.255.255                   =&gt; 172.20.30.30                        0b      0b      0b
+                                 &lt;=                                     0b     58b     36b
+255.255.255.255                  =&gt; 172.20.2.20                         0b      0b      0b
+
+
+────────────────────────────────────────────────────────────────────────────────────────────TX:             cum:   4.57KB   peak:   2.81Kb              rates:   1.98Kb  2.10Kb  2.28Kb
+RX:                    2.49KB           4.09Kb                        776b   1.47Kb  1.24Kb
+TOTAL:                 7.06KB           6.90Kb                       2.74Kb  3.57Kb  3.53Kb
+</div></code></pre>
+<h2 id="6pmap%E6%98%BE%E7%A4%BA%E6%9F%90%E8%BF%9B%E7%A8%8B%E5%AF%B9%E5%BA%94%E7%9A%84%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84">6.pmap显示某进程对应的内存映射</h2>
+<ul>
+<li>用法</li>
+</ul>
+<pre class="hljs"><code><div>pmap [options] pid [...] 
+  -x: 显示详细格式的信息 
+示例：pmap 1 
+man pmap
+</div></code></pre>
+<pre class="hljs"><code><div>[root@centos8 ~]<span class="hljs-comment">#pmap 2762   # gvfsd进程的进程号为2762</span>
+2762:   /usr/libexec/gvfsd
+0000562abe7ef000     32K r-x-- gvfsd
+0000562abe9f6000      4K r---- gvfsd
+0000562abe9f7000      4K rw--- gvfsd
+0000562abfa5b000    532K rw---   [ anon ]
+00007f4cc4000000    132K rw---   [ anon ]
+00007f4cc4021000  65404K -----   [ anon ]
+......
+00007f4cfc567000    160K r-x-- ld-2.28.so
+00007f4cfc769000     48K rw---   [ anon ]
+00007f4cfc78d000      8K rw---   [ anon ]
+00007f4cfc78f000      4K r---- ld-2.28.so
+00007f4cfc790000      4K rw--- ld-2.28.so
+00007f4cfc791000      4K rw---   [ anon ]
+00007ffd2793d000    132K rw---   [ stack ]
+00007ffd279db000     12K r----   [ anon ]
+00007ffd279de000      8K r-x--   [ anon ]
+ffffffffff600000      4K r-x--   [ anon ]
+ total           855884K
+</div></code></pre>
+<h2 id="7dstat%E5%91%BD%E4%BB%A4%E7%94%A8%E6%9D%A5%E7%BB%9F%E8%AE%A1%E7%B3%BB%E7%BB%9F%E8%B5%84%E6%BA%90%E4%BB%A3%E6%9B%BFvmstat%E5%92%8Ciostat">7.dstat命令用来统计系统资源(代替vmstat和iostat)</h2>
+<ul>
+<li>dstat命令：系统资源统计,代替vmstat,iostat</li>
+<li>用法</li>
+</ul>
+<pre class="hljs"><code><div>dstat [-afv] [options..] [delay [count]] 
+  -c 显示cpu相关信息 
+  -C <span class="hljs-comment">#,#,...,total </span>
+  -d 显示disk相关信息 
+  -D total,sda,sdb,... 
+  -g 显示page相关统计数据 
+  -m 显示memory相关统计数据 
+  -n 显示network相关统计数据 
+  -p 显示process相关统计数据 
+  -r 显示io请求相关的统计数据 
+  -s 显示swapped相关的统计数据 
+  --tcp 
+  --udp 
+  --unix 
+  --raw 
+  --socket  
+  --ipc 
+  --top-cpu：显示最占用CPU的进程 
+  --top-io: 显示最占用io的进程 
+  --top-mem: 显示最占用内存的进程 
+  --top-latency: 显示延迟最大的进程 
+
+[root@centos7 ~]<span class="hljs-comment">#dstat</span>
+You did not select any stats, using -cdngy by default.
+----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system--
+usr sys idl wai hiq siq| <span class="hljs-built_in">read</span>  writ| recv  send|  <span class="hljs-keyword">in</span>   out | int   csw
+  0   0 100   0   0   0|  34k 6742B|   0     0 |  34B  395B| 111   177
+  0   1  99   0   0   0|   0  3000k| 180B  826B|   0     0 | 406   188
+  0   0 100   0   0   0|   0     0 | 120B  346B|   0     0 |  90   154
+  0   0 100   0   0   0|   0     0 | 300B  338B|   0     0 |  76   125
+  0   0 100   0   0   0|   0     0 | 240B  338B|   0     0 |  89   151
+  0   0 100   0   0   0|   0     0 | 180B  338B|   0     0 | 114   169
+  0   0 100   0   0   0|   0     0 |  60B  338B|   0     0 |  63   127
+  0   0 100   0   0   0|   0     0 | 120B  338B|   0     0 |  69   129
+</div></code></pre>
+<h2 id="8iotop%E5%91%BD%E4%BB%A4%E7%94%A8%E6%9D%A5%E7%9B%91%E8%A7%86%E7%A3%81%E7%9B%98io%E4%BD%BF%E7%94%A8%E7%8A%B6%E5%86%B5">8.iotop命令用来监视磁盘I/O使用状况</h2>
+<ul>
+<li>
+<p>iotop命令是一个用来监视磁盘I/O使用状况的top类工具iotop具有与top相似的UI，其中包括
+PID、用户、I/O、进程等相关信息，可查看每个进程是如何使用IO
+iotop命令是一个用来监视磁盘I/O使用状况的top类工具iotop具有与top相似的UI，其中包括
+PID、用户、I/O、进程等相关信息，可查看每个进程是如何使用IO</p>
+</li>
+<li>
+<p>iotop输出解释</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>第一行：Read和Write速率总计 
+第二行：实际的Read和Write速率 
+第三行：参数如下： 
+  线程ID（按p切换为进程ID） 
+  优先级 
+  用户 
+  磁盘读速率 
+  磁盘写速率 
+  swap交换百分比 
+  IO等待所占的百分比 
+  线程/进程命令 
+
+-o, --only只显示正在产生I/O的进程或线程，除了传参，可以在运行过程中按o
+生效 
+-b, --batch非交互模式，一般用来记录日志 
+-n NUM, --iter=NUM设置监测的次数，默认无限。在非交互模式下很有用 
+-d SEC, --delay=SEC设置每次监测的间隔，默认1秒，接受非整形数据例如1.1 
+-p PID, --pid=PID指定监测的进程/线程 
+-u USER, --user=USER指定监测某个用户产生的I/O 
+-P, --processes仅显示进程，默认iotop显示所有线程 
+-a, --accumulated显示累积的I/O，而不是带宽 
+-k, --kilobytes使用kB单位，而不是对人友好的单位。在非交互模式下，脚本编程有用 
+-t, --time 加上时间戳，非交互非模式 
+-q, --quiet 禁止头几行，非交互模式，有三种指定方式 
+-q 只在第一次监测时显示列名 
+-qq 永远不显示列名 
+-qqq 永远不显示I/O汇总 
+
+交互按键 
+left和right方向键：改变排序 
+r：反向排序 
+o：切换至选项--only 
+p：切换至--processes选项 
+a：切换至--accumulated选项 
+q：退出 
+i：改变线程的优先级
+</div></code></pre>
+<h2 id="9nload%E5%91%BD%E4%BB%A4%E6%9F%A5%E7%9C%8B%E7%BD%91%E7%BB%9C%E5%AE%9E%E6%97%B6%E5%90%9E%E5%90%90%E9%87%8F">9.nload命令查看网络实时吞吐量</h2>
+<ul>
+<li>
+<p>nload是一个实时监控网络流量和带宽使用情况，以数值和动态图展示进出的流量情况</p>
+</li>
+<li>
+<p>安装：yum  install nload (EPEL源)</p>
+</li>
+<li>
+<p>界面操作</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>上下方向键、左右方向键、enter键或者tab键都就可以切换查看多个网卡的流量情况 
+按 F2 显示选项窗口 
+按 q 或者 Ctrl+C 退出 nload
+</div></code></pre>
+<ul>
+<li>示例：</li>
+</ul>
+<pre class="hljs"><code><div>  nload：默认只查看第一个网络的流量进出情况 
+  nload eth0 eth1：在nload后面指定网卡，可以指定多个 
+设置刷新间隔：默认刷新间隔是100毫秒，可通过 -t命令设置刷新时间（单位是毫秒） 
+  nload -t 500 eth0 
+设置单位：显示两种单位一种是显示Bit/s、一种是显示Byte/s，默认是以Bit/s，也可不显示/s 
+  -u h|b|k|m|g|H|B|K|M|G 
+  表示的含义： 
+    h: auto
+    b: Bit/s
+    k: kBit/s
+    m: MBit/s
+    H:auto
+    B: Byte/s
+    K: kByte/s
+    M: MByte/s 
+  nload -u M eth0 
+</div></code></pre>
+<h2 id="10lsof%E5%91%BD%E4%BB%A4%E7%94%A8%E6%9D%A5%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E7%B3%BB%E7%BB%9F%E6%96%87%E4%BB%B6">10.lsof命令用来查看当前系统文件</h2>
+<ul>
+<li>
+<p>lsof：list open files查看当前系统文件的工具。在linux环境下，一切皆文件，用户通过文件不仅可以
+访问常规数据，还可以访问网络连接和硬件如传输控制协议 (TCP) 和用户数据报协议 (UDP)套接字等，系统
+在后台都为该应用程序分配了一个文件描述符。</p>
+</li>
+<li>
+<p>用法</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>SYNOPSIS
+       lsof [ -?abChlnNOPRtUvVX ] [ -A A ] [ -c c ] [ +c c ] [ +|-d d ] [ +|-D D
+       ] [ +|-e s ] [ +|-f [cfgGn] ] [ -F [f] ] [ -g [s] ] [ -i [i] ] [ -k k ] [
+       -K  k  ]  [  +|-L  [l]  ]  [ +|-m m ] [ +|-M ] [ -o [o] ] [ -p s ] [ +|-r
+       [t[m&lt;fmt&gt;]] ] [ -s [p:s] ] [ -S [t] ] [ -T [t] ] [ -u s ] [ +|-w ]  [  -x
+       [fl] ] [ -z [z] ] [ -Z [Z] ] [ -- ] [names]
+
+-a：列出打开文件存在的进程 
+-c&lt;进程名&gt;：列出指定进程所打开的文件 
+-g：列出GID号进程详情 
+-d&lt;文件号&gt;：列出占用该文件号的进程 
++d&lt;目录&gt;：列出目录下被打开的文件 
++D&lt;目录&gt;：递归列出目录下被打开的文件 
+-i&lt;条件&gt;：列出符合条件的进程(4、6、协议、:端口、 @ip ) 
+-p&lt;进程号&gt;：列出指定进程号所打开的文件 
+-u：列出UID号进程详情 
+-h：显示帮助信息
+-v：显示版本信息。 
+-n:  不反向解析网络名字 
+查看由登陆用户启动而非系统启动的进程 
+  lsof /dev/pts/1 
+指定进程号，可以查看该进程打开的文件 
+  lsof -p 9527  
+查看指定程序打开的文件 
+  lsof -c httpd 
+查看指定用户打开的文件 
+  lsof -u root | more
+查看指定目录下被打开的文件 
+  lsof +D /var/<span class="hljs-built_in">log</span>/  
+  lsof +d /var/<span class="hljs-built_in">log</span>/   
+参数+D为递归列出目录下被打开的文件，参数+d为列出目录下被打开的文件 
+</div></code></pre>
+<ul>
+<li>lsof示例</li>
+</ul>
+<pre class="hljs"><code><div>查看所有网络连接 
+  lsof -i –n 
+  lsof -i@127.0.0.1  
+  通过参数-i查看网络连接的情况，包括连接的ip、端口等以及一些服务的连接情况，例如：sshd等。也可以通过
+指定ip查看该ip的网络连接情况 
+
+查看端口连接情况 
+  lsof -i :80 -n 
+  通过参数-i:端口可以查看端口的占用情况，-i参数还有查看协议，ip的连接情况等
+ 
+查看指定进程打开的网络连接 
+  lsof -i –n -a -p 9527  
+  参数-i、-a、-p等，-i查看网络连接情况，-a查看存在的进程，-p指定进程 
+查看指定状态的网络连接 
+  lsof -n -P -i TCP -s TCP:ESTABLISHED  
+  -n:no host names, -P:no port names,-i TCP指定协议，-s指定协议状态通过多个参数可以
+清晰的查看网络连接情况、协议连接情况等
+
+恢复删除文件 
+  lsof |grep /var/<span class="hljs-built_in">log</span>/messages 
+  rm -f /var/<span class="hljs-built_in">log</span>/messages 
+  lsof |grep /var/<span class="hljs-built_in">log</span>/messages 
+  cat /proc/653/fd/6 
+  cat /proc/653/fd/6 &gt; /var/<span class="hljs-built_in">log</span>/messages </div></code></pre>
+
+</body>
+</html>

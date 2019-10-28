@@ -19,7 +19,7 @@ KiB Swap:  0.9/3145724  [                                                       
   2152 root      20   0 3605496 183924  32756 S   1.0 12.1   2:05.55 gnome-shell
   2435 root      20   0 1371916  75124   8116 S   0.0  4.9   0:06.11 gnome-softwa+
   1531 root      20   0  419092  69204  31728 S   0.0  4.5   0:08.68 X
-  2593 root      20   0  752624  27920   9716 S   0.0  1.8   0:03.07 gnome-termin+       
+  2593 root      20   0  752624  27920   9716 S   0.0  1.8   0:03.07 gnome-termin+
   ...
 ```
 
@@ -231,150 +231,7 @@ man pmap
 0000562abfa5b000    532K rw---   [ anon ]
 00007f4cc4000000    132K rw---   [ anon ]
 00007f4cc4021000  65404K -----   [ anon ]
-00007f4cc8000000    132K rw---   [ anon ]
-00007f4cc8021000  65404K -----   [ anon ]
-00007f4ccc000000    132K rw---   [ anon ]
-00007f4ccc021000  65404K -----   [ anon ]
-00007f4cd0000000    132K rw---   [ anon ]
-00007f4cd0021000  65404K -----   [ anon ]
-00007f4cd4000000    132K rw---   [ anon ]
-00007f4cd4021000  65404K -----   [ anon ]
-00007f4cdb7ff000      4K -----   [ anon ]
-00007f4cdb800000   8192K rw---   [ anon ]
-00007f4cdc000000    132K rw---   [ anon ]
-00007f4cdc021000  65404K -----   [ anon ]
-00007f4ce0000000    132K rw---   [ anon ]
-00007f4ce0021000  65404K -----   [ anon ]
-00007f4ce4000000    132K rw---   [ anon ]
-00007f4ce4021000  65404K -----   [ anon ]
-00007f4ce8a84000      4K -----   [ anon ]
-00007f4ce8a85000   8192K rw---   [ anon ]
-00007f4ce9285000      4K -----   [ anon ]
-00007f4ce9286000   8192K rw---   [ anon ]
-00007f4ce9a86000      4K -----   [ anon ]
-00007f4ce9a87000   8192K rw---   [ anon ]
-00007f4cea287000      4K -----   [ anon ]
-00007f4cea288000   8192K rw---   [ anon ]
-00007f4ceaa88000      4K -----   [ anon ]
-00007f4ceaa89000   8192K rw---   [ anon ]
-00007f4ceb289000 212648K r---- locale-archive
-00007f4cf8233000     28K r-x-- librt-2.28.so
-00007f4cf823a000   2048K ----- librt-2.28.so
-00007f4cf843a000      4K r---- librt-2.28.so
-00007f4cf843b000      4K rw--- librt-2.28.so
-00007f4cf843c000     24K r-x-- libuuid.so.1.3.0
-00007f4cf8442000   2048K ----- libuuid.so.1.3.0
-00007f4cf8642000      4K r---- libuuid.so.1.3.0
-00007f4cf8643000      4K rw---   [ anon ]
-00007f4cf8644000    304K r-x-- libblkid.so.1.1.0
-00007f4cf8690000   2044K ----- libblkid.so.1.1.0
-00007f4cf888f000     20K r---- libblkid.so.1.1.0
-00007f4cf8894000      4K rw--- libblkid.so.1.1.0
-00007f4cf8895000      4K rw---   [ anon ]
-00007f4cf8896000    524K r-x-- libpcre2-8.so.0.7.1
-00007f4cf8919000   2044K ----- libpcre2-8.so.0.7.1
-00007f4cf8b18000      4K r---- libpcre2-8.so.0.7.1
-00007f4cf8b19000      4K rw--- libpcre2-8.so.0.7.1
-00007f4cf8b1a000     92K r-x-- libgcc_s-8-20180905.so.1
-00007f4cf8b31000   2044K ----- libgcc_s-8-20180905.so.1
-00007f4cf8d30000      4K r---- libgcc_s-8-20180905.so.1
-00007f4cf8d31000      4K rw--- libgcc_s-8-20180905.so.1
-00007f4cf8d32000    340K r-x-- libmount.so.1.1.0
-00007f4cf8d87000   2044K ----- libmount.so.1.1.0
-00007f4cf8f86000     12K r---- libmount.so.1.1.0
-00007f4cf8f89000      4K rw--- libmount.so.1.1.0
-00007f4cf8f8a000      4K rw---   [ anon ]
-00007f4cf8f8b000     80K r-x-- libresolv-2.28.so
-00007f4cf8f9f000   2044K ----- libresolv-2.28.so
-00007f4cf919e000      4K r---- libresolv-2.28.so
-00007f4cf919f000      4K rw--- libresolv-2.28.so
-00007f4cf91a0000      8K rw---   [ anon ]
-00007f4cf91a2000    156K r-x-- libselinux.so.1
-00007f4cf91c9000   2044K ----- libselinux.so.1
-00007f4cf93c8000      4K r---- libselinux.so.1
-00007f4cf93c9000      4K rw--- libselinux.so.1
-00007f4cf93ca000      8K rw---   [ anon ]
-00007f4cf93cc000     88K r-x-- libz.so.1.2.11
-00007f4cf93e2000   2044K ----- libz.so.1.2.11
-00007f4cf95e1000      4K r---- libz.so.1.2.11
-00007f4cf95e2000      4K rw---   [ anon ]
-00007f4cf95e3000    448K r-x-- libpcre.so.1.2.10
-00007f4cf9653000   2044K ----- libpcre.so.1.2.10
-00007f4cf9852000      4K r---- libpcre.so.1.2.10
-00007f4cf9853000      4K rw--- libpcre.so.1.2.10
-00007f4cf9854000     28K r-x-- libffi.so.6.0.2
-00007f4cf985b000   2048K ----- libffi.so.6.0.2
-00007f4cf9a5b000      4K r---- libffi.so.6.0.2
-00007f4cf9a5c000      4K rw--- libffi.so.6.0.2
-00007f4cf9a5d000    124K r-x-- libgpg-error.so.0.24.2
-00007f4cf9a7c000   2048K ----- libgpg-error.so.0.24.2
-00007f4cf9c7c000      4K r---- libgpg-error.so.0.24.2
-00007f4cf9c7d000      4K rw--- libgpg-error.so.0.24.2
-00007f4cf9c7e000     12K r-x-- libdl-2.28.so
-00007f4cf9c81000   2044K ----- libdl-2.28.so
-00007f4cf9e80000      4K r---- libdl-2.28.so
-00007f4cf9e81000      4K rw--- libdl-2.28.so
-00007f4cf9e82000   1108K r-x-- libgcrypt.so.20.2.3
-00007f4cf9f97000   2044K ----- libgcrypt.so.20.2.3
-00007f4cfa196000      8K r---- libgcrypt.so.20.2.3
-00007f4cfa198000     20K rw--- libgcrypt.so.20.2.3
-00007f4cfa19d000      4K r-x-- libgthread-2.0.so.0.5600.4
-00007f4cfa19e000   2044K ----- libgthread-2.0.so.0.5600.4
-00007f4cfa39d000      4K r---- libgthread-2.0.so.0.5600.4
-00007f4cfa39e000      4K rw---   [ anon ]
-00007f4cfa39f000   1768K r-x-- libc-2.28.so
-00007f4cfa559000   2048K ----- libc-2.28.so
-00007f4cfa759000     16K r---- libc-2.28.so
-00007f4cfa75d000      8K rw--- libc-2.28.so
-00007f4cfa97e000      4K rw--- libpthread-2.28.so
-00007f4cfa97f000     16K rw---   [ anon ]
-00007f4cfa983000      8K r-x-- libutil-2.28.so
-00007f4cfa985000   2048K ----- libutil-2.28.so
-00007f4cfab85000      4K r---- libutil-2.28.so
-00007f4cfab86000      4K rw--- libutil-2.28.so
-00007f4cfab87000   1108K r-x-- libglib-2.0.so.0.5600.4
-00007f4cfac9c000   2048K ----- libglib-2.0.so.0.5600.4
-00007f4cfae9c000      4K r---- libglib-2.0.so.0.5600.4
-00007f4cfae9d000      4K rw--- libglib-2.0.so.0.5600.4
-00007f4cfae9e000      4K rw---   [ anon ]
-00007f4cfae9f000    320K r-x-- libgobject-2.0.so.0.5600.4
-00007f4cfaeef000   2048K ----- libgobject-2.0.so.0.5600.4
-00007f4cfb0ef000      4K r---- libgobject-2.0.so.0.5600.4
-00007f4cfb0f0000      4K rw--- libgobject-2.0.so.0.5600.4
-00007f4cfb0f1000   1644K r-x-- libgio-2.0.so.0.5600.4
-00007f4cfb28c000   2048K ----- libgio-2.0.so.0.5600.4
-00007f4cfb48c000     28K r---- libgio-2.0.so.0.5600.4
-00007f4cfb493000      4K rw--- libgio-2.0.so.0.5600.4
-00007f4cfb494000      8K rw---   [ anon ]
-00007f4cfb496000    320K r-x-- libsecret-1.so.0.0.0
-00007f4cfb4e6000   2048K ----- libsecret-1.so.0.0.0
-00007f4cfb6e6000     16K r---- libsecret-1.so.0.0.0
-00007f4cfb6ea000      4K rw--- libsecret-1.so.0.0.0
-00007f4cfb6eb000     12K r-x-- libgmodule-2.0.so.0.5600.4
-00007f4cfb6ee000   2044K ----- libgmodule-2.0.so.0.5600.4
-00007f4cfb8ed000      4K r---- libgmodule-2.0.so.0.5600.4
-00007f4cfb8ee000      4K rw--- libgmodule-2.0.so.0.5600.4
-00007f4cfb8ef000   1148K r-x-- libp11-kit.so.0.3.0
-00007f4cfba0e000   2044K ----- libp11-kit.so.0.3.0
-00007f4cfbc0d000     44K r---- libp11-kit.so.0.3.0
-00007f4cfbc18000     40K rw--- libp11-kit.so.0.3.0
-00007f4cfbc22000    224K r-x-- libgck-1.so.0.0.0
-00007f4cfbc5a000   2044K ----- libgck-1.so.0.0.0
-00007f4cfbe59000      8K r---- libgck-1.so.0.0.0
-00007f4cfbe5b000      4K rw--- libgck-1.so.0.0.0
-00007f4cfbe5c000    592K r-x-- libgcr-base-3.so.1.0.0
-00007f4cfbef0000   2044K ----- libgcr-base-3.so.1.0.0
-00007f4cfc0ef000     48K r---- libgcr-base-3.so.1.0.0
-00007f4cfc0fb000      4K rw--- libgcr-base-3.so.1.0.0
-00007f4cfc0fc000      4K rw---   [ anon ]
-00007f4cfc0fd000    228K r-x-- libgvfscommon.so
-00007f4cfc136000   2048K ----- libgvfscommon.so
-00007f4cfc336000     24K r---- libgvfscommon.so
-00007f4cfc33c000      4K rw---   [ anon ]
-00007f4cfc33d000    160K r-x-- libgvfsdaemon.so
-00007f4cfc365000   2044K ----- libgvfsdaemon.so
-00007f4cfc564000      8K r---- libgvfsdaemon.so
-00007f4cfc566000      4K rw--- libgvfsdaemon.so
+......
 00007f4cfc567000    160K r-x-- ld-2.28.so
 00007f4cfc769000     48K rw---   [ anon ]
 00007f4cfc78d000      8K rw---   [ anon ]
@@ -476,7 +333,7 @@ o：切换至选项--only
 p：切换至--processes选项 
 a：切换至--accumulated选项 
 q：退出 
-i：改变线程的优先级 
+i：改变线程的优先级
 ```
 
 ## 9.nload命令查看网络实时吞吐量 
@@ -484,12 +341,12 @@ i：改变线程的优先级
 - nload是一个实时监控网络流量和带宽使用情况，以数值和动态图展示进出的流量情况 
 
 - 安装：yum  install nload (EPEL源) 
-- 界面操作 
+- 界面操作
 
 ```bash
 上下方向键、左右方向键、enter键或者tab键都就可以切换查看多个网卡的流量情况 
 按 F2 显示选项窗口 
-按 q 或者 Ctrl+C 退出 nload 
+按 q 或者 Ctrl+C 退出 nload
 ```
 
 - 示例：
@@ -519,7 +376,6 @@ i：改变线程的优先级
 访问常规数据，还可以访问网络连接和硬件如传输控制协议 (TCP) 和用户数据报协议 (UDP)套接字等，系统
 在后台都为该应用程序分配了一个文件描述符。
 
-
 - 用法
 
 ```bash
@@ -539,7 +395,7 @@ SYNOPSIS
 -i<条件>：列出符合条件的进程(4、6、协议、:端口、 @ip ) 
 -p<进程号>：列出指定进程号所打开的文件 
 -u：列出UID号进程详情 
--h：显示帮助信息 
+-h：显示帮助信息
 -v：显示版本信息。 
 -n:  不反向解析网络名字 
 查看由登陆用户启动而非系统启动的进程 
@@ -549,7 +405,7 @@ SYNOPSIS
 查看指定程序打开的文件 
   lsof -c httpd 
 查看指定用户打开的文件 
-  lsof -u root | more   
+  lsof -u root | more
 查看指定目录下被打开的文件 
   lsof +D /var/log/  
   lsof +d /var/log/   
