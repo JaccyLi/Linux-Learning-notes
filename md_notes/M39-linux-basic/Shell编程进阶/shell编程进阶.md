@@ -387,6 +387,46 @@ done
 echo $LAST
 ```
 
+> 11.编写脚本，利用变量RANDOM生成10个随机数字，输出这个10数字，并显示其中的最大值和最小值
+
+```bash
+#!/bin/bash
+i=0
+MAX=$RANDOM
+MIN=$RANDOM
+while [[ $i -lt 10 ]]; do
+    if (( MAX >= MIN )); then
+        :
+    else
+        MID=$MAX
+        MAX=$MIN
+        MIN=$MID
+    fi  
+    let i++
+done
+echo MAX=$MAX
+echo MIN=$MIN
+```
+> 12.编写脚本，实现打印国际象棋棋盘 
+
+```bash
+
+```
+
+> 13.后续六个字符串：efbaf275cd、4be9c40b8b、44b2395c46、f8c8873ce0、b902c16c8b、
+ad865d2f63是通过对随机数变量RANDOM随机执行命令：echo $RANDOM|md5sum|cut –c1-10
+后的结果，请破解这些字符串对应的RANDOM值
+
+```bash
+
+```
+
+> 14.
+
+```bash
+
+```
+
 ```bash
 
 ```
@@ -399,21 +439,209 @@ echo $LAST
 ```bash
 
 ```
-```bash
 
+> 编写服务脚本/root/bin/testsrv.sh，完成如下要求 
+(1) 脚本可接受参数：start, stop, restart, status  
+(2) 如果参数非此四者之一，提示使用格式后报错退出 
+(3) 如是start:则创建/var/lock/subsys/SCRIPT_NAME, 并显示“启动成功” 
+考虑：如果事先已经启动过一次，该如何处理？ 
+(4) 如是stop:则删除/var/lock/subsys/SCRIPT_NAME, 并显示“停止完成” 
+考虑：如果事先已然停止过了，该如何处理？ 
+(5) 如是restart，则先stop, 再start 
+考虑：如果本来没有start，如何处理？ 
+(6) 如是status, 则如果/var/lock/subsys/SCRIPT_NAME文件存在，则显示“SCRIPT_NAME is 
+running...”，如果/var/lock/subsys/SCRIPT_NAME文件不存在，则显示“SCRIPT_NAME is 
+stopped...” 
+(7)在所有模式下禁止启动该服务，可用chkconfig 和 service命令管理 
+说明：SCRIPT_NAME为当前脚本名 
+
+```bash
+#!/bin/bash
+#
+#*******************************************************************************               
+#Author:            steveli
+#QQ:                1049103823
+#Data:              2019-10-29
+#FileName:          testsrv.sh
+#URL:               https://blog.csdn.net/YouOops
+#Description:       testsrv.sh
+#Copyright (C):     2019 All rights reserved
+#*******************************************************************************
+#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)
+#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)
+#*******************************************************************************
+#
+
+COLOR_GREEN="\e[1;32m"
+COLOR_RED="\e[1;31m"
+COLOR_END="\e[0m"
+DIR="/var/lock/subsys"
+SCR="service"
+
+. /etc/init.d/functions
+# success
+# failure
+# passed
+# warning
+
+if [[ ! $1 ]]; then
+    echo -e "Usage:`basename $0` {${COLOR_GREEN}start|stop|restart|status${COLOR_END}}"
+fi
+
+start()
+    {
+    if [[ ! -f $DIR/`basename $0` ]]; then
+        mkdir -p $DIR &> /dev/null
+        touch $DIR/`basename $0` &> /dev/null
+        echo "Start Succeeded.`success`"
+    else
+        echo "Already Started.`passed`"
+    fi  
+    }
+stop()
+    {
+    if [[ -f $DIR/`basename $0` ]]; then
+        rm $DIR/`basename $0` &> /dev/null
+        echo "Stop completed."
+    else
+        echo "Already Stopped.`passed`"
+    fi
+    }
+
+restart()
+    {
+    if [[ -f $DIR/`basename $0` ]]; then
+        rm $DIR/`basename $0` &> /dev/null
+        sleep 0.5
+        touch $DIR/`basename $0` &> /dev/null
+        echo "Restart Succeeded.`success`"
+    else
+        echo "It's Stopped.Now starting...`passed`"
+        touch $DIR/`basename $0` &> /dev/null
+        sleep 0.5
+        echo "Start Succeeded.`success`"
+    fi
+    }
+
+status()
+    {
+    if [[ -f $DIR/`basename $0` ]]; then
+        echo -e "`basename $0` is active.${COLOR_GREEN}[RUNNING]${COLOR_END}"
+    else
+        echo -e "`basename $0` is inactive.${COLOR_RED}[STOPPED]${COLOR_END}" 
+    fi
+    }
+case $1 in
+start)
+    start
+    ;;
+stop)
+    stop
+    ;;
+restart)
+    restart
+    ;;
+status)
+    status
+    ;;
+*) 
+    if [[ $1 ]]; then
+    echo -e "Usage:`basename $0` {${COLOR_GREEN}start|stop|restart|status${COLOR_END}}"
+    else 
+    :
+    fi
+    ;;
+esac 
 ```
-```bash
 
+> 编写脚本/root/bin/copycmd.sh 
+(1) 提示用户输入一个可执行命令名称 
+(2) 获取此命令所依赖到的所有库文件列表 
+(3) 复制命令至某目标目录(例如/mnt/sysroot)下的对应路径下  
+     如：/bin/bash ==> /mnt/sysroot/bin/bash;/usr/bin/passwd ==> /mnt/sysroot/usr/bin/passwd 
+(4) 复制此命令依赖到的所有库文件至目标目录下的对应路径下：  如：/lib64/ld-linux-x86-64.so.2 ==> /mnt/sysroot/lib64/ld-linux-x86-64.so.2 
+(5)每次复制完成一个命令后，不要退出，而是提示用户键入新的要复制的命令，并重复完成上述功能；直到用户输入
+quit退出
+
+```bash
+#. /etc/init.d/functions
+# success
+# passed
+# wrning
+# failure
+
+COLOR_GREEN="\e[1;32m"
+COLOR_END="\e[0m"
+DEST_DIR="/mnt/sysroot"
+while :; do
+read -p "Please input the command you wanna move(q:quit):" CMD 
+    if [[ "$CMD" = "q" ]]; then
+        exit
+    fi  
+    CMD_FULL_PATH=`which --skip-alias $CMD`
+    #echo CMD_FULL_PATH=$CMD_FULL_PATH
+    CMD_DESTDIR=`dirname $CMD_FULL_PATH`
+    #echo CMD_DESTDIR=$CMD_DESTDIR
+    CMD_MOVED=`basename $CMD_FULL_PATH`
+    #echo CMD_MOVED=$CMD_MOVED
+    if [[ ! -d ${DEST_DIR}${CMD_DESTDIR} ]]; then
+        mkdir -p ${DEST_DIR}${CMD_DESTDIR} &> /dev/null
+    else
+        cp -a $CMD_FULL_PATH ${DEST_DIR}$CMD_DESTDIR
+    fi  
+
+    SO_LIST=`ldd "$CMD_FULL_PATH" | sed -nr 's#.* (/.*) .*#\1#p'`
+    for SO_FILE in $SO_LIST; do
+        SO_FULL_PATH=`echo $SO_FILE`
+        SO_DESTDIR=`dirname $SO_FILE`
+        SO_REAL=$(basename `ls -l $SO_FILE | sed -nr 's#.* (.*)#\1#p'`)
+        if [[ ! -d ${DEST_DIR}${SO_DESTDIR} ]]; then
+            mkdir -p ${DEST_DIR}${SO_DESTDIR} &> /dev/null
+        else
+            cp -a ${SO_DESTDIR}/${SO_REAL} ${DEST_DIR}${SO_DESTDIR}
+#            echo "$SO_FILE -> ${SO_DESTDIR}${SO_REAL} moved to ${DEST_DIR}${SO_DESTDIR}." 
+        fi  
+    done
+    echo -e "Command ${COLOR_GREEN}$CMD${COLOR_END} and corresponding libs moved to dir /mnt/sysroot/"
+done
 ```
+
+> 斐波那契数列又称黄金分割数列，因数学家列昂纳多·斐波那契以兔子繁殖为例子而引入，故又称为“兔子数列”，指的
+是这样一个数列：0、1、1、2、3、5、8、13、21、34、……，斐波纳契数列以如下被以递归的方法定义：
+F（0）=0，F（1）=1，F（n）=F(n-1)+F(n-2)（n≥2） 利用函数，求n阶斐波那契数列.
+
 ```bash
 
-```
-```bash
+#!/bin/bash
+#
+#*******************************************************************************
+#Author:            steveli
+#QQ:                1049103823
+#Data:              2019-10-28
+#FileName:          Fibonacci.sh
+#URL:               https://blog.csdn.net/YouOops
+#Description:       Fibonacci.sh
+#Copyright (C):     2019 All rights reserved
+#*******************************************************************************
+#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)
+#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)
+#*******************************************************************************
+#
 
-```
-```bash
+#f(n)=f(n-1) + f(n-2)
 
-```
-```bash
+fibonacci()
+{
+local a=0
+local b=1
+LENGTH="$1"
+    for ((i=0 ; i<LENGTH ; i++)); do
+        echo "$a"
+        let fa=$((a+b))
+        let a=$b
+        let b=$fa
+    done
+}
 
+fibonacci $1
 ```
