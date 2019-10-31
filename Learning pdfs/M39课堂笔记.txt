@@ -3,6 +3,9 @@
 a
 alias 
 apt apg-get 
+at
+atq
+atrm 
 b
 bzip 
 bunzip
@@ -13,7 +16,10 @@ bc
 bash
 basename 
 blkid 
-uuidgen
+brctl 
+batch 
+bg
+break
 c
 cat /etc/redhat-release /etc/motd 
 cd 
@@ -37,6 +43,8 @@ case  in  easc
 createrepo 
 ./configure 脚本
 curl 
+crontab -e -r -l -u 
+continue
 d
 dd 
 du 
@@ -51,6 +59,7 @@ dnf
 dpkg ubuntu rpm 
 dmesg
 dumpe2fs 
+dstat 
 e
 echo $SHELL $PATH @PS1
 enable
@@ -71,6 +80,10 @@ fdisk
 fsck 
 findmnt 
 fuser 
+fg 
+for NAME in list ;do cmd;done 
+for((expr1;expr2;expr3));do cmd;done 
+function 
 g
 gedit
 groups
@@ -88,14 +101,18 @@ gzip
 gunzip 
 gcc 
 gdisk 
+getconf -a 
+glances 
 h
 hash
 hostname
+hostnamectl set-hostname status 
 halt
 history
 hexdump
 help 内部命令
 head 
+htop
 i
 init 0 6 3 5 
 ip a 
@@ -103,9 +120,14 @@ id wang
 info ls
 if else elif  fi 
 ifconfig 
+iostat
+iftop
+iotop 
 j
+jobs
 k
-
+kill
+killall
 l
 lsb_release -a 
 ls 
@@ -126,6 +148,7 @@ lvextend
 lvreduce
 lvremove 
 lvconvert --merge 
+local 
 m
 more 
 mv
@@ -141,12 +164,19 @@ mkfs -t xfs
 mount   /etc/fstab
 mkswap  
 mkisofs 
+mpstat
 n
 nano
 newgrp
 newusers
 nl cat -b 
 ntpdate 
+nmcli 
+nmtui 
+netstat
+nohup 
+nice 
+nload 
 o
 od 
 p
@@ -165,6 +195,13 @@ partx
 pvmove 
 pvremove 
 partprobe 
+pstree -p 
+pkill
+pgrep 
+ps
+pidof 
+pmap 
+ping 
 q
 quit
 r
@@ -182,6 +219,8 @@ read
 rpm 
 rpm2cpio 
 route 
+renice 
+return 
 s
 su
 seq 
@@ -204,7 +243,8 @@ sed
 systemctl disable --now firewalld  systemctl enable --now autofs 
 swapon 
 swapoff 
-
+ss 
+select PS3 REPLY 
 t
 tr
 tee
@@ -219,7 +259,7 @@ tailf
 tar 
 time 
 tune2fs 
- 
+top 
 u
 unalias
 useradd
@@ -233,6 +273,9 @@ unxz
 unzip  
 uuidgen 
 umount
+uuidgen
+uptime 
+usleep 
 v
 vi
 vim 
@@ -243,7 +286,8 @@ vgs
 vgdisplay
 vgreduce
 vgextend 
-vgremove 
+vgremove
+vmstat  
 w
 whoami
 who am i
@@ -253,7 +297,11 @@ which
 whereis
 whatis 
 wc 
-wget 
+wget
+wait  
+wall 
+while cmd;do cmds done 
+while read NAME ;do done < file 
 x
 xxd 
 xclock 
@@ -1257,3 +1305,229 @@ route add -net 192.168.39.0/24 dev eth0
 route add default gw 192.168.39.111 dev eth0
 route -n 
 ip a 
+
+
+实验：/etc/sysconfig/network-scripts/ifcfg-xxx
+
+
+实验：多网卡bonding
+
+
+实验：桥接
+
+
+实验：ubuntu网卡设置 
+
+buffer 缓冲区，写
+cache 缓存，读
+
+内存泄露： asp  php NT4.0 windows2000
+内存溢出: 10M 11Mdata
+
+实验：性能工具ps pgrep pkill iostat iostat nload 
+
+实验：at 
+
+实验：crond 
+PATH
+
+实验：for 
+
+
+{ ping -c3 127.1;ping 127.2; }& { ping -c3 127.3;ping 127.4; }&
+
+实验：批量修改文件
+方法1
+DIR=/data/script39/test
+cd $DIR
+for FILE in *;do
+	NAME=`echo $FILE | sed -rn 's/(.*)\.(.*)/\1/p'`
+#	SUFFIX=`echo $FILE | sed -rn 's/(.*)\.(.*)/\2/p'`
+	mv $FILE $NAME.jpg
+done
+
+方法2
+for suffix in `ls * | sed  -rn 's/.*(\..*)/\1/p' |sort -u`;do rename $suffix .jpg *$suffix;done
+
+九九乘法表
+1 九行，大循环9次，第N次循环打印第N行
+for i in {1..9};do
+	for j in `seq $i`;do
+		echo -e "$jx$i=$[i*j]\t\c"
+	done
+	echo 
+done
+2 打印第N行，公式个数=N，小循环实现N次
+
+3 每个公式中，第1个数字=小循环的当前次数，每2个数字=当前行号第N行，第3个数字=第1数字X第2个数字
+
+scp yyyy-mm-dd.sh wang@172.20.0.8:/data/script39/
+
+
+面试：
+要求将目录YYYY-MM-DD/中所有文件，移动到YYYY-MM/DD/下 
+2019-10-28/a,b,c
+2019-10/28/a,b,c
+
+1 yyyy-mm-dd10.sh 创建YYYY-MM-DD，当前日期一年前365天到目前共365个目录，里面有10个文件，$RANDOM.log 
+date -d '-1 day' +%F
+[root@centos8 script39]#cat dir20.sh 
+#!/bin/bash
+#
+#********************************************************************
+#Author:		kjAlbert
+#Date:			2019-10-27
+#FileName： 		dir.sh
+#Description:		The test script
+#Copyright (C): 	2019 All rights reserved
+#********************************************************************
+#
+for i in {1..365};do 
+	DIR=`date -d "-$i day" +%F`
+	mkdir $DIR
+	cd $DIR
+	for n in {1..10};do
+		touch $RANDOM.log
+	done
+	cd ..
+done
+2 移动到YYYY-MM/DD/下  
+#!/bin/bash
+#
+DIR=/data/script39/test
+cd $DIR
+for DIR2 in * ;do 
+	PDIR=`echo $DIR2 |cut -d"-" -f1,2`
+	SUBDIR=`echo $DIR2 |cut -d"-" -f3`
+	[ -d $PDIR/$SUBDIR ] || mkdir -p $PDIR/$SUBDIR  &> /dev/null
+	mv $DIR2/*   $PDIR/$SUBDIR
+done
+
+
+for第二种语法
+[root@centos8 script39]#cat for2.sh
+#!/bin/bash
+for ((sum=0,i=1;i<=100;i++));do
+	let sum+=i
+done
+echo $sum
+
+
+
+9x9乘法表
+for((i=1;i<=9;i++));do
+	for((j=1;j<=i;j++));do
+		echo -e "${j}x${i}=$[i*j]\t\c"
+	done
+	echo 
+done
+
+[root@centos8 script39]#seq -s+ 1 2 100 
+1+3+5+7+9+11+13+15+17+19+21+23+25+27+29+31+33+35+37+39+41+43+45+47+49+51+53+55+57+59+61+63+65+67+69+71+73+75+77+79+81+83+85+87+89+91+93+95+97+99
+[root@centos8 script39]#seq -s+ 1 2 100 |bc
+2500
+[root@centos8 script39]#seq -s+ 2 2 100 |bc
+2550
+
+
+[root@centos8 script39]#cat for_while_sum.sh
+#!/bin/bash
+#
+for((sum=0,i=1;i<=100;i+=2));do
+	let sum+=i
+done
+echo $sum
+
+sum=0
+i=1
+while [ $i -le 100 ];do
+	let sum+=i
+	let i+=2
+done
+echo $sum
+
+sum=0
+i=1
+while [ $i -le 100 ];do
+	[ $[i%2] -eq 1 ] && let sum+=i
+	let i++
+done
+echo $sum
+
+[root@centos8 script39]#echo a b c  | read i j k;echo i=$i;echo j=$j;echo k=$k
+i=
+j=
+k=
+
+[root@centos8 script39]#echo a b c  | { read i j k;echo i=$i;echo j=$j;echo k=$k; }
+i=a
+j=b
+k=c
+[root@centos8 script39]#echo a b c  | ( read i j k;echo i=$i;echo j=$j;echo k=$k; )
+i=a
+j=b
+k=c
+
+[root@centos8 script39]#echo a b c  | while read i j k; do echo i=$i;echo j=$j;echo k=$k;done
+i=a
+j=b
+k=c
+
+[root@centos8 script39]#echo a b c  | while read i ; do echo i=$i ;done
+i=a b c
+
+[root@centos8 script39]#unset i j k; echo "  a b c"  | while read i j k; do echo i=$i;echo j=$j;echo k=$k;done
+i=a
+j=b
+k=c
+
+[root@centos8 script39]#cat while_user.sh
+#!/bin/bash
+#
+while read USER PASS;do
+	useradd $USER
+	echo $PASS | passwd --stdin $USER &> /dev/null
+	echo "$USER is created"
+done < user.txt
+
+
+[root@centos8 script39]#cat select.sh 
+#!/bin/bash
+#
+sum=0
+PS3="请点菜(1-6): "
+select MENU in 北京烤鸭 佛跳墙 小龙虾 羊蝎子 火锅 点菜结束;do
+case $REPLY in 
+1)
+	echo $MENU price is 100 
+	let sum+=100
+	;;
+2)
+	echo $MENU price is 88 
+	let sum+=88
+	;;
+3)
+	echo $MENU price is 66 
+	let sum+=66
+	;;
+4)
+	echo $MENU price is 166 
+	let sum+=166
+	;;
+5)
+	echo $MENU price is 200 
+	let sum+=200
+	;;
+6)
+	echo "点菜结束,退出"
+	break
+	;;
+*)
+	echo "点菜错误，重新选择"
+	;;
+esac
+done
+echo sum=$sum
+
+基例：
+链条：
