@@ -168,7 +168,8 @@ done
 - select循环主要用于创建菜单，按数字顺序排列的菜单项将显示在标准错误上，并显示PS3提示符，等待用户输入
 - 用户输入菜单列表对应的某个数字，执行相应的命令
 - 用户输入被保存在内置变量**REPLY**中
-- **注意:**select是个无限循环，因此要记住用break命令退出循环，或用exit命令终止脚本。也可以按Ctrl+c退出循环
+- **注意:**select是个无限循环，因此要记住用break命令退出循环，或用exit命令终止脚本。也可以按Ctrl+c退
+出循环
 - select经常和case联合使用
 
 
@@ -350,551 +351,493 @@ drwxr-xr-x.  2 root root     6 Sep 20 15:05 Videos
 
 
 ## 5.在脚本中定义及使用函数 
-函数在使用前必须定义，因此应将函数定义放在脚本开始部分，直至shell首次发现它
-后才能使用 
-调用函数仅使用其函数名即可 
-示例： 
-cat func1 
-#!/bin/bash 
-# func1 
-hello() 
-{ 
-  echo "Hello there today's date is `date +%F`" 
-} 
-echo "now going to the function hello" 
-hello 
-echo “back from the function” 
 
+- 函数在使用前必须定义，因此应将函数定义放在脚本开始部分，直至shell首次发现它后才能使用
+- 调用函数仅使用其函数名即可 
 
 ## 6.使用函数文件 
-可以将经常使用的函数存入函数文件，然后将函数文件载入shell 
-文件名可任意选取，但最好与相关任务有某种联系。例如：functions.main 
-一旦函数文件载入shell，就可以在命令行或脚本中调用函数。可以使用set命
-令查看所有定义的函数，其输出列表包括已经载入shell的所有函数 
-若要改动函数，首先用unset命令从shell中删除函数。改动完毕后，再重新载
-入此文件 
+- 可以将经常使用的函数存入函数文件，然后将函数文件载入shell;文件名可任意选取，但最好与相关任务有某种
+联系。例如：functions.main。一旦函数文件载入shell，就可以在命令行或脚本中调用函数。可以使用set
+命令查看所有定义的函数，其输出列表包括已经载入shell的所有函数若要改动函数，首先用unset命令从shell中
+删除函数。改动完毕后，再重新载入此文件
 
 ## 7.载入函数 
-函数文件已创建好后，要将它载入shell 
-定位函数文件并载入shell的格式 
-  
-.  
-filename 或 source   filename   
-注意：此即<点> <空格> <文件名> 
- 这里的文件名要带正确路径 
-示例： 
- 
-上例中的函数，可使用如下命令 
-      
-. functions.main 
+- 函数文件已创建好后，要将它载入shell 
+- 定位函数文件并载入shell的格式如下:
+ ```bash 
+. filename 或 source   filename
+<点> <空格> <文件名>  这里的文件名要带函数文件的完整路径名
+```
 
 ## 8.执行shell函数 
-要执行函数，简单地键入函数名即可 
-示例： 
- 
-findit groups 
-  
-/usr/bin/groups 
-   
-/usr/local/backups/groups.bak  
+- 要执行函数，简单地键入函数名即可
+- 如：
+```bash
+[root@centos7 ~]#hello (){ echo 'Hello , im a function!' ; }    
+[root@centos7 ~]#hello
+Hello , im a function!
+```
 
 ## 9.删除shell函数 
-现在对函数做一些改动后，需要先删除函数，使其对shell不可用。使用unset命
-令完成删除函数 
-命令格式为： 
- 
-unset  function_name 
-示例： 
- 
- unset findit 
- 
-再键入set命令，函数将不再显示 
-环境函数 
-使子进程也可使用 
+- 现在对函数做一些改动后，需要先删除函数，使其对shell不可用。使用unset命令完成删除函数
+- 命令格式为：
+`unset  function_name`
+- 环境函数:使子进程也可使用 
+```bash
 声明：export  -f  function_name  
 查看：export  -f 或 declare -xf 
+```
 
 ## 10.函数参数 
-函数可以接受参数： 
- 
-传递参数给函数：调用函数时，在函数名后面以空白分隔给定参数列表即可；
-例如“testfunc arg1 arg2 ...” 
- 
-在函数体中当中，可使用$1, $2, ...调用这些参数；还可以使用$@, $*, $#
-等特殊变量 
+- 函数可以接受参数：
+- 传递参数给函数：调用函数时，在函数名后面以空白分隔给定参数列表即可
+  - 例如"testfunc arg1 arg2 ..."
+- 在函数体中当中，可使用$1, $2, ...调用这些参数；还可以使用$@, $*, $#等特殊变量
 
 ## 11.函数变量 
-变量作用域： 
- 
-环境变量：当前shell和子shell有效 
- 
-本地变量：只在当前shell进程有效，为执行脚本会启动专用子shell进程；
-因此，本地变量的作用范围是当前shell脚本程序文件，包括脚本中的函数 
- 
-局部变量：函数的生命周期；函数结束时变量被自动销毁 
-注意：如果函数中有局部变量，如果其名称同本地变量，使用局部变量 
-在函数中定义局部变量的方法 
- 
-local NAME=VALUE 
+- 变量作用域：不同类型的变量作用域不同
+
+  - 环境变量：当前shell和子shell有效 
+  - 本地变量：只在当前shell进程有效，为执行脚本会启动专用子shell进程；
+#######因此，本地变量的作用范围是当前shell脚本程序文件，包括脚本中的函数 
+  - 局部变量：函数的生命周期；函数结束时变量被自动销毁 
+**注意：如果函数中有局部变量，如果其名称同本地变量，使用局部变量**
+- 在函数中定义局部变量的方法 
+> local NAME=VALUE 
 
 ## 12.函数递归示例 
-函数递归： 
- 
-函数直接或间接调用自身 
- 
-注意递归层数 
-递归实例： 
-    阶乘是基斯顿·卡曼于 1808 年发明的运算符号，是数学术语，一个正整数的阶
-乘（factorial）是所有小于及等于该数的正整数的积，并且有0的阶乘为1，自然
-数n的阶乘写作n! 
- 
-n!=1×2×3×...×n 
- 
-阶乘亦可以递归方式定义：0!=1，n!=(n-1)!×n 
- 
-n!=n(n-1)(n-2)...1 
- 
-n(n-1)! = n(n-1)(n-2)! 
-
-
-## 13.函数递归示例 
-示例：fact.sh 
-#!/bin/bash 
-# 
-fact() { 
-    if [ $1 -eq 0 -o $1 -eq 1 ]; then 
- 
- 
-echo 1 
-    else 
- 
- 
-echo $[$1*$(fact $[$1-1])] 
-    fi 
-} 
+- 函数递归：指函数直接或间接调用自身,函数调用时需要注意递归层数
+- 递归实例：阶乘的计算
+  - 阶乘是基斯顿·卡曼于 1808 年发明的运算符号，是数学术语，一个正整数的阶乘（factorial）是所有小于及
+  等于该数的正整数的积，并且有0的阶乘为1，自然数n的阶乘写作n!;n!=1×2×3×...×n;阶乘亦可以递归方式定义：
+  0!=1,n!=(n-1)!×n,n!=n(n-1)(n-2)...1,n(n-1)! = n(n-1)(n-2)!
+> fact.sh
+```bash
+#!/bin/bash
+#
+fact() {
+    if [ $1 -eq 0 -o $1 -eq 1 ]; then
+echo 1
+    else
+echo $(( $1*$( fact $(( $1-1 )) ) ))
+    fi
+}
 fact $1 
+```
 
+## 13.fork炸弹
 
-## 14.fork炸弹 
-fork炸弹是一种恶意程序，它的内部是一个不断在fork进程的无限循环，实质是
-一个简单的递归程序。由于程序是递归的，如果没有任何限制，这会导致这个
-简单的程序迅速耗尽系统里面的所有资源 
-函数实现 
-    :(){ :|:& };: 
-    bomb() { bomb | bomb & }; bomb 
-脚本实现 
-    cat Bomb.sh 
-    #!/bin/bash 
-   ./$0|./$0& 
+- fork炸弹是一种恶意程序，它的内部是一个不断在fork进程的无限循环，实质是一个简单的递归程序。由于程序
+是递归的，如果没有任何限制，这会导致这个简单的程序迅速耗尽系统里面的所有资源
+- bash函数实现
 
+```bash
+    :(){ :|:& };:
+    bomb() { bomb | bomb & }; bomb
+```
 
+- bash脚本实现
+
+```bash
+#!/bin/bash
+./$0|./$0&
+```
+
+- > [FORK炸弹的各种语言实现](https://en.wikipedia.org/wiki/Fork_bomb)
 
 # 四.数组
 
-## 1.数组 
-变量：存储单个元素的内存空间 
-数组：存储多个元素的连续的内存空间，相当于多个变量的集合 
-数组名和索引 
- 
-索引：编号从0开始，属于数值索引 
- 
-注意：索引可支持使用自定义的格式，而不仅是数值格式，即为关联索引，
-bash4.0版本之后开始支持 
- 
-bash的数组支持稀疏格式（索引不连续） 
-声明数组： 
- 
-declare -a ARRAY_NAME 
- 
-declare -A ARRAY_NAME   关联数组 
- 
-注意：两者不可相互转换 
+## 1.数组概念
 
-## 2.数组赋值 
-数组元素的赋值 
- 
+- 变量：存储单个元素的内存空间 
+- 数组：存储多个元素的连续的内存空间，相当于多个变量的集合 
+- 数组名和索引
+
+```bash
+数组名:数组名即代表该数组的地址，也代表数组中的第一个元素的地址
+索引:数组的元素编号从0开始，属于数值索引
+```
+
+**注意：索引可支持使用自定义的格式，而不仅是数值格式，即为关联索引，bash4.0版本之后开始支持**
+
+- bash的数组支持稀疏格式（索引不连续）
+- 声明数组： 
+
+```bash
+declare -a ARRAY_NAME
+declare -A ARRAY_NAME   关联数组
+```
+
+**注意：两者不可相互转换**
+
+## 2.数组赋值
+
+- 数组元素的赋值,bash数组支持多种赋值的方式
+
+```bash
 (1) 一次只赋值一个元素 
- 
-ARRAY_NAME[INDEX]=VALUE 
- 
-weekdays[0]="Sunday" 
- 
-weekdays[4]="Thursday" 
- 
+    ARRAY_NAME[INDEX]=VALUE 
+    weekdays[0]="Sunday" 
+    weekdays[4]="Thursday" 
 (2) 一次赋值全部元素 
- 
-ARRAY_NAME=("VAL1" "VAL2" "VAL3" ...) 
- 
+    ARRAY_NAME=("VAL1" "VAL2" "VAL3" ...) 
 (3) 只赋值特定元素 
- 
-ARRAY_NAME=([0]="VAL1" [3]="VAL2" ...) 
- 
+    ARRAY_NAME=([0]="VAL1" [3]="VAL2" ...) 
 (4) 交互式数组值对赋值  
- 
-read -a ARRAY 
-显示所有数组：declare  -a
+    read -a ARRAY
+```
 
-## 3.引用数组 
-引用数组元素 
- 
-${ARRAY_NAME[INDEX]} 
- 
-注意：省略[INDEX]表示引用下标为0的元素 
-引用数组所有元素 
- 
-${ARRAY_NAME[*]} 
- 
-${ARRAY_NAME[@]} 
-数组的长度(数组中元素的个数) 
- 
-${#ARRAY_NAME[*]} 
- 
-${#ARRAY_NAME[@]} 
-删除数组中的某元素：导致稀疏格式 
- 
-unset ARRAY[INDEX] 
-删除整个数组 
- 
-unset ARRAY
+- 显示所有数组：declare  -a
+
+## 3.引用数组
+
+- 引用数组元素同样存在多种方式
+`${ARRAY_NAME[INDEX]}` 引用单个元素的值
+**注意：省略[INDEX]表示引用下标为0的元素**
+`${ARRAY_NAME[*]}` 引用数组所有元素 
+`${ARRAY_NAME[@]}` 引用数组所有元素 
+- 数组的长度(数组中元素的个数) 
+`${#ARRAY_NAME[*]}`
+`${#ARRAY_NAME[@]}`
+- 删除数组中的某元素：导致稀疏格式 
+`unset ARRAY[INDEX]`
+- 删除整个数组 
+`unset ARRAY`
 
 ## 4.数组数据处理 
-引用数组中的元素： 
- 
-数组切片： 
- 
- 
+
+数组切片：
+
+```bash
 ${ARRAY[@]:offset:number} 
- 
- 
- 
-offset  
-要跳过的元素个数 
- 
- 
- 
-number 
-要取出的元素个数 
- 
- 
-取偏移量之后的所有元素  
- 
+offset  要跳过的元素个数 
+number  要取出的元素个数 
+```
 
-${ARRAY[@]:offset} 
-向数组中追加元素： 
- 
-ARRAY[${#ARRAY[*]}]=value 
-关联数组： 
- 
-declare -A ARRAY_NAME   
- 
- 
-ARRAY_NAME=([idx_name1]='val1' [idx_name2]='val2‘...) 
- 
-注意：关联数组必须先声明再调用 
+- 取偏移量之后的所有元素  
+`${ARRAY[@]:offset}`
+- 向数组中追加元素
+`ARRAY[${#ARRAY[*]}]=value`
+- 关联数组
+`declare -A ARRAY_NAME`
+`ARRAY_NAME=([idx_name1]='val1' [idx_name2]='val2'...)`
+**注意：关联数组必须先声明再调用**
 
-## 5.示例 
-- 生成10个随机数保存于数组中，并找出其最大值和最小值 
- 
-    #!/bin/bash 
+## 5.示例
+
+- 生成10个随机数保存于数组中，并找出其最大值和最小值
+
+```bash
+#!/bin/bash
 declare -i min max 
 declare -a nums 
 for ((i=0;i<10;i++));do 
- nums[$i]=$RANDOM 
- [ $i -eq 0  ] && min=${nums[$i]} &&  max=${nums[$i]}&& continue 
- [ ${nums[$i]} -gt $max ] && max=${nums[$i]}  
- [ ${nums[$i]} -lt $min ] && min=${nums[$i]}  
-done 
+   nums[$i]=$RANDOM
+   [ $i -eq 0  ] && min=${nums[$i]} &&  max=${nums[$i]}&& continue 
+   [ ${nums[$i]} -gt $max ] && max=${nums[$i]}  
+   [ ${nums[$i]} -lt $min ] && min=${nums[$i]}  
+done
 echo “All numbers are ${nums[*]}” 
 echo Max is $max 
 echo Min is $min 
+```
 
 - 编写脚本，定义一个数组，数组中的元素对应的值是/var/log目录下所有以.log结尾
-的文件；统计出其下标为偶数的文件中的行数之和 
- 
-#!/bin/bash 
- 
-# 
- 
-declare -a files 
- 
-files=(/var/log/*.log) 
- 
-declare -i lines=0 
- 
+的文件；统计出其下标为偶数的文件中的行数之和
+
+```bash
+#!/bin/bash
+#
+declare -a files
+files=(/var/log/*.log)
+declare -i lines=0
 for i in $(seq 0 $[${#files[*]}-1]); do 
- 
     if [ $[$i%2] -eq 0 ];then 
- 
- 
-let lines+=$(wc -l ${files[$i]} | cut -d' ' -f1)  
- 
-    fi 
- 
-done 
- 
-echo "Lines: $lines." 
+        let lines+=$(wc -l ${files[$i]} | cut -d' ' -f1)  
+    fi
+done
+echo "Lines: $lines."
+```
 
+## 6.练习
 
-## 6.练习 
-输入若干个数值存入数组中，采用冒泡算法进行升序或降序排序 
-将下图所示，实现转置矩阵matrix.sh 
- 
-1 2 3    
- 
-1 4 7 
- 
-4 5 6   ===>   
-2 5 8 
- 
-7 8 9    
- 
-3 6 9 
-打印杨辉三角形 
+- 输入若干个数值存入数组中，采用冒泡算法进行升序或降序排序
+
+```bash
+#!/bin/bash                                                                                                                                                                
+#
+#*******************************************************************************
+#Author:            steveli
+#QQ:                1049103823
+#Data:              2019-10-31
+#FileName:          Bubble_sort.sh
+#URL:               https://blog.csdn.net/YouOops
+#Description:       Bubble_sort.sh
+#Copyright (C):     2019 All rights reserved
+#*******************************************************************************
+#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)
+#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)
+#*******************************************************************************
+#
+COL_GREEN="\e[1;32m"
+COL_END="\e[0m"
+
+declare -a NUMS
+declare -i num=0
+
+while :; do
+    read -p "Input num(q:quit|s:sort):" N
+
+    if [[ $N =~ ^[0-9]+$ ]]; then
+        NUMS[${#NUMS[*]}]=$N
+        echo -e "All nums are now:\n${NUMS[@]}"
+    else
+        if [[ "$N" = "q" ]]; then
+            break
+        elif [[ "$N" = "s" ]]; then
+            # sort here
+            #while [[ "$num" -lt "${#NUMS[*]}" ]]; do 
+            for ((n=0 ; n < ${#NUMS[*]} ; n++)); do
+                for ((i=0 ; i < ${#NUMS[*]} ; i++)); do
+                    for (( j=i ; j < ${#NUMS[*]}-i-1 ; j++)); do
+                        if [[ ${NUMS[j]} -lt  ${NUMS[$[j+1]]} ]]; then
+                            MID=${NUMS[$[j+1]]}
+                            NUMS[$[j+1]]=${NUMS[j]}
+                            NUMS[j]=$MID
+                        fi
+                    done
+                done
+            done
+
+            echo -e "${COL_GREEN}Sorted nums are${COL_END}:\n${NUMS[@]}"
+        else
+            echo -e "$N is not a number,please reinput(q:quit):\a"
+            continue
+        fi
+    fi
+done
+```
+
+- 将下图所示，实现转置矩阵matrix.sh
+
+```bash
+############################
+#   1 2 3          2 5 8   #
+#   1 4 7   ===>   7 8 9   #
+#   4 5 6          3 6 9   #
+############################
+
+```
+
+- 打印杨辉三角形
 
 # 五.高级字符串操作
 
-${#var}:返回字符串变量var的长度 
-${var:offset}:返回字符串变量var中从第offset个字符后（不包括第offset个字符）的字
-符开始，到最后的部分，offset的取值在0 到 ${#var}-1 之间(bash4.2后，允许为负值) 
-${var:offset:number}：返回字符串变量var中从第offset个字符后（不包括第offset个
-字符）的字符开始，长度为number的部分 
-${var:  -length}：取字符串的最右侧几个字符 
- 
-注意：冒号后必须有一空白字符 
-${var:offset:-length}：从最左侧跳过offset字符，一直向右取到距离最右侧lengh个字
-符之前的内容 
-${var:  -length:-offset}：先从最右侧向左取到length个字符开始，再向右取到距离最
-右侧offset个字符之间的内容 
- 
-注意：-length前空格 
+|||
+|---|---|
+${#var}|返回字符串变量var的长度
+${var:offset}|返回字符串变量var中从第offset个字符后（不包括第offset个字符）的字符开始，到最后的部分，offset的取值在0 到 ${#var}-1 之间(bash4.2后，允许为负值) 
+${var:offset:number}|返回字符串变量var中从第offset个字符后（不包括第offset个字符）的字符开始，长度为number的部分 
+${var:  -length}|取字符串的最右侧几个字符
+||注意：冒号后必须有一空白字符|
+${var:offset:-length}|从最左侧跳过offset字符，一直向右取到距离最右侧lengh个字符之前的内容
+${var:  -length:-offset}|先从最右侧向左取到length个字符开始，再向右取到距离最右侧offset个字符之间的内容
+||注意：-length前空格|
 
-基于模式取子串 
+- 基于模式取子串
  
-${var#*word}：其中word可以是指定的任意字符 
- 
-功能：自左而右，查找var变量所存储的字符串中，第一次出现的word, 删
-除字符串开头至第一次出现word字符串（含）之间的所有字符 
- 
- 
-${var##*word}：同上，贪婪模式，不同的是，删除的是字符串开头至最后
-一次由word指定的字符之间的所有内容 
-示例： 
- 
-file=“var/log/messages” 
- 
-${file#*/}: log/messages 
- 
-${file##*/}: messages 
+|||
+|---|---|
+${var#*word}|其中word可以是指定的任意字符
+||功能：自左而右，查找var变量所存储的字符串中，第一次出现的word, 删除字符串开头至第一次出现word字符串（含）之间的所有字符|
+${var##*word}|同上，贪婪模式，不同的是，删除的是字符串开头至最后一次由word指定的字符之间的所有内容 
+||示例|
+||file=“var/log/messages”|
+||${file#*/}: log/messages|
+||${file##*/}: messages|
+|${var%word*}|其中word可以是指定的任意字符|
+||功能：自右而左，查找var变量所存储的字符串中，第一次出现的word, 删除字符串最后一个字符向左至第一次出现word字符串（含）之间的所有字符|
+||file="/var/log/messages"|
+||${file%/*}: /var/log|h
+${var%%word*}|同上，只不过删除字符串最右侧的字符向左至最后一次出现word字符之间的所有字符
+||示例|
+||url=http://www.magedu.com:80|
+||${url##`*:`} 80|
+||${url%%`:*`} http|
 
-${var%word*}：其中word可以是指定的任意字符 
+- 查找替换 
  
-功能：自右而左，查找var变量所存储的字符串中，第一次出现的word, 删
-除字符串最后一个字符向左至第一次出现word字符串（含）之间的所有字符 
- 
-file="/var/log/messages" 
- 
-${file%/*}: /var/log 
-${var%%word*}：同上，只不过删除字符串最右侧的字符向左至最后一次出现
-word字符之间的所有字符 
-示例： 
- 
-url=http://www.magedu.com:80 
- 
-${url##*:} 
-80 
- 
-${url%%:*} http 
+|||
+|---|---|
+${var/pattern/substr}|查找var所表示的字符串中，第一次被pattern所匹配到的字符串，以substr替换之 
+${var//pattern/substr}|查找var所表示的字符串中，所有能被pattern所匹配到的字符串，以substr替换之 
+${var/#pattern/substr}|查找var所表示的字符串中，行首被pattern所匹配到的字符串，以substr替换之 
+${var/%pattern/substr}|查找var所表示的字符串中，行尾被pattern所匹配到的字符串，以substr替换之 
 
+- 查找并删除
+ 
+|||
+|---|---|
+${var/pattern}|删除var表示的字符串中第一次被pattern匹配到的字符串 
+${var//pattern}|删除var表示的字符串中所有被pattern匹配到的字符串 
+${var/#pattern}|删除var表示的字符串中所有以pattern为行首匹配到的字符串 
+${var/%pattern}|删除var所表示的字符串中所有以pattern为行尾所匹配到的字符串 
 
-查找替换 
- 
-${var/pattern/substr}：查找var所表示的字符串中，第一次被pattern所匹
-配到的字符串，以substr替换之 
- 
-${var//pattern/substr}: 查找var所表示的字符串中，所有能被pattern所匹
-配到的字符串，以substr替换之 
- 
-${var/#pattern/substr}：查找var所表示的字符串中，行首被pattern所匹
-配到的字符串，以substr替换之 
- 
-${var/%pattern/substr}：查找var所表示的字符串中，行尾被pattern所匹
-配到的字符串，以substr替换之 
-
-查找并删除 
- 
-${var/pattern}：删除var表示的字符串中第一次被pattern匹配到的字符串 
- 
-${var//pattern}：删除var表示的字符串中所有被pattern匹配到的字符串 
- 
-${var/#pattern}：删除var表示的字符串中所有以pattern为行首匹配到的
-字符串 
- 
-${var/%pattern}：删除var所表示的字符串中所有以pattern为行尾所匹配
-到的字符串 
-字符大小写转换 
- 
-${var^^}：把var中的所有小写字母转换为大写 
- 
-${var,,}：把var中的所有大写字母转换为小写 
-
+- 字符大小写转换 
+`${var^^}`:把var中的所有小写字母转换为大写 
+`${var,,}`:把var中的所有大写字母转换为小写
 
 
 # 六.高级变量
+
 ## 1.高级变量赋值 
 
 ![](png/2019-10-30-21-17-32.png)
+
 ## 2.高级变量用法-有类型变量 
-Shell变量一般是无类型的，但是bash Shell提供了declare和typeset两个命令
-用于指定变量的类型，两个命令是等价的 
-declare [选项] 变量名 
--r 声明或显示只读变量 
--i 将变量定义为整型数 
--a 将变量定义为数组 
--A 将变量定义为关联数组 
--f 显示已定义的所有函数名及其内容 
--F 仅显示已定义的所有函数名 
--x 声明或显示环境变量和函数 
--l  声明变量为小写字母  declare –l var=UPPER 
--u  声明变量为大写字母 declare –u var=lower 
+
+- Shell变量一般是无类型的，但是bash Shell提供了declare和typeset两个命令用于指定变量的类型，两个命令
+是等价的
+
+`declare [选项] 变量名`
+
+```bash
+
+    -r 声明或显示只读变量 
+    -i 将变量定义为整型数 
+    -a 将变量定义为数组 
+    -A 将变量定义为关联数组 
+    -f 显示已定义的所有函数名及其内容 
+    -F 仅显示已定义的所有函数名 
+    -x 声明或显示环境变量和函数 
+    -l 声明变量为小写字母  declare –l var=UPPER 
+    -u 声明变量为大写字母 declare –u var=lower 
+```
 
 ## 3.eval命令 
-eval命令将会首先扫描命令行进行所有的置换，然后再执行该命令。该命令
-适用于那些一次扫描无法实现其功能的变量.该命令对变量进行两次扫描 
-示例： 
-[root@server ~]# CMD=whoami 
-[root@server ~]# echo  $CMD 
- whoami 
-[root@server ~]# eval $CMD 
- root  
-    [root@server ~]# n=10         
-    [root@server ~]# echo {0..$n}      
-    
-{0..10} 
-    [root@server ~]# eval echo {0..$n} 
-     
-0 1 2 3 4 5 6 7 8 9 10 
+
+- eval命令将会首先扫描命令行进行所有的置换，然后再执行该命令。该命令适用于那些一次扫描无法实现其功能
+的变量.该命令对变量进行两次扫描 
+- 示例：
+
+```bash
+[root@centos8 ~]#cmd=whoami
+[root@centos8 ~]#echo $cmd
+whoami
+[root@centos8 ~]#eval $cmd
+root
+[root@centos8 ~]#
+```
 
 ## 4.间接变量引用 
-如果第一个变量的值是第二个变量的名字，从第一个变量引用第二个变量的值
-就称为间接变量引用 
-variable1的值是variable2，而variable2又是变量名，variable2的值为value，
-间接变量引用是指通过variable1获得变量值value的行为 
- 
+
+- 如果第一个变量的值是第二个变量的名字，从第一个变量引用第二个变量的值就称为间接变量引用 
+- variable1的值是variable2，而variable2又是变量名，variable2的值为value，间接变量引用是指
+通过variable1获得变量值value的行为,如：
+
+```bash
 variable1=variable2 
- 
 variable2=value 
+```
 
 - bash Shell提供了两种格式实现间接变量引用 
- eval tempvar=\$$variable1 
- tempvar=${!variable1} 
-示例： 
-[root@server ~]# N=NAME 
-[root@server ~]# NAME=wangxiaochun 
-[root@server ~]# N1=${!N} 
-[root@server ~]# echo $N1 
-wangxiaochun 
-[root@server ~]# eval N2=\$$N 
-[root@server ~]# echo $N2 
-wangxiaochun 
+`eval tempvar=\$$variable1`
+`tempvar=${!variable1}`
+- 示例：
+
+```bash
+[root@centos8 ~]#NAME="steve" 
+[root@centos8 ~]#ATTR=NAME
+[root@centos8 ~]#N=${!ATTR}
+[root@centos8 ~]#echo $N
+steve
+[root@centos8 ~]#N1=\$$ATTR
+[root@centos8 ~]#eval N1=\$$ATTR
+[root@centos8 ~]#echo $N1
+steve
+```
 
 ## 5.创建临时文件 
-mktemp命令：创建并显示临时文件，可避免冲突 
-mktemp [OPTION]... [TEMPLATE] 
- 
-TEMPLATE: filenameXXX 
- 
- 
-X至少要出现三个 
-OPTION： 
-  
--d: 创建临时目录 
- 
--p DIR或--tmpdir=DIR：指明临时文件所存放目录位置 
-示例： 
- 
-mktemp /tmp/testXXX 
- 
-tmpdir=`mktemp –d /tmp/testdirXXX` 
- 
-mktemp  --tmpdir=/testdir  testXXXXXX 
 
-## 6.安装复制文件 
-install命令： 
-       install [OPTION]... [-T] SOURCE DEST 单文件 
-       install [OPTION]... SOURCE... DIRECTORY 
-       install [OPTION]... -t DIRECTORY SOURCE... 
-       install [OPTION]... -d DIRECTORY...创建空目录 
-选项： 
- 
--m MODE，默认755 
- 
--o OWNER 
- 
--g GROUP 
-示例： 
- 
-install -m 700 -o wang -g admins srcfile desfile 
- 
-install –m 770 –d /testdir/installdir  
+- mktemp命令：创建并显示临时文件，可避免冲突 
 
+- 用法：
 
+```bash
+mktemp [OPTION]... [TEMPLATE]
+TEMPLATE: filenameXXX 至少要出现三个X
+OPTION： 
+    -d: 创建临时目录 
+    -p DIR或--tmpdir=DIR：指明临时文件所存放目录位置 
+示例： 
+    mktemp /tmp/testXXX 
+    tmpdir=`mktemp –d /tmp/testdirXXX` 
+    mktemp  --tmpdir=/testdir  testXXXXXX 
+```
+
+## 6.使用install安装复制文件 
+
+- 用法
+
+```bash
+install [OPTION]... [-T] SOURCE DEST 单文件 
+install [OPTION]... SOURCE... DIRECTORY 
+install [OPTION]... -t DIRECTORY SOURCE... 
+install [OPTION]... -d DIRECTORY...创建空目录 
+    -m MODE，默认755 
+    -o OWNER 
+    -g GROUP 
+示例： 
+    install -m 700 -o wang -g admins srcfile desfile 
+    install –m 770 –d /testdir/installdir  
+```
 
 # 七.expect
 
 ## 1.expect介绍 
-expect 是由Don Libes基于Tcl（ Tool Command Language ）语言开发的，主
-要应用于自动化交互式操作的场景，借助 expect 处理交互的命令，可以将交互过
-程如：ssh登录，ftp登录等写在一个脚本上，使之自动化完成。尤其适用于需要对
-多台服务器执行相同操作的环境中，可以大大提高系统管理人员的工作效率 
+
+- expect 是由Don Libes基于Tcl（ Tool Command Language ）语言开发的，主要应用于自动化交互式操作的
+场景，借助 expect 处理交互的命令，可以将交互过程如：ssh登录，ftp登录等写在一个脚本上，使之自动化完成。
+尤其适用于需要对多台服务器执行相同操作的环境中，可以大大提高系统管理人员的工作效率
 
 ## 2.expect命令用法
-expect 语法： 
-  
-expect [选项] [ -c cmds ] [ [ -[f|b] ] cmdfile ] [ args ] 
-选项 
--c：从命令行执行expect脚本，默认expect是交互地执行的 
-   
-示例：expect -c 'expect "\n" {send "pressed enter\n"} 
--d：可以输出输出调试信息 
-   
-示例：expect  -d ssh.exp 
-expect中相关命令 
-spawn 启动新的进程 
-send 
-用于向进程发送字符串 
-expect 从进程接收字符串 
-interact 
-允许用户交互 
-exp_continue 匹配多个字符串在执行动作后加此命令 
-expect最常用的语法(tcl语言:模式-动作) 
-单一分支模式语法： 
-expect “hi” {send “You said hi\n"} 
-匹配到hi后，会输出“you said hi”，并换行 
-多分支模式语法： 
- 
-expect "hi" { send "You said hi\n" } \ 
-  
- 
-"hehe" { send "Hehe yourself\n" } \ 
- 
- 
-"bye" { send "Good bye\n" } 
-匹配hi,hello,bye任意字符串时，执行相应输出。等同如下： 
- 
-expect { 
- 
- 
-"hi" { send "You said hi\n"} 
- 
- 
-"hehe" { send "Hehe yourself\n"} 
- 
- 
-"bye" { send  " Good bye\n"} 
- 
-} 
 
-- 示例 
+- expect 语法
+`expect [选项] [ -c cmds ] [ [ -[f|b] ] cmdfile ] [ args ]`
+- 选项 
+
+```bash
+-c：从命令行执行expect脚本，默认expect是交互地执行的 
+    示例：expect -c 'expect "\n" {send "pressed enter\n"} 
+-d：可以输出输出调试信息 
+    示例：expect  -d ssh.exp 
+```
+
+- expect中相关命令
+
+```bas
+spawn        启动新的进程 
+send         用于向进程发送字符串 
+expect       从进程接收字符串 
+interact     允许用户交互 
+exp_continue 匹配多个字符串在执行动作后加此命令 
+```
+
+- expect最常用的语法(tcl语言:模式-动作) 
+  - 单一分支模式语法： 
+`expect “hi” {send “You said hi\n"}`  匹配到hi后，会输出“you said hi”，并换行 
+  - 多分支模式语法：
+
+```bash
+expect { 
+"hi" { send "You said hi\n"} 
+"hehe" { send "Hehe yourself\n"} 
+"bye" { send  " Good bye\n"} 
+} 
+```
+
+- expect示例 
+
 ```bash
 #!/usr/bin/expect 
 spawn scp /etc/fstab 192.168.8.100:/app 
@@ -904,6 +847,7 @@ expect {
 } 
 expect eof
 ```
+
 ```bash
 #!/usr/bin/expect 
 spawn ssh 192.168.8.100 
@@ -914,6 +858,7 @@ expect {
 interact 
 #expect eof
 ```
+
 ```bash
 #!/usr/bin/expect 
 set ip 192.168.8.100 
@@ -927,6 +872,7 @@ expect {
 } 
 interact 
 ```
+
 ```bash
 #!/usr/bin/expect 
 set ip [lindex $argv 0]  
@@ -940,6 +886,7 @@ expect {
 interact 
 #./ssh3.exp 192.168.8.100 root magedu 
 ```
+
 ```bash
 #!/usr/bin/expect 
 set ip [lindex $argv 0]  
@@ -957,6 +904,7 @@ send "exit\n"
 expect eof 
 #./ssh4.exp 192.168.8.100 root magedu 
 ```
+
 ```bash
 #!/bin/bash 
 ip=$1  
@@ -1389,20 +1337,29 @@ ad865d2f63是通过对随机数变量RANDOM随机执行命令：echo $RANDOM|md5
 
 ```
 
-```bash
+> 15.
 
-```
-```bash
-
-```
-```bash
-
-```
 ```bash
 
 ```
 
-> 编写服务脚本/root/bin/testsrv.sh，完成如下要求 
+> 16.
+
+```bash
+
+```
+> 17.
+
+```bash
+
+```
+> 18.
+
+```bash
+
+```
+
+> 编写服务脚本/root/bin/testsrv.sh，完成如下要求:
 (1) 脚本可接受参数：start, stop, restart, status  
 (2) 如果参数非此四者之一，提示使用格式后报错退出 
 (3) 如是start:则创建/var/lock/subsys/SCRIPT_NAME, 并显示“启动成功” 
@@ -1589,9 +1546,7 @@ F（0）=0，F（1）=1，F（n）=F(n-1)+F(n-2)（n≥2） 利用函数，求n�
 #Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)
 #*******************************************************************************
 #
-
 #f(n)=f(n-1) + f(n-2)
-
 fibonacci()
 {
 local a=0
