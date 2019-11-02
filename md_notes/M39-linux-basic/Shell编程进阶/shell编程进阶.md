@@ -148,8 +148,11 @@ done < /PATH/FROM/SOMEFILE
 填充至GECOS字段，并提示该用户的GECOS信息修改成功
 ```bash
 #!/bin/bash
+USER=
+TELE=
 while read line; do
     Do something here...
+    sed -nr 's#::#:'''$USER''' 62985600:#' w /tmp/passwd.tmp
 done < /etc/passwd
 
 ```
@@ -250,7 +253,6 @@ function f_name()
 - 函数的生命周期：被调用时创建，返回时终止
 ```bash
 #!/bin/bash
-#                                                                                                                                                   
 #*******************************************************************************
 #Author:            steveli
 #QQ:                1049103823
