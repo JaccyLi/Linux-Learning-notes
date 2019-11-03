@@ -27,7 +27,7 @@
 mount /dev/sr0 /mnt
 cp /mnt/Packages/kernel-2.6.32-754.e16.x86_64.rpm     /boot
 rpm2cpio /boot/kernel-2.6.32-754.e16.x86_64.rpm | cpio -idum
-cp /boot/boot/kernel-2.6.32-754.e16.x86_64.rpm /boot
+cp /boot/boot/vmlinuz-2.6.32-754.e16.x86_64 /boot
 ```
 
 ## :arrow_left:exit

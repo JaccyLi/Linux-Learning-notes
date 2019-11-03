@@ -564,7 +564,7 @@ echo "Lines: $lines."
 - 输入若干个数值存入数组中，采用冒泡算法进行升序或降序排序
 
 ```bash
-#!/bin/bash                                                                                                                                                                
+#!/bin/bash
 #
 #*******************************************************************************
 #Author:            steveli
@@ -618,7 +618,7 @@ while :; do
 done
 ```
 
-- 将下图所示，实现转置矩阵matrix.sh
+- 实现转置矩阵matrix.sh
 
 ```bash
 ############################
@@ -626,10 +626,55 @@ done
 #   1 4 7   ===>   7 8 9   #
 #   4 5 6          3 6 9   #
 ############################
-
+#!/bin/bash
+#
+#*******************************************************************************
+#Author:            steveli
+#QQ:                1049103823
+#Data:              2019-11-02
+#FileName:          matrix_transpose.sh
+#URL:               https://blog.csdn.net/YouOops
+#Description:       matrix_transpose.sh
+#Copyright (C):     2019 All rights reserved
+#*******************************************************************************
+#Fontcolor#red(31):green(32):yellow(33):blue(34):purple(35):cyan(36):white(37)
+#Backcolor#red(41):green(42):yellow(43):blue(44):purple(45):cyan(46):white(47)
+#*******************************************************************************
+#
+NUMS=([00]=1 [01]=2 [02]=3 [10]=4 [11]=5 [12]=6 [20]=7 [21]=8 [22]=9)
+ORDER=3
+read -p "Please input the size of marix: " ORDER
+generate_matrix ()
+{
+for ((i=0;i<ORDER;i++));do
+    for ((j=0;j<ORDER;j++));do
+        echo -e "${NUMS[$i$j]} \c"
+    done
+    echo
+done
+}
+echo -e "The original matrix is :\t"
+generate_matrix
+for ((i=0;i<ORDER;i++));do
+    for ((j=i;j<ORDER;j++));do
+        if [ $i -ne $j ];then
+            TMP_NUMS=${NUMS[$i$j]}
+            NUMS[$i$j]=${NUMS[$j$i]}
+            NUMS[$j$i]=$TMP_NUMS
+        fi  
+    done
+done
+echo -e "Transposed matix is: \t"
+generate_matrix
 ```
 
 - 打印杨辉三角形
+
+```bash
+
+
+
+```
 
 # 五.高级字符串操作
 
@@ -1317,7 +1362,8 @@ done
 echo MAX=$MAX
 echo MIN=$MIN
 ```
-> 12.编写脚本，实现打印国际象棋棋盘 
+
+> 12.编写脚本，实现打印国际象棋棋盘
 
 ```bash
 
@@ -1331,35 +1377,8 @@ ad865d2f63是通过对随机数变量RANDOM随机执行命令：echo $RANDOM|md5
 
 ```
 
-> 14.
 
-```bash
-
-```
-
-> 15.
-
-```bash
-
-```
-
-> 16.
-
-```bash
-
-```
-> 17.
-
-```bash
-
-```
-> 18.
-
-```bash
-
-```
-
-> 编写服务脚本/root/bin/testsrv.sh，完成如下要求:
+> 14.编写服务脚本/root/bin/testsrv.sh，完成如下要求:
 (1) 脚本可接受参数：start, stop, restart, status  
 (2) 如果参数非此四者之一，提示使用格式后报错退出 
 (3) 如是start:则创建/var/lock/subsys/SCRIPT_NAME, 并显示“启动成功” 
@@ -1473,7 +1492,7 @@ status)
 esac 
 ```
 
-> 编写脚本/root/bin/copycmd.sh 
+> 15.编写脚本/root/bin/copycmd.sh 
 (1) 提示用户输入一个可执行命令名称 
 (2) 获取此命令所依赖到的所有库文件列表 
 (3) 复制命令至某目标目录(例如/mnt/sysroot)下的对应路径下  
@@ -1525,7 +1544,7 @@ read -p "Please input the command you wanna move(q:quit):" CMD
 done
 ```
 
-> 斐波那契数列又称黄金分割数列，因数学家列昂纳多·斐波那契以兔子繁殖为例子而引入，故又称为“兔子数列”，指的
+> 16.斐波那契数列又称黄金分割数列，因数学家列昂纳多·斐波那契以兔子繁殖为例子而引入，故又称为“兔子数列”，指的
 是这样一个数列：0、1、1、2、3、5、8、13、21、34、……，斐波纳契数列以如下被以递归的方法定义：
 F（0）=0，F（1）=1，F（n）=F(n-1)+F(n-2)（n≥2） 利用函数，求n阶斐波那契数列.
 
