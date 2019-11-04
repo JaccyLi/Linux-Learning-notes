@@ -1,4 +1,4 @@
-<center> <font face="黑体" size=6 color=grey>Linux网络协议和管理</font></center>
+<center> <font face="黑体" size=6 color=grey>Linux系统启动流程和内核管理详细介绍</font></center>
 
 # CentOS5和CentOS6的启动流程
 
