@@ -7,7 +7,23 @@
 ## awk基本用法
 
 ## awk变量
+FS:Field Separator
+输入字段分隔符，默认为空白字符 
 
+OFS:Output Field Separator
+输出字段分隔符，默认为空白字符 
+ 
+RS:Record Seperator
+输入记录分隔符，指定输入时的换行符 
+ 
+ORS:Output Record Seperator
+输出记录分隔符，输出时用指定符号代替换行符 
+ 
+NF:Number Field
+字段数量 
+ 
+NR:Number Record
+记录号 
 ## awk格式化
 
 ## awk操作符 
@@ -155,25 +171,85 @@ NUM WORD
 ```
 
 5、有一文件记录了1-100000之间随机的整数共5000个，存储的格式
-100,50,35,89…请取出其中最大和最小的整数 
+100,50,35,89…请取出其中最大和最小的整数
 
 ```bash
+方法一：
+[root@centos7 /data/interview_solutions]#for i in `seq 100000` ; do echo -n "$(($RANDOM*3)),";done > random.txt
+[root@centos7 /data/interview_solutions]#awk -F "," 'BEGIN{M="MAX";m="MIN";printf("%6-s%6-s\n",M,m)}{num[$1]++}END{max=$1;min=$1;for (i=0;i<NF;i++){if($i>=max) if($i<=min){min=$i}};printf("%6-s%6-s\n",max,min)}' random.txt
+MAX   MIN
+98301 0
 
+方法二：
+[root@centos7 /data/interview_solutions]#for i in `seq 100000` ; do echo -n "$(($RANDOM*3)),";done > random.txt
+[root@centos7 /data/interview_solutions]#echo "MAX:`awk -v RS="," '{print $1}' random.txt | sort -nr | uniq -c | head -n1 | tr -s ' ' | cut -d " " -f3`"
+MAX:98301
+[root@centos7 /data/interview_solutions]#echo "MIN:`awk -v RS="," '{print $1}' random.txt | sort -nr | uniq -c | tail -n1 | tr -s ' ' | cut -d " " -f3`"
+MIN:0
+
+方法三：
+[root@centos7 /data/interview_solutions]#echo "MAX:`tr ',' '\n' < random.txt | sort -nr | uniq -c | head -n1 | tr -s ' ' | cut -d " " -f3`"
+MAX:98301
+[root@centos7 /data/interview_solutions]#echo "MIN:`tr ',' '\n' < random.txt | sort -nr | uniq -c | tail -n1 | tr -s ' ' | cut -d " " -f3`"
+MIN:0
 ```
 
 6、解决DOS攻击生产案例：根据web日志或者或者网络连接数，监控当某个IP
 并发连接数或者短时内PV达到100，即调用防火墙命令封掉对应的IP，监控频
 率每隔5分钟。防火墙命令为：iptables -A INPUT -s IP -j REJECT 
 
-7、将以下文件内容中FQDN取出并根据其进行计数从高到低排序 
-http://mail.magedu.com/index.html 
-http://www.magedu.com/test.html 
-http://study.magedu.com/index.html 
-http://blog.magedu.com/index.html 
-http://www.magedu.com/images/logo.jpg 
-http://blog.magedu.com/20080102.html 
+```bash
+[root@centos7 ~]#iptables -S
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT
+[root@centos7 ~]#ss -nt | awk -F " +|:" '/ESTAB/{ip[$6]++}END{for (i in ip){if (ip[i]>2){print i}}}' | while read ip;do iptables -A INPUT -s $ip -j REJECT;done
+[root@centos7 ~]#iptables -S
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT
+-A INPUT -s 172.20.2.16/32 -j REJECT --reject-with icmp-port-unreachable
+-A INPUT -s 172.20.2.44/32 -j REJECT --reject-with icmp-port-unreachable
+-A INPUT -s 172.20.3.80/32 -j REJECT --reject-with icmp-port-unreachable
+
+```
+
+7、将以下文件内容中FQDN(Fully Qualified Domain Name)取出并根据其进行计数从高到低排序
+```
+http://mail.magedu.com/index.html
+http://www.magedu.com/test.html
+http://study.magedu.com/index.html
+http://blog.magedu.com/index.html
+http://www.magedu.com/images/logo.jpg
+http://blog.magedu.com/20080102.html
+```
+
+```bash
+[root@centos7]#cat > 2url <<EOF
+http://mail.magedu.com/index.html
+http://www.magedu.com/test.html
+http://study.magedu.com/index.html
+http://blog.magedu.com/index.html
+http://www.magedu.com/images/logo.jpg
+http://blog.magedu.com/20080102.html
+EOF
+#[root@centos7]#sed -nr 's#.*//(.*)/.*#\1#p' 2url  | sort | uniq -c | sort -nr
+#2 blog.magedu.com
+#1 www.magedu.com/images
+#1 www.magedu.com
+#1 study.magedu.com
+#1 mail.magedu.com
+[root@centos7 /data/interview_solutions]#awk -F"/" '{url[$3]++}END{for(i in url){printf("%-d %s\n",url[i] ,i)}}' 2url | sort -nr
+2 www.magedu.com
+2 blog.magedu.com
+1 study.magedu.com
+1 mail.magedu.com
+```
+
+
 8、将以下文本以inode为标记，对inode相同的counts进行累加，并且统计出
-同一inode中，beginnumber的最小值和endnumber的最大值 
+同一inode中，beginnumber的最小值和endnumber的最大值
+```
 inode|beginnumber|endnumber|counts| 
 106|3363120000|3363129999|10000| 
 106|3368560000|3368579999|20000| 
@@ -187,3 +263,8 @@ inode|beginnumber|endnumber|counts|
 310|3337000000|3362120961|10103| 
 311|3313460102|3362120963|39900| 
 106|3363120000|3368579999|30000| 
+```
+
+```bash
+
+```
