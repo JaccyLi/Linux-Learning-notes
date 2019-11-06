@@ -3,6 +3,7 @@
 > 1.编写shell脚本对192.168.2.0/24网段主机root密码进行修改(原密码123456),要
 求每台主机root密码不一样。
 
+
 ```bash
 #!/bin/bash
 #
@@ -43,6 +44,20 @@ expect "]#" { send "exit\n" }
 expect eof
 EOF
 done
+```
+
+- sshpass也可以
+
+```bash
+export SSHPASS=123456
+for ip in $NET.$i; do
+    {
+    PASS=`openssl rand -base64 8`
+    sshpass -e ssh $ip "echo $PASS | passwd --stdin root &> /dev/null
+    echo $NET.$ip:$PASS >> HOST:PASS.txt
+    }&
+done
+wait
 ```
 
 > 2.编写shell脚本测试192.168.1.0、/24整个网段哪些主机是开机的哪些主机是关机的。

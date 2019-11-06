@@ -1,6 +1,7 @@
 ﻿20190918
 命令列表
 a
+awk
 alias 
 apt apg-get 
 at
@@ -20,6 +21,7 @@ brctl
 batch 
 bg
 break
+busybox
 c
 cat /etc/redhat-release /etc/motd 
 cd 
@@ -45,6 +47,8 @@ createrepo
 curl 
 crontab -e -r -l -u 
 continue
+chroot /mnt/sysimage
+chkconfig --list --add -del 
 d
 dd 
 du 
@@ -69,7 +73,9 @@ expr
 egrep = grep -E 扩展正则表达式
 eject 
 e2label 
-resize2fs 
+expect 
+eval 
+
 f
 free
 file
@@ -103,6 +109,13 @@ gcc
 gdisk 
 getconf -a 
 glances 
+grub
+grub-install 
+grub2-set-default 
+grub2-setpassword
+grub2-mkconfig 
+grub2-install
+
 h
 hash
 hostname
@@ -123,6 +136,8 @@ ifconfig
 iostat
 iftop
 iotop 
+install 
+insmod 
 j
 jobs
 k
@@ -149,6 +164,9 @@ lvreduce
 lvremove 
 lvconvert --merge 
 local 
+lspci
+lsusb 
+lsmod 
 m
 more 
 mv
@@ -165,6 +183,11 @@ mount   /etc/fstab
 mkswap  
 mkisofs 
 mpstat
+mktemp
+mkinitrd 
+modinfo ext4 
+modprobe -r 
+md5sum
 n
 nano
 newgrp
@@ -177,6 +200,7 @@ netstat
 nohup 
 nice 
 nload 
+ntsysv --level 3 
 o
 od 
 p
@@ -221,6 +245,7 @@ rpm2cpio
 route 
 renice 
 return 
+resize2fs 
 s
 su
 seq 
@@ -237,14 +262,19 @@ sz
 setup
 sort 
 setfacl
+setenforce 0|1 
+sestatus 
 scp 
 split 
 sed 
-systemctl disable --now firewalld  systemctl enable --now autofs 
+systemctl disable --now firewalld  systemctl enable --now autofs start | stop |restart | get-default | set-default | is-active| is-enable | mask |unmask | isolate | list-units -a |  daemon-reload 
 swapon 
 swapoff 
+systemd-analyze plot > boot.html
+sysctl -p -w  -a  /etc/sysctl.conf 
 ss 
 select PS3 REPLY 
+sha1sum     sha224sum   sha256sum   sha384sum   sha512sum
 t
 tr
 tee
@@ -260,6 +290,7 @@ tar
 time 
 tune2fs 
 top 
+trap 
 u
 unalias
 useradd
@@ -311,6 +342,7 @@ xargs
 xfs_replair
 xfs_info 
 xfs_growfs
+x86info 
 y
 yum install xclock remove repolist list 
 z
@@ -1531,3 +1563,487 @@ echo sum=$sum
 
 基例：
 链条：
+
+[root@centos8 ~]#paste 1.txt 2.txt | tr '\t' '\n' 
+1
+a
+2
+b
+3
+c
+4
+d
+5
+e
+
+1 1
+2 3 
+3 5
+4 7
+5 9
+
+
+[root@centos8 ~]#cat 1.txt
+1
+2
+3
+4
+5
+[root@centos8 ~]#cat 2.txt
+a
+b
+c
+d
+e
+[root@centos8 ~]#for i in `seq 1 $LINE`;do INSERT=`sed -n "${i}p" 2.txt`;sed -i "$[2*i-1] a $INSERT" 1.txt ; done
+[root@centos8 ~]#cat 1.txt
+1
+a
+2
+b
+3
+c
+4
+d
+5
+e
+
+
+生成10个随机数保存于数组中，并找出其最大值和最小值
+
+1 2 3
+4 5 6
+7 8 9
+
+
+matrix[11]=1
+matrix[12]=2
+
+GNU/linux 
+minix 
+
+
+[daemon]
+AutomaticLoginEnable=true                                                                                             
+AutomaticLogin=root
+
+
+实验：rm -rf /boot 恢复之，centos6,7,8 
+
+启动流程：
+POST
+BIOS选择启动硬件
+MBR 446 grub stage1 
+grub stage1.5 mbr 后续的sector 
+grub stage 2 /boot/grub/grub.conf 
+kernel /vmlinuz ro  root=/dev/sda2
+initrd /initramfs.img 
+/sbin/init 第一次进程 
+/etc/inittab  3 
+/etc/rc.d/rc.sysinit  /etc/fstab 
+/etc/rc3.d/K,S ---> /etc/init.d/服务脚本 ： #chkconfig: 234 96 3 #description: test service 
+/etc/rc.d/rc.local 最后执行启动脚本
+/sbin/mingetty
+
+
+实验: rm /sbin/init 恢复之
+
+1 grub菜单
+加 selinux=0 init=/bin/bash 
+
+2 mount -o remount,rw /
+
+3 mount /dev/sr0 /mnt/
+
+4 rpm2cpio /mnt/Packages/upstart.xxx.rpm | cpio -idv ./sbin/init 
+
+5 mv ./sbin/init /sbin/ 
+
+
+实验： rm -rf /boot/*  /etc/fstab
+
+1 rescue mode 恢复/etc/fstab 
+找到/ 所在分区
+fdisk -l 
+mkdir /mnt/tmp
+mount /dev/sdaN /mnt/tmp 
+ls /mnt/tmp 
+mount /dev/sda2  /mnt/tmp 
+vim /mnt/tmp/etc/fstab 
+/dev/sda1 /boot ext4 defaults 0 0 
+/dev/sda2  /    ext4 defaults 0 0
+/dev/sda3  /data ext4 defaults 0 0
+/dev/sda5  swap swap defaults 0 0
+
+reboot 
+
+2 rescue mode 恢复内核和initrd 文件
+/dev/sda2 --> /mnt/sysimage
+
+chroot /mnt/sysimage
+mount /dev/sr0 /mnt/
+方法1 
+rpm -ivh /mnt/Packages/kernel.xxxx.rpm --force  
+
+方法2 
+cp  /mnt/isolinux/vmlinuz  /boot/
+mkinitrd  /boot/initramfs.img  `uname -r`
+
+3 修复 grub 
+grub-install /dev/sda 
+vim /boot/grub/grub.conf 方法2
+[root@centos6 ~]#cat /boot/grub/grub.conf 
+default=0
+timeout=5
+title centos
+kernel /vmlinuz root=/dev/sda2
+initrd /initramfs.img 
+
+4 reboot 
+
+实验：自制Linux 
+
+for i in /sys/class/scsi_host/host*/scan;do echo '- - -' > $i;done
+
+实验：编译安装busybox 
+
+实验：编译安装kernel-5.3.8 
+dnf  install gcc make ncurses-devel flex bison openssl-devel elfutils-libelf-devel
+tar xf linux-5.3.8.tar.xz
+cd linux-5.3.8/
+cp /boot/config-3.10.0-1062.el7.x86_64 .config
+make menuconfig
+make modules_install
+make install
+
+make[1]: *** No rule to make target 'certs/rhel.pem', needed by 'certs/x509_certificate_list'.  Stop
+
+
+vim .config 
+# CONFIG_MODULE_SIG is not set
+CONFIG_SYSTEM_TRUSTED_KEYS=""
+# CONFIG_DEBUG_INFO is not set
+
+record  一行\n ;
+field 列   
+
+[root@centos8 ~]#df | awk -F" +|%" '{print $5}'
+Use
+0
+0
+2
+0
+6
+1
+15
+1
+
+
+[root@centos6 ~]#ifconfig | awk -F" +|:" 'NR==2{print $4 }'
+192.168.39.6
+
+[root@centos8 ~]#cat url.txt
+http://www.baidu.com/index.html
+http://mp3.baidu.com/1.mp3
+http://map.baidu.com/
+[root@centos8 ~]#awk -F"/" '{print $3}' url.txt 
+www.baidu.com
+mp3.baidu.com
+map.baidu.com
+[root@centos8 ~]#cut -d/ -f3 url.txt
+www.baidu.com
+mp3.baidu.com
+map.baidu.com
+
+[root@centos8 ~]#df | awk -F" +|%" '{print $1,$5}'
+Filesystem Use
+devtmpfs 0
+tmpfs 0
+tmpfs 2
+tmpfs 0
+/dev/sda2 6
+/dev/sda5 1
+/dev/sda1 15
+tmpfs 1
+[root@centos8 ~]#df | awk -F" +|%" '$5>=5 && $5<=15{print $1,$5}'
+/dev/sda2 6
+/dev/sda1 15
+
+
+[root@centos8 ~]#df | awk -F" +|%" '$5>=5{print $1,$5};$5<=10{print $1,$5}'
+Filesystem Use
+devtmpfs 0
+tmpfs 0
+tmpfs 2
+tmpfs 0
+/dev/sda2 6
+/dev/sda2 6
+/dev/sda5 1
+/dev/sda1 15
+tmpfs 1
+
+[root@centos8 ~]#df | awk -F" +|%" '$5>=5 || $5<=10{print $1,$5}'
+Filesystem Use
+devtmpfs 0
+tmpfs 0
+tmpfs 2
+tmpfs 0
+/dev/sda2 6
+/dev/sda5 1
+/dev/sda1 15
+tmpfs 1
+[root@centos8 ~]#df | awk -F" +|%" '$5>=5 && $5<=10{print $1,$5}'
+/dev/sda2 6
+[root@centos8 ~]#df | awk -F" +|%" '! $5>=5 {print $1,$5}'
+[root@centos8 ~]#df | awk -F" +|%" '! ($5>=5) {print $1,$5}'
+devtmpfs 0
+tmpfs 0
+tmpfs 2
+tmpfs 0
+/dev/sda5 1
+tmpfs 1
+
+[root@centos8 ~]#df | awk -F" +|%" 'NR!=1{$5>=5?DES="FULL":DES="NOT FULL";print DES,$5}'
+NOT FULL 0
+NOT FULL 0
+NOT FULL 2
+NOT FULL 0
+FULL 6
+NOT FULL 1
+FULL 15
+NOT FULL 1
+
+
+for ip in `ss -nt| awk -F" +|:" 'NR!=1{print $6}'|sort |uniq -c|awk '$1>=3{print $2}'`;do 
+iptables -A INPUT -s $ip -j REJECT
+done
+
+ss -nt| awk -F" +|:" 'NR!=1{print $6}'|sort |uniq -c|awk '$1>=3{print $2}'| while read ip ;do 
+iptables -A INPUT -s $ip -j REJECT
+done
+
+[root@centos8 ~]#ss -nt| awk -F" +|:" 'NR!=1{print $6}'|sort |uniq -c|awk '$1>=3{print $2}'| while read ip ;do iptables -A INPUT -s $ip -j REJECT;done
+
+[root@centos8 ~]#seq 10 | awk 'x=!x{print x}'
+1
+1
+1
+1
+1
+[root@centos8 ~]#seq 10 | awk 'x=!x'
+1
+3
+5
+7
+9
+[root@centos8 ~]#seq 10 | awk '!(x=!x)'
+2
+4
+6
+8
+10
+[root@centos8 ~]#seq 10 | awk -v x=1  'x=!x'
+2
+4
+6
+8
+10
+[root@centos8 ~]#seq 10 | awk -v x=2  'x=!x'
+2
+4
+6
+8
+10
+[root@centos8 ~]#seq 10 | awk '{i=!i;print i}'
+1
+0
+1
+0
+1
+0
+1
+0
+1
+0
+[root@centos8 ~]#seq 10 | awk -v i=1 '{i=!i;print i}'
+0
+1
+0
+1
+0
+1
+0
+1
+0
+1
+
+
+[root@centos8 ~]#seq 10 | sed -n '1~2p'
+1
+3
+5
+7
+9
+[root@centos8 ~]#seq 10 | sed -n '2~2p'
+2
+4
+6
+8
+10
+
+[root@centos8 ~]#awk '/^b/,/^f/' /etc/passwd
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+games:x:12:100:games:/usr/games:/sbin/nologin
+ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+[root@centos8 ~]#sed -n '/^b/,/^f/p' /etc/passwd
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+games:x:12:100:games:/usr/games:/sbin/nologin
+ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+
+[root@centos8 ~]#seq 20 | sed -n '2,10p'
+2
+3
+4
+5
+6
+7
+8
+9
+10
+[root@centos8 ~]#seq 20 | awk 'NR>=2 && NR<=10'
+2
+3
+4
+5
+6
+7
+8
+9
+10
+
+
+df | awk -F" +|%" '/^\/dev\/sd/{if($5<=5)print "空间充裕",$5;else if($5<=10)print "空间正好",$5;else print"空间满了",$5}'
+
+[root@centos8 ~]#df | awk -F" +|%" '/^\/dev\/sd/{if($5<=5){print "空间充裕",$5}else if($5<=10){print "空间正好",$5}else print"空间满了",$5}'
+空间正好 6
+空间充裕 1
+空间满了 15
+
+
+[root@centos8 ~]#awk 'BEGIN{i=1;sum=0;while(i<=100){sum+=i;i++};print sum}'
+5050
+[root@centos8 ~]#i=1;sum=0;while [ $i -le 100 ];do let sum+=i;let i++;done;echo $sum
+5050
+
+[root@centos8 ~]#awk -F"[ .]" '{print $2}' test.txt
+www
+blog
+study
+
+[root@centos8 ~]#awk -F, '{max=$1;min=$1;i=2;while (i<=NF){if($i>max){max=$i};if($i<min){min=$i};i++};print "max="max,"min="min }' test2.txt
+max=32526 min=519
+
+
+ss -nt| awk -F" +|:" 'NR!=1{print $6}'|sort |uniq -c|awk '$1>=3{print $2}'| while read ip ;do iptables -A INPUT -s $ip -j REJECT;done
+
+[root@centos8 ~]#ss -nt | awk 'NR!=1{split($5,ip,":");count[ip[1]]++}END{for(i in count){if(count[i]>=3){system("iptables -A INPUT -s "i" -j REJECT")}}}'
+
+
+
+[root@centos8 ~]#awk '{ip[$1]++}END{for(i in ip){print i":"ip[i]}}' access_log
+
+
+[root@centos8 ~]#netstat -tan|awk '/^tcp/{state[$NF]++}END{for(i in state){print i,state[i]}}'
+LISTEN 22
+ESTABLISHED 11
+[root@centos8 ~]#ss -nt |awk '/ESTAB/{split($5,ip,":");count[ip[1]]++}END{for(i in count){print i,count[i]}}'
+172.20.3.69 1
+192.168.39.1 4
+172.20.3.80 6
+172.20.3.142 1
+
+
+[root@centos8 ~]#awk 'NR!=1{if($2=="m"){msum+=$3;mcount++}else{fsum+=$3;fcount++}}END{print "男生:"msum/mcount,"女生:"fsum/fcount}' score.txt 
+男生:85 女生:96.5
+[root@centos8 ~]#awk 'NR!=1{sum[$2]+=$3;count[$2]++}END{for(i in sum){print i,sum[i]/count[i]}}' score.txt 
+m 85
+f 96.5
+
+传位于四阿哥
+DDos
+
+
+SQL注入
+
+alice ----> bob 
+
+data明文--加密key1--->data'密文---解密key2--->data
+
+对称算法：key1=key2
+
+
+
+
+
+
+不对称算法：key1 != key2
+
+
+public:公开
+secret：私有，不公开
+
+Pa Sa 
+
+Pb Sb 
+{
+
+alice ----> bob 
+	  ----> jack 
+
+Sa(data)
+
+DES 1G 4m 8m
+RSA 1G 1m 64hour
+
+
+m%n=k k,n m?
+
+hash(data)=digest 摘要
+
+md5 128 
+sha1 160
+
+sha512 512 
+
+
+
+Pb{Sa[hash(data)]+data}
+
+Sa[hash(data)]+data
+hash(data)==
+
+Pa{Sa[hash(data)]}=hash(data)
+
+
+key{Sa[hash(data)]+data}+Pb(key)
+
+Sa[hash(data)]+data
+hash(data)
+
+hash(data)

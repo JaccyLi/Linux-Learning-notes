@@ -362,16 +362,20 @@ drwxr-xr-x.  2 root root     6 Sep 20 15:05 Videos
 删除函数。改动完毕后，再重新载入此文件
 
 ## 7.载入函数 
+
 - 函数文件已创建好后，要将它载入shell 
 - 定位函数文件并载入shell的格式如下:
- ```bash 
+
+```bash 
 . filename 或 source   filename
 <点> <空格> <文件名>  这里的文件名要带函数文件的完整路径名
 ```
 
 ## 8.执行shell函数 
+
 - 要执行函数，简单地键入函数名即可
 - 如：
+
 ```bash
 [root@centos7 ~]#hello (){ echo 'Hello , im a function!' ; }    
 [root@centos7 ~]#hello
@@ -671,7 +675,42 @@ generate_matrix
 - 打印杨辉三角形
 
 ```bash
-
+#!/bin/sh 
+read -p "输入高度" g         #g是最高行 
+declare -a a 
+for i in `seq $g`           #$i是当前行 
+do 
+    if [ $i -eq 1 ] 
+        then 
+        for o in `seq $[$g-$i]` 
+        do 
+            echo -n "   " 
+        done 
+        a[1]=1 
+        echo  "1" 
+        continue 
+    fi 
+    for j in `seq $i` #j表示当前行的第几个数字 
+    do
+        if [ $j -eq 1 ] 
+        then 
+            for o in `seq $[$g-$i]` 
+            do 
+                echo -n "   " 
+            done 
+        echo -n "1" 
+        a[$i$j]=1 
+        elif [ $j -eq $i ] 
+        then 
+            echo -n "     1" 
+            a[$i$j]=1 
+        else 
+            let  a[$i$j]=${a[$[i-1]$[j-1]]}+${a[$[i-1]$[j]]} 
+            echo -n "     ${a[$i$j]}" 
+        fi 
+    done 
+echo 
+done
 
 
 ```
@@ -1366,7 +1405,21 @@ echo MIN=$MIN
 > 12.编写脚本，实现打印国际象棋棋盘
 
 ```bash
-
+#!/bin/sh 
+i=1 
+while [ $i -le 8 ];do 
+    j=1 
+    while [ $j -le 4 ];do 
+        if [ $[$i%2] -eq  0 ];then 
+            echo -e "\e[1;41m  \e[0m\e[1;43m  \e[0m\c" 
+        else 
+            echo -e "\e[1;43m  \e[0m\e[1;41m  \e[0m\c" 
+        fi 
+        let j++ 
+    done
+    echo
+    let i++
+done
 ```
 
 > 13.后续六个字符串：efbaf275cd、4be9c40b8b、44b2395c46、f8c8873ce0、b902c16c8b、
@@ -1374,7 +1427,27 @@ ad865d2f63是通过对随机数变量RANDOM随机执行命令：echo $RANDOM|md5
 后的结果，请破解这些字符串对应的RANDOM值
 
 ```bash
-
+#!/bin/sh 
+ps1=efbaf275cd 
+ps2=4be9c40b8b 
+ps3=44b2395c46 
+ps4=f8c8873ce0 
+ps5=b902c16c8b 
+ps6=ad865d2f63 
+echo 'num  ' 'random' 
+time=1 
+for i in {0..32767} ;do 
+    if [ $time -gt 6 ];then  
+        break 
+    fi 
+    ps=$(echo $i | md5sum | cut -c1-10) 
+    for j in $ps1 $ps2 $ps3 $ps4 $ps5 $ps6 ; do 
+        if [ $ps == $j ];then 
+            echo $i $ps 
+            let time++ 
+        fi 
+    done 
+done 
 ```
 
 
@@ -1579,5 +1652,19 @@ LENGTH="$1"
     done
 }
 
+fibonacci $1
+```
+
+```bash
+#!/bin/sh
+fibonacci(){
+    if [ $1 -eq 0 ];then
+        echo 0
+    elif [ $1 -le 1 ];then
+        echo 1
+    else
+       echo  $[$(fibonacci $[$1-1])+$(fibonacci $[$1-2])]
+    fi
+}
 fibonacci $1
 ```
