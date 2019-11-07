@@ -225,9 +225,9 @@ CRL分发点
 ```
 - 自签名的证书:自已签发自己的公钥 
 
-# 六.openssl
+# 五.openssl
 
-## 1.SSL：Secure Socket Layer，TLS: Transport Layer Security 
+- SSL：Secure Socket Layer，TLS: Transport Layer Security 
 
 ```bash
 1995：SSL 2.0 Netscape 
@@ -259,19 +259,14 @@ SSL”或“HTTP over TLS”，对http协议的文本数据进行加密处理后
 进制形式传输 
 
 ![](png/2019-11-06-12-36-11.png)
-<center>HTTPS结构</center>
-
-![](png/2019-11-06-12-36-41.png)
 <center>HTTPS工作过程</center>
-
-## 2.openssl软件
-
-- openssl命令包括三个组件：
+ 
+- 三个组件： 
   - openssl：多用途的命令行工具，包openssl 
   - libcrypto：加密算法库，包openssl-libs 
   - libssl：加密模块应用库，实现了ssl及tls，包nss 
 
-- openssl命令用法
+- openssl命令： 
 - 两种运行模式：交互模式和批处理模式 
 - 标准命令、消息摘要命令、加密命令 
   - 标准命令：enc, ca, req, ... 
@@ -280,153 +275,185 @@ SSL”或“HTTP over TLS”，对http协议的文本数据进行加密处理后
 工具：openssl enc, gpg 
 算法：3des, aes, blowfish, twofish 
 ```
-- openssl的enc子命令
+- enc命令： 
   - 加密： 
 `openssl enc -e -des3 -a -salt -in testfile -out testfile.cipher` 
   - 解密： 
 `openssl enc -d -des3 -a -salt –in testfile.cipher -out testfile` 
 - 单向加密： 
-  - 工具：md5sum, sha1sum, sha224sum,sha256sum… ,openssl dgst 
-- dgst命令
-`openssl dgst -md5 [-hex默认] /PATH/SOMEFILE` 
-`openssl dgst -md5 testfile` 
-`md5sum /PATH/TO/SOMEFILE` 
-- MAC: Message Authentication Code，单向加密的一种延伸应用，用于实现网络通信
+  - 工具：md5sum, sha1sum, sha224sum,sha256sum… 
+- openssl dgst 
+  - dgst命令
+openssl dgst -md5 [-hex默认] /PATH/SOMEFILE 
+openssl dgst -md5 testfile 
+md5sum /PATH/TO/SOMEFILE 
+MAC: Message Authentication Code，单向加密的一种延伸应用，用于实现网络通信
 中保证所传输数据的完整性机制 
-- CBC-MAC 
-- HMAC：使用md5或sha1算法 
+CBC-MAC 
+HMAC：使用md5或sha1算法 
 生成用户密码： 
-- openssl的passwd命令
-`openssl passwd -1 -salt SALT(最多8位)` 
-`openssl passwd -1 –salt  centos` 
-- 生成随机数： 
-`openssl rand -base64|-hex NUM` 
-  - NUM: 表示字节数，使用-hex，每个字符为十六进制，相当于4位二进制,出现的字符数为NUM*2 
+passwd命令: 
+帮助：man sslpasswd 
+openssl passwd -1 -salt SALT(最多8位) 
+openssl passwd -1 –salt  centos 
+生成随机数： 
+帮助：man sslrand 
+openssl rand -base64|-hex NUM 
+ NUM: 表示字节数，使用-hex，每个字符为十六进制，相当于4位二进制，
+出现的字符数为NUM*2 
 
-- 公钥加密： 
-```py
+公钥加密： 
+ 
 算法：RSA, ELGamal 
+ 
 工具：gpg, openssl rsautl（man rsautl） 
-```
-- 数字签名： 
-```py
+数字签名： 
+ 
 算法：RSA, DSA, ELGamal 
-```
-- 密钥交换： 
-```py
+密钥交换： 
+ 
 算法：dh 
+ 
 DSA：Digital Signature Algorithm 
+ 
 DSS：Digital Signature Standard 
+ 
 RSA： 
-```
-- 生成密钥对儿：man genrsa 
-- 生成私钥 
-`openssl genrsa -out /PATH/TO/PRIVATEKEY.FILE NUM_BITS` 
+
+生成密钥对儿：man genrsa 
+生成私钥 
+ 
+openssl genrsa -out /PATH/TO/PRIVATEKEY.FILE NUM_BITS 
+ 
  (umask 077; openssl genrsa –out test.key –des 2048) 
-`openssl rsa -in test.key –out test2.key` 将加密key解密 
-- 从私钥中提取出公钥 
-`openssl rsa -in PRIVATEKEYFILE –pubout –out PUBLICKEYFILE` 
-`openssl rsa –in test.key –pubout –out test.key.pub` 
-- 随机数生成器：伪随机数字 
-  - 键盘和鼠标，块设备中断 
-`/dev/random`：仅从熵池返回随机数；随机数用尽，阻塞 
-`/dev/urandom`：从熵池返回随机数；随机数用尽，会利用软件生成伪随机数,非阻塞
+  
+openssl rsa -in test.key –out test2.key 将加密key解密 
+从私钥中提取出公钥 
+ 
+openssl rsa -in PRIVATEKEYFILE –pubout –out PUBLICKEYFILE 
+ 
+openssl rsa –in test.key –pubout –out test.key.pub 
+随机数生成器：伪随机数字 
+ 
+键盘和鼠标，块设备中断 
+ 
+/dev/random：仅从熵池返回随机数；随机数用尽，阻塞 
+ 
+/dev/urandom：从熵池返回随机数；随机数用尽，会利用软件生成伪随机
+数,非阻塞
 
-# 七.CA创建和管理
-
-## 1.PKI：Public Key Infrastructure 
-
-```py
+PKI：Public Key Infrastructure 
+ 
 CA 
+ 
 RA 
+ 
 CRL 
+ 
 证书存取库 
-```
-- 建立私有CA一般使用工具: 
-```py
+建立私有CA: 
+ 
 OpenCA 
+ 
 openssl 
-```
-- 证书申请及签署步骤： 
-```py
+证书申请及签署步骤： 
+ 
 1、生成申请请求 
+ 
 2、RA核验 
+ 
 3、CA签署 
+ 
 4、获取证书 
-```
 
-## 3.创建私有CA、证书申请和管理
 
-### 创建私有CA
 
-- openssl的配置文件：/etc/pki/tls/openssl.cnf 
-- 三种策略：match匹配、optional可选、supplied提供 
 
-```py
-match：要求申请填写的信息跟CA设置信息必须一致 
-optional：可有可无，跟CA设置信息可不一致 
-supplied：必须填写这项申请信息， 
-```
-
-### 步骤
-
-1、创建所需要的文件 
-```py
+## 证书管理 
+创建CA和申请证书 
+创建私有CA： 
+ 
+openssl的配置文件：/etc/pki/tls/openssl.cnf 
+ 
+三种策略：match匹配、optional可选、supplied提供 
+ 
+ match：要求申请填写的信息跟CA设置信息必须一致 
+ 
+ optional：可有可无，跟CA设置信息可不一致 
+ 
+ supplied：必须填写这项申请信息， 
+1、创建所需要的文件 
+ 
 touch /etc/pki/CA/index.txt 生成证书索引数据库文件 
+ 
 echo 01 > /etc/pki/CA/serial 指定第一个颁发证书的序列号 
-```
-2、 CA自签证书 
-```py
+2、 CA自签证书 
+ 
 生成私钥 
-    cd /etc/pki/CA/ 
-    (umask 066; openssl genrsa -out  private/cakey.pem 2048)
-生成自签名证书 
-   openssl req -new -x509 -key   /etc/pki/CA/private/cakey.pem -days 3650 -out  /etc/pki/CA/cacert.pem 
-```
-- 选项说明： 
+ 
+cd /etc/pki/CA/ 
+ 
+(umask 066; openssl genrsa -out  private/cakey.pem 2048) 
 
-```py
+创建CA和申请证书 
+生成自签名证书 
+   openssl req -new -x509 -key   /etc/pki/CA/private/cakey.pem  
+ 
+ -days  3650  -out      /etc/pki/CA/cacert.pem 
+选项说明： 
+ 
 -new：生成新证书签署请求 
+ 
 -x509：专用于CA生成自签证书 
+ 
 -key：生成请求时用到的私钥文件 
+ 
 -days n：证书的有效期限 
+ 
 -out /PATH/TO/SOMECERTFILE: 证书的保存路径 
-```
-3、颁发证书 
-
-```py
-3.1 在需要使用证书的主机生成证书请求 
-eg:给web服务器生成私钥 
-(umask 066; openssl genrsa –out   /data/test.key 2048) 
-3.2 生成证书申请文件 
+创建CA和申请证书 
+3、颁发证书 
+在需要使用证书的主机生成证书请求 
+ 
+给web服务器生成私钥 
+ 
+ (umask 066; openssl genrsa –out   /data/test.key 2048) 
+ 
+生成证书申请文件 
+ 
 openssl req -new -key /data/test.key -out /data/test.csr 
-3.3 将证书请求文件传输给CA 
-3.4 CA签署证书，并将证书颁发给请求者 
+将证书请求文件传输给CA 
+CA签署证书，并将证书颁发给请求者 
+ 
 openssl ca -in /tmp/test.csr –out   /etc/pki/CA/certs/test.crt -days 100 
+ 
 注意：默认要求 国家，省，公司名称三项必须和CA一致 
-查看证书中的信息： 
+创建CA和证书管理 
+查看证书中的信息： 
+ 
 openssl x509 -in /PATH/FROM/CERT_FILE -noout   -text|issuer|subject|serial|dates 
-查看指定编号的证书状态 
-openssl  ca -status SERIAL
-```
-4、吊销证书 
-
-```py
-4.1 在客户端获取要吊销的证书的serial 
+ 
+openssl  ca -status SERIAL  查看指定编号的证书状态 
+4、吊销证书 
+在客户端获取要吊销的证书的serial 
+ 
 openssl x509 -in /PATH/FROM/CERT_FILE   -noout   -serial  -subject 
-在CA上，根据客户提交的serial与subject信息，对比检验是否与index.txt文件中的信息一致
-吊销证书命令：
+在CA上，根据客户提交的serial与subject信息，对比检验是否与index.txt文件中的信息一致，
+吊销证书： 
+ 
 openssl ca -revoke /etc/pki/CA/newcerts/SERIAL.pem 
-4.2 指定第一个吊销证书的编号,注意：第一次更新证书吊销列表前，才需要执行 
+指定第一个吊销证书的编号,注意：第一次更新证书吊销列表前，才需要执行 
+ 
 echo 01 > /etc/pki/CA/crlnumber 
-4.3 更新证书吊销列表 
+更新证书吊销列表 
+ 
 openssl ca -gencrl -out /etc/pki/CA/crl.pem 
-4.4 查看crl文件： 
+查看crl文件： 
+ 
 openssl crl -in /etc/pki/CA/crl.pem -noout -text 
-```
 
-# 八.ssh服务和dropbear 
 
+## ssh服务和dropbear 
 SSH 
 ssh: secure shell, protocol, 22/tcp, 安全的远程登录 
 具体的软件实现： 
