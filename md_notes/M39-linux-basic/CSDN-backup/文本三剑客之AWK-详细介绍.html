@@ -1,0 +1,769 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文本三剑客之AWK-详细介绍</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3><center> <font face="黑体" size="6" color="grey">文本三剑客之AWK-详细介绍</font></center></h3><ul><li><a href="#awk_2">awk介绍</a></li><ul><li><a href="#1awk_6">1.awk基本用法</a></li><li><a href="#2awk_71">2.awk变量</a></li><li><a href="#3awk_126">3.awk格式化</a></li><li><a href="#4awk_170">4.awk操作符</a></li><li><a href="#5awk_280">5.awk控制语句</a></li><li><a href="#6awk_296">6.awk条件判断</a></li><li><a href="#7awk_313">7.awk循环</a></li><ul><li><a href="#while_315">while循环</a></li><li><a href="#dowhile_335">do-while循环</a></li><li><a href="#for_342">for循环</a></li><li><a href="#switch_387">switch语句</a></li></ul><li><a href="#8awk_405">8.awk数组</a></li><li><a href="#9awk_437">9.awk函数</a></li><li><a href="#10_472">10.调用系统命令</a></li><ul><li><a href="#systemshell_474">使用system命令调用shell命令</a></li></ul><li><a href="#_513">练习</a></li></ul></ul></div><p></p>
+<h1><a id="awk_2"></a>awk介绍</h1>
+<ul>
+<li>Awk是一种便于使用且表达能力强的程序设计语言，可应用于各种计算和数据处理任务。</li>
+</ul>
+<h2><a id="1awk_6"></a>1.awk基本用法</h2>
+<ul>
+<li>基本用法：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">awk</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>  <span class="token string">'program'</span>  var<span class="token operator">=</span>value   file… 
+<span class="token function">awk</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>  -f programfile    var<span class="token operator">=</span>value  file… 
+<span class="token function">awk</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span>  <span class="token string">'BEGIN{action;… }pattern{action;… }END{action;… }'</span>  <span class="token function">file</span> <span class="token punctuation">..</span>. 
+</code></pre>
+<ul>
+<li>awk 程序可由：BEGIN语句块、能够使用模式匹配的通用语句块、END语句块，共3部分组成</li>
+<li>program 通常是被放在单引号中</li>
+<li>选项：</li>
+</ul>
+<pre><code>-F “分隔符” 指明输入时用到的字段分隔符 
+-v  var=value 变量赋值 
+</code></pre>
+<ul>
+<li>
+<p>基本格式：awk [options] ‘program’ file…</p>
+</li>
+<li>
+<p>Program：pattern{action statements;…}</p>
+<ul>
+<li>pattern部分决定动作语句何时触发及触发事件</li>
+<li>action statements对数据进行处理，放在{}内指明</li>
+</ul>
+</li>
+<li>
+<p>分割符、域和记录</p>
+<ul>
+<li>awk执行时，由分隔符分隔的字段（域）标记$1、<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>2...</mn></mrow><annotation encoding="application/x-tex">2...</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">2</span><span class="mord">.</span><span class="mord">.</span><span class="mord">.</span></span></span></span></span>n称为域标识。<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>0</mn><mi mathvariant="normal">为</mi><mi mathvariant="normal">所</mi><mi mathvariant="normal">有</mi><mi mathvariant="normal">域</mi><mi mathvariant="normal">注</mi><mi mathvariant="normal">意</mi><mi mathvariant="normal">：</mi><mi mathvariant="normal">此</mi><mi mathvariant="normal">时</mi><mi mathvariant="normal">和</mi><mi>s</mi><mi>h</mi><mi>e</mi><mi>l</mi><mi>l</mi><mi mathvariant="normal">中</mi><mi mathvariant="normal">变</mi><mi mathvariant="normal">量</mi></mrow><annotation encoding="application/x-tex">0为所有域
+注意：此时和shell中变量</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord">0</span><span class="mord cjk_fallback">为</span><span class="mord cjk_fallback">所</span><span class="mord cjk_fallback">有</span><span class="mord cjk_fallback">域</span><span class="mord cjk_fallback">注</span><span class="mord cjk_fallback">意</span><span class="mord cjk_fallback">：</span><span class="mord cjk_fallback">此</span><span class="mord cjk_fallback">时</span><span class="mord cjk_fallback">和</span><span class="mord mathdefault">s</span><span class="mord mathdefault">h</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right: 0.01968em;">l</span><span class="mord mathdefault" style="margin-right: 0.01968em;">l</span><span class="mord cjk_fallback">中</span><span class="mord cjk_fallback">变</span><span class="mord cjk_fallback">量</span></span></span></span></span>符含义不同</li>
+<li>文件的每一行称为记录</li>
+<li>省略action，则默认执行 print $0 的操作</li>
+</ul>
+</li>
+<li>
+<p>工作原理</p>
+</li>
+</ul>
+<pre><code class="prism language-py">第一步：执行BEGIN<span class="token punctuation">{</span>action<span class="token punctuation">;</span>… <span class="token punctuation">}</span>语句块中的语句 
+第二步：从文件或标准输入<span class="token punctuation">(</span>stdin<span class="token punctuation">)</span>读取一行，然后执行pattern<span class="token punctuation">{</span> action<span class="token punctuation">;</span>… <span class="token punctuation">}</span>语句块，
+它逐行扫描文件，从第一行到最后一行重复这个过程，直到文件全部被读取完毕。  
+第三步：当读至输入流末尾时，执行END<span class="token punctuation">{</span>action<span class="token punctuation">;</span>…<span class="token punctuation">}</span>语句块 
+BEGIN语句块在awk开始从输入流中读取行之前被执行，这是一个可选的语句块，
+比如变量初始化、打印输出表格的表头等语句通常可以写在BEGIN语句块中 
+END语句块在awk从输入流中读取完所有的行之后即被执行，比如打印所有行的
+分析结果这类信息汇总都是在END语句块中完成，它也是一个可选语句块  
+pattern语句块中的通用命令是最重要的部分，也是可选的。如果没有提供
+pattern语句块，则默认执行<span class="token punctuation">{</span> <span class="token keyword">print</span> <span class="token punctuation">}</span>，即打印每一个读取到的行，awk读取的每
+一行都会执行该语句块 
+</code></pre>
+<ul>
+<li>print格式：print item1, item2, …</li>
+<li>要点：</li>
+</ul>
+<pre><code>(1) 逗号分隔符 
+(2) 输出item可以字符串，也可是数值；当前记录的字段、变量或awk的表达式 
+(3) 如省略item，相当于print $0 
+</code></pre>
+<ul>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">awk</span>  <span class="token string">'{print "hello,awk"}'</span> 
+<span class="token function">awk</span> –F:   <span class="token string">'{print}'</span>   /etc/passwd 
+<span class="token function">awk</span> –F:  ‘<span class="token punctuation">{</span>print “wang”<span class="token punctuation">}</span>’   /etc/passwd 
+<span class="token function">awk</span> –F:  ‘<span class="token punctuation">{</span>print <span class="token variable">$1</span><span class="token punctuation">}</span>’   /etc/passwd 
+<span class="token function">awk</span> –F:  ‘<span class="token punctuation">{</span>print <span class="token variable">$0</span><span class="token punctuation">}</span>’  /etc/passwd 
+<span class="token function">awk</span> –F:  ‘<span class="token punctuation">{</span>print <span class="token variable">$1</span>”\t”<span class="token variable">$3</span><span class="token punctuation">}</span>’  /etc/passwd 
+<span class="token function">grep</span> “ÛUID”/etc/fstab  <span class="token operator">|</span>  <span class="token function">awk</span> ‘<span class="token punctuation">{</span>print <span class="token variable">$2</span>,<span class="token variable">$4</span><span class="token punctuation">}</span>’ 
+</code></pre>
+<h2><a id="2awk_71"></a>2.awk变量</h2>
+<ul>
+<li>可以使用内置变量也可以自定义变量</li>
+</ul>
+<pre><code class="prism language-py">FS<span class="token punctuation">:</span>Field Separator
+    输入字段分隔符，默认为空白字符 
+    awk <span class="token operator">-</span>v FS<span class="token operator">=</span><span class="token string">':'</span>  <span class="token string">'{print $1,FS,$3}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+    awk  –F<span class="token punctuation">:</span>   <span class="token string">'{print $1,$3,$7}'</span>   <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+OFS<span class="token punctuation">:</span>Output Field Separator
+    输出字段分隔符，默认为空白字符 
+    awk  <span class="token operator">-</span>v FS<span class="token operator">=</span><span class="token string">':'</span>  <span class="token operator">-</span>v OFS<span class="token operator">=</span><span class="token string">':'</span>  <span class="token string">'{print $1,$3,$7}'</span>   <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+RS<span class="token punctuation">:</span>Record Seperator
+    输入记录分隔符，指定输入时的换行符 
+    awk <span class="token operator">-</span>v RS<span class="token operator">=</span><span class="token string">' '</span> ‘<span class="token punctuation">{</span><span class="token keyword">print</span> <span class="token punctuation">}</span>’ <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+ORS<span class="token punctuation">:</span>Output Record Seperator
+    输出记录分隔符，输出时用指定符号代替换行符 
+    awk <span class="token operator">-</span>v RS<span class="token operator">=</span><span class="token string">' '</span> <span class="token operator">-</span>v ORS<span class="token operator">=</span><span class="token string">'###'</span>  <span class="token string">'{print $0}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+NF<span class="token punctuation">:</span>Number Field
+    字段数量 
+    awk  <span class="token operator">-</span>F：<span class="token string">'{print NF}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>fstab 引用变量时，变量前不需加$ 
+    awk  <span class="token operator">-</span>F：<span class="token string">'{print $(NF-1)}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+NR<span class="token punctuation">:</span>Number Record
+    记录号 
+    awk <span class="token string">'{print NR}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>fstab <span class="token punctuation">;</span> awk END <span class="token string">'{print NR}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>fstab 
+FNR：各文件分别计数<span class="token punctuation">,</span>记录号 
+    awk <span class="token string">'{print FNR}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>fstab <span class="token operator">/</span>etc<span class="token operator">/</span>inittab 
+FILENAME：当前文件名 
+    awk <span class="token string">'{print FILENAME}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>fstab 
+ARGC：命令行参数的个数 
+    awk <span class="token string">'{print ARGC}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>fstab <span class="token operator">/</span>etc<span class="token operator">/</span>inittab 
+    awk <span class="token string">'BEGIN {print ARGC}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>fstab <span class="token operator">/</span>etc<span class="token operator">/</span>inittab 
+ARGV：数组，保存的是命令行所给定的各参数 
+    awk <span class="token string">'BEGIN {print ARGV[0]}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>fstab <span class="token operator">/</span>etc<span class="token operator">/</span>inittab 
+    awk <span class="token string">'BEGIN {print ARGV[1]}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>fstab <span class="token operator">/</span>etc<span class="token operator">/</span>inittab 
+</code></pre>
+<ul>
+<li>自定义变量(区分字符大小写)</li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">-</span>v var<span class="token operator">=</span>value 
+<span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span> 在program中直接定义 
+</code></pre>
+<ul>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-py">awk  <span class="token operator">-</span>v test<span class="token operator">=</span><span class="token string">'hello gawk'</span> <span class="token string">'{print test}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>fstab  
+awk  <span class="token operator">-</span>v test<span class="token operator">=</span><span class="token string">'hello gawk'</span> <span class="token string">'BEGIN{print test}'</span>  
+awk  <span class="token string">'BEGIN{test="hello,gawk";print test}'</span>  
+awk  <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'{sex=“male”;print $1,sex,age;age=18}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+
+cat awkscript 
+<span class="token punctuation">{</span><span class="token keyword">print</span> script<span class="token punctuation">,</span>$<span class="token number">1</span><span class="token punctuation">,</span>$<span class="token number">2</span><span class="token punctuation">}</span> 
+awk  <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token operator">-</span>f awkscript script<span class="token operator">=</span><span class="token string">"awk"</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+</code></pre>
+<h2><a id="3awk_126"></a>3.awk格式化</h2>
+<ul>
+<li>printf 命令</li>
+<li>格式化输出：<code>printf "FORMAT", item1, item2, ...</code></li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> 必须指定FORMAT 
+<span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span> 不会自动换行，需要显式给出换行控制符，\n 
+<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span> FORMAT中需要分别为后面每个item指定格式符 
+</code></pre>
+<ul>
+<li>格式符：与item一一对应</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">%</span>c：显示字符的ASCII码 
+<span class="token operator">%</span>d<span class="token punctuation">,</span> <span class="token operator">%</span>i：显示十进制整数 
+<span class="token operator">%</span>e<span class="token punctuation">,</span> <span class="token operator">%</span>E：显示科学计数法数值 
+<span class="token operator">%</span>f：显示为浮点数 
+<span class="token operator">%</span>g<span class="token punctuation">,</span> <span class="token operator">%</span>G：以科学计数法或浮点形式显示数值 
+<span class="token operator">%</span>s：显示字符串 
+<span class="token operator">%</span>u：无符号整数 
+<span class="token operator">%</span><span class="token operator">%</span>：显示<span class="token operator">%</span>自身 
+</code></pre>
+<ul>
+<li>修饰符</li>
+</ul>
+<pre><code class="prism language-py"><span class="token comment">#[.#] 第一个数字控制显示的宽度；第二个#表示小数点后精度，%3.1f </span>
+<span class="token operator">-</span> 左对齐（默认右对齐） <span class="token operator">%</span><span class="token operator">-</span>15s 
+<span class="token operator">+</span> 显示数值的正负符号 <span class="token operator">%</span><span class="token operator">+</span>d
+</code></pre>
+<ul>
+<li>printf示例</li>
+</ul>
+<pre><code class="prism language-py">awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'{printf "%s",$1}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'{printf "%s\n",$1}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'{printf "%-20s %10d\n",$1,$3}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'{printf "Username: %s\n",$1}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'{printf “Username: %s,UID:%d\n",$1,$3}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'{printf "Username: %15s,UID:%d\n",$1,$3}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'{printf "Username: %-15s,UID:%d\n",$1,$3}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+</code></pre>
+<h2><a id="4awk_170"></a>4.awk操作符</h2>
+<ul>
+<li>算术操作符：</li>
+</ul>
+<pre><code class="prism language-py">x<span class="token operator">+</span>y<span class="token punctuation">,</span> x<span class="token operator">-</span>y<span class="token punctuation">,</span> x<span class="token operator">*</span>y<span class="token punctuation">,</span> x<span class="token operator">/</span>y<span class="token punctuation">,</span> x<span class="token operator">^</span>y<span class="token punctuation">,</span> x<span class="token operator">%</span>y 
+<span class="token operator">-</span> x：转换为负数 
+<span class="token operator">+</span>x：将字符串转换为数值 
+</code></pre>
+<ul>
+<li>
+<p>字符串操作符：没有符号的操作符，字符串连接</p>
+</li>
+<li>
+<p>赋值操作符：<br>
+<code>=, +=, -=, *=, /=, %=, ^=，++, --</code></p>
+</li>
+<li>
+<p>下面两语句有何不同</p>
+</li>
+</ul>
+<pre><code class="prism language-py">awk  <span class="token string">'BEGIN{i=0;print ++i,i}'</span> 
+awk  <span class="token string">'BEGIN{i=0;print i++,i}'</span> 
+</code></pre>
+<ul>
+<li>
+<p>比较操作符：<br>
+<code>==, !=, &gt;, &gt;=, &lt;, &lt;=</code></p>
+</li>
+<li>
+<p>模式匹配符：</p>
+</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">~</span>：左边是否和右边匹配，包含 
+!<span class="token operator">~</span>：是否不匹配 
+</code></pre>
+<ul>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-py">awk  <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'$0 ~ /root/{print $1}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk  <span class="token string">'$0~“^root"'</span>     <span class="token operator">/</span>etc<span class="token operator">/</span>passwd  
+awk  <span class="token string">'$0  !~ /root/'</span>   <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk  <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'$3==0'</span>     <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+</code></pre>
+<ul>
+<li>
+<p>逻辑操作符：与&amp;&amp;，或||，非!</p>
+</li>
+<li>
+<p>示例：</p>
+</li>
+</ul>
+<pre><code class="prism language-py">•awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'$3&gt;=0 &amp;&amp; $3&lt;=1000 {print $1}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+•awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'$3==0 || $3&gt;=1000 {print $1}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>passwd  
+•awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'!($3==0) {print $1}'</span>     <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+•awk <span class="token operator">-</span>F<span class="token punctuation">:</span>   <span class="token string">'!($3&gt;=500) {print $3}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+</code></pre>
+<ul>
+<li>条件表达式（三目表达式）</li>
+</ul>
+<p><code>selector?if-true-expression:if-false-expression</code></p>
+<ul>
+<li>示例：</li>
+</ul>
+<p><code>awk -F: '{$3&gt;=1000?usertype="Common User":usertype="SysUser"; printf "%15s:%-s\n",$1,usertype}' /etc/passwd</code></p>
+<ul>
+<li>PATTERN:根据pattern条件，过滤匹配的行，再做处理
+<ul>
+<li>(1)如果未指定：空模式，匹配每一行</li>
+<li>(2) /regular expression/：仅处理能够模式匹配到的行，需要用/  /括起来</li>
+</ul>
+</li>
+</ul>
+<pre><code class="prism language-py">  awk   <span class="token string">'/ÛUID/{print $1}'</span>     <span class="token operator">/</span>etc<span class="token operator">/</span>fstab 
+  awk   <span class="token string">'!/ÛUID/{print $1}'</span>   <span class="token operator">/</span>etc<span class="token operator">/</span>fstab 
+</code></pre>
+<ul>
+<li>(3) relational expression: 关系表达式，结果为“真”才会被处理</li>
+</ul>
+<pre><code class="prism language-py">真：结果为非<span class="token number">0</span>值，非空字符串 
+假：结果为空字符串或<span class="token number">0</span>值  
+</code></pre>
+<ul>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-py">awk   <span class="token operator">-</span>F<span class="token punctuation">:</span>  <span class="token string">'i=1;j=1{print i,j}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk  <span class="token string">'!0'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>passwd <span class="token punctuation">;</span>  
+awk  <span class="token string">'!1'</span>   <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+Awk  <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'$3&gt;=1000{print $1,$3}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk  <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'$3&lt;1000{print $1,$3}'</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk  <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'$NF=="/bin/bash"{print $1,$NF}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk  <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'$NF ~ /bash$/{print $1,$NF}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+</code></pre>
+<ul>
+<li>
+<ol start="4">
+<li>line ranges：行范围</li>
+</ol>
+<ul>
+<li>startline,endline：/pat1/,/pat2/ 不支持直接给出数字格式<br>
+<code>awk -F: ‘/^root\&gt;/,/^nobody\&gt;/{print $1}' /etc/passwd</code><br>
+<code>awk -F: ‘(NR&gt;=10&amp;&amp;NR&lt;=20){print NR,$1}' /etc/passwd</code></li>
+</ul>
+</li>
+<li>(5) BEGIN/END模式<br>
+<code>BEGIN{}</code>：仅在开始处理文件中的文本之前执行一次<br>
+<code>END{}</code>：仅在文本处理完成之后执行一次</li>
+<li>示例</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">awk</span> -F <span class="token keyword">:</span> <span class="token string">'BEGIN {print "USER USERID"} {print <span class="token variable">$1</span>":"<span class="token variable">$3</span>}END{print "END FILE"}'</span> /etc/passwd 
+<span class="token function">awk</span> -F: <span class="token string">'{print "USER USERID";print <span class="token variable">$1</span>":"<span class="token variable">$3</span>} END{print "END FILE"}'</span>  /etc/passwd 
+<span class="token function">awk</span> -F: <span class="token string">'BEGIN{print "USER  UID  \n--------------- "}{print <span class="token variable">$1</span>,<span class="token variable">$3</span>}'</span>  /etc/passwd 
+<span class="token function">awk</span> -F: <span class="token string">'BEGIN{print "USER UID  \n--------------- "}{print <span class="token variable">$1</span>,<span class="token variable">$3</span>}'</span> 
+             END<span class="token punctuation">{</span>print <span class="token string">"=============="</span><span class="token punctuation">}</span> /etc/passwd 
+<span class="token function">seq</span> 10 <span class="token operator">|</span> <span class="token function">awk</span>     <span class="token string">'i=0'</span> 
+<span class="token function">seq</span> 10 <span class="token operator">|</span> <span class="token function">awk</span>     <span class="token string">'i=1'</span> 
+<span class="token function">seq</span> 10 <span class="token operator">|</span> <span class="token function">awk</span>     <span class="token string">'i=!i'</span> 
+<span class="token function">seq</span> 10 <span class="token operator">|</span> <span class="token function">awk</span>     <span class="token string">'{i=!i;print i}'</span> 
+<span class="token function">seq</span> 10 <span class="token operator">|</span> <span class="token function">awk</span>   ‘<span class="token operator">!</span><span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token operator">!</span>i<span class="token punctuation">)</span><span class="token string">'               
+seq 10 | awk       -v  i=1 '</span>i<span class="token operator">=</span><span class="token operator">!</span>i' 
+</code></pre>
+<h2><a id="5awk_280"></a>5.awk控制语句</h2>
+<pre><code class="prism language-py"><span class="token punctuation">{</span> statements<span class="token punctuation">;</span>… <span class="token punctuation">}</span> 组合语句 
+<span class="token keyword">if</span><span class="token punctuation">(</span>condition<span class="token punctuation">)</span> <span class="token punctuation">{</span>statements<span class="token punctuation">;</span>…<span class="token punctuation">}</span>  
+<span class="token keyword">if</span><span class="token punctuation">(</span>condition<span class="token punctuation">)</span> <span class="token punctuation">{</span>statements<span class="token punctuation">;</span>…<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>statements<span class="token punctuation">;</span>…<span class="token punctuation">}</span> 
+<span class="token keyword">while</span><span class="token punctuation">(</span>conditon<span class="token punctuation">)</span> <span class="token punctuation">{</span>statments<span class="token punctuation">;</span>…<span class="token punctuation">}</span> 
+do <span class="token punctuation">{</span>statements<span class="token punctuation">;</span>…<span class="token punctuation">}</span> <span class="token keyword">while</span><span class="token punctuation">(</span>condition<span class="token punctuation">)</span> 
+<span class="token keyword">for</span><span class="token punctuation">(</span>expr1<span class="token punctuation">;</span>expr2<span class="token punctuation">;</span>expr3<span class="token punctuation">)</span> <span class="token punctuation">{</span>statements<span class="token punctuation">;</span>…<span class="token punctuation">}</span> 
+<span class="token keyword">break</span> 
+<span class="token keyword">continue</span> 
+delete array<span class="token punctuation">[</span>index<span class="token punctuation">]</span> 
+delete array 
+exit 
+</code></pre>
+<h2><a id="6awk_296"></a>6.awk条件判断</h2>
+<ul>
+<li>语法：<code>if(condition1){statement1}else if(condition2){statement2}else{statement3}</code></li>
+<li>使用场景：对awk取得的整行或某个字段做条件判断</li>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-py">awk <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'{if($3&gt;=1000)print $1,$3}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'{if($NF=="/bin/bash") print $1}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk <span class="token string">'{if(NF&gt;5) print $0}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>fstab 
+awk <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'{if($3&gt;=1000) {printf "Common user: %s\n",$1} else {printf "root or Sysuser: %s\n",$1}}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+awk <span class="token operator">-</span>F<span class="token punctuation">:</span> <span class="token string">'{if($3&gt;=1000) printf "Common user: %s\n",$1; else printf "root or Sysuser: %s\n",$1}'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>passwd 
+df <span class="token operator">-</span>h<span class="token operator">|</span>awk <span class="token operator">-</span>F<span class="token operator">%</span> <span class="token string">'/^\/dev/{print $1}'</span><span class="token operator">|</span>awk <span class="token string">'$NF&gt;=80{print $1,$5}'</span> 
+awk 'BEGIN<span class="token punctuation">{</span> test<span class="token operator">=</span><span class="token number">100</span><span class="token punctuation">;</span><span class="token keyword">if</span><span class="token punctuation">(</span>test<span class="token operator">&gt;</span><span class="token number">90</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token keyword">print</span> <span class="token string">"very good"</span><span class="token punctuation">}</span> 
+<span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>test<span class="token operator">&gt;</span><span class="token number">60</span><span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token keyword">print</span> <span class="token string">"good"</span><span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span><span class="token keyword">print</span> <span class="token string">"no pass"</span><span class="token punctuation">}</span><span class="token punctuation">}</span>' 
+</code></pre>
+<h2><a id="7awk_313"></a>7.awk循环</h2>
+<h3><a id="while_315"></a>while循环</h3>
+<ul>
+<li>语法：while(condition){statement;…}</li>
+<li>条件“真”，进入循环；条件“假”，退出循环</li>
+<li>使用场景：</li>
+</ul>
+<pre><code class="prism language-py">对一行内的多个字段逐一类似处理时使用 
+对数组中的各元素逐一处理时使用 
+</code></pre>
+<ul>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-py">awk '<span class="token operator">/</span><span class="token operator">^</span><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token punctuation">:</span>space<span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token operator">*</span>linux16<span class="token operator">/</span><span class="token punctuation">{</span>i<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span><span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">&lt;=</span>NF<span class="token punctuation">)</span>  
+<span class="token punctuation">{</span><span class="token keyword">print</span> $i<span class="token punctuation">,</span>length<span class="token punctuation">(</span>$i<span class="token punctuation">)</span><span class="token punctuation">;</span> i<span class="token operator">+</span><span class="token operator">+</span><span class="token punctuation">}</span><span class="token punctuation">}</span>' <span class="token operator">/</span>etc<span class="token operator">/</span>grub2<span class="token punctuation">.</span>cfg 
+awk  '<span class="token operator">/</span><span class="token operator">^</span><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token punctuation">:</span>space<span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token operator">*</span>linux16<span class="token operator">/</span><span class="token punctuation">{</span>i<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span><span class="token keyword">while</span><span class="token punctuation">(</span>i<span class="token operator">&lt;=</span>NF<span class="token punctuation">)</span>  
+<span class="token punctuation">{</span><span class="token keyword">if</span><span class="token punctuation">(</span>length<span class="token punctuation">(</span>$i<span class="token punctuation">)</span><span class="token operator">&gt;=</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token keyword">print</span> $i<span class="token punctuation">,</span>length<span class="token punctuation">(</span>$i<span class="token punctuation">)</span><span class="token punctuation">}</span><span class="token punctuation">;</span> i<span class="token operator">+</span><span class="token operator">+</span><span class="token punctuation">}</span><span class="token punctuation">}</span>' <span class="token operator">/</span>etc<span class="token operator">/</span>grub2<span class="token punctuation">.</span>cfg 
+</code></pre>
+<h3><a id="dowhile_335"></a>do-while循环</h3>
+<ul>
+<li>语法：do {statement;…}while(condition)</li>
+<li>意义：无论真假，至少执行一次循环体</li>
+<li>示例：<br>
+<code>awk ‘BEGIN{ total=0;i=0;do{ total+=i;i++;}while(i&lt;=100);print</code></li>
+</ul>
+<h3><a id="for_342"></a>for循环</h3>
+<ul>
+<li>
+<p>语法：for(expr1;expr2;expr3) {statement;…}</p>
+</li>
+<li>
+<p>常见用法：<br>
+<code>for(variable assignment;condition;iteration process){for-body}</code></p>
+</li>
+<li>
+<p>特殊用法：能够遍历数组中的元素</p>
+</li>
+<li>
+<p>语法：for(var in array) {for-body}</p>
+</li>
+<li>
+<p>示例：<br>
+<code>awk '/^[[:space:]]*linux16/{for(i=1;i&lt;=NF;i++) {print $i,length($i)}}' /etc/grub2.cfg</code></p>
+</li>
+<li>
+<p>性能比较</p>
+</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">time</span> <span class="token punctuation">(</span>awk <span class="token string">'BEGIN{ total=0;for(i=0;i&lt;=10000;i++){total+=i;};print total;}'</span><span class="token punctuation">)</span> 
+<span class="token function">time</span> <span class="token punctuation">(</span>total<span class="token operator">=</span>0<span class="token punctuation">;</span><span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token punctuation">{</span>1<span class="token punctuation">..</span>10000<span class="token punctuation">}</span><span class="token punctuation">;</span><span class="token keyword">do</span> total<span class="token operator">=</span><span class="token variable"><span class="token variable">$((</span>$total<span class="token operator">+</span>i<span class="token variable">))</span></span><span class="token punctuation">;</span><span class="token keyword">done</span><span class="token punctuation">;</span><span class="token keyword">echo</span> <span class="token variable">$total</span><span class="token punctuation">)</span> 
+<span class="token function">time</span> <span class="token punctuation">(</span>for <span class="token variable"><span class="token punctuation">((</span>i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span><span class="token number">10000</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">))</span></span><span class="token punctuation">;</span><span class="token keyword">do</span> <span class="token keyword">let</span> total+<span class="token operator">=</span>i<span class="token punctuation">;</span><span class="token keyword">done</span><span class="token punctuation">;</span><span class="token keyword">echo</span> <span class="token variable">$total</span><span class="token punctuation">)</span> 
+<span class="token function">time</span> <span class="token punctuation">(</span>seq –s ”+” 10000<span class="token operator">|</span>bc<span class="token punctuation">)</span>
+
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#time (awk 'BEGIN{ total=0;for(i=0;i&lt;=1000000;i++){total+=i;};print to tal;}')</span>
+500000500000
+
+real    0m0.059s
+user    0m0.051s
+sys     0m0.008s
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#time (total=0;for i in {1..1000000};do total=$(($total+i));done;echo</span>
+<span class="token variable">$total</span><span class="token punctuation">)</span>
+500000500000
+
+real    0m4.208s
+user    0m2.835s
+sys     0m1.358s
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#time (for ((i=0;i&lt;=1000000;i++));do let total+=i;done;echo $total)</span>
+500000500000
+
+real    0m5.108s
+user    0m4.575s
+sys     0m0.515s
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#time (seq -s "+" 1000000|bc)</span>
+500000500000
+
+real    0m0.266s
+user    0m0.072s
+sys     0m0.203s
+</code></pre>
+<h3><a id="switch_387"></a>switch语句</h3>
+<ul>
+<li>
+<p>语法：<code>switch(expression) {case VALUE1 or /REGEXP/: statement1; case VALUE2 or /REGEXP2/: statement2; ...; default: statementn}</code></p>
+</li>
+<li>
+<p>break和continue</p>
+</li>
+</ul>
+<pre><code class="prism language-py">    awk ‘BEGIN<span class="token punctuation">{</span><span class="token builtin">sum</span><span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token keyword">for</span><span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span><span class="token number">100</span><span class="token punctuation">;</span>i<span class="token operator">+</span><span class="token operator">+</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token keyword">if</span><span class="token punctuation">(</span>i<span class="token operator">%</span><span class="token number">2</span><span class="token operator">==</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token keyword">continue</span><span class="token punctuation">;</span><span class="token builtin">sum</span><span class="token operator">+=</span>i<span class="token punctuation">}</span><span class="token keyword">print</span> <span class="token builtin">sum</span><span class="token punctuation">}</span>' 
+    awk ‘BEGIN<span class="token punctuation">{</span><span class="token builtin">sum</span><span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token keyword">for</span><span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span>i<span class="token operator">&lt;=</span><span class="token number">100</span><span class="token punctuation">;</span>i<span class="token operator">+</span><span class="token operator">+</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token keyword">if</span><span class="token punctuation">(</span>i<span class="token operator">==</span><span class="token number">66</span><span class="token punctuation">)</span><span class="token keyword">break</span><span class="token punctuation">;</span><span class="token builtin">sum</span><span class="token operator">+=</span>i<span class="token punctuation">}</span><span class="token keyword">print</span> <span class="token builtin">sum</span><span class="token punctuation">}</span>' 
+</code></pre>
+<ul>
+<li>
+<p>break [n]</p>
+</li>
+<li>
+<p>continue [n]</p>
+</li>
+<li>
+<p>next:提前结束对本行处理而直接进入下一行处理（awk自身循环）</p>
+<ul>
+<li>示例:<br>
+<code>awk -F: '{if($3%2!=0) next; print $1,$3}' /etc/passwd</code></li>
+</ul>
+</li>
+</ul>
+<h2><a id="8awk_405"></a>8.awk数组</h2>
+<ul>
+<li>awk直接使用关联数组：array[index-expression]</li>
+<li>index-expression:索引表达式</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">(</span>1<span class="token punctuation">)</span> 索引表达式可使用任意字符串；字符串要使用双引号括起来 
+<span class="token punctuation">(</span>2<span class="token punctuation">)</span> 如果某数组元素事先不存在，在引用时，awk会自动创建此元素，并将其值初始化为“空串” 
+<span class="token punctuation">(</span>3<span class="token punctuation">)</span> 若要判断数组中是否存在某元素，要使用“index <span class="token keyword">in</span> array”格式进行遍历 
+</code></pre>
+<ul>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-bash">weekdays<span class="token punctuation">[</span><span class="token string">"mon"</span><span class="token punctuation">]</span><span class="token operator">=</span><span class="token string">"Monday"</span>  
+<span class="token function">awk</span> <span class="token string">'BEGIN{weekdays["mon"]="Monday";weekdays["tue"]="Tuesday"; 
+print weekdays["mon"]}‘ 
+awk '</span><span class="token operator">!</span>line<span class="token punctuation">[</span><span class="token variable">$0</span><span class="token punctuation">]</span>++<span class="token string">'  dupfile 
+awk '</span><span class="token punctuation">{</span><span class="token operator">!</span>line<span class="token punctuation">[</span><span class="token variable">$0</span><span class="token punctuation">]</span>++<span class="token punctuation">;</span>print <span class="token variable">$0</span>, line<span class="token punctuation">[</span><span class="token variable">$0</span><span class="token punctuation">]</span><span class="token punctuation">}</span>'  dupfile 
+</code></pre>
+<ul>
+<li>若要遍历数组中的每个元素，要使用for循环<br>
+<code>for(var in array) {for-body}</code><br>
+<strong>注意：var会遍历array的每个索引</strong></li>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">awk</span> <span class="token string">'BEGIN{weekdays["mon"]="Monday";weekdays["tue"]="Tuesday";for(i in weekdays) {print weekdays[i]}}'</span> 
+<span class="token function">netstat</span> -tan <span class="token operator">|</span> <span class="token function">awk</span> <span class="token string">'/^tcp/{state[<span class="token variable">$NF</span>]++}END{for(i in state) { print i,state[i]}}'</span> 
+<span class="token function">awk</span>  <span class="token string">'{ip[<span class="token variable">$1</span>]++}END{for(i in ip) {print i,ip[i]}}'</span>   /var/log/httpd/access_log 
+</code></pre>
+<h2><a id="9awk_437"></a>9.awk函数</h2>
+<ul>
+<li>
+<p>rand()：返回0和1之间一个随机数<br>
+<code>awk 'BEGIN{srand(); for (i=1;i&lt;=10;i++)print int(rand()*100) }'</code></p>
+</li>
+<li>
+<p>length([s])：返回指定字符串的长度</p>
+</li>
+<li>
+<p>sub(r,s,[t])：对t字符串搜索r表示模式匹配的内容，并将第一个匹配内容替换为s<br>
+<code>echo "2008:08:08 08:08:08" | awk 'sub(/:/,"-",$1)'</code><br>
+<code>echo "2008:08:08 08:08:08" | awk '{sub(/:/,"-",$1);print $0}'</code></p>
+</li>
+<li>
+<p>gsub(r,s,[t])：对t字符串进行搜索r表示的模式匹配的内容，并全部替换为s所表示的内容<br>
+<code>echo "2008:08:08 08:08:08" | awk 'gsub(/:/,"-",$0)'</code><br>
+<code>echo "2008:08:08 08:08:08" | awk '{gsub(/:/,"-",$0);print $0}'</code></p>
+</li>
+<li>
+<p>split(s,array,[r])：以r为分隔符，切割字符串s，并将切割后的结果保存至array<br>
+所表示的数组中，第一个索引值为1,第二个索引值为2,…<br>
+<code>netstat -tn | awk '/^tcp\&gt;/{split($5,ip,":");count[ip[1]]++}END{for (i in count) {print i,count[i]}}'</code></p>
+</li>
+<li>
+<p>自定义函数格式：</p>
+</li>
+</ul>
+<pre><code class="prism language-py">function name <span class="token punctuation">(</span> parameter<span class="token punctuation">,</span> parameter<span class="token punctuation">,</span>  <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    statements
+    <span class="token keyword">return</span> expression
+<span class="token punctuation">}</span> 
+</code></pre>
+<ul>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">cat</span> fun.awk 
+<span class="token keyword">function</span> max<span class="token punctuation">(</span>x,y<span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+    x<span class="token operator">&gt;</span>y?var<span class="token operator">=</span>x:var<span class="token operator">=</span>y 
+    <span class="token keyword">return</span> var 
+<span class="token punctuation">}</span>BEGIN<span class="token punctuation">{</span>a<span class="token operator">=</span>3<span class="token punctuation">;</span>b<span class="token operator">=</span>2<span class="token punctuation">;</span>print max<span class="token punctuation">(</span>a,b<span class="token punctuation">)</span><span class="token punctuation">}</span>  
+<span class="token function">awk</span> -f fun.awk  
+</code></pre>
+<h2><a id="10_472"></a>10.调用系统命令</h2>
+<h3><a id="systemshell_474"></a>使用system命令调用shell命令</h3>
+<ul>
+<li>空格是awk中的字符串连接符，如果system中需要使用awk中的变量可以使用空格分隔，或者<br>
+除了awk的变量外其他一律用""引用起来<br>
+<code>awk 'BEGIN{system("hostname") }'</code><br>
+<code>awk 'BEGIN{score=100; system("echo your score is " score) }'</code></li>
+<li>将awk程序写成脚本，直接调用或执行</li>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">cat</span> f1.awk
+<span class="token punctuation">{</span>if<span class="token punctuation">(</span><span class="token variable">$3</span><span class="token operator">&gt;=</span>1000<span class="token punctuation">)</span>print <span class="token variable">$1</span>,<span class="token variable">$3</span><span class="token punctuation">}</span>  
+<span class="token function">awk</span> -F: -f f1.awk /etc/passwd  
+
+ <span class="token function">cat</span> f2.awk  
+<span class="token comment">#!/bin/awk –f </span>
+<span class="token comment">#this is a awk script </span>
+<span class="token punctuation">{</span>if<span class="token punctuation">(</span><span class="token variable">$3</span><span class="token operator">&gt;=</span>1000<span class="token punctuation">)</span>print <span class="token variable">$1</span>,<span class="token variable">$3</span><span class="token punctuation">}</span>  
+<span class="token function">chmod</span> +x f2.awk 
+f2.awk -F:  /etc/passwd 
+</code></pre>
+<ul>
+<li>向awk脚本传递参数</li>
+<li>格式：<br>
+<code>awkfile var=value var2=value2... Inputfile</code></li>
+</ul>
+<p><strong>注意：在BEGIN过程中不可用。直到首行输入完成以后，变量才可用。可以通过-v参数，让awk</strong><br>
+<strong>在执行BEGIN之前得到变量的值。命令行中每一个指定的变量都需要一个-v参数</strong></p>
+<ul>
+<li>示例：</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token function">cat</span>  test.awk
+<span class="token comment">#!/bin/awk –f </span>
+<span class="token punctuation">{</span>if<span class="token punctuation">(</span><span class="token variable">$3</span> <span class="token operator">&gt;=</span>min <span class="token operator">&amp;&amp;</span> <span class="token variable">$3</span><span class="token operator">&lt;=</span>max<span class="token punctuation">)</span>print <span class="token variable">$1</span>,<span class="token variable">$3</span><span class="token punctuation">}</span>  
+<span class="token function">chmod</span> +x test.awk 
+test.awk -F: min<span class="token operator">=</span>100 max<span class="token operator">=</span>200  /etc/passwd 
+</code></pre>
+<h2><a id="_513"></a>练习</h2>
+<p>1、文件ip_list.txt如下格式，请提取".magedu.com"前面的主机名部分并写回到该文件中</p>
+<pre><code class="prism language-bash">1 blog.magedu.com
+2 www.magedu.com
+…
+999 study.magedu.com
+</code></pre>
+<ul>
+<li>solution</li>
+</ul>
+<pre><code class="prism language-bash">产生文件记录再实验：
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#seq 100 &gt; 1</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>for <span class="token variable"><span class="token punctuation">((</span>i<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span><span class="token number">100</span><span class="token punctuation">;</span>i<span class="token operator">++</span><span class="token punctuation">))</span></span><span class="token punctuation">;</span><span class="token keyword">do</span> <span class="token keyword">echo</span> <span class="token string">"<span class="token variable"><span class="token variable">`</span><span class="token keyword">echo</span> $RANDOM<span class="token variable">`</span></span>.<span class="token variable"><span class="token variable">`</span><span class="token keyword">echo</span> $RANDOM<span class="token variable">`</span></span>.<span class="token variable"><span class="token variable">`</span><span class="token keyword">echo</span> $RANDOM<span class="token variable">`</span></span>"</span> <span class="token punctuation">;</span><span class="token keyword">done</span> <span class="token operator">&gt;</span> 2
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>paste -d<span class="token string">" "</span> 1 2 <span class="token operator">&gt;</span> ip_list.gen
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span>awk -F<span class="token string">" +|[.]"</span> <span class="token string">'{print <span class="token variable">$2</span>}END{printf("\n")}'</span> <span class="token operator">&lt;</span> ip_list.gen  <span class="token operator">&gt;&gt;</span> ip_list.gen
+使用题目文件：
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#cat ip_list.txt </span>
+1 blog.magedu.com
+2 www.magedu.com
+<span class="token punctuation">..</span>.
+999 study.magedu.com
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span>awk -F<span class="token string">" +|[.]"</span> <span class="token string">'{print <span class="token variable">$2</span>}END{printf("\n")}'</span> <span class="token operator">&lt;</span> ip_list.txt  <span class="token operator">&gt;&gt;</span> ip_list.txt
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#cat ip_list.txt </span>
+1 blog.magedu.com
+2 www.magedu.com
+<span class="token punctuation">..</span>.
+999 study.magedu.com
+blog
+www
+
+study
+</code></pre>
+<p>2、统计/etc/fstab文件中每个文件系统类型出现的次数</p>
+<ul>
+<li>solution</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos8 /mnt/data/linux-5.3.8<span class="token punctuation">]</span><span class="token comment">#cat /etc/fstab </span>
+
+<span class="token comment">#</span>
+<span class="token comment"># /etc/fstab</span>
+<span class="token comment"># Created by anaconda on Tue Sep 24 22:18:02 2019</span>
+<span class="token comment">#</span>
+<span class="token comment"># Accessible filesystems, by reference, are maintained under '/dev/disk/'.</span>
+<span class="token comment"># See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.</span>
+<span class="token comment">#</span>
+<span class="token comment"># After editing this file, run 'systemctl daemon-reload' to update systemd</span>
+<span class="token comment"># units generated from this file.</span>
+<span class="token comment">#</span>
+UUID<span class="token operator">=</span>4eb8e865-b250-4d37-bc0b-b586dd0445fa /                       xfs     defaults        0 0
+UUID<span class="token operator">=</span>b1e47c34-eeae-43ca-b058-afda45663929 /boot                   ext4    defaults        1 2
+UUID<span class="token operator">=</span>32e5fa6b-f7a1-4736-a914-73217675d4d9 /data                   xfs     defaults        0 0
+UUID<span class="token operator">=</span>284edd6b-1c11-4c18-af07-0959ee08f989 swap                    swap    defaults        0 0
+
+<span class="token punctuation">[</span>root@centos8 /mnt/data/linux-5.3.8<span class="token punctuation">]</span><span class="token comment">#awk '/^UUID/{fs[$3]++}END{for (f in fs){printf("%2-d%s\n",fs[f],f)}}' &lt; /etc/fstab</span>
+1 swap
+1 ext4
+2 xfs
+</code></pre>
+<p>3、统计/etc/fstab文件中每个单词出现的次数</p>
+<ul>
+<li>solution</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#awk -v RS=" +|[/.,':=-]|[#]|[\n]" -F" +" 'BEGIN{print "NUM","WORD"}{for(i=0;i&lt;NF;i++){word[$1]++}}END{for (j in word){printf("%4-d%s\n",word[j],j)}}' &lt; /etc/fstab  | sort</span>
+
+1   After
+1   anaconda
+1   and
+1   are
+1   b058
+1   b1e47c34
+1   b250
+1   b586dd0445fa
+1   bc0b
+1   blkid<span class="token punctuation">(</span>8<span class="token punctuation">)</span>
+1   boot
+1   Created
+1   daemon
+1   data
+1   dev
+1   disk
+1   editing
+1   eeae
+1   etc
+1   ext4
+1   f7a1
+1   filesystems
+1   findfs<span class="token punctuation">(</span>8<span class="token punctuation">)</span>
+1   <span class="token keyword">for</span>
+1   from
+1   fstab
+1   fstab<span class="token punctuation">(</span>5<span class="token punctuation">)</span>
+1   generated
+1   info
+1   maintained
+1   <span class="token function">man</span>
+1   <span class="token function">more</span>
+1   mount<span class="token punctuation">(</span>8<span class="token punctuation">)</span>
+1   on
+1   or
+1   pages
+1   reference
+1   reload
+1   run
+1   See
+1   Sep
+1   systemctl
+1   systemd
+1   to
+1   Tue
+1   under
+1   <span class="token function">units</span>
+1   update
+2   by
+2   <span class="token function">file</span>
+2   swap
+2   this
+2   xfs
+4   defaults
+4   UUID
+6   0
+NUM WORD
+</code></pre>
+<p>4、提取出字符串Yd$C@M05MB%9&amp;Bdh7dq+YVixp3vpw中的所有数字</p>
+<ul>
+<li>solution</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#echo "Yd$C@M05MB%9&amp;Bdh7dq+YVixp3vpw" | tr 'a-z' 'A-Z' | awk -F "[A-Z]|[%&amp;@+]" '{for (i=1;i&lt;=NF;i++){print $i}}' | tr -s "\n"</span>
+</code></pre>
+<p>5、有一文件记录了1-100000之间随机的整数共5000个，存储的格式<br>
+100,50,35,89…请取出其中最大和最小的整数</p>
+<ul>
+<li>solution</li>
+</ul>
+<pre><code class="prism language-bash">方法一：
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#for i in `seq 100000` ; do echo -n "$(($RANDOM*3)),";done &gt; random.txt</span>
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#awk -F "," 'BEGIN{M="MAX";m="MIN";printf("%6-s%6-s\n",M,m)}{num[$1]++}END{max=$1;min=$1;for (i=0;i&lt;NF;i++){if($i&gt;=max) if($i&lt;=min){min=$i}};printf("%6-s%6-s\n",max,min)}' random.txt</span>
+MAX   MIN
+98301 0
+
+方法二：
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#for i in `seq 100000` ; do echo -n "$(($RANDOM*3)),";done &gt; random.txt</span>
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#echo "MAX:`awk -v RS="," '{print $1}' random.txt | sort -nr | uniq -c | head -n1 | tr -s ' ' | cut -d " " -f3`"</span>
+MAX:98301
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#echo "MIN:`awk -v RS="," '{print $1}' random.txt | sort -nr | uniq -c | tail -n1 | tr -s ' ' | cut -d " " -f3`"</span>
+MIN:0
+
+方法三：
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#echo "MAX:`tr ',' '\n' &lt; random.txt | sort -nr | uniq -c | head -n1 | tr -s ' ' | cut -d " " -f3`"</span>
+MAX:98301
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#echo "MIN:`tr ',' '\n' &lt; random.txt | sort -nr | uniq -c | tail -n1 | tr -s ' ' | cut -d " " -f3`"</span>
+MIN:0
+</code></pre>
+<p>6、解决DOS攻击生产案例：根据web日志或者或者网络连接数，监控当某个IP<br>
+并发连接数或者短时内PV达到100，即调用防火墙命令封掉对应的IP，监控频<br>
+率每隔5分钟。防火墙命令为：iptables -A INPUT -s IP -j REJECT</p>
+<ul>
+<li>solution</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#iptables -S</span>
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#ss -nt | awk -F " +|:" '/ESTAB/{ip[$6]++}END{for (i in ip){if (ip[i]&gt;2){print i}}}' | while read ip;do iptables -A INPUT -s $ip -j REJECT;done</span>
+<span class="token punctuation">[</span>root@centos7 ~<span class="token punctuation">]</span><span class="token comment">#iptables -S</span>
+-P INPUT ACCEPT
+-P FORWARD ACCEPT
+-P OUTPUT ACCEPT
+-A INPUT -s 172.20.2.16/32 -j REJECT --reject-with icmp-port-unreachable
+-A INPUT -s 172.20.2.44/32 -j REJECT --reject-with icmp-port-unreachable
+-A INPUT -s 172.20.3.80/32 -j REJECT --reject-with icmp-port-unreachable
+
+</code></pre>
+<p>7、将以下文件内容中FQDN(Fully Qualified Domain Name)取出并根据其进行计数从高到低排序</p>
+<pre><code>http://mail.magedu.com/index.html
+http://www.magedu.com/test.html
+http://study.magedu.com/index.html
+http://blog.magedu.com/index.html
+http://www.magedu.com/images/logo.jpg
+http://blog.magedu.com/20080102.html
+</code></pre>
+<ul>
+<li>solution</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7<span class="token punctuation">]</span><span class="token comment">#cat &gt; 2url &lt;&lt;EOF</span>
+http://mail.magedu.com/index.html
+http://www.magedu.com/test.html
+http://study.magedu.com/index.html
+http://blog.magedu.com/index.html
+http://www.magedu.com/images/logo.jpg
+http://blog.magedu.com/20080102.html
+EOF
+<span class="token comment">#[root@centos7]#sed -nr 's#.*//(.*)/.*#\1#p' 2url  | sort | uniq -c | sort -nr</span>
+<span class="token comment">#2 blog.magedu.com</span>
+<span class="token comment">#1 www.magedu.com/images</span>
+<span class="token comment">#1 www.magedu.com</span>
+<span class="token comment">#1 study.magedu.com</span>
+<span class="token comment">#1 mail.magedu.com</span>
+<span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span><span class="token comment">#awk -F"/" '{url[$3]++}END{for(i in url){printf("%-d %s\n",url[i] ,i)}}' 2url | sort -nr</span>
+2 www.magedu.com
+2 blog.magedu.com
+1 study.magedu.com
+1 mail.magedu.com
+</code></pre>
+<p>8、将以下文本以inode为标记，对inode相同的counts进行累加，并且统计出<br>
+同一inode中，beginnumber的最小值和endnumber的最大值</p>
+<pre><code class="prism language-bash">inode<span class="token operator">|</span>beginnumber<span class="token operator">|</span>endnumber<span class="token operator">|</span>counts<span class="token operator">|</span> 
+106<span class="token operator">|</span>3363120000<span class="token operator">|</span>3363129999<span class="token operator">|</span>10000<span class="token operator">|</span> 
+106<span class="token operator">|</span>3368560000<span class="token operator">|</span>3368579999<span class="token operator">|</span>20000<span class="token operator">|</span> 
+310<span class="token operator">|</span>3337000000<span class="token operator">|</span>3337000100<span class="token operator">|</span>101<span class="token operator">|</span> 
+310<span class="token operator">|</span>3342950000<span class="token operator">|</span>3342959999<span class="token operator">|</span>10000<span class="token operator">|</span> 
+310<span class="token operator">|</span>3362120960<span class="token operator">|</span>3362120961<span class="token operator">|</span>2<span class="token operator">|</span> 
+311<span class="token operator">|</span>3313460102<span class="token operator">|</span>3313469999<span class="token operator">|</span>9898<span class="token operator">|</span> 
+311<span class="token operator">|</span>3313470000<span class="token operator">|</span>3313499999<span class="token operator">|</span>30000<span class="token operator">|</span> 
+311<span class="token operator">|</span>3362120962<span class="token operator">|</span>3362120963<span class="token operator">|</span>2<span class="token operator">|</span> 
+输出的结果格式为： 
+310<span class="token operator">|</span>3337000000<span class="token operator">|</span>3362120961<span class="token operator">|</span>10103<span class="token operator">|</span> 
+311<span class="token operator">|</span>3313460102<span class="token operator">|</span>3362120963<span class="token operator">|</span>39900<span class="token operator">|</span> 
+106<span class="token operator">|</span>3363120000<span class="token operator">|</span>3368579999<span class="token operator">|</span>30000<span class="token operator">|</span> 
+</code></pre>
+<ul>
+<li>solution</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token punctuation">[</span>root@centos7 /data/interview_solutions<span class="token punctuation">]</span>awk -F <span class="token string">"|"</span> <span class="token string">'/^[^i]/{inode[<span class="token variable">$1</span>]++;if(0){begin[<span class="token variable">$1</span>]=<span class="token variable">$2</span>}else if(begin[<span class="token variable">$1</span>]&gt;<span class="token variable">$2</span>){begin[<span class="token variable">$1</span>]=<span class="token variable">$2</span>};if(end[<span class="token variable">$1</span>]&lt;<span class="token variable">$3</span>){end[<span class="token variable">$1</span>]=<span class="token variable">$3</span>};count[<span class="token variable">$1</span>]+=<span class="token variable"><span class="token variable">$(</span>NF-1<span class="token variable">)</span></span>}END{for (i in inode){print i,begin[i],end[i],count[i]}}'</span> awk_problem.txt
+</code></pre>
+</div>
+</body>
+
+</html>

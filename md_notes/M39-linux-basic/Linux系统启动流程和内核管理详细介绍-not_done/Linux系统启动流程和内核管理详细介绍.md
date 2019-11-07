@@ -2,23 +2,10 @@
  
 # 概述
  
-- 该博客内容主要包含一下内容：
- 
-```bash
-CentOS5 和 CentOS6的启动流程介绍
-相关的系统服务管理
-Grub启动引导管理
-自定义满足基本使用需求的Linux系统
-Centos系统启动故障排错
-源码编译安装linux内核
-BusyBox介绍
-CentOS 7启动流程介绍
-Centos7 Unit介绍
-Centos7 服务管理和查看
-Centos7启动排错
-破解centos口令
-修复grub2
-```
+- 博客主要包含CentOS5 和 CentOS6的启动流程介绍、相关的系统服务管理、Grub启
+动引导管理、自定义满足基本使用需求的Linux系统、Centos系统启动故障排错、源码
+编译安装linux内核、BusyBox 介绍、Centos 7启动流程介绍、Centos 7 Unit介绍
+Centos 7 服务管理和查看、Centos7启动排错、破解centos口令、修复grub引导。
  
 ## 一.Linux组成 
  
@@ -37,12 +24,13 @@ Centos7启动排错
 简化内核功能，在内核之外的用户态尽可能多地实现系统服务，同时加入相
 互之间的安全保护，每种功能使用一个单独子系统实现，将内核功能移到用户空间，
 性能差
- 
- 
+
 ## 二.CentOS6大致启动流程
  
 - 大致启动流程如下
- 
+
+![](png/2019-11-07-09-57-17.png)
+
 ```bash
 1.加载BIOS的硬件信息，获取第一个启动设备 
 2.读取第一个启动设备MBR的引导加载程序(grub)的启动信息 
@@ -69,7 +57,8 @@ CPU、主板、内存、硬盘子系统、显示子系统、串并行接口、�
   - windows: ntloader，仅是启动OS 
   - Linux：功能丰富，提供菜单，允许用户选择要启动系统或不同的内核版本；把用
 户选定的内核装载到内存中的特定空间中，解压、展开，并把系统控制权移交给内核 
-```bash
+
+```py
 LILO：LInux LOader 
 GRUB: GRand Unified Bootloader 
     GRUB 0.X: GRUB Legacy， GRUB2 
@@ -88,11 +77,13 @@ GRUB: GRand Unified Bootloader
   - 运行用户空间的第一个应用程序：/sbin/init 
  
 ### Linux内核特点： 
+
   - 支持模块化：.ko（内核对象）如：文件系统，硬件驱动，网络协议等 
   - 支持内核模块的动态装载和卸载 
 - 内核组成部分： 
   - 核心文件：
-```
+
+```py
   /boot/vmlinuz-VERSION-release 
   ramdisk：辅助的伪根系统 
   CentOS 5 /boot/initrd-VERSION-release.img 
@@ -101,7 +92,7 @@ GRUB: GRand Unified Bootloader
   - 模块文件：/lib/modules/VERSION-release 
 - ramdisk:核内中的特性之一：使用缓冲和缓存来加速对磁盘上的文件访问，并加载相应
 的硬件驱动:ramdisk --> ramfs 提高速度 
-```bash
+```py
 CentOS 5 -- > initrd.img 
 工具程序：mkinitrd 
 CentOS 6，7 --> initramfs.img 
@@ -136,9 +127,9 @@ kernel(ramdisk) --> rootfs(只读) --> init（systemd）
   sbin/init  CentOS6之前 
 ```
 
-- 运行级别：为系统运行或维护等目的而设定；0-6：7个级别 
+- 运行级别：为系统运行或维护等目的而设定0-6：7个级别 
 
-```bash
+```py
 0：关机 
 1：单用户模式(root自动登录), single, 维护模式 
 2：多用户模式，启动网络功能，但不会启动NFS；维护模式 
@@ -148,12 +139,14 @@ kernel(ramdisk) --> rootfs(只读) --> init（systemd）
 6：重启 
 默认级别：3, 5 
 切换级别：init # 
-查看级别：runlevel ;  who -r 
+查看级别：
+    runlevel
+    who -r 
 ```
  
 - init初始化基本步骤
 
-```bash
+```py
 init读取其初始化文件：/etc/inittab 
 初始运行级别(RUN LEVEL) 
 系统初始化脚本 
@@ -167,7 +160,8 @@ init读取其初始化文件：/etc/inittab
 - CentOS 5 的inittab文件 
 - 配置文件：/etc/inittab 
 - 每一行格式： 
-```bash
+
+```py
 id:runlevel:action:process 
 id：是惟一标识该项的字符序列 
 runlevels： 定义了操作所使用的运行级别 
@@ -181,7 +175,7 @@ process：定义了要执行的进程
 
 - 示例：CentOS 5 的inittab文件 
 
-```bash
+```py
 id:5:initdefault: 
 si::sysinit:/etc/rc.d/rc.sysinit 
 l0:0:wait:/etc/rc.d/rc 0 
@@ -205,13 +199,13 @@ x:5:respawn:/etc/X11/prefdm -nodaemon
 
 - CentOS6 /etc/inittab和相关文件 
 - /etc/inittab 
-```
+```py
     设置系统默认的运行级别 
     id:3:initdefault: 
 ```
 
 - 破解CentOS 6 的root口令 
-```bash
+```py
 /etc/init/control-alt-delete.conf 
 /etc/init/tty.conf 
 /etc/init/start-ttys.conf 
@@ -221,7 +215,7 @@ x:5:respawn:/etc/X11/prefdm -nodaemon
  
 - /etc/rc.d/rc.sysinit: 系统初始化脚本,主要做以下事务
 
-```bash
+```py
 (1) 设置主机名 
 (2) 设置欢迎信息 
 (3) 激活udev和selinux  
@@ -241,7 +235,7 @@ x:5:respawn:/etc/X11/prefdm -nodaemon
   - S*: S##*：##运行次序；数字越小，越先运行；数字越小的服务，通常为
 被依赖到的服务 
   - 作用类似下面的代码
-```
+```py
 for srv in /etc/rc.d/rcN.d/K*; do 
     $srv stop 
 done 
@@ -252,9 +246,9 @@ done
 
 - ntsysv命令 
 - chkconfig命令查看服务在所有级别的启动或关闭设定情形： 
-chkconfig [--list] [name] 
+`chkconfig [--list] [name]` 
 - 添加：
-```bash
+```py
 SysV的服务脚本放置于/etc/rc.d/init.d (/etc/init.d) 
 chkconfig --add name 
     #!/bin/bash 
@@ -262,9 +256,9 @@ chkconfig --add name
     #chkconfig: LLLL nn nn 
 ```
 - 删除： 
-  - chkconfig --del name 
+`chkconfig --del name` 
 - 修改指定的链接类型 
-  - chkconfig [--level levels] name <on|off|reset> 
+`chkconfig [--level levels] name <on|off|reset>` 
   - --level LLLL: 指定要设置的级别；省略时表示2345 
 
 - xinetd管理的服务 
@@ -273,17 +267,15 @@ chkconfig --add name
 `service --status-all` 
 - 瞬态（Transient）服务被xinetd进程所管理 
 - 进入的请求首先被xinetd代理 
-- 配置文件：/etc/xinetd.conf、/etc/xinetd.d/<service> 
-- 与libwrap.so文件链接 
+- 配置文件：/etc/xinetd.conf、/etc/xinetd.d/<service> 与libwrap.so文件链接 
 
-- 用chkconfig控制的服务： 
-示例：chkconfig  tftp  on 
+- 用chkconfig控制的服务：`chkconfig  tftp  on` 
 - 注意：正常级别下，最后启动一个服务S99local没有链接至/etc/rc.d/init.d
 一个服务脚本，而是指向了/etc/rc.d/rc.local脚本 
 - 不便或不需写为服务脚本放置于/etc/rc.d/init.d/目录，且又想开机时自动运
 行的命令，可直接放置于/etc/rc.d/rc.local文件中 
 - /etc/rc.d/rc.local在指定运行级别脚本后运行,可以根据情况,进行自定义修改 
-```bash
+```py
 1:2345:respawn:/usr/sbin/mingetty tty1 
 2:2345:respawn:/usr/sbin/mingetty tty2 
 ... 
@@ -292,23 +284,22 @@ chkconfig --add name
 - mingetty会自动调用login程序 
 `x:5:respawn:/etc/X11/prefdm -nodaemon`
  
-- 启动过程总结：/sbin/init --> (/etc/inittab) --> 设置默认运行级别 
+- 启动过程总结：`/sbin/init --> (/etc/inittab) --> 设置默认运行级别 
 --> 运行系统初始脚本、完成系统初始化 --> (关闭对应下需要关闭的服务)启动
-需要启动服务 --> 设置登录终端  
+需要启动服务 --> 设置登录终端` 
  
-- CentOS 6 init程序为: upstart, 其配置文件： 
-/etc/inittab, /etc/init/*.conf，配置文件的语法 遵循 upstart配置文件语
-法格式，和CentOS5不同 
+- CentOS 6 init程序为: **upstart**, 其配置文件： 
+`/etc/inittab, /etc/init/*.con`f
+- 配置文件的语法遵循 upstart配置文件语法格式，和CentOS5不同 
  
 ## 四.grub legacy
-- CentOS 6启动流程：
-POST --> Boot Sequence(BIOS) --> Boot Loader --> Kernel(ramdisk) 
---> rootfs --> switchroot --> /sbin/init -->(/etc/inittab, /etc/init/*.conf) --> 
-设定默认运行级别 --> 系统初始化脚本rc.sysinit --> 关闭或启动对应级别的服务 --> 启动终端 
+
+### CentOS 6启动流程
+`POST --> Boot Sequence(BIOS) --> Boot Loader --> Kernel(ramdisk) --> rootfs --> switchroot --> /sbin/init -->(/etc/inittab, /etc/init/*.conf) --> 设定默认运行级别 --> 系统初始化脚本rc.sysinit --> 关闭或启动对应级别的服务 --> 启动终端`
 - 参看：[比较详细的启动过程图解](http://s4.51cto.com/wyfs02/M02/87/20/wKiom1fVBELjXsvaAAUkuL83t2Q304.jpg)
  
-- grub: GRand Unified Bootloader 
-```
+### grub: GRand Unified Bootloader 
+```py
 grub 0.97: grub legacy 
 grub 2.x: grub2 
 grub legacy: 
@@ -318,8 +309,9 @@ grub legacy:
     stage2：磁盘分区(/boot/grub/) 
 ```
 
-- grub安装 
-``` 
+### grub安装 
+
+```py
 (1) grub-install 
 安装grub stage1和stage1_5到/dev/DISK磁盘上，并复制GRUB相关文件
 到 DIR/boot目录下 
@@ -331,7 +323,7 @@ grub> setup (hd#)
 - 配置文件：/boot/grub/grub.conf <-- /etc/grub.conf 
 - stage2及内核等通常放置于一个基本磁盘分区 
 - 功用： 
-```bash
+```py
 (1) 提供启动菜单、并提供交互式接口 
     a：内核参数 
     e: 编辑模式，用于编辑菜单 
@@ -344,20 +336,21 @@ grub> setup (hd#)
     为启用内核或操作系统进行认证 
 ```
 
-- grub的命令行接口 
+### grub的命令行接口 
 ```bash
 help: 获取帮助列表 
 help KEYWORD: 详细帮助信息 
 find (hd#,#)/PATH/TO/SOMEFILE： 
 root (hd#,#) 
-kernel /PATH/TO/KERNEL_FILE: 设定本次启动时用到的内核文件；额外还可添加
-许多内核支持使用的cmdline参数 
-例如：max_loop=100 selinux=0 init=/path/to/init 
-initrd /PATH/TO/INITRAMFS_FILE: 设定为选定的内核提供额外文件的ramdisk 
+kernel /PATH/TO/KERNEL_FILE: 设定本次启动时用到的内核文件；额外还可添
+加许多内核支持使用的cmdline参数 
+例如：
+    max_loop=100 selinux=0 init=/path/to/init 
+    initrd /PATH/TO/INITRAMFS_FILE: 设定为选定的内核提供额外文件的ramdisk 
 boot: 引导启动选定的内核 
 ```
 
-- cat /proc/cmdline  内核参数 
+- `cat /proc/cmdline`  查看当前内核所使用参数 
 - 内核参数文档:/usr/share/doc/kernel-doc-2.6.32/Documentation/kernel-parameters.txt 
  
 - 识别硬盘设备 
@@ -378,7 +371,8 @@ grub> boot
 ### grub legacy配置文件 
 
 - 配置文件：/boot/grub/grub.conf 
-```
+
+```py
 default=#: 设定默认启动的菜单项；落单项(title)编号从0开始 
 timeout=#：指定菜单项等待选项选择的时长 
 splashimage=(hd#,#)/PATH/XPM_FILE：菜单背景图片文件路径 
@@ -398,37 +392,36 @@ password [--md5|--encrypted ] STRING: 启动选定的内核或操作系统时进
 - 破解root口令
   - 启动系统时，设置其运行级别1 
 - 进入单用户模式： 
-```
+```py
 (1) 编辑grub菜单(选定要编辑的title，而后使用a 或 e 命令) 
-(2) 在选定的kernel后附加 
-1, s, S，single都可以
+(2) 在选定的kernel后附加: 1, s, S，single都可以
 (3) 在kernel所在行，键入“b”命令 
 ```
 
 ## 五.自制linux系统 
 
-- 1.分区并创建文件系统 
-```
+### 1.分区并创建文件系统 
+```py
 fdisk /dev/sdb 
 分两个必要的分区 
 /dev/sdb1对应/boot   /dev/sdb2对应根 / 
 mkfs.ext4 /dev/sdb1 
 mkfs.ext4 /dev/sdb2 
 ```
-- 2.挂载boot 
-```
+### 2.挂载boot 
+```py
 mkdir /mnt/boot  子目录必须为boot 
 mount /dev/sdb1 /mnt/boot 
 ```
-- 3.安装grub 
+### 3.安装grub 
 `grub-install --root-directory=/mnt   /dev/sdb` 
-- 4.恢复内核和initramfs文件 
-```
+### 4.恢复内核和initramfs文件 
+```py
 cp /boot/vmlinuz-2.6.32-642.el6.x86_64  /mnt/boot/ 
 cp /boot/initramfs-2.6.32-642.el6.x86_64.img  /mnt/boot 
 ```
-- 5.建立grub.conf 
-```
+### 5.建立grub.conf 
+```py
 vim /mnt/boot/grub/grub.conf   
 title wanglinux 
 root (hd0,0) 
@@ -436,18 +429,18 @@ kernel /vmlinuz-2.6.32-642.el6.x86_64 root=/dev/sda2  selinux=0
 init=/bin/bash 
 initrd /initramfs-2.6.32-642.el6.x86_64.img  
 ```
-- 6.chroot /mnt/sysroot 
-- 7.创建一级目录 
-```
+### 6.chroot /mnt/sysroot 
+### 7.创建一级目录 
+```py
 mkdir /mnt/sysroot 
 mount  /dev/sdb2   /mnt/sysroot 
 mkdir –pv 
 /mnt/sysroot/{etc,lib,lib64,bin,sbin,tmp,var,usr,sys,proc,opt,home,root,boot,
 dev,mnt,media} 
 ```
-- 8.复制bash和相关库文件 
-- 9.复制相关命令及相关库文件 
-    如：ifconfig,insmod,ping,mount,ls,cat,df,lsblk,blkid等 
+### 8.复制bash和相关库文件 
+### 9.复制相关命令及相关库文件 
+- 如：ifconfig,insmod,ping,mount,ls,cat,df,lsblk,blkid等 
 
 ### /proc目录
 
@@ -463,9 +456,9 @@ sysctl -w path.to.parameter=VALUE
 sysctl -w kernel.hostname=mail.magedu.com 
 (2) echo命令通过重定向方式也可以修改大多数参数的值 
 echo "VALUE" > /proc/sys/path/to/parameter 
-echo “websrv”  > /proc/sys/kernel/hostname 
+echo "websrv"  > /proc/sys/kernel/hostname 
 
-### sysctl命令 
+### sysctl命令查看当前生效的内核参数
  
 - 默认配置文件：/etc/sysctl.conf 
 (1) 设置某参数 
@@ -488,7 +481,6 @@ fs.file-max = 1020000
 - sysfs：为用户使用的伪文件系统，输出内核识别出的各硬件设备的相关属
 性信息，也有内核对硬件特性的设定信息；有些参数是可以修改的，用于调整硬件
 工作特性
-     
 - udev通过此路径下输出的信息动态为各设备创建所需要设备文件，udev是
 运行用户空间程序 
 - 专用工具：udevadmin, hotplug 
@@ -500,7 +492,7 @@ fs.file-max = 1020000
 - linux单内核体系设计、但充分借鉴了微内核设计体系的优点，为内核引入模块
 化机制
 - 内核组成部分： 
-```
+```py
 kernel：内核核心，一般为bzImage，通常在/boot目录下 
     名称为 vmlinuz-VERSION-RELEASE 
 kernel object：内核对象，一般放置于 
@@ -515,7 +507,7 @@ kernel object：内核对象，一般放置于
 
 - 内核版本 
 
-```
+```py
 查看运行中的内核版本： 
 uname命令： 
     uname - print system information 
@@ -527,13 +519,13 @@ uname命令：
 
 ### 内核模块命令 
   - lsmod命令： 
-```
+```py
 显示由核心已经装载的内核模块 
 显示的内容来自于: /proc/modules文件 
 ```
 - modinfo命令： 
-```
-显示模块的详细描述信息 
+```py
+显示内核模块的详细描述信息 
     modinfo [ -k kernel ]  [ modulename|filename... ] 
     -n：只显示模块文件路径 
     -p：显示模块参数 
@@ -546,7 +538,7 @@ uname命令：
 ### 内核模块管理 
 
 - modprobe命令： 
-```
+```py
 装载或卸载内核模块 
     modprobe [ -C config-file ]  [ modulename ]  [ module parame-ters... ] 
     modprobe [ -r ] modulename… 
@@ -554,7 +546,7 @@ uname命令：
 - 配置文件：/etc/modprobe.conf, /etc/modprobe.d/*.conf 
 - depmod命令：内核模块依赖关系文件及系统信息映射文件的生成工具 
 - 装载或卸载内核模块： 
-```
+```py
 insmod命令：指定模块文件，不自动解决依赖模块 
 insmod [ filename ]  [ module options... ] 
 insmod `modinfo –n exportfs` 
@@ -567,8 +559,8 @@ rmmod exportfs
 
 ### 编译内核 
 
-- 1.前提： 
-```
+#### 1.前提： 
+```py
 (1) 准备好开发环境 
 (2) 获取目标主机上硬件设备的相关信息 
 (3) 获取目标主机系统功能的相关信息 
@@ -576,7 +568,7 @@ rmmod exportfs
 (4) 获取内核源代码包 
      www.kernel.org 
 ```
-- 2.开发环境准备 
+#### 2.开发环境准备 
 ```
 包组 
     Development Tools 
@@ -598,7 +590,7 @@ PCI设备：
     hal-device：CentOS 6 
 ```
 
-- 3.步骤 
+#### 3.步骤 
 
 ```bash
 安装开发包组 
@@ -615,25 +607,25 @@ make install ：安装内核相关文件
 
 - 编译安装内核示例 
 ```
-yum install gcc ncurses-devel flex  bison openssl-devel elfutils-libelf-
-devel 
+yum install gcc ncurses-devel flex  bison openssl-devel elfutils-libelf devel 
 tar xf linux-5.2.9.tar.xz -C /usr/src 
-cd /usr/src 
+cd /usr/src
 ln -sv linux-5.2.9 linux 
 cd /usr/src/linux 
 cp /boot/config-$(uname -r)   ./.config 
-make help 
+make help
 make menuconfig 
-make -j 2   或者 make -j 2 bzImage ; make -j 2 modules 
+make -j 2  或者 make -j 2 bzImage ; make -j 2 modules 
 make modules_install 
 make install 
 reboot  
 ```
  
-- 编译内核两大步
+#### 编译内核两大步
 
-  - 1.配置内核选项 
-```
+- 1.配置内核选项 
+
+```py
 支持“更新”模式进行配置：make help 
 (a) make config：基于命令行以遍历的方式配置内核中可配置的每个选项 
 (b) make menuconfig：基于curses的文本窗口界面 
@@ -645,9 +637,9 @@ reboot
 (c) make allnoconfig: 所有选项均回答为“no“ 
 ```
 
-  - 2.编译 
+- 2.编译 
 
-```
+```py
 全编译:make [-j #]  
 编译内核的一部分功能： 
 (a) 只编译某子目录中的相关代码 
@@ -660,16 +652,15 @@ reboot
         make drivers/net/ethernet/intel/e1000/e1000.ko
 ```
 
-- 交叉编译内核
-- 编译的目标平台与当前平台不相同 
+- 交叉编译内核:编译的目标平台与当前平台不相同 
 `make  ARCH=arch_name` 
 - 要获取特定目标平台的使用帮助 
 `make  ARCH=arch_name help` 
-- 示例： 
+- 示例：
 `make  ARCH=arm help` 
 
 - 在已经执行过编译操作的内核源码树做重新编译需要事先清理操作： 
-```
+```py
 make clean：清理大多数编译生成的文件，但会保留config文件等 
 make mrproper: 清理所有编译生成的文件、config及某些备份文件 
 make distclean：mrproper、清理patches以及编辑器备份文件 
@@ -677,14 +668,19 @@ make distclean：mrproper、清理patches以及编辑器备份文件
 
 ### 卸载内核 
 
-```
+```py
 删除/lib/modules/目录下不需要的内核库文件 
 删除/usr/src/linux/目录下不需要的内核源码 
 删除/boot目录下启动的内核和内核映像文件 
 更改grub的配置文件，删除不需要的内核启动列表 
+    centos7:vim /boot/grub2/grub.cfg 
+           :/menuentry
+    centos8:
+          rm -f /boot/loader/entries/7e3e9120767340a8bd946a83d7c3b84d-$(uname -r)-80.el8.x86_64.conf
 ```
 
 ### Busybox介绍 
+
 - Busybox 最初是由 Bruce Perens 在 1996 年为 Debian GNU/Linux 安装盘编
 写的。其目标是在一张软盘(存储空间只有1MB多)上创建一个GNU/Linux 系统，
 可以用作安装盘和急救盘 
@@ -703,7 +699,7 @@ make distclean：mrproper、清理patches以及编辑器备份文件
 - Busybox使用 
   - busybox 的编译过程与Linux内核的编译类似 
   - busybox的使用有三种方式： 
-```
+```py
 busybox后直接跟命令，如 busybox ls 
 直接将busybox重命名，如 cp busybox tar 
 创建符号链接，如 ln -s busybox rm 
@@ -714,7 +710,7 @@ busybox后直接跟命令，如 busybox ls
 则会产生一个_install目录，其中包含了busybox及每个命令的软链接 
  
 - 编译Busybox 
-```bash
+```py
 yum install   gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl openssl-devel systemd-devel zlib-devel glibc-static ncurses-devel 
 wget https://busybox.net/downloads/busybox-1.30.1.tar.bz2 
 tar xvf busybox-1.31.0.tar.bz2 
@@ -736,30 +732,29 @@ cp -a _install/* /mnt/sysroot/
 7、编译安装kernel，启用支持ntfs文件系统功能 
 > [答案:Linux_作死实验](https://blog.csdn.net/youoops/article/category/9480839)
  
- 
 ## 七.systemd服务笔记
 
 - POST --> Boot Sequence --> Bootloader --> kernel + initramfs(initrd) --> rootfs --> /sbin/init 
  
 - init:
-```
-CentOS 5 SysV init 
-CentOS 6 Upstart 
-CentOS 7 Systemd 
+```py
+    CentOS 5 SysV init 
+    CentOS 6 Upstart 
+    CentOS 7 Systemd 
 ```
 - Systemd：系统启动和服务器守护进程管理器，负责在系统启动或运行时，激
 活系统资源，服务器进程和其它进程 
 - Systemd新特性(相对于centos6及以前版本)
-```
-系统引导时实现服务并行启动 
-按需启动守护进程 
-自动化的服务依赖关系管理 
-同时采用socket式与D-Bus总线式激活服务 
-系统状态快照 
+```py
+1.系统引导时实现服务并行启动 
+2.按需启动守护进程 
+3.自动化的服务依赖关系管理 
+4.同时采用socket式与D-Bus总线式激活服务 
+5.系统状态快照 
 ```
 - 核心概念：unit 
-  - unit表示不同类型的systemd对象，通过配置文件进行标识和配置；文件中主
-要包含了系统服务、监听socket、保存的系统快照以及其它与init相关的信息 
+  - unit表示不同类型的systemd对象，通过配置文件进行标识和配置；文件中主要包含了系统
+  服务、监听socket、保存的系统快照以及其它与init相关的信息 
 - 配置文件 
 `/usr/lib/systemd/system`:每个服务最主要的启动脚本设置，类似于之前的
 `/etc/init.d/` 
@@ -769,7 +764,7 @@ CentOS 7 Systemd
 
 - Unit类型 
 ```
-systemctl –t help 查看unit类型 
+systemctl –t unitname 查看unit类型 
 service unit: 文件扩展名为.service, 用于定义系统服务 
 Target unit: 文件扩展名为.target，用于模拟实现运行级别 
 Device unit: .device, 用于定义内核识别的设备 
@@ -782,7 +777,7 @@ Path unit: .path，用于定义文件系统中的一个文件或目录使用,常
 统变化时，延迟激活服务，如：spool 目录 
 ```
 
-- 关键特性
+- systemd关键特性
 ```
 基于socket的激活机制：socket与服务程序分离 
 基于d-bus的激活机制： 
@@ -815,7 +810,9 @@ Path unit: .path，用于定义文件系统中的一个文件或目录使用,常
 `systemctl mask name.service` 
 - 取消禁止： 
 `systemctl unmask name.service` 
+
 ### 服务查看 
+
 - 查看某服务当前激活与否的状态： 
 `systemctl is-active name.service` 
 - 查看所有已经激活的服务： 
@@ -841,7 +838,7 @@ Path unit: .path，用于定义文件系统中的一个文件或目录使用,常
 
 ### 服务状态说明
 
-```
+```py
 systemctl list-unit-files --type service --all显示状态 
 loaded Unit配置文件已处理 
 active(running) 一次或多次持续处理的运行 
@@ -893,7 +890,9 @@ systemctl restart sshd.service
 `systemctl unmask network` 
 
 ### service unit文件格式 
-- /etc/systemd/system：系统管理员和用户使用/usr/lib/systemd/system：发行版打包者使用 
+
+- /etc/systemd/system:系统管理员和用户使用
+- /usr/lib/systemd/system:发行版打包者使用 
 - 以 “#” 开头的行后面的内容会被认为是注释 
 - 相关布尔值，1、yes、on、true 都是开启，0、no、off、false 都是关闭 
 - 时间单位默认是秒，所以要用毫秒（ms）分钟（m）等须显式说明 
@@ -903,9 +902,6 @@ systemctl restart sshd.service
   - [Install]：定义由“systemctl  enable”以及"systemctl  disable“命令在实现服务启用或禁用时用到的一些选项 
 - 帮助：sytemd.units(5),systemd.service(5), systemd.socket(5),  
 systemd.target(5),systemd.exec(5) 
- 
- 
-- service unit文件格式 
 - Unit段的常用选项： 
 - Description：描述信息 
 - After：定义unit的启动次序，表示当前unit应该晚于哪些unit启动，其功能与
@@ -916,39 +912,32 @@ Before相反
 - Conflicts：定义units间的冲突关系 
 - Service段的常用选项： 
   - Type：定义影响ExecStart及相关参数的功能的unit进程启动类型 
-```
-•simple：默认值，这个daemon主要由ExecStart接的指令串来启动，启动后常
-驻于内存中 
-•forking：由ExecStart启动的程序透过spawns延伸出其他子程序来作为此
-daemon的主要服务。原生父程序在启动结束后就会终止 
-•oneshot：与simple类似，不过这个程序在工作完毕后就结束了，不会常驻在
-内存中 
-•dbus：与simple类似，但这个daemon必须要在取得一个D-Bus的名称后，才
-会继续运作.因此通常也要同时设定BusNname= 才行 
-•notify：在启动完成后会发送一个通知消息。还需要配合 NotifyAccess 来让 
-Systemd 接收消息 
-•idle：与simple类似，要执行这个daemon必须要所有的工作都顺利执行完毕后
-才会执行。这类的daemon通常是开机到最后才执行即可的服务  
+```py
+simple #默认值，这个daemon主要由ExecStart接的指令串来启动，启动后常驻于内存中 
+forking #由ExecStart启动的程序透过spawns延伸出其他子程序来作为此daemon的主要服务。原生父程序在启动结束后就会终止 
+oneshot #与simple类似，不过这个程序在工作完毕后就结束了，不会常驻在内存中 
+dbus #与simple类似，但这个daemon必须要在取得一个D-Bus的名称后，才会继续运作.因此通常也要同时设定BusNname= 才行 
+notify #在启动完成后会发送一个通知消息。还需要配合 NotifyAccess 来让Systemd接收消息 
+idle #与simple类似，要执行这个daemon必须要所有的工作都顺利执行完毕后才会执行。这类的daemon通常是开机到最后才执行即可的服务  
 ```
 - EnvironmentFile：环境配置文件 
 - ExecStart：指明启动unit要运行命令或脚本的绝对路径 
 - ExecStartPre： ExecStart前运行 
 - ExecStartPost： ExecStart后运行 
 - ExecStop：指明停止unit要运行的命令或脚本 
-- Restart：当设定Restart=1 时，则当次daemon服务意外终止后，会再次自动
-启动此服务 
+- Restart：当设定Restart=1 时，则当次daemon服务意外终止后，会再次自动启动此服务 
  
 - Install段的常用选项： 
-```
-•Alias：别名，可使用systemctl command Alias.service 
-•RequiredBy：被哪些units所依赖，强依赖 
-•WantedBy：被哪些units所依赖，弱依赖 
-•Also：安装本服务的时候还要安装别的相关服务 
+
+```py
+Alias #别名，可使用systemctl command Alias.service 
+RequiredBy #被哪些units所依赖，强依赖 
+WantedBy #被哪些units所依赖，弱依赖 
+Also #安装本服务的时候还要安装别的相关服务 
 ```
 
 - **注意：对于新创建的unit文件，或者修改了的unit文件，要通知systemd重载此配置文件,而后可以选择重启** 
 `systemctl  daemon-reload` 
- 
  
 ### 服务Unit文件示例 
 
@@ -965,7 +954,6 @@ WantedBy=multi-user.target
 ```
 - 2.systemctl daemon-reload 
 - 3.systemctl start bak 
-
 - vim /etc/systemd/system/tomcat.service  
 ```bash
 [Unit] 
@@ -989,7 +977,7 @@ unit配置文件：.target
 `ls /usr/lib/systemd/system/*.target` 
 `systemctl list-unit-files --type target  --all` 
 - 运行级别： 
-```
+```py
 0  ==> runlevel0.target, poweroff.target 
 1  ==> runlevel1.target, rescue.target 
 2  ==> runlevel2.target, multi-user.target 
@@ -998,7 +986,7 @@ unit配置文件：.target
 5  ==> runlevel5.target, graphical.target 
 6  ==> runlevel6.target, reboot.target 
 ```
-- 查看依赖性： 
+- 查看依赖性
 `systemctl list-dependencies graphical.target` 
 - 级别切换：`init N ==> systemctl isolate name.target` 
   - eg:`systemctl isolate multi-user.target` 
@@ -1021,12 +1009,12 @@ ls –l /etc/systemd/system/default.target
 - 切换至emergency模式： 
 `systemctl emergency` 
 - 传统命令init，poweroff，halt，reboot都成为systemctl的软链接 
-```
-关机：systemctl halt、systemctl poweroff 
-重启：systemctl reboot 
-挂起：systemctl suspend 
-休眠：systemctl hibernate 
-休眠并挂起：systemctl hybrid-sleep 
+```py
+关机:systemctl halt、systemctl poweroff 
+重启:systemctl reboot 
+挂起:systemctl suspend 
+休眠:systemctl hibernate 
+休眠并挂起:systemctl hybrid-sleep 
 ```
 
 ## 八.centos7启动及排错
@@ -1059,7 +1047,7 @@ systemd执行graphical需要的服务
 - 启动时，在linux16行后添加systemd.unit=desired.target 
 `systemd.unit=emergency.target` 
 `systemd.unit=rescue.target` 
-- rescue.target 比emergency 支持更多的功能，例如日志等 
+- rescue.target比emergency支持更多的功能，例如日志等 
 - systemctl  default  进入默认target 
  
 - 启动排错 
@@ -1068,40 +1056,42 @@ systemd执行graphical需要的服务
 - 在/etc/fstab不存在对应的设备和UUID 
   - 等一段时间，如不可用，进入emergency shell 
 - 在/etc/fstab不存在对应挂载点 
-  - systemd 尝试创建挂载点，否则提示进入emergency shell. 
+  - systemd尝试创建挂载点，否则提示进入emergency shell. 
 - 在/etc/fstab不正确的挂载选项 
   - 提示进入emergency shell 
  
 ### 破解CentOS7的root口令方法一 
 
-```bash
-启动时任意键暂停启动 
-按e键进入编辑模式 
-将光标移动linux16开始的行，添加内核参数rd.break 
-按ctrl-x启动  
-mount –o remount,rw  /sysroot 
-chroot /sysroot 
-passwd root 
-touch /.autorelabel 
-exit 
-reboot 
+```py
+1.启动时任意键暂停启动 
+2.按e键进入编辑模式 
+3.将光标移动linux16开始的行，添加内核参数rd.break 
+4.按ctrl-x启动  
+5.mount –o remount,rw  /sysroot 
+6.chroot /sysroot 
+7.passwd root 
+8.touch /.autorelabel 
+9.exit 
+10.reboot 
 ```
  
 ### 破解CentOS7的root口令方法二 
-```bash
-启动时任意键暂停启动 
-按e键进入编辑模式 
-将光标移动linux16开始的行，改为rw init=/sysroot/bin/sh 
-按ctrl-x启动  
-chroot /sysroot 
-passwd root 
-touch /.autorelabel 
-exit 
-reboot 
+
+```py
+1.启动时任意键暂停启动 
+2.按e键进入编辑模式 
+3.将光标移动linux16开始的行，改为rw init=/sysroot/bin/sh 
+4.按ctrl-x启动  
+5.hchroot /sysroot 
+6.passwd root 
+7.touch /.autorelabel 
+8.exit 
+9.reboot 
 ```
  
 ### 修复GRUB2 
-```bash
+
+```py
 GRUB“the Grand Unified Bootloader” 
     引导提示时可以使用命令行界面 
     可从文件系统引导 
@@ -1115,5 +1105,3 @@ GRUB“the Grand Unified Bootloader”
     vim /etc/default/grub 
     GRUB_DEFAULT=0 
 ```
-
- 
