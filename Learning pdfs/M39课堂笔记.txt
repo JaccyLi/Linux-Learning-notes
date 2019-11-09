@@ -1,6 +1,7 @@
 ﻿20190918
 命令列表
 a
+aide --check --init --update 
 awk
 alias 
 apt apg-get 
@@ -115,7 +116,7 @@ grub2-set-default
 grub2-setpassword
 grub2-mkconfig 
 grub2-install
-
+gpg 
 h
 hash
 hostname
@@ -138,6 +139,7 @@ iftop
 iotop 
 install 
 insmod 
+iptables 
 j
 jobs
 k
@@ -167,6 +169,7 @@ local
 lspci
 lsusb 
 lsmod 
+lastb 
 m
 more 
 mv
@@ -203,6 +206,7 @@ nload
 ntsysv --level 3 
 o
 od 
+openssl 
 p
 poweroff 
 pwd
@@ -226,6 +230,7 @@ ps
 pidof 
 pmap 
 ping 
+pssh 
 q
 quit
 r
@@ -246,6 +251,7 @@ route
 renice 
 return 
 resize2fs 
+rsync 
 s
 su
 seq 
@@ -275,6 +281,12 @@ sysctl -p -w  -a  /etc/sysctl.conf
 ss 
 select PS3 REPLY 
 sha1sum     sha224sum   sha256sum   sha384sum   sha512sum
+sshpass 
+ssh-keygen
+ssh-copy-id
+ssh-agent bash
+ssh-add 
+sshfs 
 t
 tr
 tee
@@ -291,6 +303,7 @@ time
 tune2fs 
 top 
 trap 
+tcpdmatch
 u
 unalias
 useradd
@@ -319,6 +332,8 @@ vgreduce
 vgextend 
 vgremove
 vmstat  
+visudo export EDITOR=vim 
+sudoedit 
 w
 whoami
 who am i
@@ -2047,3 +2062,161 @@ Sa[hash(data)]+data
 hash(data)
 
 hash(data)
+
+
+useradd -p `echo centos | openssl passwd -6  -salt "u7yVtTHm7SvtB8PF" -stdin` alice
+useradd -p `openssl passwd -6  -salt "u7yVtTHm7SvtB8PF" centos` jack
+
+[ CA_default ]
+
+dir             = /etc/pki/CA           # Where everything is kept
+certs           = $dir/certs            # Where the issued certs are kept
+crl_dir         = $dir/crl              # Where the issued crl are kept
+database        = $dir/index.txt        # database index file.
+#unique_subject = no                    # Set to 'no' to allow creation of
+                                        # several certs with same subject.
+new_certs_dir   = $dir/newcerts         # default place for new certs.
+
+certificate     = $dir/cacert.pem       # The CA certificate
+serial          = $dir/serial           # The current serial number
+crlnumber       = $dir/crlnumber        # the current crl number
+                                        # must be commented out to leave a V1 CRL
+crl             = $dir/crl.pem          # The current CRL
+private_key     = $dir/private/cakey.pem# The private key
+
+
+实验：用脚本实现以下功能
+create_ca.sh
+create_crt.sh 
+
+创建CA
+
+mkdir /etc/pki/CA/{certs.newcerts,private} -pv
+cd /etc/pki/CA
+(umask 077;openssl genrsa -out private/cakey.pem 2048)
+openssl req -new -x509 -key private/cakey.pem -out cacert.pem -days 3650 填写：国家，省份，城市，公司，部门，域名，邮箱
+touch index.txt
+echo 00 > serial 
+echo 00 > crlnumber
+
+证书请求
+(umask 077;openssl genrsa -out /data/app.key 2048)
+openssl req -new  -key /data/app.key -out /data/app.csr  填写：国家，省份，城市，公司，部门，域名，邮箱
+
+颁发证书
+openssl ca -in /data/app.csr -out /etc/pki/CA/certs/app.crt -days 100  
+
+
+面试题 
+export SSHPASS=123456
+NET=192.168.39
+for i in {1..254};do
+    {
+ 	PASS=`openssl rand -base64 9`
+	sshpass -e ssh $NET.$i "echo $PASS|passwd --stdin root &> /dev/null"
+	echo $NET.$i:$PASS >>  host.txt
+	}&
+done
+wait 
+
+ssh-keygen  -P ""  -f /root/.ssh/id_rsa
+sshpass  -p 123456 ssh-copy-id -i /root/.ssh/id_rsa.pub 192.168.39.7
+
+
+批量部署基于key验证
+
+NET=192.168.39
+ssh-keygen  -P ""  -f /root/.ssh/id_rsa &> /dev/null
+rpm -q sshpass &> /dev/null || yum -y install sshpass &> /dev/null
+for i in {5..7};do
+{
+sshpass  -p 123456 ssh-copy-id -i /root/.ssh/id_rsa.pub $NET.$i &> /dev/null
+
+}&
+done
+wait 
+
+[root@centos8 ~]#crontab  -l
+30 2 * * * /usr/bin/rsync  -av --delete /data/ 192.168.39.7:/data
+
+
+
+yum install install sshfs
+
+rpm -ql fuse-sshfs
+sshfs 192.168.39.8:/data /mnt
+
+pssh -h hostlist.txt     -i  "sed -i '/StrictHostKeyChecking/c StrictHostKeyChecking no' /etc/ssh/ssh_config"
+[root@centos7 ~]#pssh -h hostlist.txt     -i  'echo $PATH'
+[1] 10:16:51 [SUCCESS] 192.168.39.6
+/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+[2] 10:16:51 [SUCCESS] 192.168.39.18
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+[3] 10:16:52 [SUCCESS] 192.168.39.8
+/usr/share/Modules/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+
+
+[root@centos7 ~]#pssh -h hostlist.txt   -o /data/  'echo $PATH'
+[1] 10:17:48 [SUCCESS] 192.168.39.6
+[2] 10:17:48 [SUCCESS] 192.168.39.18
+[3] 10:17:49 [SUCCESS] 192.168.39.8
+[root@centos7 ~]#ls /data -l
+total 20
+-rw-r--r-- 1 root root  50 Nov  8 10:17 192.168.39.18
+-rw-r--r-- 1 root root  83 Nov  8 10:17 192.168.39.6
+-rw-r--r-- 1 root root  73 Nov  8 10:17 192.168.39.8
+
+[root@centos7 ~]#pscp.pssh  -h hostlist.txt  /etc/centos-release  /data
+[1] 10:20:27 [SUCCESS] 192.168.39.6
+[2] 10:20:27 [SUCCESS] 192.168.39.18
+[3] 10:20:27 [SUCCESS] 192.168.39.8
+
+[root@centos7 ~]#pslurp  -h hostlist.txt  -L /data  /etc/centos-release version
+[1] 10:23:11 [SUCCESS] 192.168.39.6
+[2] 10:23:11 [SUCCESS] 192.168.39.18
+[3] 10:23:11 [SUCCESS] 192.168.39.8
+[root@centos7 ~]#ll /data
+total 0
+drwxr-xr-x 2 root root 21 Nov  8 10:23 192.168.39.18
+drwxr-xr-x 2 root root 21 Nov  8 10:23 192.168.39.6
+drwxr-xr-x 2 root root 21 Nov  8 10:23 192.168.39.8
+[root@centos7 ~]#tree /data
+/data
+├── 192.168.39.18
+│   └── version
+├── 192.168.39.6
+│   └── version
+└── 192.168.39.8
+    └── version
+
+[root@centos6 ~]#read A B C <<< "1 2 3 "
+[root@centos6 ~]#echo $A
+1
+[root@centos6 ~]#echo $B
+2
+[root@centos6 ~]#echo $C
+3
+
+实验：本地ssh端口转发
+ssh -L 9527:192.168.39.18:23 192.168.39.7 -fN
+telnet 127.0.0.1 9527 
+data--->127.0.0.1:9527<----127.0.0.1:XXXX---ssh(data)<--->192.168.39.7:22--192.168.39.7:XXXX<----telnet--->192.168.39.18:23
+
+
+
+实验：三台主机互为key验证
+
+1 三台主机各个生成key pair
+2 从三台主机复制到在其中一台主机authorized_keys ssh-copy-id三个IP
+3 将authorized_keys复制到其它主机.ssh/
+
+
+[root@centos8 ~]#lastb | awk '/ssh:notty/{ip[$3]++}END{for(i in ip){if(ip[i] >10)system("iptables -A INPUT -s "i" -j REJECT")}}'
+
+
+
+./dropbearkey -t rsa -f dropbear_rsa_host_key
+
+
+rsync 
+pssh 
