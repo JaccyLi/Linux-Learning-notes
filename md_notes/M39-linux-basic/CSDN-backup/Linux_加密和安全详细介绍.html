@@ -1,0 +1,1719 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux_加密和安全详细介绍</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><center> <font face="黑体" size="6" color="grey">加密和安全</font></center>
+<h1><a id="_3"></a>一.安全机制</h1>
+<ul>
+<li>安全攻击的几种典型方式： STRIDE</li>
+</ul>
+<pre><code class="prism language-py">Spoofing                假冒  
+Tampering               篡改  
+Repudiation             否认  
+Information Disclosure  信息泄漏 
+Denial of Service       拒绝服务 
+Elevation of Privilege  提升权限 
+</code></pre>
+<ul>
+<li>
+<p>安全设计基本原则</p>
+<ul>
+<li>使用成熟的安全系统</li>
+<li>以小人之心度输入数据</li>
+<li>部系统是不安全的</li>
+<li>小授权</li>
+<li>少外部接口</li>
+<li>省使用安全模式</li>
+<li>全不是似是而非</li>
+<li>STRIDE思考</li>
+<li>入口处检查</li>
+<li>管理上保护好你的系统</li>
+</ul>
+</li>
+<li>
+<p>常见加密算法和协议</p>
+<ul>
+<li>对称加密</li>
+<li>公钥加密</li>
+<li>单向加密</li>
+<li>认证协议</li>
+</ul>
+</li>
+</ul>
+<h1><a id="_37"></a>二.对称和非对称加密</h1>
+<h2><a id="1_39"></a>1.对称加密算法:加密和解密使用同一个密钥</h2>
+<pre><code class="prism language-bash">DES：Data Encryption Standard，56bits 
+3DES： 
+AES：Advanced <span class="token punctuation">(</span>128, 192, 256bits<span class="token punctuation">)</span> 
+Blowfish,Twofish,IDEA,RC6,CAST5 
+</code></pre>
+<ul>
+<li>特性：<br>
+1、加密、解密使用同一个密钥，效率高<br>
+2、将原始数据分割成固定大小的块，逐个进行加密</li>
+<li>缺陷：<br>
+1、密钥过多<br>
+2、密钥分发<br>
+3、数据来源无法确认</li>
+</ul>
+<h2><a id="2_56"></a>2.非对称加密算法</h2>
+<ul>
+<li>
+<p>公钥加密：密钥成对出现</p>
+<ul>
+<li>公钥：公开给所有人；public key</li>
+<li>私钥：自己留存，必须保证其私密性；secret key</li>
+</ul>
+</li>
+<li>
+<p>特点：用公钥加密数据，只能使用与之配对的私钥解密；反之亦然</p>
+</li>
+<li>
+<p>功能：</p>
+<ul>
+<li>数字签名：主要在于让接收方确认发送方身份对称密钥交换：发送方用对方的公钥加密一个对称密钥后发送给对方</li>
+<li>数据加密：适合加密较小数据</li>
+</ul>
+</li>
+<li>
+<p>缺点：密钥长，加密解密效率低下</p>
+</li>
+<li>
+<p>算法： RSA（加密，数字签名） DSA（数字签名） ELGamal</p>
+</li>
+<li>
+<p>基于一对公钥/密钥对<br>
+•用密钥对中的一个加密，另一个解密</p>
+</li>
+<li>
+<p>实现加密：<br>
+•接收者<br>
+生成公钥/密钥对：P和S<br>
+公开公钥P，保密密钥S<br>
+•发送者<br>
+使用接收者的公钥来加密消息M<br>
+将P(M)发送给接收者<br>
+•接收者<br>
+使用密钥S来解密：M=S(P(M))</p>
+</li>
+<li>
+<p>实现数字签名：<br>
+•发送者<br>
+生成公钥/密钥对：P和S<br>
+公开公钥P，保密密钥S<br>
+使用密钥S来加密消息M<br>
+发送给接收者S(M)<br>
+•接收者<br>
+使用发送者的公钥来解密M=P(S(M))<br>
+结合签名和加密<br>
+分离签名</p>
+</li>
+</ul>
+<h2><a id="3RSADSA_91"></a>3.RSA和DSA</h2>
+<ul>
+<li>RSA：公钥加密算法是1977年由Ron Rivest、Adi Shamirh和LenAdleman在<br>
+（美国麻省理工学院）开发的，RSA取名来自开发他们三者的名字，后成立RSA<br>
+数据安全有限公司。RSA是目前最有影响力的公钥加密算法，它能够抵抗到目<br>
+前为止已知的所有密码攻击，已被ISO推荐为公钥数据加密标准。RSA算法基于<br>
+一个十分简单的数论事实：将两个大素数相乘十分容易，但想要对其乘积进行因式<br>
+分解却极其困难，因此可以将乘积公开作为加密密钥</li>
+<li>DSA (Digital Signature Algorithm)：1991年7月26日提交，并归属于David<br>
+W. Kravitz前NSA员工，DSA是Schnorr和ElGamal签名算法的变种，被美国<br>
+NIST作为SS(DigitalSignature Standard)， DSA是基于整数有限域离散对数难<br>
+题的，其安全性与RSA相比差不多。DSA只是一种算法，和RSA不同之处在于<br>
+它不能用作加密和解密，也不能进行密钥交换，只用于签名,它比RSA要快很多</li>
+</ul>
+<h1><a id="_106"></a>三.散列算法</h1>
+<h2><a id="1_108"></a>1.单向散列:将任意数据缩小成固定大小的“指纹”</h2>
+<p>•任意长度输入<br>
+•固定长度输出<br>
+•若修改数据，指纹也会改变（“不会产生冲突”）<br>
+•无法从指纹中重新生成数据（“单向”）</p>
+<ul>
+<li>
+<p>功能：保护数据完整性</p>
+</li>
+<li>
+<p>常见算法:md5: 128bits、sha1: 160bits、sha224 、sha256、sha384、sha512</p>
+</li>
+<li>
+<p>常用工具<br>
+•md5sum | sha1sum  [ --check  ]  file<br>
+•openssl、gpg<br>
+•rpm  -V</p>
+</li>
+<li>
+<p>数字签名图解<br>
+[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-bdR3z9Ge-1573386467794)(png/2019-11-07-11-10-09.png)]</p>
+</li>
+</ul>
+<h2><a id="2IKEInternet_Key_Exchange_125"></a>2.密钥交换:IKE(Internet Key Exchange)</h2>
+<ul>
+<li>
+<p>公钥加密DH</p>
+</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">DH参看</a></p>
+</li>
+</ul>
+<pre><code class="prism language-bash">DH <span class="token punctuation">(</span>Deffie-Hellman<span class="token punctuation">)</span>：生成会话密钥，由惠特菲尔德·迪菲（Bailey Whitfield Diffie）和
+马丁·赫尔曼（Martin Edward Hellman）在1976年发表. 
+DH： 
+A: g,p 协商生成公开的整数g, 大素数p 
+B: g,p 
+A:生成隐私数据 :a <span class="token punctuation">(</span>a<span class="token operator">&lt;</span>p <span class="token punctuation">)</span>，计算得出 gâ%p，发送给B 
+B:生成隐私数据 :b,计算得出 g^b%p，发送给A 
+A:计算得出 <span class="token punctuation">[</span><span class="token punctuation">(</span>g^b%p<span class="token punctuation">)</span>â<span class="token punctuation">]</span> %p <span class="token operator">=</span> gâb%p，生成为密钥 
+B:计算得出 <span class="token punctuation">[</span><span class="token punctuation">(</span>gâ%p<span class="token punctuation">)</span>^b<span class="token punctuation">]</span> %p <span class="token operator">=</span> gâb%p，生成为密钥 
+</code></pre>
+<h1><a id="gpg_143"></a>四.gpg</h1>
+<h2><a id="1gpgfile_145"></a>1.使用gpg实现对称加密file文件</h2>
+<pre><code class="prism language-py">gpg <span class="token operator">-</span>c <span class="token builtin">file</span> 
+ls <span class="token builtin">file</span><span class="token punctuation">.</span>gpg 
+</code></pre>
+<ul>
+<li>在另一台主机上解密file</li>
+</ul>
+<p><code>gpg -o file -d file.gpg</code></p>
+<h2><a id="2gpg_155"></a>2.使用gpg工具实现公钥加密</h2>
+<pre><code class="prism language-py">在hostB主机上用公钥加密，在hostA主机上解密 
+在hostA主机上生成公钥<span class="token operator">/</span>私钥对 
+    gpg <span class="token operator">-</span><span class="token operator">-</span>gen<span class="token operator">-</span>key 
+在hostA主机上查看公钥 
+    gpg <span class="token operator">-</span><span class="token operator">-</span><span class="token builtin">list</span><span class="token operator">-</span>keys 
+在hostA主机上导出公钥到wang<span class="token punctuation">.</span>pubkey 
+    gpg <span class="token operator">-</span>a  <span class="token operator">-</span><span class="token operator">-</span>export <span class="token operator">-</span>o wang<span class="token punctuation">.</span>pubkey 
+从hostA主机上复制公钥文件到需加密的B主机上 
+    scp wang<span class="token punctuation">.</span>pubkey  hostB<span class="token punctuation">:</span> 
+在需加密数据的hostB主机上生成公钥<span class="token operator">/</span>私钥对 
+    gpg <span class="token operator">-</span><span class="token operator">-</span><span class="token builtin">list</span><span class="token operator">-</span>keys 
+    gpg <span class="token operator">-</span><span class="token operator">-</span>gen<span class="token operator">-</span>key 
+在hostB主机上导入公钥 
+    gpg <span class="token operator">-</span><span class="token operator">-</span><span class="token keyword">import</span> wang<span class="token punctuation">.</span>pubkey  
+    gpg <span class="token operator">-</span><span class="token operator">-</span><span class="token builtin">list</span><span class="token operator">-</span>keys 
+用从hostA主机导入的公钥，加密hostB主机的文件<span class="token builtin">file</span><span class="token punctuation">,</span>生成<span class="token builtin">file</span><span class="token punctuation">.</span>gpg 
+    gpg <span class="token operator">-</span>e <span class="token operator">-</span>r wangxiaochun <span class="token builtin">file</span>  
+    <span class="token builtin">file</span> <span class="token builtin">file</span><span class="token punctuation">.</span>gpg 
+复制加密文件到hostA主机  
+    scp fstab<span class="token punctuation">.</span>gpg hostA<span class="token punctuation">:</span> 
+在hostA主机解密文件 
+    gpg <span class="token operator">-</span>d <span class="token builtin">file</span><span class="token punctuation">.</span>gpg   
+    gpg <span class="token operator">-</span>o <span class="token builtin">file</span>  <span class="token operator">-</span>d <span class="token builtin">file</span><span class="token punctuation">.</span>gpg  
+删除公钥和私钥 
+    gpg <span class="token operator">-</span><span class="token operator">-</span>delete<span class="token operator">-</span>keys  wangxiaochun 
+    gpg <span class="token operator">-</span><span class="token operator">-</span>delete<span class="token operator">-</span>secret<span class="token operator">-</span>keys  wangxiaochun 
+</code></pre>
+<ul>
+<li>中间人攻击<br>
+<img src="https://img-blog.csdnimg.cn/2019111019493248.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+</ul>
+<h1><a id="PKICA_189"></a>五.PKI和CA</h1>
+<ul>
+<li>
+<p>PKI：Public Key Infrastructure</p>
+</li>
+<li>
+<p>CA和证书</p>
+</li>
+</ul>
+<pre><code class="prism language-py">签证机构<span class="token punctuation">:</span>CA<span class="token punctuation">(</span>Certificate Authority<span class="token punctuation">)</span> 
+注册机构<span class="token punctuation">:</span>RA<span class="token punctuation">(</span>registration authority <span class="token punctuation">)</span>
+证书吊销列表<span class="token punctuation">:</span>CRL<span class="token punctuation">(</span>Certificate Revoke List<span class="token punctuation">)</span>
+证书存取库<span class="token punctuation">:</span>Certificate access library
+</code></pre>
+<ul>
+<li>X.509：定义了证书的结构以及认证协议标准</li>
+</ul>
+<pre><code class="prism language-py">版本号
+序列号 
+签名算法 
+颁发者 
+有效期限 
+主体名称 
+主体公钥 
+CRL分发点 
+扩展信息 
+发行者签名 
+</code></pre>
+<ul>
+<li>证书类型</li>
+</ul>
+<pre><code class="prism language-bash">证书授权机构的证书
+服务器证书
+用户证书
+</code></pre>
+<ul>
+<li>
+<p>获取证书两种方法：</p>
+<ul>
+<li>使用证书授权机构授权的证书</li>
+</ul>
+</li>
+</ul>
+<pre><code class="prism language-py">   生成证书请求<span class="token punctuation">(</span>csr<span class="token punctuation">)</span><span class="token punctuation">(</span>The certificate request<span class="token punctuation">)</span>
+   将证书请求csr发送给CA
+   CA签名颁发证书
+</code></pre>
+<ul>
+<li>自签名的证书:自已签发自己的公钥</li>
+</ul>
+<h1><a id="openssl_237"></a>六.openssl</h1>
+<h2><a id="1SSLSecure_Socket_LayerTLS_Transport_Layer_Security_239"></a>1.SSL：Secure Socket Layer，TLS: Transport Layer Security</h2>
+<pre><code class="prism language-py"><span class="token number">1995</span>：SSL <span class="token number">2.0</span> Netscape 
+<span class="token number">1996</span>：SSL <span class="token number">3.0</span> 
+<span class="token number">1999</span>：TLS <span class="token number">1.0</span>  
+<span class="token number">2006</span>：TLS <span class="token number">1.1</span> IETF<span class="token punctuation">(</span>Internet工程任务组<span class="token punctuation">)</span> RFC <span class="token number">4346</span> 
+<span class="token number">2008</span>：TLS <span class="token number">1.2</span> 当前使用 
+<span class="token number">2015</span>：TLS <span class="token number">1.3</span>  
+</code></pre>
+<ul>
+<li>功能：机密性，认证，完整性，重放保护</li>
+<li>两阶段协议，分为握手阶段和应用阶段
+<ul>
+<li>握手阶段(协商阶段):客户端和服务器端认证对方身份（依赖于PKI体系，利用数字<br>
+证书进行身份认证），并协商通信中使用的安全参数、密码套件以及主密钥。后续通信使<br>
+用的所有密钥都是通过MasterSecret生成</li>
+<li>应用阶段:在握手阶段完成后进入，在应用阶段通信双方使用握手阶段协商好的密钥进行安全通信</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20191110195006865.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<center>SSL/TLS协议在四层网络模型中的位置及模块</center>
+<ul>
+<li>Handshake协议：包括协商安全参数和密码套件、服务器身份认证（客户端身<br>
+份认证可选）、密钥交换</li>
+<li>ChangeCipherSpec 协议：一条消息表明握手协议已经完成</li>
+<li>Alert 协议：对握手协议中一些异常的错误提醒，分为fatal和warning两个级别，</li>
+<li>fatal类型错误会直接中断SSL链接，而warning级别的错误SSL链接仍可继续，<br>
+只是会给出错误警告</li>
+<li>Record 协议：包括对消息的分段、压缩、消息认证和完整性保护、加密等</li>
+<li>HTTPS协议：就是"HTTP协议"和"SSL/TLS协议"的组合。HTTP over<br>
+SSL”或“HTTP over TLS”，对http协议的文本数据进行加密处理后，成为二<br>
+进制形式传输</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20191110195023904.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<center>HTTPS结构</center>
+<p><img src="https://img-blog.csdnimg.cn/20191110195044701.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<center>HTTPS工作过程</center>
+<h2><a id="2openssl_280"></a>2.openssl软件</h2>
+<ul>
+<li>
+<p>openssl命令包括三个组件：</p>
+<ul>
+<li>openssl：多用途的命令行工具，包openssl</li>
+<li>libcrypto：加密算法库，包openssl-libs</li>
+<li>libssl：加密模块应用库，实现了ssl及tls，包nss</li>
+</ul>
+</li>
+<li>
+<p>openssl命令用法</p>
+</li>
+<li>
+<p>两种运行模式：交互模式和批处理模式</p>
+</li>
+<li>
+<p>标准命令、消息摘要命令、加密命令</p>
+<ul>
+<li>标准命令：enc, ca, req, …</li>
+<li>对称加密:</li>
+</ul>
+</li>
+</ul>
+<pre><code class="prism language-py">工具：openssl enc<span class="token punctuation">,</span> gpg 
+算法：3des<span class="token punctuation">,</span> aes<span class="token punctuation">,</span> blowfish<span class="token punctuation">,</span> twofish 
+</code></pre>
+<ul>
+<li>
+<p>openssl的enc子命令</p>
+<ul>
+<li>加密：<br>
+<code>openssl enc -e -des3 -a -salt -in testfile -out testfile.cipher</code></li>
+<li>解密：<br>
+<code>openssl enc -d -des3 -a -salt –in testfile.cipher -out testfile</code></li>
+</ul>
+</li>
+<li>
+<p>单向加密：</p>
+<ul>
+<li>工具：md5sum, sha1sum, sha224sum,sha256sum… ,openssl dgst</li>
+</ul>
+</li>
+<li>
+<p>dgst命令<br>
+<code>openssl dgst -md5 [-hex默认] /PATH/SOMEFILE</code><br>
+<code>openssl dgst -md5 testfile</code><br>
+<code>md5sum /PATH/TO/SOMEFILE</code></p>
+</li>
+<li>
+<p>MAC: Message Authentication Code，单向加密的一种延伸应用，用于实现网络通信<br>
+中保证所传输数据的完整性机制</p>
+</li>
+<li>
+<p>CBC-MAC</p>
+</li>
+<li>
+<p>HMAC：使用md5或sha1算法<br>
+生成用户密码：</p>
+</li>
+<li>
+<p>openssl的passwd命令<br>
+<code>openssl passwd -1 -salt SALT(最多8位)</code><br>
+<code>openssl passwd -1 –salt centos</code></p>
+</li>
+<li>
+<p>生成随机数：<br>
+<code>openssl rand -base64|-hex NUM</code></p>
+<ul>
+<li>NUM: 表示字节数，使用-hex，每个字符为十六进制，相当于4位二进制,出现的字符数为NUM*2</li>
+</ul>
+</li>
+<li>
+<p>公钥加密：</p>
+</li>
+</ul>
+<pre><code class="prism language-py">算法：RSA<span class="token punctuation">,</span> ELGamal 
+工具：gpg<span class="token punctuation">,</span> openssl rsautl（man rsautl） 
+</code></pre>
+<ul>
+<li>数字签名：</li>
+</ul>
+<pre><code class="prism language-py">算法：RSA<span class="token punctuation">,</span> DSA<span class="token punctuation">,</span> ELGamal 
+</code></pre>
+<ul>
+<li>密钥交换：</li>
+</ul>
+<pre><code class="prism language-py">算法：dh 
+DSA：Digital Signature Algorithm 
+DSS：Digital Signature Standard 
+</code></pre>
+<ul>
+<li>生成密钥对儿：man genrsa</li>
+<li>生成私钥<br>
+<code>openssl genrsa -out /PATH/TO/PRIVATEKEY.FILE NUM_BITS</code><br>
+(umask 077; openssl genrsa –out test.key –des 2048)<br>
+<code>openssl rsa -in test.key –out test2.key</code> 将加密key解密</li>
+<li>从私钥中提取出公钥<br>
+<code>openssl rsa -in PRIVATEKEYFILE –pubout –out PUBLICKEYFILE</code><br>
+<code>openssl rsa –in test.key –pubout –out test.key.pub</code></li>
+<li>随机数生成器：伪随机数字
+<ul>
+<li>键盘和鼠标，块设备中断<br>
+<code>/dev/random</code>：仅从熵池返回随机数；随机数用尽，阻塞<br>
+<code>/dev/urandom</code>：从熵池返回随机数；随机数用尽，会利用软件生成伪随机数,非阻塞</li>
+</ul>
+</li>
+</ul>
+<h1><a id="CA_353"></a>七.CA创建和管理</h1>
+<h2><a id="1PKIPublic_Key_Infrastructure_355"></a>1.PKI：Public Key Infrastructure</h2>
+<pre><code class="prism language-py">CA 
+RA 
+CRL 
+证书存取库 
+</code></pre>
+<ul>
+<li>建立私有CA一般使用工具:</li>
+</ul>
+<pre><code class="prism language-py">OpenCA 
+openssl 
+</code></pre>
+<ul>
+<li>证书申请及签署步骤：</li>
+</ul>
+<pre><code class="prism language-py"><span class="token number">1</span>、生成申请请求
+<span class="token number">2</span>、RA核验
+<span class="token number">3</span>、CA签署
+<span class="token number">4</span>、获取证书
+</code></pre>
+<h2><a id="3CA_380"></a>3.创建私有CA、证书申请和管理</h2>
+<h3><a id="CA_382"></a>创建私有CA</h3>
+<ul>
+<li>openssl的配置文件：/etc/pki/tls/openssl.cnf</li>
+<li>三种策略：match匹配、optional可选、supplied提供</li>
+</ul>
+<pre><code class="prism language-py">match：要求申请填写的信息跟CA设置信息必须一致
+optional：可有可无，跟CA设置信息可不一致
+supplied：必须填写这项申请信息，
+</code></pre>
+<h3><a id="_393"></a>步骤</h3>
+<p>1、创建所需要的文件</p>
+<pre><code class="prism language-py">touch <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span>index<span class="token punctuation">.</span>txt 生成证书索引数据库文件 
+echo <span class="token number">01</span> <span class="token operator">&gt;</span> <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span>serial 指定第一个颁发证书的序列号 
+</code></pre>
+<p>2、 CA自签证书</p>
+<pre><code class="prism language-py">生成私钥 
+    cd <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span> 
+    <span class="token punctuation">(</span>umask <span class="token number">066</span><span class="token punctuation">;</span> openssl genrsa <span class="token operator">-</span>out  private<span class="token operator">/</span>cakey<span class="token punctuation">.</span>pem <span class="token number">2048</span><span class="token punctuation">)</span>
+生成自签名证书 
+   openssl req <span class="token operator">-</span>new <span class="token operator">-</span>x509 <span class="token operator">-</span>key   <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span>private<span class="token operator">/</span>cakey<span class="token punctuation">.</span>pem <span class="token operator">-</span>days <span class="token number">3650</span> <span class="token operator">-</span>out  <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span>cacert<span class="token punctuation">.</span>pem 
+</code></pre>
+<ul>
+<li>选项说明：</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">-</span>new：生成新证书签署请求
+<span class="token operator">-</span>x509：专用于CA生成自签证书
+<span class="token operator">-</span>key：生成请求时用到的私钥文件
+<span class="token operator">-</span>days n：证书的有效期限
+<span class="token operator">-</span>out <span class="token operator">/</span>PATH<span class="token operator">/</span>TO<span class="token operator">/</span>SOMECERTFILE<span class="token punctuation">:</span> 证书的保存路径
+</code></pre>
+<p>3、颁发证书</p>
+<pre><code class="prism language-py"><span class="token number">3.1</span> 在需要使用证书的主机生成证书请求
+eg<span class="token punctuation">:</span>给web服务器生成私钥
+<span class="token punctuation">(</span>umask <span class="token number">066</span><span class="token punctuation">;</span> openssl genrsa –out   <span class="token operator">/</span>data<span class="token operator">/</span>test<span class="token punctuation">.</span>key <span class="token number">2048</span><span class="token punctuation">)</span>
+<span class="token number">3.2</span> 生成证书申请文件
+openssl req <span class="token operator">-</span>new <span class="token operator">-</span>key <span class="token operator">/</span>data<span class="token operator">/</span>test<span class="token punctuation">.</span>key <span class="token operator">-</span>out <span class="token operator">/</span>data<span class="token operator">/</span>test<span class="token punctuation">.</span>csr
+<span class="token number">3.3</span> 将证书请求文件传输给CA
+<span class="token number">3.4</span> CA签署证书，并将证书颁发给请求者
+openssl ca <span class="token operator">-</span><span class="token keyword">in</span> <span class="token operator">/</span>tmp<span class="token operator">/</span>test<span class="token punctuation">.</span>csr –out   <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span>certs<span class="token operator">/</span>test<span class="token punctuation">.</span>crt <span class="token operator">-</span>days <span class="token number">100</span>
+注意：默认要求 国家，省，公司名称三项必须和CA一致
+查看证书中的信息：
+    openssl x509 <span class="token operator">-</span><span class="token keyword">in</span> <span class="token operator">/</span>PATH<span class="token operator">/</span>FROM<span class="token operator">/</span>CERT_FILE <span class="token operator">-</span>noout   <span class="token operator">-</span>text<span class="token operator">|</span>issuer<span class="token operator">|</span>subject<span class="token operator">|</span>serial<span class="token operator">|</span>dates
+查看指定编号的证书状态
+    openssl  ca <span class="token operator">-</span>status SERIAL
+</code></pre>
+<p>4、吊销证书</p>
+<pre><code class="prism language-py"><span class="token number">4.1</span> 在客户端获取要吊销的证书的serial
+openssl x509 <span class="token operator">-</span><span class="token keyword">in</span> <span class="token operator">/</span>PATH<span class="token operator">/</span>FROM<span class="token operator">/</span>CERT_FILE   <span class="token operator">-</span>noout   <span class="token operator">-</span>serial  <span class="token operator">-</span>subject
+<span class="token number">4.2</span> 在CA上，根据客户提交的serial与subject信息，对比检验是否与index<span class="token punctuation">.</span>txt文件中的信息一致
+吊销证书命令：
+openssl ca <span class="token operator">-</span>revoke <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span>newcerts<span class="token operator">/</span>SERIAL<span class="token punctuation">.</span>pem
+<span class="token number">4.3</span> 指定第一个吊销证书的编号<span class="token punctuation">,</span>注意：第一次更新证书吊销列表前，才需要执行
+echo <span class="token number">01</span> <span class="token operator">&gt;</span> <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span>crlnumber
+<span class="token number">4.4</span> 更新证书吊销列表
+openssl ca <span class="token operator">-</span>gencrl <span class="token operator">-</span>out <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span>crl<span class="token punctuation">.</span>pem
+<span class="token number">4.5</span> 查看crl文件：
+openssl crl <span class="token operator">-</span><span class="token keyword">in</span> <span class="token operator">/</span>etc<span class="token operator">/</span>pki<span class="token operator">/</span>CA<span class="token operator">/</span>crl<span class="token punctuation">.</span>pem <span class="token operator">-</span>noout <span class="token operator">-</span>text
+</code></pre>
+<h2><a id="openssl_456"></a>openssl常用命令例子</h2>
+
+<table>
+<thead>
+<tr>
+<th align="left">命令</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">openssl enc -e -des3 -a -salt -in testfile -out testfile.cipher</td>
+<td align="left">对称加密</td>
+</tr>
+<tr>
+<td align="left">openssl enc -d -des3 -a -salt –in testfile.cipher -out testfile</td>
+<td align="left">解密</td>
+</tr>
+<tr>
+<td align="left">openssl dgst -md5 [-hex默认] /PATH/SOMEFILE</td>
+<td align="left">为文件生成摘要(也叫指纹或者hash),同md5sum命令的计算结果</td>
+</tr>
+<tr>
+<td align="left">openssl passwd -1 -salt SALT(最多8位)</td>
+<td align="left">生成用户密码(-1:使用基于MD5的BSD密码算法;-salt:指定掺杂的字符)</td>
+</tr>
+<tr>
+<td align="left">openssl rand -base64</td>
+<td align="left">-hex NUM</td>
+</tr>
+<tr>
+<td align="left">(umask 077; openssl genrsa –out test.key –des 2048)</td>
+<td align="left">生成私钥</td>
+</tr>
+<tr>
+<td align="left">openssl rsa -in test.key –out test2.key</td>
+<td align="left">将加密keyjiemi</td>
+</tr>
+<tr>
+<td align="left">openssl rsa –in test.key –pubout –out test.key.pub</td>
+<td align="left">从私钥中提取公钥</td>
+</tr>
+<tr>
+<td align="left">(umask 066; openssl genrsa -out  private/cakey.pem 2048)</td>
+<td align="left">生成私钥</td>
+</tr>
+<tr>
+<td align="left">openssl req -new -x509 -key   /etc/pki/CA/private/cakey.pem  -days  3650  -out      /etc/pki/CA/cacert.pem</td>
+<td align="left">生成自签名证书</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">-new：生成新证书签署请求</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">-x509：专用于CA生成自签证书</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">-key：生成请求时用到的私钥文件</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">-days n：证书的有效期限</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">-out /PATH/TO/SOMECERTFILE: 证书的保存路径</td>
+</tr>
+<tr>
+<td align="left">openssl req -new -key /data/test.key -out /data/test.csr</td>
+<td align="left">生成证书申请文件</td>
+</tr>
+<tr>
+<td align="left">openssl ca -in /tmp/test.csr –out   /etc/pki/CA/certs/test.crt -days 100</td>
+<td align="left">CA签署证书</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">注意：默认要求 国家，省，公司名称三项必须和CA一致</td>
+</tr>
+<tr>
+<td align="left">openssl x509 -in /PATH/FROM/CERT_FILE -noout   -text</td>
+<td align="left">issuer</td>
+</tr>
+<tr>
+<td align="left">openssl  ca -status SERIAL</td>
+<td align="left">查看指定编号的证书状态</td>
+</tr>
+<tr>
+<td align="left">openssl ca -revoke /etc/pki/CA/newcerts/SERIAL.pem</td>
+<td align="left">吊销证书</td>
+</tr>
+<tr>
+<td align="left">openssl ca -gencrl -out /etc/pki/CA/crl.pem</td>
+<td align="left">更新证书吊销列表</td>
+</tr>
+<tr>
+<td align="left">openssl crl -in /etc/pki/CA/crl.pem -noout -text</td>
+<td align="left">查看crl文件</td>
+</tr>
+</tbody>
+</table><h1><a id="sshdropbear_484"></a>八.ssh服务和dropbear</h1>
+<h2><a id="1SSH_486"></a>1.SSH</h2>
+<ul>
+<li>ssh: secure shell, protocol, 22/tcp, 安全的远程登录</li>
+<li>具体的软件实现：
+<ul>
+<li><strong>OpenSSH</strong>:ssh协议的开源实现，CentOS默认安装</li>
+<li><strong>dropbear</strong>:另一个开源实现</li>
+</ul>
+</li>
+<li>SSH协议版本
+<ul>
+<li>v1: 基于CRC-32做MAC，不安全；man-in-middle</li>
+<li>v2：双方主机协议选择安全的MAC方式</li>
+</ul>
+</li>
+<li>基于DH算法做密钥交换，基于RSA或DSA实现身份认证</li>
+<li>OpenSSH介绍
+<ul>
+<li>相关包：</li>
+</ul>
+</li>
+</ul>
+<pre><code class="prism language-py">openssh
+openssh<span class="token operator">-</span>clients
+openssh<span class="token operator">-</span>server
+</code></pre>
+<ul>
+<li>
+<p>工具：基于C/S结构</p>
+<ul>
+<li>Linux Client: ssh, scp, sftp，slogin</li>
+<li>Windows Client：xshell, putty, securecrt, sshsecureshellclient</li>
+<li>Server: sshd</li>
+</ul>
+</li>
+<li>
+<p>ssh建立连接时的公钥交换<br>
+<img src="https://img-blog.csdnimg.cn/20191110195204383.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h3><a id="_513"></a>公钥交换的过程</h3>
+<pre><code class="prism language-py"><span class="token number">1</span><span class="token punctuation">.</span>客户端发起链接请求 
+<span class="token number">2</span><span class="token punctuation">.</span>服务端返回自己的公钥，以及一个会话ID（这一步客户端得到服务端公钥） 
+<span class="token number">3</span><span class="token punctuation">.</span>客户端生成密钥对 
+<span class="token number">4</span><span class="token punctuation">.</span>客户端用自己的公钥异或会话ID，计算出一个值Res，并用服务端的公钥加密 
+<span class="token number">5</span><span class="token punctuation">.</span>客户端发送加密后的值到服务端，服务端用私钥解密<span class="token punctuation">,</span>得到Res 
+<span class="token number">6</span><span class="token punctuation">.</span>服务端用解密后的值Res异或会话ID，计算出客户端的公钥（这一步服务端得到客户端公钥） 
+<span class="token number">7</span><span class="token punctuation">.</span>最终：双方各自持有三个秘钥，分别为自己的一对公、私钥，以及对方的公钥，之后的所有通讯都会被加密 
+</code></pre>
+<ul>
+<li>建立连接后的数据交换过程</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20191110195220657.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3><a id="ssh_529"></a>ssh客户端</h3>
+<ul>
+<li>客户端组件：
+<ul>
+<li>配置文件：/etc/ssh/ssh_config</li>
+<li>StrictHostKeyChecking no 首次登录不显示检查提示</li>
+</ul>
+</li>
+</ul>
+<pre><code class="prism language-py">格式<span class="token punctuation">:</span>ssh <span class="token punctuation">[</span>user@<span class="token punctuation">]</span>host <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> 
+     ssh <span class="token punctuation">[</span><span class="token operator">-</span>l user<span class="token punctuation">]</span> host <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> 
+常见选项 
+<span class="token operator">-</span>p port：远程服务器监听的端口 
+<span class="token operator">-</span>b：指定连接的源IP 
+<span class="token operator">-</span>v：调试模式 
+<span class="token operator">-</span>C：压缩方式 
+<span class="token operator">-</span>X：支持x11转发 
+<span class="token operator">-</span>t：强制伪tty分配 
+ssh <span class="token operator">-</span>t remoteserver1 ssh <span class="token operator">-</span>t  remoteserver2   ssh   remoteserver3 
+</code></pre>
+<ul>
+<li>ssh允许实现对远程系统经验证地加密安全访问</li>
+<li>当用户远程连接ssh服务器时，会复制ssh服务器/etc/ssh/ssh_host*key.pub<br>
+（CentOS7默认是ssh_host_ecdsa_key.pub）文件中的公钥到客户机的<br>
+~./ssh/know_hosts中。下次连接时，会自动匹配相应私钥，不能匹配，将拒绝连接</li>
+</ul>
+<h3><a id="ssh_553"></a>ssh服务登录验证</h3>
+<ul>
+<li>ssh服务登录的验证方式两种
+<ul>
+<li>用户/口令</li>
+<li>基于密钥</li>
+</ul>
+</li>
+<li>基于用户名和口令的登录验证过程</li>
+</ul>
+<p>[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-Fh60nuss-1573386467798)(png/2019-11-06-12-40-23.png)]</p>
+<ul>
+<li>基于用户和口令登录验证过程描述</li>
+</ul>
+<pre><code class="prism language-py"><span class="token number">1</span> 客户端发起ssh请求，服务器会把自己的公钥发送给用户 
+<span class="token number">2</span> 用户会根据服务器发来的公钥对密码进行加密 
+<span class="token number">3</span> 加密后的信息回传给服务器，服务器用自己的私钥解密，如果密码正确，则用户登录成功 
+</code></pre>
+<ul>
+<li>基于密钥的登录验证</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20191110195235278.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<ul>
+<li>基于密钥的登录方式过程</li>
+</ul>
+<pre><code class="prism language-py"><span class="token number">1</span> 首先在客户端生成一对密钥（ssh<span class="token operator">-</span>keygen） 
+<span class="token number">2</span> 并将客户端的公钥ssh<span class="token operator">-</span>copy<span class="token operator">-</span><span class="token builtin">id</span> 拷贝到服务端 
+<span class="token number">3</span> 当客户端再次发送一个连接请求，包括ip、用户名 
+<span class="token number">4</span> 服务端得到客户端的请求后，会到authorized_keys中查找，如果有响应的
+IP和用户，就会随机生成一个字符串，例如：magedu 
+<span class="token number">5</span> 服务端将使用客户端拷贝过来的公钥进行加密，然后发送给客户端 
+<span class="token number">6</span> 得到服务端发来的消息后，客户端会使用私钥进行解密，然后将解密后的
+字符串发送给服务端 
+<span class="token number">7</span> 服务端接受到客户端发来的字符串后，跟之前的字符串进行对比，如果一
+致，就允许免密码登录 
+</code></pre>
+<h3><a id="key_588"></a>基于key认证的实现</h3>
+<ul>
+<li>基于密钥的认证实现步骤</li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>在客户端生成密钥对
+    ssh<span class="token operator">-</span>keygen <span class="token operator">-</span>t rsa <span class="token punctuation">[</span><span class="token operator">-</span>P <span class="token string">''</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token operator">-</span>f “<span class="token operator">~</span><span class="token operator">/</span><span class="token punctuation">.</span>ssh<span class="token operator">/</span>id_rsa"<span class="token punctuation">]</span> 
+<span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span>把公钥文件传输至远程服务器对应用户的家目录 
+    ssh<span class="token operator">-</span>copy<span class="token operator">-</span><span class="token builtin">id</span> <span class="token punctuation">[</span><span class="token operator">-</span>i <span class="token punctuation">[</span>identity_file<span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>user@<span class="token punctuation">]</span>host 
+<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span>测试 
+<span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span>在SecureCRT或Xshell实现基于key验证 
+    在SecureCRT工具—<span class="token operator">&gt;</span>创建公钥—<span class="token operator">&gt;</span>生成Identity<span class="token punctuation">.</span>pub文件转化为openssh兼容格式
+    （适合SecureCRT，Xshell不需要转化格式），并复制到需登录主机上相应文件
+    authorized_keys中<span class="token punctuation">,</span>注意权限必须为<span class="token number">600</span>，在需登录的ssh主机上执行：
+    ssh<span class="token operator">-</span>keygen  <span class="token operator">-</span>i <span class="token operator">-</span>f Identity<span class="token punctuation">.</span>pub <span class="token operator">&gt;&gt;</span> <span class="token punctuation">.</span>ssh<span class="token operator">/</span>authorized_keys
+<span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span>重设私钥口令：
+    ssh<span class="token operator">-</span>keygen –p  
+<span class="token punctuation">(</span><span class="token number">6</span><span class="token punctuation">)</span>验证代理（authentication agent）保密解密后的密钥这样口令就只需要输入一次 
+    在GNOME中，代理被自动提供给root用户 
+    否则运行ssh<span class="token operator">-</span>agent bash 
+<span class="token punctuation">(</span><span class="token number">7</span><span class="token punctuation">)</span>钥匙通过命令添加给代理 
+    ssh<span class="token operator">-</span>add 
+</code></pre>
+<h3><a id="sshfs_612"></a>sshfs将远程主机的目录挂载到本地</h3>
+<ul>
+<li>用法
+<ul>
+<li>挂载<br>
+<code>sshfs [user@]host:[dir] mountpoint [options]</code></li>
+<li>卸载<br>
+<code>fusermount -u mountpoint</code><br>
+<code>umount mountpoint</code></li>
+</ul>
+</li>
+</ul>
+<h3><a id="scp_621"></a>scp命令</h3>
+<ul>
+<li>用法<br>
+<code>scp [options] SRC... DEST/</code></li>
+<li>两种方式<br>
+<code>scp [options] [user@]host:/sourcefile /destpath</code><br>
+<code>scp [options] /sourcefile [user@]host:/destpath</code></li>
+<li>常用选项</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">-</span>C 压缩数据流
+<span class="token operator">-</span>r 递归复制
+<span class="token operator">-</span>p 保持原文件的属性信息
+<span class="token operator">-</span>q 静默模式
+<span class="token operator">-</span>P PORT
+指明remote host的监听的端口
+</code></pre>
+<h3><a id="rsync_639"></a>rsync命令</h3>
+<ul>
+<li>rsync基于ssh和rsh服务实现高效率的远程系统之间复制文件,其使用安全的shell连接做为传输方式<br>
+<code>rsync -av /etc server1:/tmp</code></li>
+<li>复制目录和目录下文件<br>
+<code>rsync -av /etc/ server1:/tmp</code></li>
+<li>rsync只复制目录下有改动的文件，包括文件元数据的变化；scp更快.</li>
+<li>常用选项</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">-</span>n 模拟复制过程
+<span class="token operator">-</span>v 显示详细过程 
+<span class="token operator">-</span>r 递归复制目录树 
+<span class="token operator">-</span>p 保留权限 
+<span class="token operator">-</span>t 保留时间戳 
+<span class="token operator">-</span>g 保留组信息 
+<span class="token operator">-</span>o 保留所有者信息 
+<span class="token operator">-</span>l 将软链接文件本身进行复制（默认） 
+<span class="token operator">-</span>L 将软链接文件指向的文件复制
+<span class="token operator">-</span>a 存档，相当于–rlptgoD，但不保留ACL（<span class="token operator">-</span>A）和SELinux属性（<span class="token operator">-</span>X） 
+</code></pre>
+<h3><a id="sftp_661"></a>sftp命令</h3>
+<ul>
+<li>交互式文件传输工具用法和传统的ftp工具相似</li>
+<li>其利用ssh服务实现安全的文件上传和下载</li>
+<li>使用ls cd mkdir rmdir pwd get put等指令，可用？或help获取帮助信息</li>
+</ul>
+<pre><code>sftp [user@]host
+sftp&gt; help
+</code></pre>
+<h2><a id="2_672"></a>2.轻量级自动化运维工具</h2>
+<h3><a id="pssh_674"></a>pssh</h3>
+<ul>
+<li>
+<p>基于python编写，可在多台服务器上执行命令的工具，也可实现文件复制，提供了基于ssh和<br>
+scp的多个并行工具</p>
+</li>
+<li>
+<p>用法</p>
+</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">-</span><span class="token operator">-</span>version：查看版本  
+<span class="token operator">-</span>h：主机文件列表，内容格式<span class="token string">"[user@]host[:port]"</span>  
+<span class="token operator">-</span>H：主机字符串，内容格式<span class="token string">"[user@]host[:port]"</span>  
+<span class="token operator">-</span>A：手动输入密码模式  
+<span class="token operator">-</span>i：每个服务器内部处理信息输出  
+<span class="token operator">-</span>l：登录使用的用户名  
+<span class="token operator">-</span>p：并发的线程数<span class="token punctuation">[</span>可选<span class="token punctuation">]</span>  
+<span class="token operator">-</span>o：输出的文件目录<span class="token punctuation">[</span>可选<span class="token punctuation">]</span> <span class="token comment"># 生成的文件名为主机名 </span>
+<span class="token operator">-</span>e：错误输出文件<span class="token punctuation">[</span>可选<span class="token punctuation">]</span>  
+<span class="token operator">-</span>t：TIMEOUT 超时时间设置<span class="token punctuation">,</span><span class="token number">0</span>无限制<span class="token punctuation">[</span>可选<span class="token punctuation">]</span> 
+<span class="token operator">-</span>O：SSH的选项  
+<span class="token operator">-</span>P：打印出服务器返回信息 
+<span class="token operator">-</span>v：详细模式  
+</code></pre>
+<ul>
+<li>示例</li>
+</ul>
+<pre><code class="prism language-py"><span class="token number">1</span><span class="token punctuation">.</span>通过pssh批量关闭seLinux 
+    pssh <span class="token operator">-</span>H root@<span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.10</span>  <span class="token operator">-</span>i  ‘sed <span class="token operator">-</span>i <span class="token string">"s/^SELINUX=.*/SELINUX=disabled/"</span>  <span class="token operator">/</span>etc<span class="token operator">/</span>selinux<span class="token operator">/</span>config’
+<span class="token number">2</span><span class="token punctuation">.</span>批量发送指令
+    pssh <span class="token operator">-</span>H root@<span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.10</span>  <span class="token operator">-</span>i  setenforce <span class="token number">0</span>   
+    pssh <span class="token operator">-</span>H wang@<span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.10</span>  <span class="token operator">-</span>i  hostname 
+<span class="token number">3</span><span class="token punctuation">.</span>当不支持ssh的key认证时，通过 <span class="token operator">-</span>A选项，使用密码认证批量执行指令 
+    pssh <span class="token operator">-</span>H wang@<span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.10</span>  <span class="token operator">-</span>A <span class="token operator">-</span>i  hostname    
+<span class="token number">4</span><span class="token punctuation">.</span>将标准错误和标准正确重定向都保存至本地主机的<span class="token operator">/</span>app目录下 
+    pssh <span class="token operator">-</span>H <span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.10</span> <span class="token operator">-</span>o <span class="token operator">/</span>app <span class="token operator">-</span>e <span class="token operator">/</span>app   <span class="token operator">-</span>i “hostname” 
+<span class="token number">5</span><span class="token punctuation">.</span>使用host主机列表来发送指令到多台电脑
+<span class="token punctuation">[</span>root@centos7 <span class="token operator">/</span>data<span class="token punctuation">]</span><span class="token comment">#cat hostlist                         │</span>
+<span class="token number">172.20</span><span class="token number">.2</span><span class="token number">.16</span>                                               │
+<span class="token punctuation">[</span>root@centos7 <span class="token operator">/</span>data<span class="token punctuation">]</span><span class="token comment">#pssh -h hostlist -i ls /data         │</span>
+<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token number">09</span><span class="token punctuation">:</span><span class="token number">04</span><span class="token punctuation">:</span><span class="token number">55</span> <span class="token punctuation">[</span>SUCCESS<span class="token punctuation">]</span> <span class="token number">172.20</span><span class="token number">.2</span><span class="token number">.16</span>                        │
+authorized_keys                                           │
+bucket_man<span class="token punctuation">.</span>gif                                            │
+encrypt                                                   │
+giphy<span class="token punctuation">.</span>gif                                                 │
+hand<span class="token punctuation">.</span>gif                                                  │
+mice<span class="token punctuation">.</span>gif                                                  │
+penguin<span class="token punctuation">.</span>gif                                               │
+rabbit<span class="token punctuation">.</span>gif
+</code></pre>
+<blockquote>
+<p><a href="http://code.google.com/p/parallel-ssh/">项目</a></p>
+</blockquote>
+<h3><a id="pscppssh_727"></a>pscp.pssh命令</h3>
+<ul>
+<li>pscp.pssh功能是将本地文件批量复制到远程主机</li>
+<li>用法<br>
+<code>pscp [-vAr] [-h hosts_file] [-H [user@]host[:port]] [-l user] [-p par] [-o outdir] [-e errdir] [-t timeout] [-O options] [-x args] [-X arg] local remote</code></li>
+<li>pscp-pssh选项及用法</li>
+</ul>
+<pre><code class="prism language-py">    <span class="token operator">-</span>v 显示复制过程 
+    <span class="token operator">-</span>r 递归复制目录 
+将本地curl<span class="token punctuation">.</span>sh 复制到<span class="token operator">/</span>app<span class="token operator">/</span>目录 
+    pscp<span class="token punctuation">.</span>pssh <span class="token operator">-</span>H <span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.10</span> <span class="token operator">/</span>root<span class="token operator">/</span>test<span class="token operator">/</span>curl<span class="token punctuation">.</span>sh    <span class="token operator">/</span>app<span class="token operator">/</span>    
+    pscp<span class="token punctuation">.</span>pssh <span class="token operator">-</span>h host<span class="token punctuation">.</span>txt  <span class="token operator">/</span>root<span class="token operator">/</span>test<span class="token operator">/</span>curl<span class="token punctuation">.</span>sh    <span class="token operator">/</span>app<span class="token operator">/</span>  
+将本地多个文件批量复制到<span class="token operator">/</span>app<span class="token operator">/</span>目录 
+    pscp<span class="token punctuation">.</span>pssh <span class="token operator">-</span>H <span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.10</span>  <span class="token operator">/</span>root<span class="token operator">/</span>f1<span class="token punctuation">.</span>sh  <span class="token operator">/</span>root<span class="token operator">/</span>f2<span class="token punctuation">.</span>sh    <span class="token operator">/</span>app<span class="token operator">/</span> 
+将本地目录批量复制到<span class="token operator">/</span>app<span class="token operator">/</span>目录  
+    pscp<span class="token punctuation">.</span>pssh <span class="token operator">-</span>H <span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.10</span>  <span class="token operator">-</span>r <span class="token operator">/</span>root<span class="token operator">/</span>test<span class="token operator">/</span>    <span class="token operator">/</span>app<span class="token operator">/</span> 
+</code></pre>
+<h3><a id="pslurp_747"></a>pslurp命令</h3>
+<ul>
+<li>
+<p>pslurp功能是将远程主机的文件批量复制到本地<br>
+<code>pslurp [-vAr] [-h hosts_file] [-H [user@]host[:port]] [-l user] [-p par] [-o outdir] [-e errdir] [-t timeout] [-O options] [-x args] [-X arg] [-L localdir] remote local（本地名）</code></p>
+</li>
+<li>
+<p>pslurp选项</p>
+</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">-</span>L 指定从远程主机下载到本机的存储的目录，local是下载到本地后的名称 
+<span class="token operator">-</span>r 递归复制目录 
+</code></pre>
+<ul>
+<li>批量下载目标服务器的passwd文件至/app下，并更名为user<br>
+<code>pslurp -H 192.168.1.10 -L /app /etc/passwd user</code></li>
+</ul>
+<h3><a id="pdsh_764"></a>pdsh</h3>
+<ul>
+<li>Parallel remote shell program，是一个多线程远程shell客户端，可以<br>
+并行执行多个远程主机上的命令。 pdsh可以使用几种不同的远程shell服务，包<br>
+括标准的“rsh”，Kerberos IV和ssh</li>
+</ul>
+<blockquote>
+<p><a href="https://pdsh.googlecode.com/">pdsh项目地址</a></p>
+</blockquote>
+<h3><a id="mussh_772"></a>mussh</h3>
+<ul>
+<li>Multihost SSH wrapper，是一个shell脚本，允许您使用一个命令在<br>
+多个主机上通过ssh执行命令或脚本。 mussh可使用ssh-agent和RSA / DSA密<br>
+钥，以减少输入密码</li>
+</ul>
+<blockquote>
+<p><a href="http://www.sourceforge.net/projects/mussh">mussh项目</a></p>
+</blockquote>
+<ul>
+<li>pssh,pdsh,mussh工具都包含在EPEL源中</li>
+</ul>
+<h3><a id="SSH_782"></a>SSH端口转发</h3>
+<ul>
+<li>
+<p>SSH会自动加密和解密所有SSH客户端与服务端之间的网络数据。但是，SSH还能够将其他TCP端<br>
+口的网络数据通过SSH链接来转发，并且自动提供 相应的加密及解密服务。这一过程也被叫做“隧<br>
+道”（tunneling），这是因为SSH为其他TCP链接提供了一个安全的通道来进行传输而得名。例<br>
+如，Telnet，SMTP，LDAP这些TCP应用均能够从中得益，避免了用户名，密码以及隐私 息的明文<br>
+传输。而与此同时，如果工作环境中的防火墙限制了一些网络端口的使用，但是允许SSH的连接，<br>
+也能够通过将TCP端口转发来使用SSH进行通讯。</p>
+</li>
+<li>
+<p>SSH 端口转发能够提供两大功能：</p>
+<ul>
+<li>1.加密 SSH Client 端至 SSH Server 端之间的通讯数据</li>
+<li>2.突破防火墙的限制完成一些之前无法建立的 TCP 连接</li>
+</ul>
+</li>
+<li>
+<p>本地转发实现<br>
+<code>ssh -L localport:remotehost:remotehostport sshserver</code></p>
+</li>
+<li>
+<p>选项</p>
+</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">-</span>f 后台启用 
+<span class="token operator">-</span>N 不打开远程shell，处于等待状态 
+<span class="token operator">-</span>g 启用网关功能 
+</code></pre>
+<ul>
+<li>示例</li>
+</ul>
+<pre><code class="prism language-py">ssh –L  <span class="token number">9527</span><span class="token punctuation">:</span>telnetsrv<span class="token punctuation">:</span><span class="token number">23</span> <span class="token operator">-</span>Nfg  sshsrv
+ssh <span class="token operator">-</span>L <span class="token number">9527</span><span class="token punctuation">:</span><span class="token number">192.168</span><span class="token number">.39</span><span class="token number">.18</span><span class="token punctuation">:</span><span class="token number">23</span> <span class="token number">192.168</span><span class="token number">.39</span><span class="token number">.7</span> <span class="token operator">-</span>fN
+telnet <span class="token number">127.0</span><span class="token number">.0</span><span class="token number">.1</span> <span class="token number">9527</span>
+</code></pre>
+<ul>
+<li>
+<p>当访问本机的9527的端口时，被加密后转发到sshsrv的ssh服务，再解密被转发到telnetsrv:23</p>
+</li>
+<li>
+<p>数据传输过程示意<br>
+<code>data &lt;---&gt; localhost:9527 &lt;---&gt; localhost:XXXXX &lt;---&gt; sshsrv:22 &lt;---&gt; sshsrv:YYYYY &lt;---&gt; telnetsrv:23</code></p>
+</li>
+<li>
+<p>远程转发<br>
+<code>ssh -R sshserverport:remotehost:remotehostport sshserver</code></p>
+</li>
+<li>
+<p>此处:sshserver表示出差人员的主机</p>
+</li>
+<li>
+<p>此处:remotehost表示企业内部的跳板机<br>
+<strong>注意：该命令一定是企业内部的主机执行</strong></p>
+</li>
+<li>
+<p>示例<br>
+ssh –R 9527:telnetsrv:23 –Nf  sshsrv</p>
+</li>
+<li>
+<p>让sshsrv侦听9527端口的访问，如有访问，就加密后通过ssh服务转发请求<br>
+到本机ssh客户端，再由本机解密后转发到telnetsrv:23<br>
+<code>Data &lt;---&gt; sshsrv:9527 &lt;---&gt; sshsrv:22 &lt;---&gt; localhost:XXXXX &lt;---&gt; localhost:YYYYY &lt;---&gt; telnetsrv:23</code></p>
+</li>
+<li>
+<p>动态端口转发：</p>
+</li>
+<li>
+<p>当用firefox访问internet时，本机的1080端口做为代理服务器，firefox的访问请求被转发到<br>
+sshserver上，由sshserver替之访问internet<br>
+<code>ssh -D 1080 root@sshserver -fNg</code></p>
+</li>
+<li>
+<p>在本机firefox设置代理socket proxy:127.0.0.1:1080</p>
+</li>
+<li>
+<p>curl  --socks5 127.0.0.1:1080  http://www.google.com</p>
+</li>
+<li>
+<p>X/windows 协议转发</p>
+<ul>
+<li>所有图形化应用程序都是X客户程序</li>
+<li>能够通过tcp/ip连接远程X服务器</li>
+<li>数据没有加密机，但是它通过ssh连接隧道安全进行</li>
+<li>ssh -X user@remotehost gedit</li>
+<li>remotehost主机上的gedit工具，将会显示在本机的X服务器上</li>
+<li>传输的数据将通过ssh连接加密</li>
+</ul>
+</li>
+</ul>
+<h2><a id="3ssh_842"></a>3.ssh服务器</h2>
+<ul>
+<li>服务器端sshd配置文件: /etc/ssh/sshd_config</li>
+<li>常用参数</li>
+</ul>
+<pre><code class="prism language-py">Port  
+ListenAddress ip 
+LoginGraceTime 2m 
+PermitRootLogin yes 
+StrictModes yes    检查<span class="token punctuation">.</span>ssh<span class="token operator">/</span>文件的所有者，权限等 
+MaxAuthTries   <span class="token number">6</span> 
+MaxSessions  <span class="token number">10</span>  同一个连接最大会话 
+PubkeyAuthentication yes 
+PermitEmptyPasswords no 
+PasswordAuthentication yes 
+GatewayPorts no 
+ClientAliveInterval    单位<span class="token punctuation">:</span>秒 
+ClientAliveCountMax   默认<span class="token number">3</span> 
+UseDNS yes
+GSSAPIAuthentication yes  提高速度可改为no 
+MaxStartups               未认证连接最大值，默认值<span class="token number">10</span> 
+Banner <span class="token operator">/</span>path<span class="token operator">/</span><span class="token builtin">file</span>
+
+限制可登录用户的办法： 
+    AllowUsers user1 user2 user3 
+    DenyUsers 
+    AllowGroups 
+    DenyGroups 
+</code></pre>
+<ul>
+<li>ssh服务的最佳实践</li>
+</ul>
+<pre><code class="prism language-py1">建议使用非默认端口 
+禁止使用protocol version 1 
+限制可登录用户 
+设定空闲会话超时时长 
+利用防火墙设置ssh访问策略 
+仅监听特定的IP地址 
+基于口令认证时，使用强密码策略 `tr -dc A-Za-z0-9_ &lt; /dev/urandom | head -c 12| xargs`
+使用基于密钥的认证 
+禁止使用空密码 
+禁止root用户直接登录 
+限制ssh的访问频度和并发在线数 
+经常分析日志 
+</code></pre>
+<h2><a id="4dropbear_890"></a>4.dropbear</h2>
+<ul>
+<li>ssh协议的另一个实现dropbear,其占用空间少，功能丰富</li>
+<li>源码编译安装</li>
+</ul>
+<pre><code class="prism language-py"><span class="token number">1</span>、安装相关包<span class="token punctuation">:</span>yum install gcc 
+<span class="token number">2</span>、下载dropbear<span class="token operator">-</span><span class="token number">2019.78</span><span class="token punctuation">.</span>tar<span class="token punctuation">.</span>bz2 
+<span class="token number">3</span>、tar xf dropbear<span class="token operator">-</span><span class="token number">2019.78</span><span class="token punctuation">.</span>tar<span class="token punctuation">.</span>bz2 
+<span class="token number">4</span>、less INSTALL README 
+<span class="token number">5</span>、<span class="token punctuation">.</span><span class="token operator">/</span>configure 
+<span class="token number">6</span>、make PROGRAMS<span class="token operator">=</span>"dropbear dbclient dropbearkey dropbearconvert
+scp"
+<span class="token number">7</span>、make PROGRAMS<span class="token operator">=</span><span class="token string">"dropbear dbclient dropbearkey dropbearconvert scp"</span> install 
+启动ssh服务： 
+    <span class="token number">8</span>、ls <span class="token operator">/</span>usr<span class="token operator">/</span>local<span class="token operator">/</span>sbin<span class="token operator">/</span>  <span class="token operator">/</span>usr<span class="token operator">/</span>local<span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span> 
+    <span class="token number">9</span>、<span class="token operator">/</span>usr<span class="token operator">/</span>local<span class="token operator">/</span>sbin<span class="token operator">/</span>dropbear  <span class="token operator">-</span>h 
+    <span class="token number">10</span>、mkdir <span class="token operator">/</span>etc<span class="token operator">/</span>dropbear 
+    <span class="token number">11</span>、dropbearkey <span class="token operator">-</span>t rsa <span class="token operator">-</span>f <span class="token operator">/</span>etc<span class="token operator">/</span>dropbear<span class="token operator">/</span>dropbear_rsa_host_key <span class="token operator">-</span>s <span class="token number">2048</span> 
+    <span class="token number">12</span>、dropbearkey <span class="token operator">-</span>t dss <span class="token operator">-</span>f <span class="token operator">/</span>etc<span class="token operator">/</span>dropbear<span class="token operator">/</span>dropbear_dsa_host_key  
+    <span class="token number">13</span>、dropbear <span class="token operator">-</span>p <span class="token punctuation">:</span><span class="token number">2222</span> <span class="token operator">-</span>F –E   <span class="token comment">#前台运行 </span>
+    dropbear <span class="token operator">-</span>p <span class="token punctuation">:</span><span class="token number">2222</span> <span class="token comment">#后台运行 </span>
+客户端访问： 
+    <span class="token number">14</span>、ssh <span class="token operator">-</span>p <span class="token number">2222</span> root@<span class="token number">127.0</span><span class="token number">.0</span><span class="token number">.1</span> 
+    <span class="token number">15</span>、dbclient <span class="token operator">-</span>p <span class="token number">2222</span> root@<span class="token number">127.0</span><span class="token number">.0</span><span class="token number">.1</span> 
+</code></pre>
+<h1><a id="aide_917"></a>十.aide</h1>
+<h2><a id="1_919"></a>1.简介</h2>
+<ul>
+<li>
+<p>当一个入侵者进入了你的系统并且种植了木马，通常会想办法来隐蔽这个木马（除了木马自身的<br>
+一些隐蔽特性外，他会尽量给你检查系统的过程设置障碍），通常入侵者会修改一些文件，比如管<br>
+理员通常用ps  aux来查看系统进程，那么入侵者很可能用自己经过修改的ps程序来替换掉你系统<br>
+上的ps程序，以使用ps命令查不到正在运行的木马程序。如果入侵者发现管理员正在运行crontab<br>
+作业，也有可能替换掉crontab程序等等。所以由此可以看出对于系统文件或是关键文件的检查是<br>
+很必要的。目前就系统完整性检查的工具用的比较多的有两款：Tripwire和AIDE，前者是一款商<br>
+业软件，后者是一款免费的但功能也很强大的工具。</p>
+</li>
+<li>
+<p>AIDE(Advanced Intrusion Detection Environment高级入侵检测环境)是一个入侵检测工<br>
+具，主要用途是检查文件的完整性，审计计算机上的那些文件被更改过了</p>
+</li>
+<li>
+<p>AIDE能够构造一个指定文件的数据库，它使用aide.conf作为其配置文件。AIDE数据库能够保<br>
+存文件的各种属性，包括：权限(permission)、索引节点序号(inode number)、所属用户<br>
+(user)、所属用户组(group)、文件大小、最后修改时间(mtime)、创建时间(ctime)、最后<br>
+访问时间(atime)、增加的大小以及连接数。AIDE还能够使用下列算法：sha1、md5、rmd160、<br>
+tiger，以密文形式建立每个文件的校验码或散列号</p>
+</li>
+<li>
+<p>该数据库不应该保存那些经常变动的文件信息，例如：日志文件、邮件、/proc文件系统、用户起始目录以及临时目录</p>
+</li>
+<li>
+<p>AIDE使用样本库和实际库实现监控报告<br>
+<img src="https://img-blog.csdnimg.cn/2019111019531542.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h2><a id="2_942"></a>2.安装配置</h2>
+<ul>
+<li>安装<br>
+<code>yum install aide</code></li>
+<li>修改配置文件</li>
+</ul>
+<pre><code class="prism language-py">vim <span class="token operator">/</span>etc<span class="token operator">/</span>aide<span class="token punctuation">.</span>conf <span class="token punctuation">(</span>指定对哪些文件进行检测<span class="token punctuation">)</span> 
+<span class="token operator">/</span>test<span class="token operator">/</span>chameleon R 
+<span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>ps R<span class="token operator">+</span>a 
+<span class="token operator">/</span>usr<span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>crontab R<span class="token operator">+</span>a 
+<span class="token operator">/</span>etc    PERMS 
+!<span class="token operator">/</span>etc<span class="token operator">/</span>mtab   <span class="token comment">#“!”表示忽略这个文件的检查 </span>
+R<span class="token operator">=</span>p<span class="token operator">+</span>i<span class="token operator">+</span>n<span class="token operator">+</span>u<span class="token operator">+</span>g<span class="token operator">+</span>s<span class="token operator">+</span>m<span class="token operator">+</span>c<span class="token operator">+</span>md5 权限<span class="token operator">+</span>索引节点<span class="token operator">+</span>链接数<span class="token operator">+</span>用户<span class="token operator">+</span>组<span class="token operator">+</span>大小<span class="token operator">+</span>最后一次修改时间<span class="token operator">+</span>创建时间<span class="token operator">+</span>md5校验值  
+NORMAL <span class="token operator">=</span> R<span class="token operator">+</span>rmd60<span class="token operator">+</span>sha256 
+</code></pre>
+<ul>
+<li>初始化默认的AIDE的库：<br>
+<code>/usr/local/bin/aide --init</code></li>
+<li>生成检查数据库（建议初始数据库存放到安全的地方）<br>
+<code>cd /var/lib/aide</code><br>
+<code>mv aide.db.new.gz aide.db.gz</code></li>
+<li>检测<br>
+<code>/usr/local/bin/aide --check</code></li>
+<li>更新数据库<br>
+<code>aide --update</code></li>
+</ul>
+<h1><a id="Sudo_969"></a>十一.Sudo</h1>
+<h2><a id="1_971"></a>1.简介</h2>
+<ul>
+<li>
+<p>sudo能够授权指定用户在指定主机上运行某些命令。如果未授权用户尝试使用sudo，会提示联<br>
+系管理员</p>
+</li>
+<li>
+<p>sudo工具来自sudo包</p>
+</li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#rpm -qf `which sudo`</span>
+sudo<span class="token operator">-</span><span class="token number">1.8</span><span class="token punctuation">.</span>19p2<span class="token operator">-</span><span class="token number">13.</span>el7<span class="token punctuation">.</span>x86_64
+</code></pre>
+<ul>
+<li>
+<p>sudo也可以提供日志，记录每个用户使用sudo操作</p>
+</li>
+<li>
+<p>sudo为系统管理员提供配置文件，允许系统管理员集中地管理用户的使用权限和使用的主机</p>
+</li>
+<li>
+<p>sudo使用时间戳文件来完成类似“检票”的系统，默认存活期为5分钟的“入场券”</p>
+</li>
+</ul>
+<h2><a id="2_988"></a>2.配置文件</h2>
+<ul>
+<li>通过visudo命令编辑配置文件，具有语法检查功能<br>
+<code>visudo -c</code>检查语法<br>
+<code>visudo -f /etc/sudoers.d/test</code><br>
+<code>export EDITOR=vim</code></li>
+</ul>
+<pre><code class="prism language-py">配置文件：<span class="token operator">/</span>etc<span class="token operator">/</span>sudoers<span class="token punctuation">,</span> <span class="token operator">/</span>etc<span class="token operator">/</span>sudoers<span class="token punctuation">.</span>d<span class="token operator">/</span>
+时间戳文件：<span class="token operator">/</span>var<span class="token operator">/</span>db<span class="token operator">/</span>sudo
+日志文件：<span class="token operator">/</span>var<span class="token operator">/</span>log<span class="token operator">/</span>secure
+</code></pre>
+<ul>
+<li>配置文件支持使用通配符glob</li>
+</ul>
+<pre><code class="prism language-py">?       任意单一字符
+<span class="token operator">*</span>       匹配任意长度字符
+<span class="token punctuation">[</span>wxc<span class="token punctuation">]</span>   匹配其中一个字符
+<span class="token punctuation">[</span>!wxc<span class="token punctuation">]</span>  除了这三个字符的其它字符
+\x 转义  
+<span class="token punctuation">[</span><span class="token punctuation">[</span>alpha<span class="token punctuation">]</span><span class="token punctuation">]</span> 字母  
+示例： <span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>ls <span class="token punctuation">[</span><span class="token punctuation">[</span>alpha<span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token operator">*</span>
+</code></pre>
+<ul>
+<li>配置文件规则有两类
+<ul>
+<li>1、别名定义：不是必须的</li>
+<li>2、授权规则：必须的</li>
+</ul>
+</li>
+</ul>
+<h2><a id="3sudoers_1017"></a>3.sudoers</h2>
+<ul>
+<li>授权规则格式：
+<ul>
+<li>用户 登入主机=(代表用户) 命令<br>
+<code>user host=(runas) command</code></li>
+</ul>
+</li>
+<li>示例<br>
+<code>root ALL=(ALL) ALL</code></li>
+<li>格式说明</li>
+</ul>
+<pre><code class="prism language-py">user<span class="token punctuation">:</span> 运行命令者的身份 
+host<span class="token punctuation">:</span> 通过哪些主机 
+<span class="token punctuation">(</span>runas<span class="token punctuation">)</span>：以哪个用户的身份 
+command<span class="token punctuation">:</span> 运行哪些命令 
+</code></pre>
+<h2><a id="4_1033"></a>4.别名</h2>
+<ul>
+<li>User和runas:</li>
+</ul>
+<pre><code class="prism language-py">username 
+<span class="token comment">#uid </span>
+<span class="token operator">%</span>group_name 
+<span class="token operator">%</span><span class="token comment">#gid </span>
+user_alias<span class="token operator">|</span>runas_alias 
+</code></pre>
+<ul>
+<li>host</li>
+</ul>
+<pre><code class="prism language-py">ip或hostname 
+network<span class="token punctuation">(</span><span class="token operator">/</span>netmask<span class="token punctuation">)</span> 
+host_alias 
+</code></pre>
+<ul>
+<li>command</li>
+</ul>
+<pre><code class="prism language-py">command name 
+directory 
+sudoedit 
+Cmnd_Alias 
+</code></pre>
+<h2><a id="5sudo_1062"></a>5.sudo别名和示例</h2>
+<ul>
+<li>别名有四种类型：User_Alias，Runas_Alias，Host_Alias，Cmnd_Alias</li>
+<li>别名格式：<code>[A-Z]([A-Z][0-9]_)*</code></li>
+<li>别名定义：<br>
+<code>Alias_Type NAME1 = item1,item2,item3 : NAME2 = item4, item5</code></li>
+<li>示例1<br>
+<code>Student ALL=(ALL) ALL</code><br>
+<code>%wheel ALL=(ALL) ALL</code></li>
+<li>示例2<br>
+<code>student ALL=(root) /sbin/pidof,/sbin/ifconfig</code><br>
+<code>%wheel ALL=(ALL) NOPASSWD: ALL</code></li>
+<li>示例3</li>
+</ul>
+<pre><code class="prism language-py">User_Alias  NETADMIN<span class="token operator">=</span> netuser1<span class="token punctuation">,</span>netuser2 
+Cmnd_Alias  NETCMD <span class="token operator">=</span> <span class="token operator">/</span>usr<span class="token operator">/</span>sbin<span class="token operator">/</span>ip 
+NETADMIN ALL<span class="token operator">=</span>（root） NETCMD 
+</code></pre>
+<ul>
+<li>示例4</li>
+</ul>
+<pre><code class="prism language-py">User_Alias SYSADER<span class="token operator">=</span>wang<span class="token punctuation">,</span>mage<span class="token punctuation">,</span><span class="token operator">%</span>admins  
+User_Alias DISKADER<span class="token operator">=</span>tom 
+Host_Alias SERS<span class="token operator">=</span>www<span class="token punctuation">.</span>magedu<span class="token punctuation">.</span>com<span class="token punctuation">,</span><span class="token number">172.16</span><span class="token number">.0</span><span class="token number">.0</span><span class="token operator">/</span><span class="token number">24</span> 
+Runas_Alias OP<span class="token operator">=</span>root  
+Cmnd_Alias SYDCMD<span class="token operator">=</span><span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>chown<span class="token punctuation">,</span><span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>chmod  
+Cmnd_Alias DSKCMD<span class="token operator">=</span><span class="token operator">/</span>sbin<span class="token operator">/</span>parted<span class="token punctuation">,</span><span class="token operator">/</span>sbin<span class="token operator">/</span>fdisk   
+SYSADER SERS<span class="token operator">=</span>   SYDCMD<span class="token punctuation">,</span>DSKCMD  
+DISKADER ALL<span class="token operator">=</span><span class="token punctuation">(</span>OP<span class="token punctuation">)</span>  DSKCMD  
+</code></pre>
+<ul>
+<li>示例5</li>
+</ul>
+<pre><code class="prism language-py">User_Alias ADMINUSER <span class="token operator">=</span> adminuser1<span class="token punctuation">,</span>adminuser2 
+Cmnd_Alias ADMINCMD <span class="token operator">=</span> <span class="token operator">/</span>usr<span class="token operator">/</span>sbin<span class="token operator">/</span>useradd，<span class="token operator">/</span>usr<span class="token operator">/</span>sbin<span class="token operator">/</span>usermod<span class="token punctuation">,</span> 
+<span class="token operator">/</span>usr<span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>passwd <span class="token punctuation">[</span>a<span class="token operator">-</span>zA<span class="token operator">-</span>Z<span class="token punctuation">]</span><span class="token operator">*</span><span class="token punctuation">,</span> !<span class="token operator">/</span>usr<span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>passwd root 
+ADMINUSER ALL<span class="token operator">=</span><span class="token punctuation">(</span>root<span class="token punctuation">)</span> NOPASSWD<span class="token punctuation">:</span>ADMINCMD，
+PASSWD<span class="token punctuation">:</span><span class="token operator">/</span>usr<span class="token operator">/</span>sbin<span class="token operator">/</span>userdel 
+</code></pre>
+<ul>
+<li>示例6<br>
+<code>Defaults:wang runas_default=tom</code><br>
+<code>wang ALL=(tom,jerry) ALL</code></li>
+<li>示例7<br>
+<code>wang 192.168.1.6,192.168.1.8=(root) /usr/sbin/,!/usr/sbin/useradd</code></li>
+<li>示例8<br>
+<code>wang ALL=(ALL) /bin/cat /var/log/messages*</code></li>
+</ul>
+<h2><a id="6sudo_1113"></a>6.sudo命令用法</h2>
+<ul>
+<li>ls -l /usr/bin/sudo</li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">[</span>root@centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#ll `which sudo`</span>
+<span class="token operator">-</span><span class="token operator">-</span><span class="token operator">-</span>s<span class="token operator">-</span><span class="token operator">-</span>x<span class="token operator">-</span><span class="token operator">-</span>x <span class="token number">1</span> root root <span class="token number">147320</span> Oct <span class="token number">24</span> <span class="token number">23</span><span class="token punctuation">:</span><span class="token number">27</span> <span class="token operator">/</span>usr<span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>sudo
+</code></pre>
+<ul>
+<li>sudo –i –u wang 切换身份</li>
+<li>用法<br>
+<code>sudo [-u user] COMMAND</code></li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">-</span>V 显示版本信息等配置信息
+<span class="token operator">-</span>u user  默认为root
+<span class="token operator">-</span>l<span class="token punctuation">,</span>ll 列出用户在主机上可用的和被禁止的命令
+<span class="token operator">-</span>v 再延长密码有效期限<span class="token number">5</span>分钟<span class="token punctuation">,</span>更新时间戳
+<span class="token operator">-</span>k 清除时间戳（<span class="token number">1970</span><span class="token operator">-</span><span class="token number">01</span><span class="token operator">-</span><span class="token number">01</span>），下次需要重新输密码 
+<span class="token operator">-</span>K 与<span class="token operator">-</span>k类似，还要删除时间戳文件
+<span class="token operator">-</span>b 在后台执行指令
+<span class="token operator">-</span>p 改变询问密码的提示符号
+</code></pre>
+<ul>
+<li>示例：-p “password on %h for user %p:”</li>
+</ul>
+<h1><a id="TCP_Wrappers_1139"></a>十二.TCP Wrappers</h1>
+<h2><a id="1_1141"></a>1.简介</h2>
+<ul>
+<li>作者：Wieste Venema，IBM，Google</li>
+<li>工作在第四层（传输层）的TCP协议</li>
+<li>对有状态连接的特定服务进行安全检测并实现访问控制</li>
+<li>以库文件形式实现</li>
+<li>某进程是否接受libwrap的控制取决于发起此进程的程序在编译时是否针对libwrap进行编译的</li>
+<li>判断服务程序是否能够由tcp_wrapper进行访问控制的方法：<br>
+<code>ldd /PATH/TO/PROGRAM|grep libwrap.so</code><br>
+<code>strings PATH/TO/PROGRAM|grep libwrap.so</code></li>
+</ul>
+<h2><a id="2_1152"></a>2.配置文件及格式</h2>
+<ul>
+<li>配置文件：/etc/hosts.allow, /etc/hosts.deny</li>
+<li>帮助参考：man 5 hosts_access，man 5 hosts_options</li>
+<li>检查顺序：hosts.allow，hosts.deny（默认允许）<br>
+<strong>注意：一旦前面规则匹配，直接生效，将不再继续</strong></li>
+<li>基本语法<br>
+<code>daemon_list@host: client_list [ :options :option… ]</code></li>
+<li>Daemon_list@host格式</li>
+</ul>
+<pre><code class="prism language-py">单个应用程序的二进制文件名，而非服务名，例如vsftpd 
+以逗号或空格分隔的应用程序文件名列表，如<span class="token punctuation">:</span>sshd<span class="token punctuation">,</span>vsftpd 
+ALL表示所有接受tcp_wrapper控制的服务程序 
+主机有多个IP，可用@hostIP来实现控制 
+</code></pre>
+<ul>
+<li>
+<p>如：in.telnetd@192.168.0.254</p>
+</li>
+<li>
+<p>客户端Client_list格式</p>
+</li>
+</ul>
+<pre><code class="prism language-py">以逗号或空格分隔的客户端列表 
+基于IP地址：<span class="token number">192.168</span><span class="token number">.10</span><span class="token number">.1</span>   <span class="token number">192.168</span><span class="token number">.1</span><span class="token punctuation">.</span> 
+基于主机名：www<span class="token punctuation">.</span>magedu<span class="token punctuation">.</span>com  <span class="token punctuation">.</span>magedu<span class="token punctuation">.</span>com 较少用 
+基于网络<span class="token operator">/</span>掩码：<span class="token number">192.168</span><span class="token number">.0</span><span class="token number">.0</span><span class="token operator">/</span><span class="token number">255.255</span><span class="token number">.255</span><span class="token number">.0</span> 
+基于net<span class="token operator">/</span>prefixlen<span class="token punctuation">:</span> <span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.0</span><span class="token operator">/</span><span class="token number">24</span>（CentOS7） 
+基于网络组（NIS 域）：@mynetwork 
+内置ACL：ALL，LOCAL，KNOWN，UNKNOWN，PARANOID 
+</code></pre>
+<ul>
+<li>EXCEPT用法：
+<ul>
+<li>示例<br>
+<code>vsftpd: 172.16. EXCEPT 172.16.100.0/24 EXCEPT 172.16.100.1</code></li>
+<li>示例：只允许192.168.1.0/24的主机访问sshd</li>
+</ul>
+</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">/</span>etc<span class="token operator">/</span>hosts<span class="token punctuation">.</span>allow
+    sshd<span class="token punctuation">:</span><span class="token number">192.168</span><span class="token number">.1</span><span class="token punctuation">.</span> 
+<span class="token operator">/</span>etc<span class="token operator">/</span>hosts<span class="token punctuation">.</span>deny 
+    sshd<span class="token punctuation">:</span>ALL  
+</code></pre>
+<ul>
+<li>示例：只允许192.168.1.0/24的主机访问telnet和vsftpd服务</li>
+</ul>
+<pre><code class="prism language-py">etc<span class="token operator">/</span>hosts<span class="token punctuation">.</span>allow
+    vsftpd<span class="token punctuation">,</span><span class="token keyword">in</span><span class="token punctuation">.</span>telnetd<span class="token punctuation">:</span> <span class="token number">192.168</span><span class="token number">.1</span><span class="token punctuation">.</span> 
+<span class="token operator">/</span>etc<span class="token operator">/</span>host<span class="token punctuation">.</span>deny 
+    vsftpd<span class="token punctuation">,</span><span class="token keyword">in</span><span class="token punctuation">.</span>telnetd<span class="token punctuation">:</span>  ALL  
+</code></pre>
+<ul>
+<li>
+<p>[:options]选项：</p>
+</li>
+<li>
+<p>帮助：man 5 hosts_options</p>
+</li>
+<li>
+<p>deny 主要用在/etc/hosts.allow定义“拒绝”规则</p>
+<ul>
+<li>如：vsftpd: 172.16. :deny</li>
+</ul>
+</li>
+<li>
+<p>allow 主要用在/etc/hosts.deny定义“允许”规则</p>
+<ul>
+<li>如：vsftpd:172.16. :allow</li>
+</ul>
+</li>
+<li>
+<p>spawn 启动一个外部程序完成执行的操作</p>
+</li>
+<li>
+<p>twist   实际动作是拒绝访问,使用指定操作替换当前服务,标准输出和ERROR发送到客户端,默认至/dev/null</p>
+</li>
+<li>
+<p>测试工具<br>
+<code>tcpdmatch [-d] daemon[@host] client</code><br>
+<code>-d 测试当前目录下的hosts.allow和hosts.deny</code></p>
+</li>
+<li>
+<p>示例</p>
+</li>
+</ul>
+<p><code>sshd: ALL :spawn echo "$(date +%%F) login attempt from %c to %s,%d" &gt;&gt;/var/log/sshd.log</code></p>
+<ul>
+<li>说明</li>
+</ul>
+<pre><code class="prism language-py">在<span class="token operator">/</span>etc<span class="token operator">/</span>hosts<span class="token punctuation">.</span>allow中添加，允许登录，并记录日志 
+在<span class="token operator">/</span>etc<span class="token operator">/</span>hosts<span class="token punctuation">.</span>deny中添加，拒绝登录，并记录日志 
+<span class="token operator">%</span>c 客户端信息 
+<span class="token operator">%</span>s 服务器端信息 
+<span class="token operator">%</span>d 服务名 
+<span class="token operator">%</span>p 守护进程的PID 
+<span class="token operator">%</span><span class="token operator">%</span> 表示<span class="token operator">%</span> 
+</code></pre>
+<ul>
+<li>例如：<code>vsftpd: 172.16. :twist /bin/echo "connection prohibited"</code></li>
+</ul>
+<h2><a id="3_1227"></a>3.练习</h2>
+<ul>
+<li>仅开放本机两个IP地址中的一个地址172.16.0.X上绑定的sshd和vsftpd服务给172.16.0.0/16<br>
+网络中除了172.16.0.0/24网络中的主机之外的所有主机，但允许172.16.0.200访问,每次的用<br>
+户访问都要记录于日志文件中，注：其中X为学号</li>
+</ul>
+<pre><code class="prism language-bash">vim /etc/hosts.allow
+sshd,vsftpd@172.16.0.x <span class="token keyword">:</span> 172.16.0.0/16 EXPECT 172.16.0.0/24 EXPECT 172.16.0.200 :spawn <span class="token keyword">echo</span>
+<span class="token string">"<span class="token variable"><span class="token variable">`</span><span class="token function">date</span><span class="token variable">`</span></span> login attempt from %c to %s,%d"</span> <span class="token operator">&gt;&gt;</span> /var/log/sshd.log
+</code></pre>
+<ul>
+<li>编写脚本/root/bin/checkip.sh，每5分钟检查一次，如果发现通过ssh登录失次数超过10次，自动<br>
+将此远程IP放入Tcp Wrapper的黑名单中予以禁止防问</li>
+</ul>
+<pre><code class="prism language-bash"><span class="token shebang important">#!/bin/bash</span> 
+<span class="token keyword">while</span> <span class="token boolean">true</span><span class="token punctuation">;</span><span class="token keyword">do</span> 
+    <span class="token function">cat</span> /var/log/secure<span class="token operator">|</span><span class="token function">awk</span> <span class="token string">'/Failed password/{ip[<span class="token variable"><span class="token variable">$(</span>NF-3<span class="token variable">)</span></span>]++}END{for(i in ip){if(ip[i]&gt;=10)
+{system("echo sshd:"i" &gt;&gt; /etc/hosts.deny" )}}}'</span> 
+    <span class="token function">sleep</span> 5m
+<span class="token keyword">done</span> 
+</code></pre>
+<h1><a id="PAM_1248"></a>十三.PAM模块</h1>
+<h2><a id="1PAM_1250"></a>1.PAM介绍</h2>
+<ul>
+<li>
+<p>PAM:Pluggable Authentication Modules</p>
+</li>
+<li>
+<p>认证库包括：文本文件，MySQL，NIS，LDAP等</p>
+</li>
+<li>
+<p>Sun公司于1995 年开发的一种与认证相关的通用框架机制</p>
+</li>
+<li>
+<p>PAM 是关注如何为服务验证用户的 API，通过提供一些动态链接库和一套统一的API，将系统<br>
+提供的服务和该服务的认证方式分开</p>
+</li>
+<li>
+<p>使得系统管理员可以灵活地根据需要给不同的服务配置不同的认证方式而无需更改服务程序</p>
+</li>
+<li>
+<p>一种认证框架，自身不做认证</p>
+</li>
+<li>
+<p>它提供了对所有服务进行认证的中央机制，适用于本地登录，远程登录，如：telnet,rlogin,<br>
+fsh,ftp,点对点协议PPP，su等应用程序中，系统管理员通过PAM配置文件来制定不同应用程序的<br>
+不同认证策略；应用程序开发者通过在服务程序中使用PAM API(pam_xxxx( ))来实现对认证方<br>
+法的调用；而PAM服务模块的开发者则利用PAM SPI来编写模块（主要调用函数pam_sm_xxxx( )<br>
+供PAM接口库调用，将不同的认证机制加入到系统中；PAM接口库（libpam）则读取配置<br>
+文件，将应用程序和相应的PAM服务模块联系起来。</p>
+</li>
+<li>
+<p>PAM框架<br>
+<img src="https://img-blog.csdnimg.cn/20191110200653829.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h2><a id="2PAM_1269"></a>2.PAM相关文件</h2>
+<ul>
+<li>模块文件目录：/lib64/security/*.so</li>
+<li>环境相关的设置：/etc/security/</li>
+<li>主配置文件：/etc/pam.conf，默认不存在</li>
+<li>为每种应用模块提供一个专用的配置文件：/etc/pam.d/APP_NAME</li>
+<li>注意：如/etc/pam.d存在，/etc/pam.conf将失效</li>
+</ul>
+<h2><a id="3pam_1277"></a>3.pam认证原理</h2>
+<ul>
+<li>
+<p>PAM认证一般遵循这样的顺序：Service(服务)→PAM(配置文件)→pam_*.so</p>
+</li>
+<li>
+<p>PAM认证首先要确定哪一项服务，然后加载相应的PAM的配置文件(位于/etc/pam.d下)<br>
+,最后调用认证文件(位于/lib64/security下)进行安全认证</p>
+</li>
+<li>
+<p>Linux-PAM认证模块<br>
+<img src="https://img-blog.csdnimg.cn/20191110200709645.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h2><a id="4PAM_1285"></a>4.PAM认证过程：</h2>
+<pre><code class="prism language-py"><span class="token number">1</span><span class="token punctuation">.</span>使用者执行<span class="token operator">/</span>usr<span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>passwd 程序，并输入密码 
+<span class="token number">2.</span>passwd开始调用PAM模块，PAM模块会搜寻passwd程序的PAM相关设置文件，这个设置文件一
+般是在<span class="token operator">/</span>etc<span class="token operator">/</span>pam<span class="token punctuation">.</span>d<span class="token operator">/</span>里边的与程序同名的文件，即PAM会搜寻<span class="token operator">/</span>etc<span class="token operator">/</span>pam<span class="token punctuation">.</span>d<span class="token operator">/</span>passwd此设置文件 
+<span class="token number">3</span><span class="token punctuation">.</span>经由<span class="token operator">/</span>etc<span class="token operator">/</span>pam<span class="token punctuation">.</span>d<span class="token operator">/</span>passwd设定文件的数据，取用PAM所提供的相关模块来进行验证 
+<span class="token number">4</span><span class="token punctuation">.</span>将验证结果回传给passwd这个程序，而passwd这个程序会根据PAM回传的结果决定下一个动作
+（重新输入密码或者通过验证） 
+</code></pre>
+<h2><a id="5_1295"></a>5.配置文件及格式</h2>
+<ul>
+<li>
+<p>通用配置文件/etc/pam.conf格式<br>
+<code>application type control module-path arguments</code></p>
+</li>
+<li>
+<p>专用配置文件/etc/pam.d/* 格式<br>
+<code>type control module-path arguments</code></p>
+</li>
+<li>
+<p>说明</p>
+<ul>
+<li>服务名（application）<br>
+<code>telnet、login、ftp等，服务名字“OTHER”代表所有没有在该文件中明确配置的其它服务模块类型（module-type）</code></li>
+<li>control  PAM库该如何处理与该服务相关的PAM模块的成功或失败情况</li>
+<li>module-path 用来指明本模块对应的程序文件的路径名</li>
+<li>Arguments  用来传递给该模块的参数</li>
+</ul>
+</li>
+<li>
+<p>模块类型（module-type）</p>
+</li>
+</ul>
+<pre><code class="prism language-py">Auth    账号的认证和授权 
+Account 与账号管理相关的非认证类的功能，如：用来限制<span class="token operator">/</span>允许用户对某个服务的访问时间，
+当前有效的系统资源<span class="token punctuation">(</span>最多可以有多少个用户<span class="token punctuation">)</span>，限制用户的位置<span class="token punctuation">(</span>例如：root用户只能从控制台登录<span class="token punctuation">)</span> 
+Password 用户修改密码时密码复杂度检查机制等功能 
+Session 用户获取到服务之前或使用服务完成之后需要进行一些附加的操作，如：记录打开<span class="token operator">/</span>关闭数据的信息，监视目录等 
+<span class="token operator">-</span><span class="token builtin">type</span> 表示因为缺失而不能加载的模块将不记录到系统日志<span class="token punctuation">,</span>对于那些不总是安装在系统上的模块有用 
+</code></pre>
+<ul>
+<li>Control
+<ul>
+<li>PAM库如何处理与该服务相关的PAM模块成功或失败情况</li>
+</ul>
+</li>
+<li>两种方式实现:简单和复杂</li>
+<li>简单方式实现：一个关健词实现</li>
+</ul>
+<pre><code class="prism language-py">required
+一票否决，表示本模块必须返回成功才能通过认证，但是如果该模块返回失败，失败结果也不会
+立即通知用户，而是要等到同一<span class="token builtin">type</span>中的所有模块全部执行完毕再将失败结果返回给应用程序，
+即为必要条件 
+requisite
+一票否决，该模块必须返回成功才能通过认证，但是一旦该模块返回失败，将不再执行同一<span class="token builtin">type</span>
+内的任何模块，而是直接将控制权返回给应用程序。是一个必要条件 
+sufficient
+一票通过，表明本模块返回成功则通过身份认证的要求，不必再 行同一<span class="token builtin">type</span>内的其它模块，但如
+果本模块返回失败可忽略，即为充分条件 
+optional 
+表明本模块是可选的，它的成功与否不会对身份认证起关键作用，其返回值一般被忽略 
+include： 调用其他的配置文件中定义的配置信息 
+</code></pre>
+<ul>
+<li>复杂详细实现：使用一个或多个“status=action”<br>
+<code>[status1=action1 status2=action …]</code>
+<ul>
+<li>Status:检查结果的返回状态</li>
+<li>Action:采取行为 ok，done，die，bad，ignore，reset</li>
+</ul>
+</li>
+</ul>
+<pre><code class="prism language-py">ok     模块通过，继续检查 
+done   模块通过，返回最后结果给应用 
+bad    结果失败，继续检查 
+die    结果失败，返回失败结果给应用 
+ignore 结果忽略，不影响最后结果 
+reset  忽略已经得到的结果 
+</code></pre>
+<ul>
+<li>module-path: 模块路径
+<ul>
+<li>相对路径</li>
+</ul>
+</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">/</span>lib64<span class="token operator">/</span>security目录下的模块可使用相对路径 
+如：pam_shells<span class="token punctuation">.</span>so、pam_limits<span class="token punctuation">.</span>so 
+</code></pre>
+<ul>
+<li>绝对路径</li>
+<li>模块通过读取配置文件完成用户对系统资源的使用控制<br>
+<code>/etc/security/*.conf</code></li>
+<li>注意：修改PAM配置文件将马上生效</li>
+<li>建议：编辑pam规则时，保持至少打开一个root会话，以防止root身份验证错误</li>
+<li>Arguments  用来传递给该模块的参数</li>
+</ul>
+<h2><a id="6pam_1363"></a>6.pam文档说明</h2>
+<pre><code class="prism language-py"><span class="token operator">/</span>user<span class="token operator">/</span>share<span class="token operator">/</span>doc<span class="token operator">/</span>pam<span class="token operator">-</span><span class="token operator">*</span> 
+rpm <span class="token operator">-</span>qd pam 
+man –k pam_ 
+man 模块名 如man rootok 
+<span class="token operator">&lt;</span>The Linux<span class="token operator">-</span>PAM System  Administrators' Guide<span class="token operator">&gt;</span>
+</code></pre>
+<h2><a id="7PAM_1372"></a>7.PAM模块示例</h2>
+<h3><a id="1_1373"></a>例子1</h3>
+<pre><code class="prism language-py">模块：pam_shells  
+功能：检查有效shell 
+man pam_shells 
+示例：不允许使用<span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>csh的用户本地登录 
+vim <span class="token operator">/</span>etc<span class="token operator">/</span>pam<span class="token punctuation">.</span>d<span class="token operator">/</span>login 
+    auth required pam_shells<span class="token punctuation">.</span>so  
+vim <span class="token operator">/</span>etc<span class="token operator">/</span>shells 
+   去掉 <span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>csh 
+useradd –s <span class="token operator">/</span><span class="token builtin">bin</span><span class="token operator">/</span>csh testuser 
+testuser将不可登录 
+tail <span class="token operator">/</span>var<span class="token operator">/</span>log<span class="token operator">/</span>secure 
+</code></pre>
+<h3><a id="2_1388"></a>例子2</h3>
+<pre><code class="prism language-py">模块：pam_securetty<span class="token punctuation">.</span>so 
+功能：只允许root用户在<span class="token operator">/</span>etc<span class="token operator">/</span>securetty列出的安全终端上登陆 
+示例：允许root在telnet登陆 
+vi <span class="token operator">/</span>etc<span class="token operator">/</span>pam<span class="token punctuation">.</span>d<span class="token operator">/</span>remote 
+<span class="token comment">#auth required pam_securetty.so #将这一行加上注释 </span>
+或者<span class="token operator">/</span>etc<span class="token operator">/</span>securetty文件中加入 
+pts<span class="token operator">/</span><span class="token number">0</span><span class="token punctuation">,</span>pts<span class="token operator">/</span><span class="token number">1</span>…pts<span class="token operator">/</span>n 
+</code></pre>
+<h3><a id="3_1399"></a>例子3</h3>
+<pre><code class="prism language-py">模块：pam_nologin<span class="token punctuation">.</span>so 
+功能： 
+如果<span class="token operator">/</span>etc<span class="token operator">/</span>nologin文件存在<span class="token punctuation">,</span>将导致非root用户不能登陆 
+如果用户shell是<span class="token operator">/</span>sbin<span class="token operator">/</span>nologin 时，当该用户登陆时，会显示<span class="token operator">/</span>etc<span class="token operator">/</span>nologin
+文件内容，并拒绝登陆 
+</code></pre>
+<h3><a id="3_1408"></a>例子3</h3>
+<pre><code class="prism language-py">模块：pam_limits<span class="token punctuation">.</span>so 
+功能：在用户级别实现对其可使用的资源的限制，例如：可打开的文件数量，
+可运行的进程数量，可用内存空间 
+修改限制的实现方式： 
+    <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> ulimit命令，立即生效，但无法保存 
+        <span class="token operator">-</span>n   每个进程最多的打开的文件描述符个数 
+        <span class="token operator">-</span>u   最大用户进程数 
+        <span class="token operator">-</span>S   使用 soft（软）资源限制 
+        <span class="token operator">-</span>H   使用 hard（硬）资源限制 
+    <span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span> 配置文件：<span class="token operator">/</span>etc<span class="token operator">/</span>security<span class="token operator">/</span>limits<span class="token punctuation">.</span>conf<span class="token punctuation">,</span> <span class="token operator">/</span>etc<span class="token operator">/</span>security<span class="token operator">/</span>limits<span class="token punctuation">.</span>d<span class="token operator">/</span><span class="token operator">*</span><span class="token punctuation">.</span>conf 
+配置文件：每行一个定义； 
+    <span class="token operator">&lt;</span>domain<span class="token operator">&gt;</span>        <span class="token operator">&lt;</span><span class="token builtin">type</span><span class="token operator">&gt;</span>  <span class="token operator">&lt;</span>item<span class="token operator">&gt;</span>  <span class="token operator">&lt;</span>value<span class="token operator">&gt;</span> 
+</code></pre>
+<pre><code class="prism language-py">ulimit <span class="token punctuation">[</span><span class="token operator">-</span>HSTabcdefilmnpqrstuvx <span class="token punctuation">[</span>limit<span class="token punctuation">]</span><span class="token punctuation">]</span>
+              Provides control over the resources available to the shell <span class="token operator">and</span> to processes started by it<span class="token punctuation">,</span>
+              on  systems  that allow such control<span class="token punctuation">.</span>  The <span class="token operator">-</span>H <span class="token operator">and</span> <span class="token operator">-</span>S options specify that the hard <span class="token operator">or</span> soft
+              limit <span class="token keyword">is</span> <span class="token builtin">set</span> <span class="token keyword">for</span> the given resource<span class="token punctuation">.</span>  A hard limit cannot be increased by a non<span class="token operator">-</span>root  user
+              once  it <span class="token keyword">is</span> <span class="token builtin">set</span><span class="token punctuation">;</span> a soft limit may be increased up to the value of the hard limit<span class="token punctuation">.</span>  If nei‐
+              ther <span class="token operator">-</span>H nor <span class="token operator">-</span>S <span class="token keyword">is</span> specified<span class="token punctuation">,</span> both the soft <span class="token operator">and</span> hard limits are <span class="token builtin">set</span><span class="token punctuation">.</span>  The  value  of  limit
+              can  be a number <span class="token keyword">in</span> the unit specified <span class="token keyword">for</span> the resource <span class="token operator">or</span> one of the special values hard<span class="token punctuation">,</span>
+              soft<span class="token punctuation">,</span> <span class="token operator">or</span> unlimited<span class="token punctuation">,</span> which stand <span class="token keyword">for</span> the current hard limit<span class="token punctuation">,</span> the current soft limit<span class="token punctuation">,</span> <span class="token operator">and</span> no
+              limit<span class="token punctuation">,</span>  respectively<span class="token punctuation">.</span>   If  limit  <span class="token keyword">is</span>  omitted<span class="token punctuation">,</span> the current value of the soft limit of the
+              resource <span class="token keyword">is</span> printed<span class="token punctuation">,</span> unless the <span class="token operator">-</span>H option <span class="token keyword">is</span> given<span class="token punctuation">.</span>  When more than one resource <span class="token keyword">is</span> speci‐
+              fied<span class="token punctuation">,</span> the limit name <span class="token operator">and</span> unit are printed before the value<span class="token punctuation">.</span>  Other options are interpreted
+              <span class="token keyword">as</span> follows<span class="token punctuation">:</span>
+              <span class="token operator">-</span>a     All current limits are reported
+              <span class="token operator">-</span>b     The maximum socket <span class="token builtin">buffer</span> size
+              <span class="token operator">-</span>c     The maximum size of core files created
+              <span class="token operator">-</span>d     The maximum size of a process's data segment
+              <span class="token operator">-</span>e     The maximum scheduling priority <span class="token punctuation">(</span><span class="token string">"nice"</span><span class="token punctuation">)</span>
+              <span class="token operator">-</span>f     The maximum size of files written by the shell <span class="token operator">and</span> its children
+              <span class="token operator">-</span>i     The maximum number of pending signals
+              <span class="token operator">-</span>l     The maximum size that may be locked into memory
+              <span class="token operator">-</span>m     The maximum resident <span class="token builtin">set</span> size <span class="token punctuation">(</span>many systems do <span class="token operator">not</span> honor this limit<span class="token punctuation">)</span>
+              <span class="token operator">-</span>n     The maximum number of <span class="token builtin">open</span> <span class="token builtin">file</span> descriptors <span class="token punctuation">(</span>most systems do <span class="token operator">not</span> allow  this  value
+                     to be <span class="token builtin">set</span><span class="token punctuation">)</span>
+              <span class="token operator">-</span>p     The pipe size <span class="token keyword">in</span> <span class="token number">512</span><span class="token operator">-</span>byte blocks <span class="token punctuation">(</span>this may <span class="token operator">not</span> be <span class="token builtin">set</span><span class="token punctuation">)</span>
+              <span class="token operator">-</span>q     The maximum number of <span class="token builtin">bytes</span> <span class="token keyword">in</span> POSIX message queues
+              <span class="token operator">-</span>r     The maximum real<span class="token operator">-</span>time scheduling priority
+              <span class="token operator">-</span>s     The maximum stack size
+              <span class="token operator">-</span>t     The maximum amount of cpu time <span class="token keyword">in</span> seconds
+              <span class="token operator">-</span>u     The maximum number of processes available to a single user
+              <span class="token operator">-</span>v     The  maximum  amount of virtual memory available to the shell <span class="token operator">and</span><span class="token punctuation">,</span> on some systems<span class="token punctuation">,</span>
+                     to its children
+              <span class="token operator">-</span>x     The maximum number of <span class="token builtin">file</span> locks
+              <span class="token operator">-</span>T     The maximum number of threads
+
+              If limit <span class="token keyword">is</span> given<span class="token punctuation">,</span> it <span class="token keyword">is</span> the new value of the specified resource <span class="token punctuation">(</span>the <span class="token operator">-</span>a option <span class="token keyword">is</span> display
+              only<span class="token punctuation">)</span><span class="token punctuation">.</span>   If  no  option <span class="token keyword">is</span> given<span class="token punctuation">,</span> then <span class="token operator">-</span>f <span class="token keyword">is</span> assumed<span class="token punctuation">.</span>  Values are <span class="token keyword">in</span> <span class="token number">1024</span><span class="token operator">-</span>byte increments<span class="token punctuation">,</span>
+              <span class="token keyword">except</span> <span class="token keyword">for</span> <span class="token operator">-</span>t<span class="token punctuation">,</span> which <span class="token keyword">is</span> <span class="token keyword">in</span> seconds<span class="token punctuation">,</span> <span class="token operator">-</span>p<span class="token punctuation">,</span> which <span class="token keyword">is</span> <span class="token keyword">in</span> units of <span class="token number">512</span><span class="token operator">-</span>byte blocks<span class="token punctuation">,</span> <span class="token operator">and</span> <span class="token operator">-</span>T<span class="token punctuation">,</span>  <span class="token operator">-</span>b<span class="token punctuation">,</span>
+              <span class="token operator">-</span>n<span class="token punctuation">,</span> <span class="token operator">and</span> <span class="token operator">-</span>u<span class="token punctuation">,</span> which are unscaled values<span class="token punctuation">.</span>  The <span class="token keyword">return</span> status <span class="token keyword">is</span> <span class="token number">0</span> unless an invalid option <span class="token operator">or</span>
+              argument <span class="token keyword">is</span> supplied<span class="token punctuation">,</span> <span class="token operator">or</span> an error occurs  <span class="token keyword">while</span>  setting  a  new  limit<span class="token punctuation">.</span>   In  POSIX  Mode
+              <span class="token number">512</span><span class="token operator">-</span>byte blocks are used <span class="token keyword">for</span> the `<span class="token operator">-</span>c<span class="token string">' and `-f'</span> options<span class="token punctuation">.</span>
+</code></pre>
+<ul>
+<li>
+<p>翻译如下<br>
+<img src="https://img-blog.csdnimg.cn/20191110200733306.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+<li>
+<p>pam_limits.so</p>
+</li>
+<li>
+<p> 应用于哪些对象</p>
+</li>
+</ul>
+<pre><code class="prism language-py">Username 单个用户 
+@group 组内所有用户 
+<span class="token operator">*</span>  所有用户 
+</code></pre>
+<ul>
+<li> 限制的类型</li>
+</ul>
+<pre><code class="prism language-py">Soft 软限制<span class="token punctuation">,</span>普通用户自己可以修改 
+Hard 硬限制<span class="token punctuation">,</span>由root用户设定，且通过kernel强制生效 
+<span class="token operator">-</span>  二者同时限定 
+</code></pre>
+<ul>
+<li> 限制的资源</li>
+</ul>
+<pre><code class="prism language-py">nofile 所能够同时打开的最大文件数量<span class="token punctuation">,</span>默认为<span class="token number">1024</span> 
+nproc 所能够同时运行的进程的最大数量<span class="token punctuation">,</span>默认为<span class="token number">1024</span> 
+</code></pre>
+<ul>
+<li> 指定具体值</li>
+<li>限制用户最多打开的文件数和运行进程数<br>
+<code>/etc/pam.d/system-auth</code><br>
+session     required      pam_limits.so<br>
+<code>vim /etc/security/limits.conf</code><br>
+<code>apache – nofile 10240</code> 用户apache可打开10240个文件<br>
+<code>student hard nproc 20</code> 用户student不能运行超过20个进程</li>
+</ul>
+<h3><a id="etcsecuritylimitsconf_1498"></a>/etc/security/limits.conf生产案例</h3>
+<pre><code class="prism language-py"><span class="token operator">*</span>                soft    core             unlimited 
+<span class="token operator">*</span>                hard    core             unlimited 
+<span class="token operator">*</span>                soft    nproc            <span class="token number">1000000</span> 
+<span class="token operator">*</span>                hard    nproc            <span class="token number">1000000</span> 
+<span class="token operator">*</span>                soft    nofile           <span class="token number">1000000</span> 
+<span class="token operator">*</span>                hard    nofile           <span class="token number">1000000</span> 
+<span class="token operator">*</span>                soft    memlock          <span class="token number">32000</span> 
+<span class="token operator">*</span>                hard    memlock          <span class="token number">32000</span> 
+<span class="token operator">*</span>                soft    msgqueue         <span class="token number">8192000</span> 
+<span class="token operator">*</span>                hard    msgqueue         <span class="token number">8192000</span> 
+</code></pre>
+</div>
+</body>
+
+</html>

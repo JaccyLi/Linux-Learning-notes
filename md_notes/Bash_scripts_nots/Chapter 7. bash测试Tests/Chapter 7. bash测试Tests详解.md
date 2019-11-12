@@ -4,18 +4,20 @@
 
 # 概述
 
-- 任何相对完整的计算机语言都能够测试某个条件，然后根据测试的结果采取不同的动作。对于测试条件，Bash使用test命令、各种方括号和圆括号、if/then结构等来测试条件。
+- 任何相对完整的计算机语言都能够测试某个条件，然后根据测试的结果采取不同的动作。对于测试条件，
+Bash使用test命令、各种方括号和圆括号、if/then结构等来测试条件。
 
 ## 7.1. Test Constructs
 
-- 一个if/then语句结构测试一个或多个命令的退出状态是否为0(因为在unix系统中0表示'执行成功')，如果为0，就执行语句后面的命令。
+- 一个if/then语句结构测试一个或多个命令的退出状态是否为0(因为在unix系统中0表示'执行成功')，
+如果为0，就执行语句后面的命令。
 
-- Bash中有个专用的命令叫[(左中括号，bash特殊字符之一)。它是内置命令test别名，同时也是不是bash的内置命令，这样做可以提升bash的效率。
-&emsp;&emsp;该命令视其接受的参数为比较表达式或文件测试(测试文件是否存在、文件类型、文件权限等)并且返回一个对应于比较结果的退出状态
-&emsp;&emsp;(如果比较或测试结果为真则返回0，否则返回1)。
+- Bash中有个专用的命令叫[(左中括号，bash特殊字符之一)。它是内置命令test别名，为提升效率
+其同时也是bash的内置命令。该命令视其接受的参数为比较表达式或文件测试(测试文件是否存在、
+文件类型、文件权限等)并且返回一个对应于比较结果的退出状态(如果比较或测试结果为真则返回0，否则返回1)。
 
-- 在bash2.02版本中，bash新增了\[[ ... ]]叫扩展的test测试命令，其进行比较时更贴合其他编程语言的风格。需要注意的是\[[是一个bash关键字而非命令。
-&emsp;&emsp;bash视\[[ $a -lt \$b ]]为单个元素，返回一个退出状态。
+- 在bash2.02版本中，bash新增了\[[ ... ]]叫扩展的test测试命令，其进行比较时更贴合其他编程语言
+的风格。需要注意的是\[[是一个bash关键字而非命令。bash视\[[ $a -lt \$b ]]为单个元素，返回一个退出状态。
 
 ```bash
 [root@centos8 ~]#type [[
@@ -40,7 +42,8 @@ test is a shell builtin
 1
 ```
 
-- '(( ... ))' 和 'let ...' 结构用来进行简单的数学运算，也会返回一个退出状态，退出状态决定于其里面的算术表达式展开后的结果是否是非0值。这些算术运算展开结构可能会被用来进行算术比较。
+- '(( ... ))' 和 'let ...' 结构用来进行简单的数学运算，也会返回一个退出状态，退出状态决定于其里面的
+算术表达式展开后的结果是否是非0值。这些算术运算展开结构可能会被用来进行算术比较。
 
 ```bash
 (( 0 && 1 ))                 # 逻辑与
@@ -68,6 +71,8 @@ echo $?                      # 0     ***
 # "let" 结构和双圆括号的返回状态相同。
 ```
 
+- **"let" 结构和双圆括号的返回状态相同。**
+
 - 注意：某个算术表达式的退出状态不是该算术表达式计算错误的值。
 
 ```bash
@@ -93,6 +98,7 @@ word=Linux
 letter_sequence=inu
 if echo "$word" | grep -q "$letter_sequence"
 # The "-q" option to grep suppresses output.
+# -q 选项不输出任何信息到标准输出
 then
   echo "$letter_sequence found in $word"
 else
@@ -141,7 +147,7 @@ then
   echo "NULL is true."
 else
   echo "NULL is false."
-fi            # NULL 空位假。
+fi            # NULL 空为假。
 echo
 echo "Testing \"xyz\""
 if [ xyz ]    # 随机字符串
@@ -297,7 +303,7 @@ echo
 exit 0
 ```
 
-- 相比'[ ]'，'[\[ ]]'测试结构更加健壮。则是扩展的test命令，从ksh88版本中借鉴而来。
+- 相比'[ ]'，'[\[ ]]'测试结构更加健壮。后者是扩展的test命令，从ksh88版本中借鉴而来。
 - 在'[\[ ]]' 结构中不允许文件名展开或者单词分割，但是允许参数展开和命令替换。
 
 ```bash
@@ -436,7 +442,7 @@ fi
 ```bash
 function show_input_type()
 {
-   [ -p /dev/fd/0 ] && echo PIPE || echo STDIN    # 此处/dev/fd/0表示标准输出
+   [ -p /dev/fd/0 ] && echo PIPE || echo STDIN    # 此处/dev/fd/0表示标准输入
 }
 show_input_type "Input"                           # STDIN 标准输入
 echo "Input" | show_input_type                    # PIPE  管道
@@ -518,7 +524,7 @@ linkchk () {
 for directory in $directorys; do
     if [ -d $directory ]
         then linkchk $directory
-        else 
+        else
             echo "$directory is not a directory"
             echo "Usage: $0 dir1 dir2 ..."
     fi
@@ -577,30 +583,28 @@ if [ "$a" == "$b" ]
 ```
 
 ```bash
-[[ $a == z* ]]   # 如果 $a 以字母"z"开头则为真(pattern matching).
-[[ $a == "z*" ]] # True if $a is equal to z* (literal matching).
-[ $a == z* ]     # File globbing and word splitting take place.
-[ "$a" == "z*" ] # True if $a is equal to z* (literal matching).
+[[ $a == z* ]]   # 如果 $a 以字母"z"开头则为真(模式匹配).
+[[ $a == "z*" ]] # 将"z*"视为普通字符串.
+[ $a == z* ]     # 此处会视为通配和单词分割.
+[ "$a" == "z*" ] # 将"z*"视为普通字符串.
 # Thanks, Stéphane Chazelas
 ```
 
 ```bash
-!= is not equal to
+!= 是否不等
 if [ "$a" != "$b" ]
-This operator uses pattern matching within a [[ ... ]] construct.
-< is less than, in ASCII alphabetical order
+该操作符也可以在[[ ... ]]结构中参与模式匹配操作.
+< 是否小于,以ASCII字符的顺序比较
 if [[ "$a" < "$b" ]]
 if [ "$a" \< "$b" ]
-Note that the "<" needs to be escaped within a [ ] construct.
-> is greater than, in ASCII alphabetical order
+注意： "<" 在 [ ] 结构中需要被转义.
+> 是否大于,以ASCII字符的顺序比较
 if [[ "$a" > "$b" ]]
 if [ "$a" \> "$b" ]
 ```
 
-- Note that the ">" needs to be escaped within a [ ] construct.
-See Example 27-11 for an application of this comparison operator.
 
--z string is null, that is, has zero length
+-z 判断某字符串是否为空,也就是长度为0
 
 ```bash
 String=''   # Zero-length ("null") string variable.
@@ -612,14 +616,11 @@ else
 fi     # $String is null.
 ```
 
--n string is not null.
+-n 判断某字符串是否非空.
 
-- The -n test requires that the string be quoted within the test brackets. Using an
-unquoted string with ! -z, or even just the unquoted string alone within test brackets
-(see Example 7-6) normally works, however, this is an unsafe practice. Always quote a
-tested string. [
+- 注意：-n 测试选项需要被测试的字符串被双引号引用起来，一般总是将被测试的字符串引用起来。
 
-> Example 7-5. Arithmetic and string comparisons
+> 例 7-5. 算术运算和比较
 
 ```bash
 #!/bin/bash
@@ -632,25 +633,25 @@ b=5
 #+ whose value consists of all-integer characters.
 #  Caution advised, however.
 echo
-if [ "$a" -ne "$b" ]
+if [ "$a" -ne "$b" ]  # 数学运算比较
 then
   echo "$a is not equal to $b"
   echo "(arithmetic comparison)"
 fi
 echo
-if [ "$a" != "$b" ]
+if [ "$a" != "$b" ]   # 字符串比较
 then
   echo "$a is not equal to $b."
   echo "(string comparison)"
   #     "4"  != "5"
   # ASCII 52 != ASCII 53
 fi
-# In this particular instance, both "-ne" and "!=" work.
+# 在该例子中 "-ne" 和 "!=" 都可以.
 echo
 exit 0
 ```
 
-> Example 7-6. Testing whether a string is null
+> 例 7-6. 测试某字符串是否为空
 
 ```bash
 #!/bin/bash
@@ -658,55 +659,56 @@ exit 0
 #+ but not strings and sealing wax, not to mention cabbages and kings . . .
 # Using   if [ ... ]
 # If a string has not been initialized, it has no defined value.
-# This state is called "null" (not the same as zero!).
-if [ -n $string1 ]    # string1 has not been declared or initialized.
+# 如果一个字符串没有被定义，其没有被定义的值，这种状态叫'null'
+if [ -n $string1 ]    # string1 没有被初始化或定义过.
 then
   echo "String \"string1\" is not null."
 else  
   echo "String \"string1\" is null."
-fi                    # Wrong result.
-# Shows $string1 as not null, although it was not initialized.
+fi
+# 此处认为$string1非空,即使它没有被初始化.
 echo
-# Let's try it again.
-if [ -n "$string1" ]  # This time, $string1 is quoted.
+# 再试试?
+if [ -n "$string1" ]  # 这次 $string1 被双引号引用起来.
 then
   echo "String \"string1\" is not null."
 else  
   echo "String \"string1\" is null."
-fi                    # Quote strings within test brackets!
+fi                    # 为空!
 echo
-if [ $string1 ]       # This time, $string1 stands naked.
+if [ $string1 ]       # 此处变量string未引起
 then
   echo "String \"string1\" is not null."
 else  
   echo "String \"string1\" is null."
-fi                    # This works fine.
-# The [ ... ] test operator alone detects whether the string is null.
-# However it is good practice to quote it (if [ "$string1" ]).
+fi                    # 为空，正确.
+# 最好还是引用起来需要测试的字符串，不管是变量还是字符串本身.
 #
 # As Stephane Chazelas points out,
 #    if [ $string1 ]    has one argument, "]"
-#    if [ "$string1" ]  has two arguments, the empty "$string1" and "]" 
+                        #该测试结果只有一个参数"]"
+#    if [ "$string1" ]  has two arguments, the empty "$string1" and "]"
+                        #该测试结果有两个参数空字符串"$string1"和"]"
 echo
 string1=initialized
-if [ $string1 ]       # Again, $string1 stands unquoted.
+if [ $string1 ]       # 赋值后, $string1 .
 then
   echo "String \"string1\" is not null."
 else  
   echo "String \"string1\" is null."
-fi                    # Again, gives correct result.
-# Still, it is better to quote it ("$string1"), because . . .
+fi                    # 非空.
+# 然而，最好还是引起来，因为...
 string1="a = b"
-if [ $string1 ]       # Again, $string1 stands unquoted.
+if [ $string1 ]
 then
   echo "String \"string1\" is not null."
 else  
   echo "String \"string1\" is null."
-fi                    # Not quoting "$string1" now gives wrong result!
+fi                    # 此处不引用导致错误!
 exit 0   # Thank you, also, Florian Wisser, for the "heads-up".
 ```
 
-> Example 7-7. zmore
+> 例 7-7. zmore
 
 ```bash
 #!/bin/bash
@@ -724,7 +726,7 @@ then
   # Returns 85 as exit status of script (error code).
 fi  
 filename=$1
-if [ ! -f "$filename" ]   # Quoting $filename allows for possible spaces.
+if [ ! -f "$filename" ]   # 使用引号可以避免带空格的文件名出错.
 then
   echo "File $filename not found!" >&2   # Error message to stderr.
   exit $E_NOTFOUND
@@ -742,6 +744,7 @@ exit $?   # Script returns exit status of pipe.
 #  Actually "exit $?" is unnecessary, as the script will, in any case,
 #+ return the exit status of the last command executed.
 ```
+
 - compound comparison
 
 -a
