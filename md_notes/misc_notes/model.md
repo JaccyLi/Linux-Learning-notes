@@ -3,6 +3,7 @@
 
 <center><font face="黑体" size=4 color=grey> </center>
 
+<font face="黑体" color="grey" size="6"> 略 cowardly!</font>
 
 快捷键
 ---------------------------

@@ -1,4 +1,4 @@
-<center><font face="黑体" color="grey" size="6">运维自动化与Cobbler服务部署</font></center>
+﻿@[TOC](<center><font face="黑体" color="grey" size="6">运维自动化与Cobbler服务部署</font></center>)
 
 <font face="黑体" color="grey" size="3">
 
@@ -35,12 +35,12 @@ TFTP,DHCP),也可以将这几个服务分别部署到不同服务器。事实上
 型后,客服端会到HTTP服务器下载相应的系统安装文件并执行自动安装。
 
 - PXE网络安装示意
-![png/](png/PXE_install_diagram.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20191116103633200.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 
 ## 1.3.工作流程
 
 - Cobbler大致工作流程如下
-![](png/Cobbler.png)
+在这里插入图片描述
 
 # 二.Cobbler安装
 
@@ -232,9 +232,12 @@ dr-xr-xr-x 2 root root 4.0K Jun 29  2018 repodata
 ```
 
 ### 4.2.4 将linux发行版系统镜像与其对应的ks文件建立关联
-
+- 图中红框表示安装源所在的服务器的文件夹位置
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2019111610380965.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 `cobbler profile --name=centos6 --distro=centos6-x86_64 --kickstart=/var/lib/cobbler/kickstarts/ks6.cfg` 
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20191116103854101.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 `cobbler profile --name=centos7 --distro=centos7-x86_64 --kickstart=/var/lib/cobbler/kickstarts/ks7.cfg` 
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20191116103901374.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 `cobbler profile --name=centos8 --distro=centos8-x86_64 --kickstart=/var/lib/cobbler/kickstarts/ks8.cfg` 
 
 - 注意，在导入distro时，cobbler会自动生成distro条目，这些并未和ks文件关联，可以使用
@@ -381,10 +384,10 @@ files:
 
 - 上面信息中有一行如下：
 `Kickstart Metadata             : {'tree': 'http://@@http_server@@/cblr/links/centos8-x86_64'}`
-- 该行的定义在文件[root@old_centos7 ~]#vim /var/www/cobbler/ks_mirror/config/
-centos8-x86_64.repo中,是cobbler自己定义安装源路径的特有语法规定的，因此可以在ks文件中指定安装
-源时直接指定为$tree变量。(url --url=$tree)
-![](png/2019-11-16-10-46-21.png)
+- 该行的定义在文件`[root@old_centos7 ~]#vim /var/www/cobbler/ks_mirror/config/
+centos8-x86_64.repo`中,是cobbler自己定义安装源路径的特有语法规定的，因此可以在ks文件中指定安装
+源时直接指定为`$tree`变量。(`url --url=$tree`)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20191116104705578.png)
 ```py
 [root@old_centos7 ~]#vim /var/www/cobbler/ks_mirror/config/centos8-x86_64.repo
 [core-0]
@@ -488,14 +491,14 @@ MENU end
 # 七.Trouble Shooting
 
 - 遇到下面这种情况？
-![](png/url_not_right.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20191116103518960.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
   - 这种情况是ks文件中的安装源路径出错,改为如下：
 centos6:`url --url=http://httpserver/ksdir/ks.cfg`或者`url --url=$tree`
 centos7:`url --url=http://httpserver/ksdir/ks.cfg`或者`url --url=$tree`
 centos8:`url --url=http://httpserver/ksdir/ks.cfg`或者`url --url=$tree`
 
 - 遇到下面这种情况？
-![](png/cobbler_not_up.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20191116103533678.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
   - 这种情况是因为在安装配置cobbler时httpd服务一直在运行中，没有正确的为cobbler提供服务，
 因此重启httpd服务就ok了`systemctl restart httpd`
 
@@ -519,5 +522,6 @@ passwd:cobbler
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20191114213422882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L05hbmppbmdfYm9rZWJp,size_16,color_FFFFFF,t_70)
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20191114213614553.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L05hbmppbmdfYm9rZWJp,size_16,color_FFFFFF,t_70)
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20191114213632906.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L05hbmppbmdfYm9rZWJp,size_16,color_FFFFFF,t_70) 
-
+现在就可以点点鼠标管理le！！！
 ## :arrow_left:exit
+

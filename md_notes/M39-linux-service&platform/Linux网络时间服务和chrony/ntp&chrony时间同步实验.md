@@ -82,4 +82,6 @@ allow 192.168.0.0/16
 local stratum 10
 ```
 
+- **注意：在ccentos6中，若chronyd服务已开启，则不能手动使用ntpdate同步时间。**
+
 ## :arrow_left:exit

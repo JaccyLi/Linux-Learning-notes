@@ -1,0 +1,519 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>运维自动化系统部署安装与Cobbler</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3><center><font face="黑体" color="grey" size="6">运维自动化与Cobbler服务部署</font></center></h3><ul><li><a href="#Cobbler_4">一.Cobbler简介</a></li><ul><li><a href="#11_6">1.1.简介</a></li><li><a href="#12Cobbler_25">1.2.Cobbler的下属服务</a></li><li><a href="#13_39">1.3.工作流程</a></li></ul><li><a href="#Cobbler_44">二.Cobbler安装</a></li><ul><li><a href="#21epel_46">2.1.安装epel源</a></li><li><a href="#22Cobbler_51">2.2.安装Cobbler及其相关的服务和组件</a></li></ul><li><a href="#Cobbler_65">三.Cobbler配置</a></li><ul><li><a href="#31Cobbler_67">3.1.Cobbler配置文件及各目录情况</a></li><li><a href="#32cobblerd_108">3.2.配置及启动cobblerd服务</a></li></ul><li><a href="#Cobbler_142">四.Cobbler使用</a></li><ul><li><a href="#41_144">4.1用法</a></li><li><a href="#42linuxks_191">4.2配置linux发行版和关联相应的ks文件</a></li><ul><li><a href="#421ks_193">4.2.1拷贝事先准备好的ks文件</a></li><li><a href="#422linuxcobblerhttpd_197">4.2.2将linux发行版导入到cobbler在httpd服务的文件夹下</a></li><li><a href="#423__204">4.2.3 导入后重启并同步</a></li><li><a href="#424_linuxks_233">4.2.4 将linux发行版系统镜像与其对应的ks文件建立关联</a></li><li><a href="#425__245">4.2.5 建立关联后重启并同步</a></li><li><a href="#426__250">4.2.6 查看详细信息</a></li></ul></ul><li><a href="#_400">五.测试安装</a></li><ul><li><a href="#51__402">5.1 新建一台虚拟机</a></li><li><a href="#52_PXE_407">5.2 使用PXE网络引导启动</a></li><li><a href="#53__409">5.3 选择相应版本安装</a></li></ul><li><a href="#_411">六.优化</a></li><ul><li><a href="#61__413">6.1 菜单优化</a></li><li><a href="#62_httpdcobblerwebwebcobbler_476">6.2 使用httpd服务和cobbler-web基于web界面来管理配置cobbler</a></li><ul><li><a href="#621_cobblerweb_478">6.2.1 安装cobbler-web</a></li><li><a href="#622_http_482">6.2.2 重启http服务</a></li><li><a href="#623_web_486">6.2.3 访问web界面</a></li></ul></ul><li><a href="#Trouble_Shooting_490">七.Trouble Shooting</a></li><ul><li><a href="#arrow_leftexit_525">:arrow_left:exit</a></li></ul></ul></div><p></p>
+<font face="黑体" color="grey" size="3">
+</font><h1><a id="Cobbler_4"></a>一.Cobbler简介</h1>
+<h2><a id="11_6"></a>1.1.简介</h2>
+<ul>
+<li>
+<p>Cobbler是一款Linux生态的自动化运维工具，基于Python2开发，用于自动化批量部署安装操作系<br>
+统；其提供基于CLI的管理方式和WEB配置界面，其中WEB配置界面是基于Python2和Django框架开<br>
+发。另外，cobbler还提供了API，方便二次开发。当然，Cobbler属于C/S模型(客户端/服务器模型)</p>
+</li>
+<li>
+<p>Cobbler主要用于快速网络安装linux操作系统，支持众多的Linux发行版如：Red Hat、<br>
+Fedora、CentOS、Debian、Ubuntu和SuSE等。</p>
+</li>
+<li>
+<p>在cobbler之前，微软曾开发过另一项类似的基于C/S工作模式的技术PXE(Prebot eXecute<br>
+Environment，预启动执行环境)，其支持通过网络启动操作系统，亦可以让需要安装系统的带支持<br>
+PEX技术网卡的裸机通过网络从http服务器下载映像来安装，在启动过程中，客户端需要从dhcp服务器<br>
+得到IP地址、掩码、网关以及相关的配置文件路径，再用TFTP（trivial file transfer<br>
+protocol）协议从服务器下载一个引导启动的软件包(类似linux光盘的isolinux文件夹下的文件)并加载<br>
+到本机内存中执行，经过启动软件包中配置文件指定的ks应答文件指明服务器中的操作系统位置，进而<br>
+找到安装源，并在ks文件的指导下完成操作系统的安装。</p>
+</li>
+<li>
+<p>Cobbler实质是PXE的二次封装，将多种安装参数封装到一起，并提供统一的管理方法。</p>
+</li>
+</ul>
+<h2><a id="12Cobbler_25"></a>1.2.Cobbler的下属服务</h2>
+<ul>
+<li>
+<p>使用Cobbler安装系统需要一台专门提供各种服务的服务器，提供的服务包括(HTTP/FTP/NFS,<br>
+TFTP,DHCP),也可以将这几个服务分别部署到不同服务器。事实上在实际应用中，总是将不同的服务分别<br>
+部署到专门的服务器。</p>
+</li>
+<li>
+<p>Cobbler是在HTTP、TFTP、DHCP等各种服务的基础上进行相关操作的，实际安装的大体过程类似于基<br>
+于PXE的网络安装:客户端(裸机)开机使用网卡引导启动，其请求DHCP分配一个地址后从TFTP服务器获取<br>
+启动文件,加载到客户端本地内存中运行，并显示出可安装的系统列表；在人为的选定安装的操作系统类<br>
+型后,客服端会到HTTP服务器下载相应的系统安装文件并执行自动安装。</p>
+</li>
+<li>
+<p>PXE网络安装示意<br>
+<img src="https://img-blog.csdnimg.cn/20191116103633200.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+<h2><a id="13_39"></a>1.3.工作流程</h2>
+<ul>
+<li>Cobbler大致工作流程如下<br>
+<img src="https://img-blog.csdnimg.cn/201911161053516.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+</ul>
+<h1><a id="Cobbler_44"></a>二.Cobbler安装</h1>
+<h2><a id="21epel_46"></a>2.1.安装epel源</h2>
+<ul>
+<li>Cobbler来源于epel源，在安装cobbler之前需要配置epel源，或者直接使用命令安装epel源：<br>
+<code>[root@mainserver ~]#wget -O /etc/yum.repos.d/ http://mirrors.aliyun.com/repo/epel-7.repo</code></li>
+</ul>
+<h2><a id="22Cobbler_51"></a>2.2.安装Cobbler及其相关的服务和组件</h2>
+<ul>
+<li>Cobbler下属的服务包括HTTPD,TFTP,DHCP等，如果有web界面要求，还需要安装相关的组件</li>
+</ul>
+<p><code>[root@mainserver ~]#yum install -y httpd dhcp tftp-server cobbler cobbler-web pykickstart xinetd</code></p>
+<pre><code class="prism language-py">httpd<span class="token punctuation">:</span>配合cobbler<span class="token operator">-</span>web使得cobbler可以通过web网页界面进行配置管理
+tftp<span class="token operator">-</span>server<span class="token punctuation">.</span>x86_64 <span class="token punctuation">:</span> The server <span class="token keyword">for</span> the Trivial File Transfer Protocol <span class="token punctuation">(</span>TFTP<span class="token punctuation">)</span>
+cobbler<span class="token operator">-</span>web<span class="token punctuation">.</span>noarch <span class="token punctuation">:</span> Web interface <span class="token keyword">for</span> Cobbler
+pykickstart<span class="token punctuation">.</span>noarch <span class="token punctuation">:</span> 基于python的管理kickstart文件的库
+xinetd<span class="token punctuation">.</span>x86_64 <span class="token punctuation">:</span> A secure replacement <span class="token keyword">for</span> inetd
+</code></pre>
+<h1><a id="Cobbler_65"></a>三.Cobbler配置</h1>
+<h2><a id="31Cobbler_67"></a>3.1.Cobbler配置文件及各目录情况</h2>
+<ul>
+<li>配置文件</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>settings <span class="token punctuation">:</span> cobbler 主配置文件 
+<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>iso<span class="token operator">/</span><span class="token punctuation">:</span> iso模板配置文件
+<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>pxe<span class="token punctuation">:</span> pxe模板文件
+<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>power<span class="token punctuation">:</span> 电源配置文件 
+<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>user<span class="token punctuation">.</span>conf<span class="token punctuation">:</span> web服务授权配置文件 
+<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>users<span class="token punctuation">.</span>digest<span class="token punctuation">:</span> web访问的用户名密码配置文件 
+<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>dhcp<span class="token punctuation">.</span>template <span class="token punctuation">:</span> dhcp服务器的的配置模板
+<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>dnsmasq<span class="token punctuation">.</span>template <span class="token punctuation">:</span> dns服务器的配置模板
+<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>tftpd<span class="token punctuation">.</span>template <span class="token punctuation">:</span> tftp服务的配置模板
+<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>modules<span class="token punctuation">.</span>conf <span class="token punctuation">:</span> cobbler模块的配置文件
+</code></pre>
+<ul>
+<li>数据目录</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">/</span>var<span class="token operator">/</span>lib<span class="token operator">/</span>cobbler<span class="token operator">/</span>config<span class="token operator">/</span><span class="token punctuation">:</span> 用于存放distros，system，profiles 等信息的配置文件
+<span class="token operator">/</span>var<span class="token operator">/</span>lib<span class="token operator">/</span>cobbler<span class="token operator">/</span>triggers<span class="token operator">/</span><span class="token punctuation">:</span> 用于存放用户定义的cobbler命令
+<span class="token operator">/</span>var<span class="token operator">/</span>lib<span class="token operator">/</span>cobbler<span class="token operator">/</span>kickstarts<span class="token operator">/</span><span class="token punctuation">:</span> 默认存放kickstart文件
+<span class="token operator">/</span>var<span class="token operator">/</span>lib<span class="token operator">/</span>cobbler<span class="token operator">/</span>loaders<span class="token operator">/</span><span class="token punctuation">:</span> 存放各种引导程序
+</code></pre>
+<ul>
+<li>镜像目录</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token operator">/</span><span class="token punctuation">:</span> 导入的发行版系统的所有数据
+<span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>images<span class="token operator">/</span> <span class="token punctuation">:</span> 导入发行版kernel和initrd镜像用于远程网络启动
+<span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>repo_mirror<span class="token operator">/</span><span class="token punctuation">:</span> yum 仓库存储目录
+</code></pre>
+<ul>
+<li>日志目录</li>
+</ul>
+<pre><code class="prism language-py"><span class="token operator">/</span>var<span class="token operator">/</span>log<span class="token operator">/</span>cobbler<span class="token operator">/</span>installing<span class="token punctuation">:</span> 客户端安装日志 
+<span class="token operator">/</span>var<span class="token operator">/</span>log<span class="token operator">/</span>cobbler<span class="token operator">/</span>cobbler<span class="token punctuation">.</span>log <span class="token punctuation">:</span> cobbler日志
+</code></pre>
+<h2><a id="32cobblerd_108"></a>3.2.配置及启动cobblerd服务</h2>
+<ul>
+<li>当httpd，tftp及dhcp服务都正常运行后，就可以启动cobblerd服务进行相关的配置了。</li>
+<li>启动cobblerd<br>
+<code>systemctl start cobbler</code></li>
+<li>检测cobbler的运行环境,并根据提示逐步配置cobbler<br>
+<code>cobbler check</code></li>
+</ul>
+<pre><code class="prism language-py"><span class="token number">1</span><span class="token punctuation">.</span>更改<span class="token operator">/</span>etc<span class="token operator">/</span>xinetd<span class="token punctuation">.</span>d<span class="token operator">/</span>tftp配置文件
+vim <span class="token operator">/</span>etc<span class="token operator">/</span>xinetd<span class="token punctuation">.</span>d<span class="token operator">/</span>tftp
+disable  <span class="token operator">=</span>  yes  <span class="token operator">-</span><span class="token operator">-</span><span class="token operator">&gt;</span>  disable  <span class="token operator">=</span>  no
+systemctl restart xinetd
+<span class="token number">2</span><span class="token punctuation">.</span>联网下载boot引导程序文件
+cobbler get<span class="token operator">-</span>loaders
+<span class="token number">3</span><span class="token punctuation">.</span>没有网络情况下拷贝启动文件到TFTP服务文件夹
+cp <span class="token operator">-</span>a <span class="token operator">/</span>usr<span class="token operator">/</span>share<span class="token operator">/</span>syslinux<span class="token operator">/</span><span class="token punctuation">{</span>pxelinux<span class="token punctuation">.</span><span class="token number">0</span><span class="token punctuation">,</span>menu<span class="token punctuation">.</span>c32<span class="token punctuation">}</span>  <span class="token operator">/</span>var<span class="token operator">/</span>lib<span class="token operator">/</span>tftpboot
+<span class="token number">4</span><span class="token punctuation">.</span>更改<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>settings配置文件的server项为提供cobblerd服务的主机地址<span class="token punctuation">,</span>也就是本机地址
+sed <span class="token operator">-</span>nri <span class="token string">'s#server:172.0.0.1#server:192.168.31.17#'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>settings
+更改后的整行内容<span class="token punctuation">:</span>server<span class="token punctuation">:</span><span class="token number">192.168</span><span class="token number">.131</span><span class="token number">.17</span>
+<span class="token number">5</span><span class="token punctuation">.</span>更改<span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>settings配置文件的next_server项，指明tftp服务器地址，使得客户端能够找
+到TFTP服务器
+sed <span class="token operator">-</span>i <span class="token string">'s/next_server: 127.0.0.1/next_server: 192.168.56.11/'</span> <span class="token operator">/</span>etc<span class="token operator">/</span>cobbler<span class="token operator">/</span>settings
+更改后的整行内容<span class="token punctuation">:</span>next_server<span class="token punctuation">:</span><span class="token number">192.168</span><span class="token number">.131</span><span class="token number">.17</span>
+<span class="token number">6</span><span class="token punctuation">.</span>配置相应的选项来使用cobbler管理dhcp服务和tftp服务
+manage_dhcp：<span class="token number">1</span>
+manage_tftpd：<span class="token number">1</span>
+<span class="token number">7.</span>pxe_just_once选项，该选项置<span class="token number">1</span>表示在pxe安装块结束时在cobbler系统中做相应的记录，这样会避免如果客户机的BIOS选项中PXE启动处于第一位导致的循环重启；如果第一个启动硬件不是PXE启动那就置<span class="token number">0</span>。
+pxe_just_once：<span class="token number">1</span>  
+</code></pre>
+<ul>
+<li>配置完成后重启<br>
+<code>systemctl restart cobblerd</code></li>
+</ul>
+<h1><a id="Cobbler_142"></a>四.Cobbler使用</h1>
+<h2><a id="41_144"></a>4.1用法</h2>
+<ul>
+<li>'&lt;&gt;‘中的是必须跟的选项，后面’[]'中的是可选项</li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#cobbler</span>
+usage
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+cobbler <span class="token operator">&lt;</span>distro<span class="token operator">|</span>profile<span class="token operator">|</span>system<span class="token operator">|</span>repo<span class="token operator">|</span>image<span class="token operator">|</span>mgmtclass<span class="token operator">|</span>package<span class="token operator">|</span><span class="token builtin">file</span><span class="token operator">&gt;</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+        <span class="token punctuation">[</span>add<span class="token operator">|</span>edit<span class="token operator">|</span>copy<span class="token operator">|</span>getks<span class="token operator">*</span><span class="token operator">|</span><span class="token builtin">list</span><span class="token operator">|</span>remove<span class="token operator">|</span>rename<span class="token operator">|</span>report<span class="token punctuation">]</span> <span class="token punctuation">[</span>options<span class="token operator">|</span><span class="token operator">-</span><span class="token operator">-</span><span class="token builtin">help</span><span class="token punctuation">]</span>
+
+cobbler <span class="token operator">&lt;</span>aclsetup<span class="token operator">|</span>buildiso<span class="token operator">|</span><span class="token keyword">import</span><span class="token operator">|</span><span class="token builtin">list</span><span class="token operator">|</span>replicate<span class="token operator">|</span>report<span class="token operator">|</span>reposync<span class="token operator">|</span>sync<span class="token operator">|</span>validateks<span class="token operator">|</span>version<span class="token operator">|</span>signature<span class="token operator">|</span>get<span class="token operator">-</span>loaders<span class="token operator">|</span>hardlink<span class="token operator">&gt;</span> <span class="token punctuation">[</span>options<span class="token operator">|</span><span class="token operator">-</span><span class="token operator">-</span><span class="token builtin">help</span><span class="token punctuation">]</span>
+</code></pre>
+<ul>
+<li>可以使用下面的方式得到使用帮助<br>
+<code>[root@old_centos7 ~]cobbler</code><br>
+<code>[root@old_centos7 ~]cobbler --help</code></li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#cobbler distro --help</span>
+usage
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+cobbler distro add
+cobbler distro copy
+cobbler distro edit
+cobbler distro find
+cobbler distro <span class="token builtin">list</span>
+cobbler distro remove
+cobbler distro rename
+cobbler distro report
+<span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#cobbler distro add --help</span>
+Usage<span class="token punctuation">:</span> cobbler <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options<span class="token punctuation">:</span>
+  <span class="token operator">-</span>h<span class="token punctuation">,</span> <span class="token operator">-</span><span class="token operator">-</span><span class="token builtin">help</span>            show this <span class="token builtin">help</span> message <span class="token operator">and</span> exit
+  <span class="token operator">-</span><span class="token operator">-</span>name<span class="token operator">=</span>NAME           Name <span class="token punctuation">(</span>Ex<span class="token punctuation">:</span> Fedora<span class="token operator">-</span><span class="token number">11</span><span class="token operator">-</span>i386<span class="token punctuation">)</span>
+  <span class="token operator">-</span><span class="token operator">-</span>ctime<span class="token operator">=</span>CTIME
+  <span class="token operator">-</span><span class="token operator">-</span>mtime<span class="token operator">=</span>MTIME
+  <span class="token operator">-</span><span class="token operator">-</span>uid<span class="token operator">=</span>UID       Owners <span class="token punctuation">(</span>Owners <span class="token builtin">list</span> <span class="token keyword">for</span> authz_ownership <span class="token punctuation">(</span>space delimited<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+</code></pre>
+<ul>
+<li>例如<br>
+<code>cobbler distro list</code> 列出当前导入的linux发行版条目<br>
+<code>cobbler distro report</code> 报告当前所有的linux发行版详细信息<br>
+<code>cobbler profile --name=centos7 --distro=centos7-x86_64 --kickstart=/var/lib/cobbler/kickstarts/ks7.cfg</code> 将linux发行版系统镜像与其对应的ks文件建立关联</li>
+</ul>
+<h2><a id="42linuxks_191"></a>4.2配置linux发行版和关联相应的ks文件</h2>
+<h3><a id="421ks_193"></a>4.2.1拷贝事先准备好的ks文件</h3>
+<p><code>[root@old_centos7 ~]#cp /var/www/html/ksdir/ks{6,7,8}.ks /var/lib/cobbler/kickstarts</code></p>
+<h3><a id="422linuxcobblerhttpd_197"></a>4.2.2将linux发行版导入到cobbler在httpd服务的文件夹下</h3>
+<ul>
+<li>cobbler在httpd的服务文件夹位于<code>/var/www/cobbler/ks_mirror</code><br>
+<code>cobbler import --name=centos6 --path=/var/www/html/centos/6/isos/x86_64/ --arch=x86_64</code><br>
+<code>cobbler import --name=centos7 --path=/var/www/html/centos/7/isos/x86_64/ --arch=x86_64</code><br>
+<code>cobbler import --name=centos8 --path=/var/www/html/centos/8/isos/x86_64/ --arch=x86_64</code></li>
+</ul>
+<h3><a id="423__204"></a>4.2.3 导入后重启并同步</h3>
+<p><code>systemctl restart cobblerd</code><br>
+<code>cobbler sync</code></p>
+<pre><code class="prism language-py"><span class="token punctuation">[</span>root@old_centos7 <span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token punctuation">]</span><span class="token comment">#ls</span>
+centos6<span class="token operator">-</span>x86_64  centos<span class="token operator">-</span><span class="token number">7.5</span><span class="token operator">-</span>x86_64  centos7<span class="token operator">-</span>x86_64  centos8<span class="token operator">-</span>x86_64  config
+<span class="token comment"># centos-7.5-x86_64 为cobbler默认创建的，里面无镜像</span>
+<span class="token punctuation">[</span>root@old_centos7 <span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token punctuation">]</span><span class="token comment">#ls -lh centos-7.5-x86_64/</span>
+total <span class="token number">0</span>
+<span class="token punctuation">[</span>root@old_centos7 <span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token punctuation">]</span><span class="token comment">#ls -lh centos6-x86_64/</span>
+total 276K
+<span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span> <span class="token number">1</span> root root   <span class="token number">14</span> Jun <span class="token number">29</span>  <span class="token number">2018</span> CentOS_BuildTag
+dr<span class="token operator">-</span>xr<span class="token operator">-</span>xr<span class="token operator">-</span>x <span class="token number">3</span> root root   <span class="token number">35</span> Jun <span class="token number">29</span>  <span class="token number">2018</span> EFI
+<span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span> <span class="token number">1</span> root root  <span class="token number">212</span> Nov <span class="token number">27</span>  <span class="token number">2013</span> EULA
+<span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span> <span class="token number">1</span> root root  18K Nov <span class="token number">27</span>  <span class="token number">2013</span> GPL
+dr<span class="token operator">-</span>xr<span class="token operator">-</span>xr<span class="token operator">-</span>x <span class="token number">3</span> root root   <span class="token number">95</span> Jun <span class="token number">29</span>  <span class="token number">2018</span> images
+dr<span class="token operator">-</span>xr<span class="token operator">-</span>xr<span class="token operator">-</span>x <span class="token number">2</span> root root  <span class="token number">198</span> Jun <span class="token number">29</span>  <span class="token number">2018</span> isolinux
+dr<span class="token operator">-</span>xr<span class="token operator">-</span>xr<span class="token operator">-</span>x <span class="token number">2</span> root root 176K Jun <span class="token number">29</span>  <span class="token number">2018</span> Packages
+<span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span> <span class="token number">1</span> root root <span class="token number">1.</span>4K Jun <span class="token number">29</span>  <span class="token number">2018</span> RELEASE<span class="token operator">-</span>NOTES<span class="token operator">-</span>en<span class="token operator">-</span>US<span class="token punctuation">.</span>html
+dr<span class="token operator">-</span>xr<span class="token operator">-</span>xr<span class="token operator">-</span>x <span class="token number">2</span> root root <span class="token number">4.</span>0K Jun <span class="token number">29</span>  <span class="token number">2018</span> repodata
+<span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span> <span class="token number">1</span> root root <span class="token number">1.</span>7K Nov <span class="token number">27</span>  <span class="token number">2013</span> RPM<span class="token operator">-</span>GPG<span class="token operator">-</span>KEY<span class="token operator">-</span>CentOS<span class="token operator">-</span><span class="token number">6</span>
+<span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span> <span class="token number">1</span> root root <span class="token number">1.</span>7K Nov <span class="token number">27</span>  <span class="token number">2013</span> RPM<span class="token operator">-</span>GPG<span class="token operator">-</span>KEY<span class="token operator">-</span>CentOS<span class="token operator">-</span>Debug<span class="token operator">-</span><span class="token number">6</span>
+<span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span> <span class="token number">1</span> root root <span class="token number">1.</span>7K Nov <span class="token number">27</span>  <span class="token number">2013</span> RPM<span class="token operator">-</span>GPG<span class="token operator">-</span>KEY<span class="token operator">-</span>CentOS<span class="token operator">-</span>Security<span class="token operator">-</span><span class="token number">6</span>
+<span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span> <span class="token number">1</span> root root <span class="token number">1.</span>7K Nov <span class="token number">27</span>  <span class="token number">2013</span> RPM<span class="token operator">-</span>GPG<span class="token operator">-</span>KEY<span class="token operator">-</span>CentOS<span class="token operator">-</span>Testing<span class="token operator">-</span><span class="token number">6</span>
+<span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span>r<span class="token operator">-</span><span class="token operator">-</span> <span class="token number">1</span> root root <span class="token number">3.</span>4K Jun <span class="token number">29</span>  <span class="token number">2018</span> TRANS<span class="token punctuation">.</span>TBL
+</code></pre>
+<h3><a id="424_linuxks_233"></a>4.2.4 将linux发行版系统镜像与其对应的ks文件建立关联</h3>
+<ul>
+<li>
+<p>图中红框表示安装源所在的服务器的文件夹位置<br>
+<img src="https://img-blog.csdnimg.cn/2019111610380965.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>
+<code>cobbler profile --name=centos6 --distro=centos6-x86_64 --kickstart=/var/lib/cobbler/kickstarts/ks6.cfg</code><br>
+<img src="https://img-blog.csdnimg.cn/20191116103854101.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>
+<code>cobbler profile --name=centos7 --distro=centos7-x86_64 --kickstart=/var/lib/cobbler/kickstarts/ks7.cfg</code><br>
+<img src="https://img-blog.csdnimg.cn/20191116103901374.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>
+<code>cobbler profile --name=centos8 --distro=centos8-x86_64 --kickstart=/var/lib/cobbler/kickstarts/ks8.cfg</code></p>
+</li>
+<li>
+<p>注意，在导入distro时，cobbler会自动生成distro条目，这些并未和ks文件关联，可以使用<br>
+<code>cobbler profile remove --name=PROFILE_NAME</code>删除后，再关联ks文件。</p>
+</li>
+</ul>
+<h3><a id="425__245"></a>4.2.5 建立关联后重启并同步</h3>
+<p><code>systemctl restart cobblerd</code><br>
+<code>cobbler sync</code></p>
+<h3><a id="426__250"></a>4.2.6 查看详细信息</h3>
+<p><code>cobbler report</code></p>
+<pre><code class="prism language-py"><span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#cobbler report</span>
+distros<span class="token punctuation">:</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+Name                           <span class="token punctuation">:</span> centos7<span class="token operator">-</span>x86_64
+Architecture                   <span class="token punctuation">:</span> x86_64
+TFTP Boot Files                <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Breed                          <span class="token punctuation">:</span> redhat
+Comment                        <span class="token punctuation">:</span> 
+Fetchable Files                <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Initrd                         <span class="token punctuation">:</span> <span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token operator">/</span>centos7<span class="token operator">-</span>x86_64<span class="token operator">/</span>images<span class="token operator">/</span>pxeboot<span class="token operator">/</span>initrd<span class="token punctuation">.</span>img
+Kernel                         <span class="token punctuation">:</span> <span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token operator">/</span>centos7<span class="token operator">-</span>x86_64<span class="token operator">/</span>images<span class="token operator">/</span>pxeboot<span class="token operator">/</span>vmlinuz
+Kernel Options                 <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Kernel Options <span class="token punctuation">(</span>Post Install<span class="token punctuation">)</span>  <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Kickstart Metadata             <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">'tree'</span><span class="token punctuation">:</span> <span class="token string">'http://@@http_server@@/cblr/links/centos7-x86_64'</span><span class="token punctuation">}</span>
+Management Classes             <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+OS Version                     <span class="token punctuation">:</span> rhel7
+Owners                         <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'admin'</span><span class="token punctuation">]</span>
+Red Hat Management Key         <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Red Hat Management Server      <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Template Files                 <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+Name                           <span class="token punctuation">:</span> centos8<span class="token operator">-</span>x86_64
+Architecture                   <span class="token punctuation">:</span> x86_64
+TFTP Boot Files                <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Breed                          <span class="token punctuation">:</span> redhat
+Comment                        <span class="token punctuation">:</span> 
+Fetchable Files                <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Initrd                         <span class="token punctuation">:</span> <span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token operator">/</span>centos8<span class="token operator">-</span>x86_64<span class="token operator">/</span>images<span class="token operator">/</span>pxeboot<span class="token operator">/</span>initrd<span class="token punctuation">.</span>img
+Kernel                         <span class="token punctuation">:</span> <span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token operator">/</span>centos8<span class="token operator">-</span>x86_64<span class="token operator">/</span>images<span class="token operator">/</span>pxeboot<span class="token operator">/</span>vmlinuz
+Kernel Options                 <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Kernel Options <span class="token punctuation">(</span>Post Install<span class="token punctuation">)</span>  <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Kickstart Metadata             <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">'tree'</span><span class="token punctuation">:</span> <span class="token string">'http://@@http_server@@/cblr/links/centos8-x86_64'</span><span class="token punctuation">}</span>
+Management Classes             <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+OS Version                     <span class="token punctuation">:</span> rhel8
+Owners                         <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'admin'</span><span class="token punctuation">]</span>
+Red Hat Management Key         <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Red Hat Management Server      <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Template Files                 <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+Name                           <span class="token punctuation">:</span> centos6<span class="token operator">-</span>x86_64
+Architecture                   <span class="token punctuation">:</span> x86_64
+TFTP Boot Files                <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Breed                          <span class="token punctuation">:</span> redhat
+Comment                        <span class="token punctuation">:</span> 
+Fetchable Files                <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Initrd                         <span class="token punctuation">:</span> <span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token operator">/</span>centos6<span class="token operator">-</span>x86_64<span class="token operator">/</span>images<span class="token operator">/</span>pxeboot<span class="token operator">/</span>initrd<span class="token punctuation">.</span>img
+Kernel                         <span class="token punctuation">:</span> <span class="token operator">/</span>var<span class="token operator">/</span>www<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token operator">/</span>centos6<span class="token operator">-</span>x86_64<span class="token operator">/</span>images<span class="token operator">/</span>pxeboot<span class="token operator">/</span>vmlinuz
+Kernel Options                 <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Kernel Options <span class="token punctuation">(</span>Post Install<span class="token punctuation">)</span>  <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Kickstart Metadata             <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token string">'tree'</span><span class="token punctuation">:</span> <span class="token string">'http://@@http_server@@/cblr/links/centos6-x86_64'</span><span class="token punctuation">}</span>
+Management Classes             <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+OS Version                     <span class="token punctuation">:</span> rhel6
+Owners                         <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'admin'</span><span class="token punctuation">]</span>
+Red Hat Management Key         <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Red Hat Management Server      <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Template Files                 <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+
+profiles<span class="token punctuation">:</span>
+Owners                         <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'admin'</span><span class="token punctuation">]</span>
+Parent Profile                 <span class="token punctuation">:</span> 
+Internal proxy                 <span class="token punctuation">:</span> 
+Red Hat Management Key         <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Red Hat Management Server      <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Repos                          <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+Server Override                <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Template Files                 <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Virt Auto Boot                 <span class="token punctuation">:</span> <span class="token number">1</span>
+Virt Bridge                    <span class="token punctuation">:</span> xenbr0
+Virt CPUs                      <span class="token punctuation">:</span> <span class="token number">1</span>
+Virt Disk Driver Type          <span class="token punctuation">:</span> raw
+Virt File Size<span class="token punctuation">(</span>GB<span class="token punctuation">)</span>             <span class="token punctuation">:</span> <span class="token number">5</span>
+Virt Path                      <span class="token punctuation">:</span> 
+Virt RAM <span class="token punctuation">(</span>MB<span class="token punctuation">)</span>                  <span class="token punctuation">:</span> <span class="token number">512</span>
+Virt Type                      <span class="token punctuation">:</span> xenpv
+
+Name                           <span class="token punctuation">:</span> Install_centos6
+TFTP Boot Files                <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Comment                        <span class="token punctuation">:</span> 
+DHCP Tag                       <span class="token punctuation">:</span> default
+Distribution                   <span class="token punctuation">:</span> centos6<span class="token operator">-</span>x86_64
+Enable gPXE?                   <span class="token punctuation">:</span> <span class="token number">0</span>
+Enable PXE Menu?               <span class="token punctuation">:</span> <span class="token number">1</span>
+Fetchable Files                <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Kernel Options                 <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Kernel Options <span class="token punctuation">(</span>Post Install<span class="token punctuation">)</span>  <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Kickstart                      <span class="token punctuation">:</span> <span class="token operator">/</span>var<span class="token operator">/</span>lib<span class="token operator">/</span>cobbler<span class="token operator">/</span>kickstarts<span class="token operator">/</span>ks6<span class="token punctuation">.</span>cfg
+Kickstart Metadata             <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Management Classes             <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+Management Parameters          <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Name Servers                   <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+Name Servers Search Path       <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+Owners                         <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'admin'</span><span class="token punctuation">]</span>
+Parent Profile                 <span class="token punctuation">:</span> 
+Internal proxy                 <span class="token punctuation">:</span> 
+Red Hat Management Key         <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Red Hat Management Server      <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Repos                          <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+Server Override                <span class="token punctuation">:</span> <span class="token operator">&lt;&lt;</span>inherit<span class="token operator">&gt;&gt;</span>
+Template Files                 <span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+Virt Auto Boot                 <span class="token punctuation">:</span> <span class="token number">1</span>
+Virt Bridge                    <span class="token punctuation">:</span> xenbr0
+Virt CPUs                      <span class="token punctuation">:</span> <span class="token number">1</span>
+Virt Disk Driver Type          <span class="token punctuation">:</span> raw
+Virt File Size<span class="token punctuation">(</span>GB<span class="token punctuation">)</span>             <span class="token punctuation">:</span> <span class="token number">5</span>
+Virt Path                      <span class="token punctuation">:</span> 
+Virt RAM <span class="token punctuation">(</span>MB<span class="token punctuation">)</span>                  <span class="token punctuation">:</span> <span class="token number">512</span>
+Virt Type                      <span class="token punctuation">:</span> xenpv
+
+
+systems<span class="token punctuation">:</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+
+repos<span class="token punctuation">:</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+
+images<span class="token punctuation">:</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+
+mgmtclasses<span class="token punctuation">:</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+
+packages<span class="token punctuation">:</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+
+files<span class="token punctuation">:</span>
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+</code></pre>
+<ul>
+<li>上面信息中有一行如下：<br>
+<code>Kickstart Metadata : {'tree': 'http://@@http_server@@/cblr/links/centos8-x86_64'}</code></li>
+<li>该行的定义在文件<code>[root@old_centos7 ~]#vim /var/www/cobbler/ks_mirror/config/ centos8-x86_64.repo</code>中,是cobbler自己定义安装源路径的特有语法规定的，因此可以在ks文件中指定安装<br>
+源时直接指定为<code>$tree</code>变量。(<code>url --url=$tree</code>)<br>
+<img src="https://img-blog.csdnimg.cn/20191116104705578.png" alt="在这里插入图片描述"></li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#vim /var/www/cobbler/ks_mirror/config/centos8-x86_64.repo</span>
+<span class="token punctuation">[</span>core<span class="token operator">-</span><span class="token number">0</span><span class="token punctuation">]</span>
+name<span class="token operator">=</span>core<span class="token operator">-</span><span class="token number">0</span>
+baseurl<span class="token operator">=</span>http<span class="token punctuation">:</span><span class="token operator">//</span>@@http_server@@<span class="token operator">/</span>cobbler<span class="token operator">/</span>ks_mirror<span class="token operator">/</span>centos8<span class="token operator">-</span>x86_64<span class="token operator">/</span>AppStream
+enabled<span class="token operator">=</span><span class="token number">1</span>
+gpgcheck<span class="token operator">=</span><span class="token number">0</span>
+priority<span class="token operator">=</span>$yum_distro_priority
+</code></pre>
+<h1><a id="_400"></a>五.测试安装</h1>
+<h2><a id="51__402"></a>5.1 新建一台虚拟机</h2>
+<ul>
+<li>设置其网络类型为NAT并桥接到和服务器相同的VMnet8,安装centos6时配置内存1G以上，安装centos7和<br>
+centos8时配置内存大于1.6G</li>
+</ul>
+<h2><a id="52_PXE_407"></a>5.2 使用PXE网络引导启动</h2>
+<h2><a id="53__409"></a>5.3 选择相应版本安装</h2>
+<h1><a id="_411"></a>六.优化</h1>
+<h2><a id="61__413"></a>6.1 菜单优化</h2>
+<ul>
+<li>修改/etc/cobbler/pxe/pxedefault.template模板文件，重启同步</li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#vim /etc/cobbler/pxe/pxedefault.template</span>
+DEFAULT menu
+PROMPT <span class="token number">0</span>
+MENU TITLE Welcome! <span class="token operator">|</span> suosuoli<span class="token punctuation">.</span>cn      <span class="token comment"># 自定义项</span>
+TIMEOUT <span class="token number">200</span> 
+TOTALTIMEOUT <span class="token number">6000</span>
+ONTIMEOUT $pxe_timeout_profile
+
+LABEL local
+        MENU LABEL <span class="token punctuation">(</span>local installation<span class="token punctuation">)</span> <span class="token comment"># 自定义项1</span>
+        MENU DEFAULT
+        LOCALBOOT <span class="token operator">-</span><span class="token number">1</span>
+
+$pxe_menu_items
+
+MENU end
+<span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#systemctl restart cobblerd</span>
+<span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#cobbler sync</span>
+</code></pre>
+<ul>
+<li>重启同步后cobbler更新文件/var/lib/tftpboot/pxelinux.cfg/default</li>
+</ul>
+<pre><code class="prism language-py"><span class="token punctuation">[</span>root@old_centos7 <span class="token operator">~</span><span class="token punctuation">]</span><span class="token comment">#vim /var/lib/tftpboot/pxelinux.cfg/default</span>
+DEFAULT menu
+PROMPT <span class="token number">0</span>
+MENU TITLE Welcome! <span class="token operator">|</span> suosuoli<span class="token punctuation">.</span>cn
+TIMEOUT <span class="token number">200</span> 
+TOTALTIMEOUT <span class="token number">6000</span>
+ONTIMEOUT local
+
+LABEL local
+        MENU LABEL <span class="token punctuation">(</span>local installation<span class="token punctuation">)</span>
+        MENU DEFAULT
+        LOCALBOOT <span class="token operator">-</span><span class="token number">1</span>
+LABEL Install_centos6
+        kernel <span class="token operator">/</span>images<span class="token operator">/</span>centos6<span class="token operator">-</span>x86_64<span class="token operator">/</span>vmlinuz
+        MENU LABEL Install_centos6
+        append initrd<span class="token operator">=</span><span class="token operator">/</span>images<span class="token operator">/</span>centos6<span class="token operator">-</span>x86_64<span class="token operator">/</span>initrd<span class="token punctuation">.</span>img ksdevice<span class="token operator">=</span>bootif lang<span class="token operator">=</span>  kssendmac text  ks<span class="token operator">=</span>http<span class="token punctuation">:</span><span class="token operator">//</span><span class="token number">192.168</span><span class="token number">.131</span><span class="token number">.17</span><span class="token operator">/</span>cblr<span class="token operator">/</span>svc<span class="token operator">/</span>op<span class="token operator">/</span>ks<span class="token operator">/</span>profile<span class="token operator">/</span>Install_centos6
+        ipappend <span class="token number">2</span>
+
+LABEL Install_centos7
+        kernel <span class="token operator">/</span>images<span class="token operator">/</span>centos7<span class="token operator">-</span>x86_64<span class="token operator">/</span>vmlinuz
+        MENU LABEL Install_centos7
+        append initrd<span class="token operator">=</span><span class="token operator">/</span>images<span class="token operator">/</span>centos7<span class="token operator">-</span>x86_64<span class="token operator">/</span>initrd<span class="token punctuation">.</span>img ksdevice<span class="token operator">=</span>bootif lang<span class="token operator">=</span>  kssendmac text  ks<span class="token operator">=</span>http<span class="token punctuation">:</span><span class="token operator">//</span><span class="token number">192.168</span><span class="token number">.131</span><span class="token number">.17</span><span class="token operator">/</span>cblr<span class="token operator">/</span>svc<span class="token operator">/</span>op<span class="token operator">/</span>ks<span class="token operator">/</span>profile<span class="token operator">/</span>Install_centos7
+        ipappend <span class="token number">2</span>
+
+LABEL Install_centos8
+        kernel <span class="token operator">/</span>images<span class="token operator">/</span>centos8<span class="token operator">-</span>x86_64<span class="token operator">/</span>vmlinuz
+        MENU LABEL Install_centos8
+        append initrd<span class="token operator">=</span><span class="token operator">/</span>images<span class="token operator">/</span>centos8<span class="token operator">-</span>x86_64<span class="token operator">/</span>initrd<span class="token punctuation">.</span>img ksdevice<span class="token operator">=</span>bootif lang<span class="token operator">=</span>  kssendmac text  ks<span class="token operator">=</span>http<span class="token punctuation">:</span><span class="token operator">//</span><span class="token number">192.168</span><span class="token number">.131</span><span class="token number">.17</span><span class="token operator">/</span>cblr<span class="token operator">/</span>svc<span class="token operator">/</span>op<span class="token operator">/</span>ks<span class="token operator">/</span>profile<span class="token operator">/</span>Install_centos8
+        ipappend <span class="token number">2</span>
+
+
+
+MENU end 
+</code></pre>
+<h2><a id="62_httpdcobblerwebwebcobbler_476"></a>6.2 使用httpd服务和cobbler-web基于web界面来管理配置cobbler</h2>
+<h3><a id="621_cobblerweb_478"></a>6.2.1 安装cobbler-web</h3>
+<p><code>yum install cobbler-web</code></p>
+<h3><a id="622_http_482"></a>6.2.2 重启http服务</h3>
+<p><code>systemctl restart httpd</code></p>
+<h3><a id="623_web_486"></a>6.2.3 访问web界面</h3>
+<p><code>https://cobblerserver/cobbler_web</code></p>
+<h1><a id="Trouble_Shooting_490"></a>七.Trouble Shooting</h1>
+<ul>
+<li>
+<p>遇到下面这种情况？<br>
+<img src="https://img-blog.csdnimg.cn/20191116103518960.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<ul>
+<li>这种情况是ks文件中的安装源路径出错,改为如下：<br>
+centos6:<code>url --url=http://httpserver/ksdir/ks.cfg</code>或者<code>url --url=$tree</code><br>
+centos7:<code>url --url=http://httpserver/ksdir/ks.cfg</code>或者<code>url --url=$tree</code><br>
+centos8:<code>url --url=http://httpserver/ksdir/ks.cfg</code>或者<code>url --url=$tree</code></li>
+</ul>
+</li>
+<li>
+<p>遇到下面这种情况？<br>
+<img src="https://img-blog.csdnimg.cn/20191116103533678.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<ul>
+<li>这种情况是因为在安装配置cobbler时httpd服务一直在运行中，没有正确的为cobbler提供服务，<br>
+因此重启httpd服务就ok了<code>systemctl restart httpd</code></li>
+</ul>
+</li>
+<li>
+<p>遇到下面这种情况？</p>
+</li>
+<li>
+<p>httpd服务运行中安装cobbler-web包后无法访问https://cobblerserver/cobbler-web管理界面？</p>
+<ul>
+<li>重启httpd服务：<code>systemctl restart httpd</code></li>
+</ul>
+</li>
+<li>
+<p>cobbler-web界面的默认账号</p>
+</li>
+</ul>
+<pre><code class="prism language-py">login<span class="token punctuation">:</span>cobbler
+passwd<span class="token punctuation">:</span>cobbler
+</code></pre>
+<ul>
+<li>cobbler访问图示</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20191114213154887.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L05hbmppbmdfYm9rZWJp,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>
+默认账户密码都是:cobbler<br>
+<img src="https://img-blog.csdnimg.cn/20191114213422882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L05hbmppbmdfYm9rZWJp,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/20191114213614553.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L05hbmppbmdfYm9rZWJp,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>
+<img src="https://img-blog.csdnimg.cn/20191114213632906.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L05hbmppbmdfYm9rZWJp,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>
+现在就可以点点鼠标管理le！！！</p>
+<h2><a id="arrow_leftexit_525"></a>⬅️exit</h2>
+</div>
+</body>
+
+</html>

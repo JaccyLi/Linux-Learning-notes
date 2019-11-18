@@ -75,9 +75,17 @@ echo "/dev/sdd1      /data/log     ext4     defaults  0  0" >> /etc/fstab
 
 > 6.在Shell环境下，如何查看远程Linux系统运行了多少时间?
 
+```py
+[root@steve ~]$uptime
+ 21:46:17 up 9 days,  2:23,  1 user,  load average: 0.00, 0.00, 0.00
+[root@steve ~]$last | grep "system boot" | sed -n '1p'
+reboot   system boot  5.3.6-1.el7.elre Fri Nov  8 19:22 - 21:46 (9+02:24)
+[root@steve ~]$
+```
+
 > 7.使用bash处理以下文件内容，将域名取出并进行计数排序，如处理:
 
-```
+```py
 http://www.baidu.com/index.html
 htp://www.baidu.com/1.html
 http://post.baidu.com/index.html
@@ -173,6 +181,11 @@ backup.tar.gz;
 ```
 
 > 12.列出linux常见打包工具并写相应解压缩参数(至少三种)?
+
+```py
+
+```
+
 > 13.一个EXT3的文件分区，当用touch新建文件时报错，错误信息是磁盘已满，但是使用df命令查看磁盘空间并不满，为什么?
 > 14.请使用Linux系统命令统计出establish状态的连接数有多少?
 > 15.mysql数据库的备份还原是怎么做的?
@@ -189,9 +202,44 @@ backup.tar.gz;
 > 24.dmesg命令中看到ip_ conntrack: table full, dropping packet.如何解决?
 > 25.查询file1里面空行的所在行号?
 > 26.查询file1以abc结尾的行?
+
+```py
+
+```
+
 > 27.打印出file1文件第1到第三行?
+
+```py
+sed -n '1,3p' file1
+head -n3 < file1
+```
+
 > 28.如何将本地80端口的请求转发到8080端口，当前主机IP为192.168.2.1?
+
+
 > 29.crontab在11月份内，每天的早上6点到12点中，每隔2小时执行一次/usr/bin/httpd.sh怎么实现?
-> 30.编写个shell脚本将/usr/ocal/test目录下大于100K的文件转移到/tmp目录?
+
+```py
+crontab -e
+0 6-12/2 * 11 * /bin/bash /usr/bin/httpd.sh
+```
+
+> 30.编写个shell脚本将/usr/local/test目录下大于100K的文件转移到/tmp目录?
+
+```py
+#!/bin/bash
+WORKDIR="/usr/local/test/"
+if [[ -f ${WORKDIR}* ]]; then
+      find ${WORKDIR} -type f -size +100K -exec mv {} /tmp \;
+else
+      echo "Nothing to do.Exiting..."
+      exit
+fi
+```
+
 > 31.有三台Linux主机，A, B和C, A上有私钥，B和C上都有公钥，如何做到用私钥从A登录到B后，可以直接不输密码即可再登录到C?并写出具体命令行。
-> 32
+> 32.简述多核CPU和单核CPU的优点和缺点，是否所有程序在多核CPU上运行速度都快?为什么?
+> 33.脚本实现打印杨辉三角?
+> 34.简述DNS(Domain Name System)域名系统工作原理。
+> 35.TCP和UDP协议对比，说明优缺点。
+> 36.
