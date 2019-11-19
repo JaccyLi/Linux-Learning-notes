@@ -183,28 +183,68 @@ backup.tar.gz;
 > 12.列出linux常见打包工具并写相应解压缩参数(至少三种)?
 
 ```py
+tar:
+tar -Jxf file.tar.xz
+tar -jxf file.tar.bz2
+tar -zxf file.tar.gz
 
+cpio:
+cpio -idv < file.cpio
 ```
 
 > 13.一个EXT3的文件分区，当用touch新建文件时报错，错误信息是磁盘已满，但是使用df命令查看磁盘空间并不满，为什么?
-> 14.请使用Linux系统命令统计出establish状态的连接数有多少?
-> 15.mysql数据库的备份还原是怎么做的?
-> 16.用一条命令查看目前系统已启动服务所监听的端口?
-> 17.统计出一台web server上的各个状态(ESTABLISHED/SYN_SENT/SYN _RECV
-等)的个数?
-> 18.查找/usr/local/nginx/logs 目录最后修改时间大于30天的文件，并删除?
-> 19.添加一条到192.168.3.0/24的路由，网关为192.168.1.254?
-> 20.利用sed命令将test.txt中所有的回车替换成空格?
-> 21.在每周6的凌晨3:15执行/home/shell/collect.pl, 并将标准输出和标准错
-误输出到/dev/null设备，请写出crontab中的语句?
-> 22.请写出精确匹配IPv4规范的正则表达式?
-> 23.匹配文本中的key,并打印出该行及下面的5行?
-> 24.dmesg命令中看到ip_ conntrack: table full, dropping packet.如何解决?
-> 25.查询file1里面空行的所在行号?
-> 26.查询file1以abc结尾的行?
 
 ```py
 
+```
+
+> 14.请使用Linux系统命令统计出establish状态的连接数有多少?
+
+```py
+netstat | sed -n '/ESTAB/p' | cut -d " " -f6 | wc -l
+```
+
+> 15.mysql数据库的备份还原是怎么做的?
+> 16.用一条命令查看目前系统已启动服务所监听的端口?
+> 17.统计出一台web server上的各个状态(ESTABLISHED/SYN_SENT/SYN _RECV等)的个数?
+> 18.查找/usr/local/nginx/logs 目录最后修改时间大于30天的文件，并删除?
+> 19.添加一条到192.168.3.0/24的路由，网关为192.168.1.254?
+> 20.利用sed命令将test.txt中所有的回车替换成空格?
+> 21.在每周6的凌晨3:15执行/home/shell/collect.pl, 并将标准输出和标准错误输出到/dev/null设备，
+请写出crontab中的语句?
+
+```py
+
+```
+
+> 22.请写出精确匹配IPv4规范的正则表达式?
+
+```py
+
+```
+
+> 23.匹配文本中的key,并打印出该行及下面的5行?
+
+```py
+grep -En -A 5 'key' file.txt
+```
+
+> 24.dmesg命令中看到ip_ conntrack: table full, dropping packet.如何解决?
+
+```py
+
+```
+
+> 25.查询file1里面空行的所在行号?
+
+```py
+grep -En '^$' file1
+```
+
+> 26.查询file1以abc结尾的行?
+
+```py
+grep -E 'abc$' file1
 ```
 
 > 27.打印出file1文件第1到第三行?
