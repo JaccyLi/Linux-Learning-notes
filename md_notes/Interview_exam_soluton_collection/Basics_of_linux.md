@@ -165,19 +165,55 @@ backup.tar.gz;
 - (5)在早上8: 00开机后启动
 
 ```bash
-
+crontab -e
+50 16 * * * /usr/bin/rm /abc/* -rf
+0 8-18 * * * /usr/bin/awk '{print $1}' /xyz/x1 >> /backup/back01.txt
+50 17 * * mon /usr/bin/tar -zcf /data/backup.tar.gz /data
+55 17 * * * /usr/bin/umount /dev/hdc
+@reboot   /usr/bin/mount /dev/hdc
 ```
 
 > 10.Linux 启动大致过程?
 
 ```bash
+CentOS6:
+1.加载BIOS的硬件信息，获取第一个启动设备 
+2.读取第一个启动设备MBR的引导加载程序(grub)的启动信息 
+3.加载核心操作系统的核心信息，核心开始解压缩，并尝试驱动所有的硬件设备 
+4.核心执行init程序，并获取默认的运行信息 
+5.init程序执行/etc/rc.d/rc.sysinit文件 
+6.启动核心的外挂模块
+7.init执行运行的各个批处理文件(scripts) 
+8.init执行/etc/rc.d/rc.local
+9.执行/bin/login程序，等待用户登录 
+10.登录之后开始以Shell控制主机
 
+CentOS7:
+1.UEFi或BIOS初始化，运行POST开机自检 
+2.选择启动设备 
+3.引导装载程序, centos7是grub2 
+4.加载程序的配置文件： 
+    /etc/grub.d/   
+    /etc/default/grub  
+    /boot/grub2/grub.cfg 
+5.加载initramfs驱动模块 
+6.加载内核选项 
+7.内核初始化，centos7使用systemd代替init  
+8.执行initrd.target所有单元，包括挂载/etc/fstab 
+9.从initramfs根文件系统切换到磁盘根目录 
+10.systemd执行默认target配置，配置文件/etc/systemd/system/default.target 
+11.systemd执行sysinit.target初始化系统及basic.target准备操作系统 
+12.systemd启动multi-user.target下的本机与服务器服务 
+13.systemd执行multi-user.target下的/etc/rc.d/rc.local 
+14.Systemd执行multi-user.target下的getty.target及登录服务 
+15.systemd执行graphical需要的服务 
 ```
 
 > 11.简述/et/stab里面个字段的含义?
 
 ```bash
-
+UUID=7b5a4979-194d-419e-802f-df05cd42f592 /boot    ext3       defaults        1 2
+设备全局唯一表示符/分区标识     设备挂载点      文件系统类型       默认的启动加载选项      启动检查顺序
 ```
 
 > 12.列出linux常见打包工具并写相应解压缩参数(至少三种)?
@@ -256,7 +292,6 @@ head -n3 < file1
 
 > 28.如何将本地80端口的请求转发到8080端口，当前主机IP为192.168.2.1?
 
-
 > 29.crontab在11月份内，每天的早上6点到12点中，每隔2小时执行一次/usr/bin/httpd.sh怎么实现?
 
 ```py
@@ -277,9 +312,31 @@ else
 fi
 ```
 
-> 31.有三台Linux主机，A, B和C, A上有私钥，B和C上都有公钥，如何做到用私钥从A登录到B后，可以直接不输密码即可再登录到C?并写出具体命令行。
-> 32.简述多核CPU和单核CPU的优点和缺点，是否所有程序在多核CPU上运行速度都快?为什么?
-> 33.脚本实现打印杨辉三角?
-> 34.简述DNS(Domain Name System)域名系统工作原理。
-> 35.TCP和UDP协议对比，说明优缺点。
-> 36.
+> 31.在/var/log目录下查找文件名以vmk开头的文件并打印路径
+
+> 32.每周日子凌晨零点零分定期备份/usr/backup 到/tmp目录下，普通用户如何操作?
+
+> 33.有三台Linux主机，A, B和C; A上有私钥，B和C上都有公钥，如何做到用私钥从A登录到B后，
+可以直接不输密码即可再登录到C?并写出具体命令行。
+
+> 34.简述多核CPU和单核CPU的优点和缺点，是否所有程序在多核CPU上运行速度都快?为什么?
+
+```py
+多核CPU:相比单核CPU,多核CPU可实现真正意义上的并行处理任务，在处理如渲染、并行计算等任务时优势明显；
+但是随着CPU核心增多，单个核心的主频无法做到很高；而且目前很多软件并未对多核心的CPU提供很好的优化(对多线程的支持)。
+所以某些软件在多核心的CPU上运行并不会有明显的性能改善，仍然是单核处理该任务，甚至某些时候更适合在主频更高的单核
+处理器上运行。
+单核CPU:相比多核CPU，单核CPU可以实现更高的主频，对于需要实时处理的任务优势明显，如对3D游戏的实时渲染；高的主频
+意味着可以在单位时间内渲染更多的帧。
+综上:不是所有程序在多核CPU上运行的速度就快，这取决于程序对于多核特性的支持和多核处理器的每个核心的主频等诸多因素。
+```
+
+> 35.脚本实现打印杨辉三角?
+
+
+
+> 36.简述DNS(Domain Name System)域名系统工作原理。
+
+> 37.TCP和UDP协议对比，说明优缺点。
+
+> 38.

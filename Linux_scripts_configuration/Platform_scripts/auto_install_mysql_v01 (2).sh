@@ -1,12 +1,3 @@
-<center><font face="幼圆" size="5" color="grey">mysql各种安装姿势解锁</center></font>
-
-# 一.二进制包安装mysql
-
-# 二.源码编译安装mysql
-
-# 三.一键安装mysql二进制程序包脚本
-
-```py
 #!/bin/bash
 #
 #*******************************************************************************
@@ -24,7 +15,7 @@
 #******************************************************************************
 #Update log:
 #V00:install mysql5.6 mysql5.7 and mariadb10.2 on centos6
-#V01:install mysql5.6 myaql5.7 and mariadb10.2 on centos6&centos7
+#V01:install mysql5.6 mysql5.7 and mariadb10.2 on centos6$centos7
 #
 #######################
 declare -a MYSQL_VER
@@ -33,7 +24,7 @@ DATA_DIR="/data/mysql"
 BASE_DIR="/usr/local"
 SYS_VER=`cat /etc/redhat-release | sed -nr 's/.* ([0-9]+)\.[0-9]+\.?.*/\1/p'`
 BINARY_NAME=
-MYSQL_VER=( mysql-5.6 mysql-5.7 mariadb-10.2.29 )
+MYSQL_VER=( mysql-5.6.46 mysql-5.7.26 mariadb-10.2.29 )
 #######################
 
 
@@ -205,12 +196,15 @@ create_db() {
     fi
 }
 
+
 ## make mysql controlable via system
 get_service_script_ready() {
     cp ${BASE_DIR}/mysql/support-files/mysql.server /etc/init.d/mysqld
 }
 
+
 if_mysql_running() {
+
 service mysqld start
 if lsof -i:3306; then
     echo "mysqld started successfully.`success`"
@@ -250,6 +244,8 @@ EOF
 [[ $? -eq 0 ]] && echo "Secure_installation complete,password for root is \"centos\"`success`" || echo "Something wrong during secure_installation.`failure`"
 }
 
+
+
 main() {
 
     #_test
@@ -271,7 +267,5 @@ main() {
     fi
 }
 
-main
-```
 
-# 四.一键编译安装mysql二进制程序包脚本
+main
