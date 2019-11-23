@@ -308,4 +308,15 @@ select * from students where Age > (select avg(Age) from students where classID 
 
 ```
 
-> 9.
+> 9.存储引擎InnoDB和MyISAM的区别
+
+|Feature|InnoDB|MyISAM|
+|---|---|---|
+|MVCC|支持|不支持|
+|Transactions|支持|不支持|
+|Data caches|支持|不支持|
+|Foreign key|支持|不支持|
+|Clustered indexes|支持|不支持|
+|锁机制粒度|行级锁|表级锁|
+|文件|两种:.ibd/.frm|三种:.frm/.MYD/.MYI|
+- MyISAM读取数据较快，占用资源少，崩溃恢复性差；Innodb崩溃后恢复性更好。

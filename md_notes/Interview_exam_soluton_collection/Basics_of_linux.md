@@ -75,7 +75,7 @@ echo "/dev/sdd1      /data/log     ext4     defaults  0  0" >> /etc/fstab
 
 > 6.在Shell环境下，如何查看远程Linux系统运行了多少时间?
 
-```py
+```bash
 [root@steve ~]$uptime
  21:46:17 up 9 days,  2:23,  1 user,  load average: 0.00, 0.00, 0.00
 [root@steve ~]$last | grep "system boot" | sed -n '1p'
@@ -85,7 +85,7 @@ reboot   system boot  5.3.6-1.el7.elre Fri Nov  8 19:22 - 21:46 (9+02:24)
 
 > 7.使用bash处理以下文件内容，将域名取出并进行计数排序，如处理:
 
-```py
+```bash
 http://www.baidu.com/index.html
 htp://www.baidu.com/1.html
 http://post.baidu.com/index.html
@@ -218,7 +218,7 @@ UUID=7b5a4979-194d-419e-802f-df05cd42f592 /boot    ext3       defaults        1 
 
 > 12.列出linux常见打包工具并写相应解压缩参数(至少三种)?
 
-```py
+```bash
 tar:
 tar -Jxf file.tar.xz
 tar -jxf file.tar.bz2
@@ -230,62 +230,93 @@ cpio -idv < file.cpio
 
 > 13.一个EXT3的文件分区，当用touch新建文件时报错，错误信息是磁盘已满，但是使用df命令查看磁盘空间并不满，为什么?
 
-```py
-
+```bash
+inode节点数用尽，提示空间满;此时虽然还有空闲磁盘空间，但是用来记录文件元数据的inode已无法分配，所以无法再创建文件。
 ```
 
 > 14.请使用Linux系统命令统计出establish状态的连接数有多少?
 
-```py
+```bash
 netstat | sed -n '/ESTAB/p' | cut -d " " -f6 | wc -l
 ```
 
 > 15.mysql数据库的备份还原是怎么做的?
+
 > 16.用一条命令查看目前系统已启动服务所监听的端口?
+
+```sh
+netstat -ntulp
+ss -ntulp
+```
+
 > 17.统计出一台web server上的各个状态(ESTABLISHED/SYN_SENT/SYN _RECV等)的个数?
+
+```bash
+方法一:
+netstat -nautlp | awk '{print $6,NF;}' | awk '/[A-Z] /{print $1}' | awk 'BEGIN{printf("%-20s%s\n","STATUS","COUNT")}{count[$0]++}END{for (i in count)printf("%-20s%d\n",i,count[i])}'
+方法二:
+netstat -ntulp | tr -s " " | cut -d" " -f6 | grep '[A-Z].*[A-Z]$' | sort | uniq -c
+```
+
 > 18.查找/usr/local/nginx/logs 目录最后修改时间大于30天的文件，并删除?
+
+```bash
+find /usr/local/nginx/logs -mtime +30 -exec rm {} \;
+```
+
 > 19.添加一条到192.168.3.0/24的路由，网关为192.168.1.254?
+
+```sh
+#route add -net 192.168.3.0/24 via 192.168.1.254
+```
+
 > 20.利用sed命令将test.txt中所有的回车替换成空格?
+
+
+```bash
+sed ':L;N;s/\n/ /;tL' test.txt
+```
+
 > 21.在每周6的凌晨3:15执行/home/shell/collect.pl, 并将标准输出和标准错误输出到/dev/null设备，
 请写出crontab中的语句?
 
-```py
+```bash
 
 ```
 
 > 22.请写出精确匹配IPv4规范的正则表达式?
 
-```py
+```bash
 
 ```
 
 > 23.匹配文本中的key,并打印出该行及下面的5行?
 
-```py
+```bash
 grep -En -A 5 'key' file.txt
 ```
 
 > 24.dmesg命令中看到ip_ conntrack: table full, dropping packet.如何解决?
 
-```py
+```bash
 
 ```
 
 > 25.查询file1里面空行的所在行号?
 
-```py
+```bash
 grep -En '^$' file1
 ```
 
 > 26.查询file1以abc结尾的行?
 
-```py
+```bash
 grep -E 'abc$' file1
 ```
 
 > 27.打印出file1文件第1到第三行?
 
-```py
+```bash
 sed -n '1,3p' file1
 head -n3 < file1
 ```
@@ -294,14 +325,14 @@ head -n3 < file1
 
 > 29.crontab在11月份内，每天的早上6点到12点中，每隔2小时执行一次/usr/bin/httpd.sh怎么实现?
 
-```py
+```bash
 crontab -e
 0 6-12/2 * 11 * /bin/bash /usr/bin/httpd.sh
 ```
 
 > 30.编写个shell脚本将/usr/local/test目录下大于100K的文件转移到/tmp目录?
 
-```py
+```bash
 #!/bin/bash
 WORKDIR="/usr/local/test/"
 if [[ -f ${WORKDIR}* ]]; then
@@ -314,6 +345,7 @@ fi
 
 > 31.在/var/log目录下查找文件名以vmk开头的文件并打印路径
 
+
 > 32.每周日子凌晨零点零分定期备份/usr/backup 到/tmp目录下，普通用户如何操作?
 
 > 33.有三台Linux主机，A, B和C; A上有私钥，B和C上都有公钥，如何做到用私钥从A登录到B后，
@@ -321,7 +353,7 @@ fi
 
 > 34.简述多核CPU和单核CPU的优点和缺点，是否所有程序在多核CPU上运行速度都快?为什么?
 
-```py
+```bash
 多核CPU:相比单核CPU,多核CPU可实现真正意义上的并行处理任务，在处理如渲染、并行计算等任务时优势明显；
 但是随着CPU核心增多，单个核心的主频无法做到很高；而且目前很多软件并未对多核心的CPU提供很好的优化(对多线程的支持)。
 所以某些软件在多核心的CPU上运行并不会有明显的性能改善，仍然是单核处理该任务，甚至某些时候更适合在主频更高的单核
@@ -340,3 +372,4 @@ fi
 > 37.TCP和UDP协议对比，说明优缺点。
 
 > 38.
+
