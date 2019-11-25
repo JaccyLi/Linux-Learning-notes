@@ -318,5 +318,6 @@ select * from students where Age > (select avg(Age) from students where classID 
 |Foreign key|支持|不支持|
 |Clustered indexes|支持|不支持|
 |锁机制粒度|行级锁|表级锁|
+|全文索引|mysql5.5版本后支持|支持|
 |文件|两种:.ibd/.frm|三种:.frm/.MYD/.MYI|
 - MyISAM读取数据较快，占用资源少，崩溃恢复性差；Innodb崩溃后恢复性更好。

@@ -2,14 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="306c7b4a-47b8-4215-a10d-e93dcc7a6620" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/md_notes.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Python_Books/mysql-connector-python-manual.a4.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Interview_exam_soluton_collection/Basics_of_linux.md" beforeDir="false" afterPath="$PROJECT_DIR$/Interview_exam_soluton_collection/Basics_of_linux.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Interview_exam_soluton_collection/Other_platform.md" beforeDir="false" afterPath="$PROJECT_DIR$/Interview_exam_soluton_collection/Other_platform.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Interview_exam_soluton_collection/Shell_scripting.md" beforeDir="false" afterPath="$PROJECT_DIR$/Interview_exam_soluton_collection/Shell_scripting.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/golang/playground/firstApp/Main.go" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -30,11 +25,11 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="717" />
-    <option name="y" value="126" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="495" />
+    <option name="y" value="92" />
     <option name="width" value="974" />
-    <option name="height" value="858" />
+    <option name="height" value="849" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -48,11 +43,6 @@
             <path>
               <item name="md_notes" type="b2602c69:ProjectViewProjectNode" />
               <item name="md_notes" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="md_notes" type="b2602c69:ProjectViewProjectNode" />
-              <item name="md_notes" type="462c0819:PsiDirectoryNode" />
-              <item name="Interview_exam_soluton_collection" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -96,16 +86,17 @@
       <workItem from="1574422920889" duration="176000" />
       <workItem from="1574423139264" duration="133000" />
       <workItem from="1574423301383" duration="71000" />
+      <workItem from="1574640607607" duration="1236000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="3141000" />
+    <option name="totallyTimeSpent" value="4377000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="22" width="1936" height="1066" extended-state="6" />
+    <frame x="495" y="92" width="974" height="849" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2489339" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2549234" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -118,7 +109,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
-      <window_info active="true" anchor="bottom" id="Event Log" order="10" side_tool="true" visible="true" weight="0.3290461" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" visible="true" weight="0.33240223" />
       <window_info anchor="bottom" id="Terminal" order="11" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
