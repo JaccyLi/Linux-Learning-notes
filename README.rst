@@ -5,7 +5,7 @@ This repo include all the notes of learning Linux.
 
 ./md_notes/Bash_scripts_nots::
 
-    该文件夹存放对Advanced_bash_scripting_guide.pdf这本书的学习和翻译资料。
+    该文件夹存放对Advanced_bash_scripting_guide.pdf这本书的学习和翻译资料
 
 ./md_notes/M39-linux-basic::
 
@@ -21,5 +21,5 @@ This repo include all the notes of learning Linux.
 
 ./Linux_scripts_configuration::
 
-    该文件夹存放所写脚本
+    该文件夹存放所写脚本及一些系统配置文件
 
