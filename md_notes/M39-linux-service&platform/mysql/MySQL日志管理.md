@@ -51,6 +51,7 @@ innodb_flush_log_at_trx_commit=0|1|2     # 决定innodb在多I/O操作的事务�
 ```
 
 - 性能从高到低:`0--->2--->1` 但是是以最后一秒的数据可能丢失的代价换取的
+- `innodb_flush_log_at_trx_commit=2`是比较折中的方案
 
 # 二.错误日志
 

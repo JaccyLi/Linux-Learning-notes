@@ -168,13 +168,13 @@ change_default_passwd() {
 create_db() {
     cd ${BASE_DIR}/mysql
     if [[ "$1" -eq "1" ]]; then
-        scripts/mysql_install_db --datadir=/data/mysql --user=mysql
+        scripts/mysql_install_db --datadir=/data/mysql --user=mysql &> /tmp/${EXTRACT_TEMP_DIR}_databases_install.log
         [[ "$?" -eq 0 ]] && echo "Databases installed.`success`" || echo "Something wrong when install databases.`failure`"
     elif [[ "$1" -eq "2" ]]; then
-        bin/mysqld --initialize --user=mysql --datadir=/data/mysql  &> /tmp/mysql5.7_databases_install.log
+        bin/mysqld --initialize --user=mysql --datadir=/data/mysql  &> /tmp/${EXTRACT_TEMP_DIR}_databases_install.log
         [[ "$?" -eq 0 ]] && echo "Databases installed.`success`" || echo "Something wrong when install databases.`failure`"
     elif [[ "$1" -eq "3" ]]; then
-        scripts/mysql_install_db --datadir=/data/mysql --user=mysql &> /tmp/mariadb10.2_databases_install.log
+        scripts/mysql_install_db --datadir=/data/mysql --user=mysql &> /tmp/${EXTRACT_TEMP_DIR}_databases_install.log
         [[ "$?" -eq 0 ]] && echo "Databases installed.`success`" || echo "Something wrong when install databases.`failure`"
     fi
 }
@@ -249,13 +249,14 @@ main() {
     create_db ${SELECT}
     get_service_script_ready
     if_mysql_running
-    change_default_passwd
 
     if [[ ${SELECT} -ne 2 ]]; then
         secure_install
+	else
+		change_default_passwd
     fi
     echo -e "Please run:\e[5;1;32m source /etc/profile.d/mysql.sh\e[0m"
+    echo -e "Default password for \"${EXTRACT_TEMP_DIR}\" please check:\e[5;1;35m \"/tmp/${EXTRACT_TEMP_DIR}_databases_install.log\""
 }
-
 
 main
