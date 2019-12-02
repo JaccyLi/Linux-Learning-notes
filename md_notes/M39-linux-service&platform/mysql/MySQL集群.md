@@ -19,7 +19,47 @@ SQL Thread将中继日志应用到从服务器，执行相应的SQL语句生成�
 
 ### 1.1.2 二进制日志类型
 
+- 基于STATEMENT格式---binlog_format=STATEMENT
 
+```sql
+# at 237
+#150416 18:30:21 server id 1  end_log_pos 316 CRC32 0x54b3fd07 Query thread_id=3 exec_time=0 error_code=0
+SET TIMESTAMP=1429209021/*!*/;
+BEGIN
+/*!*/;
+# at 316
+#150416 18:30:21 server id 1  end_log_pos 440 CRC32 0x23bfcad7 Query thread_id=3 exec_time=0 error_code=0
+SET TIMESTAMP=1429209021/*!*/;
+insert into t1 (f1,f2) values(17650, 'hohdeal3lo')
+/*!*/;
+# at 440
+#150416 18:30:21 server id 1  end_log_pos 471 CRC32 0x569c6fe3 Xid = 19
+COMMIT/*!*/;
+DELIMITER ;
+```
+
+- 基于ROW格式---binlog_format=ROW
+
+```sql
+# at 311
+#130419 16:27:17 server id 1  end_log_pos 385 CRC32 0x572186a8 Rows_query
+# insert into t1 (f1,f2) values(17650, 'hohdeal3lo') <- 5.6 only – binlog_rows_query_log_events needs to be ON 
+# at 385
+#130419 16:27:17 server id 1  end_log_pos 433 CRC32 0x538010c4 Table_map: `test`.`t1` mapped to number 70
+# at 433
+#130419 16:27:17 server id 1  end_log_pos 484 CRC32 0x44f810d4 Write_rows: table id 70 flags: STMT_END_F
+BINLOG '
+tbZxUR0BAAAASgAAAIEBAACAADJpbnNlcnQgaW50byB0MSAoZjEsZjIpIHZhbHVlcygxNzY1MCwg
+J2hvaGRlYWwzbG8nKaiGIVc=
+tbZxURMBAAAAMAAAALEBAAAAAEYAAAAAAAEABHRlc3QAAnQxAAIDDwItAADEEIBT
+tbZxUR4BAAAAMwAAAOQBAAAAAEYAAAAAAAEAAgAC//zyRAAACmhvaGRlYWwzbG/UEPhE
+'/*!*/;
+### INSERT INTO `test`.`t1`
+### SET
+###   @1=17650 /* INT meta=0 nullable=0 is_null=0 */
+###   @2='hohdeal3lo' /* VARSTRING(45) meta=45 nullable=0 is_null=0 */
+# at 48
+```
 
 ### 1.1.3 主从复制所涉及的线程
 
@@ -44,7 +84,7 @@ Progress: 0.000
     User: repluser1
     Host: 172.20.1.40:35346        # 从服务器1号
       db: NULL
- Command: Binlog Dump
+ Command: Binlog Dump              # Binlog Dump线程
     Time: 214
    State: Master has sent all binlog to slave; waiting for binlog to be updated
     Info: NULL
@@ -54,7 +94,7 @@ Progress: 0.000
     User: repluser1
     Host: 172.20.1.43:49098        # 从服务器2号
       db: NULL
- Command: Binlog Dump
+ Command: Binlog Dump              # Binlog Dump线程
     Time: 163
    State: Master has sent all binlog to slave; waiting for binlog to be updated
     Info: NULL
@@ -93,7 +133,8 @@ MariaDB [(none)]> SHOW SLAVE STATUS\G
 - SQL Thread:从服务器创建一个SQL线程读取被I/O线程写入磁盘的中继日志Relay log,并执行其中记录的事务，生成数据。
 
 - **每个主/从复制结构都涉及到三个线程:Master:Binlog dump thread;Slave:Slave I/O thread 和 Slave SQL thread**
-**主服务器为每个从服务器创建一个Binlog dump thread;每个从服务器自己创建两线程。**
+**主服务器为每个从服务器创建一个Binlog dump thread;每个从服务器自己创建两个线程。**
+
 ## 1.2 主从复制涉及的变量
 
 ### 1.2.1 Mater
