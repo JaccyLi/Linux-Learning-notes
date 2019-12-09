@@ -3,6 +3,14 @@ Linux Notes All in One
 
 This repo include all the notes of learning Linux.
 
+./md_notes/M39-linux-service&platform::
+
+    该文件夹存放对开源平台和相关运维工具的学习笔记
+
+./md_notes/Interview_exam_solution_collection::
+
+    该文件夹存放面试习题
+
 ./md_notes/Bash_scripts_nots::
 
     该文件夹存放对Advanced_bash_scripting_guide.pdf这本书的学习和翻译资料
