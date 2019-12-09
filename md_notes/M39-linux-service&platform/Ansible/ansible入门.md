@@ -101,7 +101,7 @@
 ## 3.2 Ansible 的核心模块
 
 - ansible 核心模块包括：
-  INVENTRY:ansible 控制和管理的主机清单
+  INVENTRY:ansible 控制和管理的主机清单默认使用的文件为`/etc/ansible/hosts`
   API: 供第三方程序调用的应用程序编程接口
   MODULES:ansible 执行命令的功能模块，多数为内置核心，也可以自定义(基于 Python)
   PLUGINS:模块功能的补充，如连接类的插件、循环插件、过滤插件等。
@@ -163,7 +163,7 @@ pip install ansible --upgrade
 
 ```bash
 /etc/ansible/ansible.cfg 主配置文件，配置 ansible 工作特性
-/etc/ansible/hosts       主机清单
+/etc/ansible/hosts       默认的Inventory主机清单
 /etc/ansible/roles/      存放角色的目录
 ```
 
@@ -543,33 +543,39 @@ module_name = shell
   此外， 当如若目标主机使用了非默认的 SSH 端口，还可以在主机名称之后使用冒号加端口号来标明如果
   主机名称遵循相似的命名模式，还可以使用列表的方式标识各主机。如下面的例子:
 
-```bash
-[webwebsrvss]
+```ini
+# websrvs 组的主机清单
+[websrvs]
 172.20.1.67
 172.20.1.68
 172.20.1.69
 
-[webwebsrvss:vars]
+# websrvs 组的主机变量
+[websrvs:vars]
 web67=172.20.1.67
 web68=172.20.1.68
 web69=172.20.1.69
 
-[appwebsrvss]
+# appsrvs 组的主机清单
+[appsrvs]
 172.20.1.84
 172.20.1.86
 172.20.1.87
 
-[appwebsrvss:vars]
+# appsrvs 组的主机变量
+[appsrvs:vars]
 app84=172.20.1.84
 app86=172.20.1.86
 app87=172.20.1.87
 
-[dnswebsrvss]
+# dnssrvs 组的主机清单
+[dnssrvs]
 172.20.1.79
 172.20.1.88
 172.20.1.89
 
-[dnswebsrvss:vars]
+# dnssrvs 组的主机别名(变量)
+[dnssrvs:vars]
 dns79=172.20.1.79
 dns88=172.20.1.88
 dns89=172.20.1.89
