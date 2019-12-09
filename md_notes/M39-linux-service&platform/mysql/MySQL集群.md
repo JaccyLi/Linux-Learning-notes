@@ -619,7 +619,7 @@ mysql -uroot -p123456 -h 127.0.0.1 -P8066  ##mycat 默认端口不是3306而是8
 
 - 此时连接的 mycat 并未连接到真实的数据库
 
-#### Mycat 注意配置文件说明
+#### Mycat 配置文件说明
 
 - Mycat 的配置文件使用 xml 文件，使用标签和标签所带的属性来定义配置项。主要分为 server.xml 和 schema.xml;
   server.xml 几乎保存了所有 mycat 需要的系统配置信息。其在代码内直接的映射类为 SystemConfig 类。
@@ -1089,7 +1089,7 @@ general_log=ON
   写集。因此，所有的节点关于该事务的结果达成一致。达成一致后，开始当前事务的节点可以通知集群的客户端是否
   要提交目前的事务。
 
-#### 3.2.2.3 SST 复制技术(State Snapshot Transfers)
+#### 3.2.2.2 SST 复制技术(State Snapshot Transfers)
 
 - 当一个新的节点加入集群时，它将像集群请求数据。某个节点（此时成 donor，捐赠者）,会使用 SST 复制技术提供
   一个数据全备份给新加入的节点（称 joiner）。可以使用`wsrep_set_donor`参数事先指定某个节点为 donor，
@@ -1328,14 +1328,15 @@ root@ubuntu1904:~#ansible websrvs -a 'grep -Ev "^#|^$"  /etc/percona-xtradb-clus
 172.20.1.79 | CHANGED | rc=0 >>
 [mysqld]
 wsrep_provider=/usr/lib64/galera3/libgalera_smm.so
-wsrep_cluster_address=gcomm://
+wsrep_cluster_address=gcomm://172.20.1.69,172.20.1.68,172.20.1.67,172.20.1.79
 binlog_format=ROW
 default_storage_engine=InnoDB
 wsrep_slave_threads= 8
 wsrep_log_conflicts
 innodb_autoinc_lock_mode=2
+wsrep_node_address=172.20.1.79
 wsrep_cluster_name=pxc-cluster
-wsrep_node_name=pxc-cluster-node-1
+wsrep_node_name=pxc-cluster-node-4
 pxc_strict_mode=ENFORCING
 wsrep_sst_method=xtrabackup-v2
 
@@ -1374,12 +1375,13 @@ wsrep_sst_auth="sstuser:s3cretPass"
 172.20.1.69 | CHANGED | rc=0 >>
 [mysqld]
 wsrep_provider=/usr/lib64/galera3/libgalera_smm.so
-wsrep_cluster_address=gcomm://
+wsrep_cluster_address=gcomm://172.20.1.69,172.20.1.68,172.20.1.67,172.20.1.79
 binlog_format=ROW
 default_storage_engine=InnoDB
 wsrep_slave_threads= 8
 wsrep_log_conflicts
 innodb_autoinc_lock_mode=2
+wsrep_node_address=172.20.1.69
 wsrep_cluster_name=pxc-cluster
 wsrep_node_name=pxc-cluster-node-1
 pxc_strict_mode=ENFORCING
@@ -1608,7 +1610,7 @@ wsrep_cluster_status | Primary 表示已经完全连接并准备好
 ##### 5.启动其它节点
 
 ```bash
-root@ubuntu1904:~#ansible 'websrvs:!172.20.1.79' -a 'systemctl start mysql'
+root@ubuntu1904:~#ansible 'websrvs:!172.20.1.79' -m shell -a 'systemctl start mysql'
 172.20.1.67 | CHANGED | rc=0 >>
 
 172.20.1.68 | CHANGED | rc=0 >>
@@ -1638,9 +1640,75 @@ root@ubuntu1904:~#ansible 'websrvs:!172.20.1.79' -a 'systemctl start mysql'
 
 - <font face="" color="white" size="6">略略略略略</font>
 
-> [MariaDB Galera Cluster 参考](https://galeracluster.com)
+- 配置大同小异，官网有教程
+
+```bash
+安装：
+    yum install mariadb-server-galera -y
+    dnf install mariadb-server-galera -y
+启动第一个节点：
+    galera_new_cluster
+启动其它节点：
+    systemctl start mariadb
+```
+
+> [MariaDB Galera Cluster 参考](https://mariadb.com/kb/en/library/what-is-mariadb-galera-cluster/)
 
 ## 3.4 TiDB
+
+### 3.4.1 What is TiDB?
+
+> [pingcap-TiDB-github](https://github.com/pingcap/tidb)
+
+> [A-brief-introduction-of-TiDB-pdf](https://www.percona.com/live/17/sites/default/files/slides/A%20brief%20introduction%20of%20TiDB%20%28Percona%20Live%29.pdf)
+
+- TiDB("Ti"表示 Titanium，n. [化学] 钛(金属元素))是一个开源的分布式 NoSQL 数据库；支持混合事务分析处理
+  工作负载。最初是 PingCAP 公司受 Google Spanner / F1 论文启发而设计,结合了传统的 RDBMS 和 NoSQL 的最
+  佳特性。TiDB 兼容 MySQL，支持无限的水平扩展，具备强一致性和高可用性。TiDB 和 mysql 几乎完全兼容。它支
+  持水平弹性扩展、ACID 事务、标准 SQL、MySQL 语法和 MySQL 协议，具有数据强一致的高可用特性，是一个不仅
+  适合 OLTP 场景还适合 OLAP 场景的混合数据库。TiDB 的目标是为 OLTP(Online Transactional Processing)
+  和 OLAP (Online Analytical Processing) 景提供一站式的解决方案。
+
+- TiDB 核心特点
+
+1. 高度兼容 MySQL 大多数情况下，无需修改代码即可从 MySQL 轻松迁移至 TiDB，分库分表后的 MySQL 集群亦
+   可通过 TiDB 工具进行实时迁移
+2. 水平弹性扩展 通过简单地增加新节点即可实现 TiDB 的水平扩展，按需扩展吞吐或存储，轻松应对高并发、海量
+   数据场景
+3. 分布式事务 TiDB 100% 支持标准的 ACID 事务
+4. 真正金融级高可用 相比于传统主从 (M-S) 复制方案，基于 Raft 的多数派选举协议可以提供金融级的 100% 数据
+   强一致性保证，且在不丢失大多数副本的前提下，可以实现故障的自动恢复(auto-failover)，无需人工介入
+5. 一站式 HTAP 解决方案 TiDB 作为典型的 OLTP 行存数据库，同时兼具强大的 OLAP 性能，配合 TiSpark，可提
+   供一站式 HTAP 解决方案，一份存储同时处理 OLTP & OLAP(OLAP、OLTP 的介绍和比较 )无需传统繁琐的 ETL
+   过程
+6. 云原生 SQL 数据库 TiDB 是为云而设计的数据库，同 Kubernetes 深度耦合，支持公有云、私有云和混合云，
+   使部署、配置和维护变得十分简单。 TiDB 的设计目标是 100% 的 OLTP 场景和 80% 的 OLAP 场景，更复杂的
+   OLAP 分析可以通过 TiSpark 项目来完成。 TiDB 对业务没有任何侵入性，能优雅的替换传统的数据库中间件、
+   数据库分库分表等 Sharding 方案。同时它也让开发运维人员不用关注数据库 Scale 的细节问题，专注于业务
+   开发，极大的提升研发的生产力。
+
+- **TiDB 整体架构**
+
+![](png/2019-12-07-16-36-33.png)
+
+**TiDB Server**
+TiDB Server 负责接收 SQL 请求，处理 SQL 相关的逻辑，并通过 PD 找到存储计算所需数据的 TiKV 地址，与
+TiKV 交互获取数据，最终返回结果。TiDB Server 是无状态的，其本身并不存储数据，只负责计算，可以无限水平
+扩展，可以通过负载均衡组件（LVS、HAProxy 或 F5）对外提供统一的接入地址。
+**PD Server**
+Placement Driver（简称 PD）是整个集群的管理模块，其主要工作有三个：一是存储集群的元信息(某个 Key 存储
+在那个 TiKV 节点)；二是对 TiKV 集群进行调度和负载均衡(如数据的迁移、Raft groupleader 的迁移等)；三是
+分配全局唯一且递增的事务 ID;PD 是一个集群，需要部署奇数个节点，一般线上推荐至少部署 3 个节点。PD 在选举
+的过程中无法对外提供服务，这个时间大约是 3 秒。
+**TiKV Server**
+TiKV Server 负责存储数据，从外部看 TiKV 是一个分布式的提供事务的 Key-Value 存储引擎。存储数据的基本单
+位是 Region，每个 Region 负责存储一个 Key Range（从 StartKey 到 EndKey 的左闭右开区间）的数据，每个
+TiKV 节点会负责多个 Region。TiKV 使用 Raft 协议做复制，保持数据的一致性和容灾。副本以 Region 为单位
+进行管理，不同节点上的多个 Region 构成一个 Raft Group，互为副本。数据在多个 TiKV 之间的负载均衡由 PD
+调度，这里也就是以 Region 为单位进行调度。物理上 TiKV 上的数据存储由 RocksDB 引擎负责。
+
+- 使用 TiDB 结合 spark 进行加速和优化的架构
+  ![](png/2019-12-07-16-55-19.png)
 
 # 四.MySQL Benchmark
 
@@ -1648,13 +1716,272 @@ root@ubuntu1904:~#ansible 'websrvs:!172.20.1.79' -a 'systemctl start mysql'
 
 ### 4.1.1 常见 MySQL 压力测试工具
 
+1.mysqlslap
+2.Sysbench：功能强大，[Sysbench-github 官网](https://github.com/akopytov/sysbench)
+3.tpcc-mysql
+4.MySQL Benchmark Suite
+5.MySQL super-smack
+6.MyBench
+
 ### 4.1.2 mysqlslap 工具
+
+- **mysqlslap**来自于 mariadb 包，测试的过程默认生成一个 mysqlslap 的 schema,生成测试表 t1，查询和插
+  入测试数据，mysqlslap 库自动生成，如果已经存在则先删除。用--only-print 来打印实际的测试过程，整个测试
+  完成后不会在数据库中留下痕迹
+
+- 用法：
+
+```bash
+mysqlslap [options]
+
+--auto-generate-sql, -a #自动生成测试表和数据，表示用mysqlslap工具自己生成的SQL脚本来测试并发压力
+--auto-generate-sql-load-type=type #测试语句的类型。代表要测试的环境是读操作还是写操作还是两者混合的。取值包括：read，key，write，update和mixed(默认)
+--auto-generate-sql-add-auto-increment #代表对生成的表自动添加auto_increment列，从5.1.18版本开始支持
+--number-char-cols=N, -x N #自动生成的测试表中包含多少个字符类型的列，默认1
+--number-int-cols=N, -y N #自动生成的测试表中包含多少个数字类型的列，默认1
+--number-of-queries=N #总的测试查询次数(并发客户数×每客户查询次数)
+--query=name,-q #使用自定义脚本执行测试，例如可以调用自定义的存储过程或者sql语句来执行测试
+--create-schema #代表自定义的测试库名称，测试的schema
+--commint=N #多少条DML后提交一次
+--compress, -C #如服务器和客户端都支持压缩，则压缩信息
+--concurrency=N, -c N #表示并发量，即模拟多少个客户端同时执行select。可指定多个值，以逗号或者--delimiter参数指定值做为分隔符,如：--concurrency=100,200,500
+--engine=engine_name, -e engine_name #代表要测试的引擎，可以有多个，用分隔符隔开。例如：--engines=myisam,innodb
+--iterations=N, -i N #测试执行的迭代次数，代表要在不同并发环境下，各自运行测试多少次
+--only-print #只打印测试语句而不实际执行。
+--detach=N #执行N条语句后断开重连
+--debug-info, -T #打印内存和CPU的相关信息
+```
+
+- mysqlslap 示例
+
+```bash
+#单线程测试
+mysqlslap -a -uroot -pmagedu
+
+#多线程测试。使用--concurrency来模拟并发连接
+mysqlslap -a -c 100 -uroot -pmagedu
+
+#迭代测试。用于需要多次执行测试得到平均值
+mysqlslap -a -i 10 -uroot -pmagedu
+mysqlslap ---auto-generate-sql-add-autoincrement -a
+mysqlslap -a --auto-generate-sql-load-type=read
+mysqlslap -a --auto-generate-secondary-indexes=3
+mysqlslap -a --auto-generate-sql-write-number=1000
+mysqlslap --create-schema world -q "select count(*) from City"
+mysqlslap -a -e innodb -uroot -pmagedu
+mysqlslap -a --number-of-queries=10 -uroot -pmagedu
+
+#测试同时不同的存储引擎的性能进行对比
+mysqlslap -a --concurrency=50,100 --number-of-queries 1000 --iterations=5 --
+engine=myisam,innodb --debug-info -uroot -pmagedu
+
+#执行一次测试，分别50和100个并发，执行1000次总查询
+mysqlslap -a --concurrency=50,100 --number-of-queries 1000 --debug-info -uroot -
+pmagedu
+#50和100个并发分别得到一次测试结果(Benchmark)，并发数越多，执行完所有查询的时间越长。为了准确起见，可以多迭代测试几次
+mysqlslap -a --concurrency=50,100 --number-of-queries 1000 --iterations=5 --
+debug-info -uroot -pmagedu
+```
+
+### 4.1.3 生产实践配置案例
+
+- 参考硬件内存:32G
+
+```sql
+#打开独立表空间
+innodb_file_per_table = 1
+
+#MySQL 服务所允许的同时会话数的上限，经常出现Too Many Connections的错误提示，则需要增大此值
+max_connections = 8000
+
+#所有线程所打开表的数量
+open_files_limit = 10240
+
+#back_log 是操作系统在监听队列中所能保持的连接数
+back_log = 300
+
+#每个客户端连接最大的错误允许数量，当超过该次数，MYSQL服务器将禁止此主机的连接请求，直到MYSQL
+服务器重启或通过flush hosts命令清空此主机的相关信息
+max_connect_errors = 1000
+
+#每个连接传输数据大小.最大1G，须是1024的倍数，一般设为最大的BLOB的值
+max_allowed_packet = 32M
+
+#指定一个请求的最大连接时间
+wait_timeout = 10
+
+# 排序缓冲被用来处理类似ORDER BY以及GROUP BY队列所引起的排序
+sort_buffer_size = 16M
+
+#不带索引的全表扫描.使用的buffer的最小值
+join_buffer_size = 16M
+
+#查询缓冲大小
+query_cache_size = 128M
+
+#指定单个查询能够使用的缓冲区大小，缺省为1M
+query_cache_limit = 4M
+
+# 设定默认的事务隔离级别
+transaction_isolation = REPEATABLE-READ
+
+# 线程使用的堆大小. 此值限制内存中能处理的存储过程的递归深度和SQL语句复杂性，此容量的内存在每次连接时被预留.
+thread_stack = 512K
+
+# 二进制日志功能
+log-bin=/data/mysqlbinlogs/
+
+#二进制日志格式
+binlog_format=row
+
+#InnoDB使用一个缓冲池来保存索引和原始数据, 可设置这个变量到物理内存大小的80%
+innodb_buffer_pool_size = 24G
+
+#用来同步IO操作的IO线程的数量
+innodb_file_io_threads = 4
+
+#在InnoDb核心内的允许线程数量，建议的设置是CPU数量加上磁盘数量的两倍
+innodb_thread_concurrency = 16
+
+# 用来缓冲日志数据的缓冲区的大小
+innodb_log_buffer_size = 16M
+
+在日志组中每个日志文件的大小
+innodb_log_file_size = 512M
+
+# 在日志组中的文件总数
+innodb_log_files_in_group = 3
+
+# SQL语句在被回滚前,InnoDB事务等待InnoDB行锁的时间
+innodb_lock_wait_timeout = 120
+
+#慢查询时长
+long_query_time = 2
+
+#将没有使用索引的查询也记录下来
+log-queries-not-using-indexes
+```
+
+# 五.MySQL 最佳实践准则
+
+- 高并发大数据的互联网业务，架构设计思路是“解放数据库 CPU，将计算转移到服务层”，并发量大的情况下，这些功
+  能很可能将数据库拖死，业务逻辑放到服务层具备更好的扩展性，能够轻易实现“增机器就加性能”
+- 参考资料：
+  阿里巴巴 Java 开发手册
+  [58 到家数据库 30 条军规解读](http://zhuanlan.51cto.com/art/201702/531364.htm)
+
+## 5.1 基础规范
+
+- 1.必须使用 InnoDB 存储引擎
+  解读：支持事务、行级锁、并发性能更好、CPU 及内存缓存页优化使得资源利用率更高
+- 2.使用 UTF8MB4 字符集
+  解读：万国码，无需转码，无乱码风险，节省空间，支持表情包及生僻字
+- 3.数据表、数据字段必须加入中文注释
+  解读：N 年后谁知道这个 r1,r2,r3 字段是干嘛的
+- 4.禁止使用存储过程、视图、触发器、Event
+  解读：高并发大数据的互联网业务，架构设计思路是“解放数据库 CPU，将计算转移到服务层”，并发量
+  大的情况下，这些功能很可能将数据库拖死，业务逻辑放到服务层具备更好的扩展性，能够轻易实现
+  “增机器就加性能”。数据库擅长存储与索引，CPU 计算还是上移吧！
+- 5.禁止存储大文件或者大照片
+  解读：为何要让数据库做它不擅长的事情?大文件和照片存储在文件系统，数据库里存 URI 多好。
+
+## 5.2 命名规范
+
+- 1.只允许使用内网域名，而不是 ip 连接数据库
+- 2.线上环境、开发环境、测试环境数据库内网域名遵循命名规范
+  业务名称：xxx
+  线上环境：xxx.db
+  开发环境：xxx.rdb
+  测试环境：xxx.tdb
+  从库在名称后加-s 标识，备库在名称后加-ss 标识
+  线上从库：xxx-s.db
+  线上备库：xxx-sss.db
+- 3.库名、表名、字段名
+  小写，下划线风格，不超过 32 个字符，必须见名知意，禁止拼音英文混用
+- 4.库名与应用名称尽量一致
+  表名:t*业务名称*表的作用，主键名:pk_xxx，非唯一索引名:idx_xxx，唯一键索引名:uk_xxx
+
+## 5.3 表设计规范
+
+- 1.单实例表数目必须小于 500
+  单表行数超过 500 万行或者单表容量超过 2GB，才推荐进行分库分表。
+  说明：如果预计三年后的数据量根本达不到这个级别，请不要在创建表时就分库分表
+- 2.单表列数目必须小于 30
+- 3.表必须有主键，例如自增主键
+  解读：
+  a)主键递增，数据行写入可以提高插入性能，可以避免 page 分裂，减少表碎片提升空间和内存的使用
+  b)主键要选择较短的数据类型， Innodb 引擎普通索引都会保存主键的值，较短的数据类型可以有效的
+  减少索引的磁盘空间，提高索引的缓存效率
+  c) 无主键的表删除，在 row 模式的主从架构，会导致备库夯住
+- 4.禁止使用外键，如果有外键完整性约束，需要应用程序控制
+  解读：外键会导致表与表之间耦合，update 与 delete 操作都会涉及相关联的表，十分影响 sql 的性能，
+  甚至会造成死锁。高并发情况下容易造成数据库性能，大数据高并发业务场景数据库使用以性能优先
+
+## 5.4 字段设计规范
+
+- 1.必须把字段定义为 NOT NULL 并且提供默认值
+  解读：
+  a)null 的列使索引/索引统计/值比较都更加复杂，对 MySQL 来说更难优化
+  b)null 这种类型 MySQL 内部需要进行特殊处理，增加数据库处理记录的复杂性;同等条件下，表中有较
+  多空字段的时候，数据库的处理性能会降低很多
+  c)null 值需要更多的存储空，无论是表还是索引中每行中的 null 的列都需要额外的空间来标识
+  d)对 null 的处理时候，只能采用 is null 或 is not null，而不能采用=、in、<、<>、!=、not in 这些
+  操作符号。如：where name!=’shenjian’，如果存在 name 为 null 值的记录，查询结果就不会包含 name
+  为 null 值的记录
+- 2.禁止使用 TEXT、BLOB 类型
+  解读：会浪费更多的磁盘和内存空间，非必要的大量的大字段查询会淘汰掉热数据，导致内存命中率急
+  剧降低，影响数据库性能
+- 3.禁止使用小数存储货币
+  解读：使用整数吧，小数容易导致钱对不上
+- 4.必须使用 varchar(20)存储手机号
+  解读：
+  a)涉及到区号或者国家代号，可能出现+-()
+  b)手机号会去做数学运算么?
+  c)varchar 可以支持模糊查询，例如：like“138%”
+- 5.禁止使用 ENUM，可使用 TINYINT 代替
+  解读：
+  a)增加新的 ENUM 值要做 DDL 操作
+  b)ENUM 的内部实际存储就是整数，你以为自己定义的是字符串?
+
+## 5.5 索引设计规范
+
+- 1.单表索引建议控制在 5 个以内
+- 2.单索引字段数不允许超过 5 个
+  解读：字段超过 5 个时，实际已经起不到有效过滤数据的作用了
+- 3.禁止在更新十分频繁、区分度不高的属性上建立索引
+  解读：
+  a)更新会变更 B+树，更新频繁的字段建立索引会大大降低数据库性能
+  b)“性别”这种区分度不大的属性，建立索引是没有什么意义的，不能有效过滤数据，性能与全表扫描类
+  似
+- 4.建立组合索引，必须把区分度高的字段放在前面
+  解读：能够更加有效的过滤数据
+
+## 5.6 SQL 使用规范
+
+- 1.禁止使用 SELECT *，只获取必要的字段，需要显示说明列属性
+  解读：
+  a)读取不需要的列会增加 CPU、IO、NET 消耗
+  b)不能有效的利用覆盖索引
+  c)使用 SELECT *容易在增加或者删除字段后出现程序 BUG
+- 2.禁止使用 INSERT INTO t_xxx VALUES(xxx)，必须显示指定插入的列属性
+  解读：容易在增加或者删除字段后出现程序 BUG
+- 3.禁止使用属性隐式转换
+  解读：SELECT uid FROM t_user WHERE phone=13812345678 会导致全表扫描，而不能命中 phone
+  索引，猜猜为什么?(这个线上问题不止出现过一次)
+- 4.禁止在 WHERE 条件的属性上使用函数或者表达式
+  解读：SELECT uid FROM t_user WHERE from_unixtime(day)>='2017-02-15' 会导致全表扫描
+  正确的写法是：SELECT uid FROM t_user WHERE day>= unix_timestamp('2017-02-15 00:00:00')
+- 5.禁止负向查询，以及%开头的模糊查询
+  解读：
+  a)负向查询条件：NOT、!=、<>、!<、!>、NOT IN、NOT LIKE 等，会导致全表扫描
+  b)%开头的模糊查询，会导致全表扫描
+- 6.禁止大表使用 JOIN 查询，禁止大表使用子查询
+  解读：会产生临时表，消耗较多内存与 CPU，极大影响数据库性能
+- 7.禁止使用 OR 条件，必须改为 IN 查询
+  解读：旧版本 Mysql 的 OR 查询是不能命中索引的，即使能命中索引，为何要让数据库耗费更多的 CPU 帮
+  助实施查询优化呢?
+- 8.应用程序必须捕获 SQL 异常，并有相应处理
 
 ## 脚注
 
-[^1]: 多租户技术或称多重租赁技术，是一种软件架构技术，它是在探讨与实现如何于多用户的环境下共用相同的
-
-系统或程序组件，并且仍可确保各用户间数据的隔离性。在云计算时代，多租户技术在共用的数据中心以单一系
-统架构与服务提供多数客户端相同甚至可定制化的服务，并且仍然可以保障客户的数据隔离。目前各种各样的云
-计算服务就是这类技术范畴，例如阿里云数据库服务（RDS）、阿里云服务器等等。
-多租户在数据存储上存在三种主要的方案，分别是：
+[^1]: 多租户技术或称多重租赁技术，是一种软件架构技术，它是在探讨与实现如何于多用户的环境下共用相同的系统或程序组件，并且仍可确保各用户间数据的隔离性。在云计算时代，多租户技术在共用的数据中心以单一系统架构与服务提供多数客户端相同甚至可定制化的服务，并且仍然可以保障客户的数据隔离。目前各种各样的云计算服务就是这类技术范畴，例如阿里云数据库服务（RDS）、阿里云服务器等等
