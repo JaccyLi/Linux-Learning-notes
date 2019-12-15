@@ -2,18 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1b5b990a-bc95-43d9-a3d0-5ffa9b2c734d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/add_section.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/admin.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/gitee_discuz.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/home.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/install_discuz.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/install_discuz2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/install_discuz3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/install_discuz4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/install_discuz5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/manage_center.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/.LAMP_images/management.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/LAMP.md" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -22,22 +12,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/LAMP.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
-            <state split_layout="FIRST">
-              <first_editor relative-caret-position="95">
-                <caret line="47" lean-forward="true" selection-start-line="47" selection-end-line="47" />
-              </first_editor>
-              <second_editor>
-                <markdownNavigatorState />
-              </second_editor>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -75,7 +50,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="I:/ansible_exercise" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
@@ -108,16 +83,15 @@
       <workItem from="1576199918128" duration="186000" />
       <workItem from="1576200157235" duration="542000" />
       <workItem from="1576200743094" duration="2981000" />
-      <workItem from="1576219810012" duration="648000" />
+      <workItem from="1576219810012" duration="2031000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="5306000" />
+    <option name="totallyTimeSpent" value="6689000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="953" y="30" width="974" height="1057" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.2554585" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -153,8 +127,8 @@
     <entry file="file://$PROJECT_DIR$/md_notes/M39-linux-service&amp;platform/LAMP/LAMP.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="FIRST">
-          <first_editor relative-caret-position="95">
-            <caret line="47" lean-forward="true" selection-start-line="47" selection-end-line="47" />
+          <first_editor relative-caret-position="703">
+            <caret line="61" column="36" selection-start-line="61" selection-start-column="36" selection-end-line="61" selection-end-column="36" />
           </first_editor>
           <second_editor>
             <markdownNavigatorState />
