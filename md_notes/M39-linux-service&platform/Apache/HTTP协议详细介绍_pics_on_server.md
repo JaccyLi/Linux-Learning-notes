@@ -8,14 +8,14 @@ HTTP(HyperText Transfer Protocol)：超文本传输协议，是一种允许通�
 档)，从获取的不同子文档(例如文本、布局描述、图像、视频、脚本等)重建完整的文档并由
 客户端(web 浏览器)显示出来。设计HTTP最初的目的是为了提供一种远距离共享知识的方式，
 借助多文档进行关联实现超文本，连成相互参阅的WWW(world wide web,万维网)
-![](png/Fetching_a_page.png)
+![](http://suosuoli.cn/wp-content/uploads/2019/12/Fetching_a_page.png)
 
 <center><font face="黑体" color="grey" size="2">上图展示了客户端请求资源的过程</font></center>
 
 客户端和服务器通过交换相互独立的消息来通讯(而不是数据流)。客户端(通常是 web 浏览器)发送的消
 息叫**请求**(_requests_)，而服务器发送的消息作为客户端消息的回应被称为**响应**(_response_)
 
-![](png/HTTP_layers.png)
+![](http://suosuoli.cn/wp-content/uploads/2019/12/HTTP_layers.png)
 <center><font face="黑体" color="grey" size="2">上图展示了HTTP协议在整个web架构的位置</font></center>
 
 HTTP 在 1989 年就已经被在[CERN](https://en.wikipedia.org/wiki/CE)的[Tim Berners-Lee](https://en.wikipedia.org/wiki/Tim_Berners-Lee)所设计出来，到目前已经经历了 HTTP/0.9，
@@ -31,7 +31,7 @@ HTTP是个用于客户端/服务器架构的协议，请求一般由用户代理
 服务器接收并处理，处理完成后给出响应。在实际的互联网环境中，客户端和服务器之间往往会存在多台
 其它类型的服务器，他们都被称为**代理**(_proxy_)，各自承担不同的服务角色，如作为网关、图片服务器或者
 视频服务器或者缓存服务器。如下图
-![](png/Client-server-chain.png)
+![](http://suosuoli.cn/wp-content/uploads/2019/12/Client-server-chain.png)
 <center><font face="黑体" color="grey" size="2">上图展示了使用HTTP协议的客户端-服务器链</font></center>
 
 实际上，在浏览器和处理请求的服务器之间有更多的计算机、路由器、调制解调器等等。由于Web的分层
@@ -185,7 +185,7 @@ HTTP的连接是在传输层控制和处理的，因此基本上超出了HTTP的
 
 上面这四步为一次完整的访问过程，称为一次HTTP事务。下面图示了一次HTTP事务的执行过程。
 
-![](png/HTTP_Steps.png)
+![](http://suosuoli.cn/wp-content/uploads/2019/12/HTTP_Steps.png)
 如果使用HTTP管道机制，可以在一个TCP连接连续发送多个请求，而不必等待第一个响应被完全接收。
 事实证明，HTTP管道很难在现有网络中实现，因为某些地方老版本的软件与较新的版本共存。HTTP/2
 中的HTTP管道已经被更健壮的多路复用请求技术所取代。
@@ -202,7 +202,7 @@ HTTP协议有两种消息，**请求**和**响应**，各自有各自的格式�
 ## 6.1. 请求报文
 
 一个HTTP请求报文例子：
-![](png/2019-12-18-15-03-33.png)
+![](http://suosuoli.cn/wp-content/uploads/2019/12/2019-12-18-15-03-33.png)
 
 请求消息包含以下元素：
 : - 首先是**HTTP方法**，通常是个动词，如:`GET`,`POST`或是名词如`OPTIONS`,`HEAD`用来定义客户
@@ -217,7 +217,7 @@ HTTP协议有两种消息，**请求**和**响应**，各自有各自的格式�
 ## 6.2. 响应报文
 
 一个HTTP响应报文的例子：
-![](png/2019-12-18-15-25-43.png)
+![](http://suosuoli.cn/wp-content/uploads/2019/12/2019-12-18-15-25-43.png)
 
 响应报文包括以下元素：
 : HTTP协议版本
