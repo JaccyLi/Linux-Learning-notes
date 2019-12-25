@@ -1,4 +1,4 @@
-<center><font face="黑体" color="grey" size="6">运维自动化与Cobbler服务部署</font></center>
+<center><font face="黑体" color="grey" size="6"></font></center>
 
 壹、贰、叁、肆、伍、陆、柒、捌、玖、拾、壹、贰、叁、肆、伍、陆、柒、捌、玖、拾、
 

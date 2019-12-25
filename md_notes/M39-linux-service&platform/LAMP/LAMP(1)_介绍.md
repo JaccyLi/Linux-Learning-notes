@@ -137,7 +137,6 @@ print('<output>{0} + {1} = {2}</output>'.format(num1, num2, num1 + num2))
 
 ### 2.2.3 Fast CGI
 
-> Fast CGI
 > ![](png/CGI_FAST_CGI.png)
 
   <center><font face="黑体" color="grey" size="3">CGI(左)和Fast CGI(右)对比</font></center>
