@@ -5,7 +5,7 @@
 ## 1.1 集群
 
 在计算机领域，集群早在 1960 年就出现，随着互联网和计算机相关技术的发展，现在
-集群这一技术已经在各大互联网公司普及
+集群这一技术已经在各大互联网公司普及。
 
 ### 1.1.1 集群概念
 
@@ -189,53 +189,500 @@
 
 ## 2.1 LVS 简介
 
+LVS 是由张文松在 1998 年 5 月启动的自由和开源项目，遵循 GNU 通用公共许
+可证(GPL)第 2 版的要求。该项目的任务是使用集群技术为 Linux 构建一个高性
+能、高可用的服务器，它提供了良好的可伸缩性、可靠性和可服务性。
+
+LVS 项目的主要工作是开发高级 IP 负载平衡软件(IPVS)、应用程序级负载平衡
+软件(KTCPVS)和集群管理组件。
+
+```c
+IPVS:在Linux内核中实现的一种高级IP负载平衡软件。IP Virtual Server代码合
+已经被合并到版本2.4.x和更新的Linux内核主线。
+KTCPVS:在Linux内核中实现应用程序级负载平衡，截至2011年2月仍在开发中。
+```
+
+LVS 可用于构建高度可伸缩和高度可用的网络服务，如 web、电子邮件、媒体和
+VoIP 服务，并将可伸缩的网络服务集成到大型可靠的电子商务或电子政府应用程
+序中。基于 LVS 的解决方案已经部署在世界各地的许多实际应用程序中，
+包括维基百科 Wikipedia。维基百科简化版的架构如下：
+![](<png/Wikimedia_Server_Architecture_(simplified).svg>)
+
 ## 2.2 LVS 工作原理
 
-## 2.3 LVS 集群体系架构
+LVS 组件依赖于 Linux Netfilter 框架，其源代码可以在 Linux 内核源代码的
+`net/netfilter/ipvs`子目录中找到。LVS 能够处理 UDP、TCP 等 4 层协议，
+通过检查第 7 层数据包，也可以处理 FTP 被动连接。
+
+用于配置 LVS 的用户空间实用程序称为 ipvsadm，它需要超级用户特权才能运行。
+
+> [LVS 官网](http://www.linuxvirtualserver.org/)
+
+LVS 相关术语
+`VS`: Virtual Server，负责调度的服务器
+`RS`: Real Server，负责真正提供服务
+
+VS 根据请求报文的目标 IP 和目标协议及端口将其调度转发至某 RS，根据调度算法
+来挑选 RS。LVS 是内核级功能，工作在 INPUT 链的位置，将发往 INPUT 的流量
+进行"处理"。
+
+查看内核对 LVS 的支持
+
+```bash
+[root@steve ~]$grep -i -C 10 ipvs /boot/config-3.10.0-1062.4.1.el7.x86_64
+CONFIG_NETFILTER_XT_MATCH_CPU=m
+CONFIG_NETFILTER_XT_MATCH_DCCP=m
+CONFIG_NETFILTER_XT_MATCH_DEVGROUP=m
+CONFIG_NETFILTER_XT_MATCH_DSCP=m
+CONFIG_NETFILTER_XT_MATCH_ECN=m
+CONFIG_NETFILTER_XT_MATCH_ESP=m
+CONFIG_NETFILTER_XT_MATCH_HASHLIMIT=m
+CONFIG_NETFILTER_XT_MATCH_HELPER=m
+CONFIG_NETFILTER_XT_MATCH_HL=m
+CONFIG_NETFILTER_XT_MATCH_IPRANGE=m
+CONFIG_NETFILTER_XT_MATCH_IPVS=m
+CONFIG_NETFILTER_XT_MATCH_LENGTH=m
+CONFIG_NETFILTER_XT_MATCH_LIMIT=m
+CONFIG_NETFILTER_XT_MATCH_MAC=m
+CONFIG_NETFILTER_XT_MATCH_MARK=m
+CONFIG_NETFILTER_XT_MATCH_MULTIPORT=m
+CONFIG_NETFILTER_XT_MATCH_NFACCT=m
+CONFIG_NETFILTER_XT_MATCH_OSF=m
+CONFIG_NETFILTER_XT_MATCH_OWNER=m
+CONFIG_NETFILTER_XT_MATCH_POLICY=m
+CONFIG_NETFILTER_XT_MATCH_PHYSDEV=m
+--
+CONFIG_IP_SET_HASH_NETNET=m
+CONFIG_IP_SET_HASH_NETPORT=m
+CONFIG_IP_SET_HASH_NETIFACE=m
+CONFIG_IP_SET_LIST_SET=m
+CONFIG_IP_VS=m
+CONFIG_IP_VS_IPV6=y
+# CONFIG_IP_VS_DEBUG is not set
+CONFIG_IP_VS_TAB_BITS=12
+
+#
+# IPVS transport protocol load balancing support
+#
+CONFIG_IP_VS_PROTO_TCP=y
+CONFIG_IP_VS_PROTO_UDP=y
+CONFIG_IP_VS_PROTO_AH_ESP=y
+CONFIG_IP_VS_PROTO_ESP=y
+CONFIG_IP_VS_PROTO_AH=y
+CONFIG_IP_VS_PROTO_SCTP=y
+
+#
+# IPVS scheduler
+#
+CONFIG_IP_VS_RR=m
+CONFIG_IP_VS_WRR=m
+CONFIG_IP_VS_LC=m
+CONFIG_IP_VS_WLC=m
+CONFIG_IP_VS_LBLC=m
+CONFIG_IP_VS_LBLCR=m
+CONFIG_IP_VS_DH=m
+CONFIG_IP_VS_SH=m
+CONFIG_IP_VS_SED=m
+CONFIG_IP_VS_NQ=m
+
+#
+# IPVS SH scheduler
+#
+CONFIG_IP_VS_SH_TAB_BITS=8
+
+#
+# IPVS application helper
+#
+CONFIG_IP_VS_FTP=m
+CONFIG_IP_VS_NFCT=y
+CONFIG_IP_VS_PE_SIP=m
+
+#
+# IP: Netfilter Configuration
+#
+CONFIG_NF_DEFRAG_IPV4=m
+CONFIG_NF_CONNTRACK_IPV4=m
+```
+
+## 2.3 LVS 典型集群体系架构
+
+![](png/DR.png)
+
+<center><font size=3>LVS-DR模型</font></center>
 
 ## 2.4 LVS 功能及组织架构
 
 ### 2.4.1 LVS 胜任高访问负载的业务
 
+如果业务应用访问量很高，可以通过配置监听规则将流量分发到不同的云服务器 ECS
+(Elastic Compute Service 弹性计算服务)实例上。此外，可以使用会话保持功能
+将同一客户端的请求转发到同一台后端 ECS。
+
 ### 2.4.2 LVS 弹性横向扩展场景
+
+可以根据业务发展的需要，随时添加和移除 ECS 实例来扩展应用系统的服务能力，
+适用于各种 Web 服务器和 App 服务器。
 
 ### 2.4.3 LVS 自动调度，消除单点故障 SPOF
 
+可以在负载均衡实例下添加多台 ECS 实例。当其中一部分 ECS 实例发生故障后，
+负载均衡会自动屏蔽故障的 ECS 实例，将请求分发给正常运行的 ECS 实例，保
+证应用系统仍能正常工作
+
 ### 2.4.4 LVS 同城容灾场景
 
+为了提供更加稳定可靠的负载均衡服务，阿里云的负载均衡实现在各地域部署了
+多可用区以实现同地域容灾。当主可用区出现机房故障或不可用时，负载均衡仍
+然有能力在非常短的时间内（如：大约 30s 中断）切换到另外一个备可用区恢复
+服务能力；当主可用区恢复时，负载均衡同样会自动切换到主可用区提供服务。
+
+使用负载均衡时，可以将负载均衡实例部署在支持多可用区的地域以实现同城容灾。
+此外，还需要结合自身的应用需要，综合考虑后端服务器的部署。如果每个可用区
+均至少添加了一台 ECS 实例，那么此种部署模式下的负载均衡服务的效率是最高的。
+
+如下图所示，在负载均衡实例下绑定不同可用区的 ECS 实例。正常情况下，用户访
+问流量将同时转至发主、备可用区内的 ECS 实例；当可用区 A 发生故障时，用户
+访问流量将只转发至备可用区内的 ECS 实例。此种部署既可以避免因为单个可用区
+的故障而导致对外服务的不可用，也可以通过不同产品间可用区的选择来降低延迟。
+
+![](png/LVS-BACK.png)
+
+如果在负载均衡实例的主可用区(可用区 A)下绑定多台 ECS 实例，而在备可用区
+(可用区 B)没有任何 ECS 实例。当主可用区发生故障时会造成业务中断，因为备
+可用区没有 ECS 实例来接收请求。这样的部署方式很明显是以牺牲高可用性为代
+价来获取低延时。
+
 ### 2.4.5 LVS 跨地域容灾
+
+可以在不同地域下部署负载均衡实例，并分别挂载相应地域内不同可用区的 ECS。
+上层利用云解析做智能 DNS，将域名解析到不同地域的负载均衡实例服务地址下，
+可实现全局负载均衡。当某个地域出现不可用时，暂停对应解析即可实现所有
+用户访问不受影响。
+
+![](png/LVS-area.png)
 
 ## 3.5 LVS 应用场景
 
 ### 3.5.1 音视频大流量场景
 
+对象存储(Object Storage Service,简称 OSS),是阿里云对外提供的海量、安全和
+高可靠的云存储服务
+![](png/2019-12-28-17-53-30.png)
+
+音视频海量流量自动分发
+: 音视频应用中由于用户与主播之间需要实时大量的互动，因此，用户的流量非常大，
+而直播业务的波峰波谷效应明显，这对整个系统的弹性、稳定性和可用性带来了巨大
+的挑战
+
+提高横向扩展能力
+: 添加或删减负载均衡后端的服务器实时生效，可根据业务流量大小实时增减
+
+抵御海量流量
+: 业务发展快，访问流量巨大，负载均衡可对多台云服务器进行流量分发服务
+
+提升应用可用性
+: 负载均衡提供后端服务器的健康检查，实时屏蔽异常服务器，提升系统可用性
+
 ### 3.5.2 网页游戏动静分离场景
+
+![](png/2019-12-28-17-53-54.png)
+
+动静请求分离，快速稳定交付
+: 游戏业务有很多图片等静态资源需要加载，通过 CDN 实现全球用户访问静态资源的
+加速；当用户在游 中有互动时，产生的访问流量非常大，此时为了保证互动实时性，
+需要使用负载均衡进行流量分发
+
+动态请求流量分发
+: 动态请求量大，采用多台云服务器计算处理，并利用负载均衡服务随时进行流量分发
+
+静态请求快速加载
+: 静态内容选择对象存储，接入 CDN 服务，进一步优化内容分发链路，让内容即刻加载
 
 ### 3.5.3 多层次容灾架构场景
 
+![](png/2019-12-28-17-54-53.png)
+
+跨地域跨可用区的容灾方案
+: 用户业务遍布各地域，使用云解析 DNS 将不同地域用户智能解析访问到相应的
+业务系统内，使用负载均衡进行海量的访问流量分发，还可构建地域级、可用区级
+的多层容灾架构
+
+智能解析
+: 智能判断提供最佳的访问解析地址，使访问用户获得最快捷、最流畅的体验
+
+流量分发
+: 业务发展快，访问流量巨大，负载均衡可对多台云服务器进行流量分发服务
+
+多层次容灾
+: 云解析提供跨地域的高可用，负载均衡可实现可用区级的高可用
+
 ### 3.5.4 海量访问流量分发场景
 
+![](png/2019-12-28-17-56-29.png)
+
 ## 2.6 LVS 相关术语
+
+`VS`：Virtual Server，Director Server(DS), Dispatcher(调度器)，Load Balancer
+`RS`：Real Server(lvs), upstream server(nginx), backend server(haproxy)
+`CIP`：Client IP
+`VIP`：Virtual serve IP VS 外网的 IP
+`DIP`：Director IP VS 内网的 IP
+`RIP`：Real server IP
+访问流程：CIP <--> VIP == DIP <--> RIP
 
 # 三.LVS 工作模式
 
 ## 3.1 LVS 集群的工作模式
 
+LVS 有四种工作模式
+
+: lvs-nat：修改请求报文的目标 IP,多目标 IP 的 DNAT
+: lvs-dr：操纵封装新的 MAC 地址
+: lvs-tun：在原请求 IP 报文之外新加一个 IP 首部
+: lvs-fullnat：修改请求报文的源和目标 IP
+
 ### 3.1.1 LVS 的 NAT 工作模式
+
+![](png/VS-NAT.gif)
+
+vs-nat：本质是多目标 IP 的 DNAT，通过将请求报文中的目标地址和目标端口修改为
+某挑出的 RS 的 RIP 和 PORT 实现转发，特点：
+（1）RIP 和 DIP 应在同一个 IP 网络，且应使用私网地址；RS 的网关要指向 DIP
+（2）请求报文和响应报文都必须经由 Director 转发，Director 易于成为系统瓶颈
+（3）支持端口映射，可修改请求报文的目标 PORT
+（4）VS 必须是 Linux 系统，RS 可以是任意 OS 系统
+![](png/natflow.png)
 
 ### 3.1.2 LVS 的 DR 模式
 
+![](png/VS-DRouting.gif)
+
+LVS-DR：Direct Routing，直接路由，LVS 默认模式,应用最广泛,通过为请求报文
+重新封装一个 MAC 首部进行转发，源 MAC 是 DIP 所在的接口的 MAC，目标 MAC 是某挑选
+出的 RS 的 RIP 所在接口的 MAC 地址；源 IP/PORT，以及目标 IP/PORT 均保持不变
+
+![](png/DR-flow-me.png)
+DR 模式的特点：
+
+1. Director 和各 RS 都配置有 VIP
+2. 确保前端路由器将目标 IP 为 VIP 的请求报文发往 Director
+   需要在前端网关做静态绑定 VIP 和 Director 的 MAC 地址
+   在 RS 上使用 arptables 工具
+   ```bash
+   arptables -A IN -d $VIP -j DROP
+   arptables -A OUT -s $VIP -j mangle --mangle-ip-s $RIP
+   ```
+   在 RS 上修改内核参数以限制 arp 通告及应答级别[^1]
+   ```bash
+   /proc/sys/net/ipv4/conf/all/arp_ignore
+   /proc/sys/net/ipv4/conf/all/arp_announce
+   ```
+3. RS 的 RIP 可以使用私网地址，也可以是公网地址；RIP 与 DIP 在同一 IP
+   网络；RIP 的网关不能指向 DIP，以确保响应报文不会经由 Director
+4. RS 和 Director 要在同一个物理网络
+5. 请求报文要经由 Director，但响应报文不经由 Director，而由 RS 直接发往 Client
+6. 不支持端口映射（端口不能修败）
+7. RS 可使用大多数 OS 系统
+
 ### 3.1.3 LVS 的 TUN 模式
+
+转发方式：不修改请求报文的 IP 首部（源 IP 为 CIP，目标 IP 为 VIP），而
+在原 IP 报文之外再封装一个 IP 首部（源 IP 是 DIP，目标 IP 是 RIP），将
+报文发往挑选出的目标 RS；RS 直接响应给客户端(源 IP 是 VIP，目标 IP 是 CIP)
+
+![](png/VS-IPTunneling.gif)
+
+TUN 模式特点：
+
+1. DIP, VIP, RIP 可以是公网地址
+2. RS 的网关一般不能指向 DIP
+3. 请求报文要经由 Director，但响应不经由 Director
+4. 不支持端口映射
+5. RS 的 OS 须支持隧道功能
 
 ### 3.1.4 LVS 的 FULLNAT 模式
 
+![](png/fullnat.jpg)
+
+通过同时修改请求报文的源 IP 地址和目标 IP 地址进行转发
+: CIP --> DIP
+: VIP --> RIP
+
+fullnat 模式特点：
+
+1. VIP 是公网地址，RIP 和 DIP 是私网地址，且通常不在同一 IP 网络；因此，
+   RIP 的网关一般不会指向 DIP
+2. RS 收到的请求报文源地址是 DIP，因此，只需响应给 DIP；但 Director 还
+   要将其发往 Client
+3. 请求和响应报文都经由 Director
+4. 支持端口映射
+
+注意：此类型 kernel 默认不支持
+
 ### 3.1.5 LVS 的工作模式总结和比较
+
+| 服务器参数\LVS 模式 | VS/NAT        | VS/TUN     | VS/DR          |
+| ------------------- | ------------- | ---------- | -------------- |
+| Server              | any           | Tunneling  | Non-arp device |
+| server network      | private       | LAN/WAN    | LAN            |
+| server number       | low (10~20)   | High (100) | High (100)     |
+| server gateway      | load balancer | own router | Own router     |
+
+lvs-nat 与 lvs-fullnat：
+: 请求和响应报文都经由 Director
+: lvs-nat：RIP 的网关要指向 DIP
+: lvs-fullnat：RIP 和 DIP 未必在同一 IP 网络，但要能通信
+
+lvs-dr 与 lvs-tun：
+: 请求报文要经由 Director，但响应报文由 RS 直接发往 Client
+: lvs-dr：通过封装新的 MAC 首部实现，通过 MAC 网络转发
+: lvs-tun：通过在原 IP 报文外封装新 IP 头实现转发，支持远距离通信
 
 ## 3.2 LVS 调度算法
 
+LVS 调度算法可以根据其调度是是否考虑各 RS 当前的负载状态分为**静态调度方法**
+和**动态调度方法**。由`ipvs scheduler`调度。内核 4.15 版本以前总共有十种调度
+算法，各调度算法和源码的对应关系如下：
+
+| 调度算法                                         | 源码文件        |
+| ------------------------------------------------ | --------------- |
+| Round-robin                                      | (ip_vs_rr.c)    |
+| Weighted round-robin                             | (ip_vs_wrr.c)   |
+| Least-connection                                 | (ip_vs_lc.c)    |
+| Weighted least-connection                        | (ip_vs_wlc.c)   |
+| Locality-based least-connection                  | (ip_vs_lblc.c)  |
+| Locality-based least-connection with replication | (ip_vs_lblcr.c) |
+| Destination hashing                              | (ip_vs_dh.c)    |
+| Source hashing                                   | (ip_vs_sh.c)    |
+| Shortest expected delay                          | (ip_vs_sed.c)   |
+| Never queue                                      | (ip_vs_nq.c)    |
+
+- ipvs 源码
+
+```sh
+root@ubuntu1904:/data#ll linux-5.4.6/net/netfilter/ipvs/
+total 588
+-rw-rw-r-- 1 root root  13438 Dec 21 18:05 ip_vs_app.c
+-rw-rw-r-- 1 root root  37075 Dec 21 18:05 ip_vs_conn.c
+-rw-rw-r-- 1 root root  67225 Dec 21 18:05 ip_vs_core.c
+-rw-rw-r-- 1 root root 107931 Dec 21 18:05 ip_vs_ctl.c
+-rw-rw-r-- 1 root root   6328 Dec 21 18:05 ip_vs_dh.c
+-rw-rw-r-- 1 root root   5535 Dec 21 18:05 ip_vs_est.c
+-rw-rw-r-- 1 root root   1876 Dec 21 18:05 ip_vs_fo.c
+-rw-rw-r-- 1 root root  15949 Dec 21 18:05 ip_vs_ftp.c
+-rw-rw-r-- 1 root root  15908 Dec 21 18:05 ip_vs_lblc.c
+-rw-rw-r-- 1 root root  20389 Dec 21 18:05 ip_vs_lblcr.c
+-rw-rw-r-- 1 root root   2232 Dec 21 18:05 ip_vs_lc.c
+-rw-rw-r-- 1 root root  13657 Dec 21 18:05 ip_vs_mh.c
+-rw-rw-r-- 1 root root   9010 Dec 21 18:05 ip_vs_nfct.c
+-rw-rw-r-- 1 root root   3359 Dec 21 18:05 ip_vs_nq.c
+-rw-rw-r-- 1 root root   2132 Dec 21 18:05 ip_vs_ovf.c
+-rw-rw-r-- 1 root root   2501 Dec 21 18:05 ip_vs_pe.c
+-rw-rw-r-- 1 root root   4877 Dec 21 18:05 ip_vs_pe_sip.c
+-rw-rw-r-- 1 root root   3832 Dec 21 18:05 ip_vs_proto_ah_esp.c
+-rw-rw-r-- 1 root root   8570 Dec 21 18:05 ip_vs_proto.c
+-rw-rw-r-- 1 root root  18326 Dec 21 18:05 ip_vs_proto_sctp.c
+-rw-rw-r-- 1 root root  20142 Dec 21 18:05 ip_vs_proto_tcp.c
+-rw-rw-r-- 1 root root  12350 Dec 21 18:05 ip_vs_proto_udp.c
+-rw-rw-r-- 1 root root   3310 Dec 21 18:05 ip_vs_rr.c
+-rw-rw-r-- 1 root root   5727 Dec 21 18:05 ip_vs_sched.c
+-rw-rw-r-- 1 root root   3758 Dec 21 18:05 ip_vs_sed.c
+-rw-rw-r-- 1 root root   9445 Dec 21 18:05 ip_vs_sh.c
+-rw-rw-r-- 1 root root  55183 Dec 21 18:05 ip_vs_sync.c
+-rw-rw-r-- 1 root root   3044 Dec 21 18:05 ip_vs_wlc.c
+-rw-rw-r-- 1 root root   6950 Dec 21 18:05 ip_vs_wrr.c
+-rw-rw-r-- 1 root root  43486 Dec 21 18:05 ip_vs_xmit.c
+-rw-rw-r-- 1 root root  13157 Dec 21 18:05 Kconfig
+-rw-rw-r-- 1 root root   1428 Dec 21 18:05 Makefile
+```
+
+> [10 种算法的官方说明](http://www.linuxvirtualserver.org/docs/scheduling.html)
+
 ### 3.2.1 静态调度算法
 
+#### 3.2.1.1 Round-Robin Scheduling
+
+循环调度算法：该调度算法是 LVS 最简单的调度策略，其将每个传入的请求发送到
+其列表的下一个服务器。例如：在三个服务器的集群中(A、B 和 C 服务器)，请求 1
+将被 调度到服务器 A，请求 2 将被调度到服务器 B，请求 3 将被 C 服务器处理，
+请求 4 又被调度到服务器 A。从而让集群中的服务器循环的提供服务，该调度策略
+平等对待所有服务器，其不考虑到来的连接或请求数量和服务器的响应时间(或是负
+载情况)，其性能高于传统的 DNS 轮询。
+
+#### 3.2.1.2 Weighted Round-Robin Scheduling
+
+加权轮询调度算法：该调度策略旨在处理不同的性能的服务器在接收请求和处理请求
+时的权重呵呵优先顺序。在调度期间，每个服务器的性能有差异，各自会被分配不同
+的权重值，一个表示处理能力的整数值。权重较大的服务器比权重小的服务器优先
+处理新连接，权重较大的服务器也比权重较小的服务器获得更多的连接，权重相同
+的服务器获得相同的连接数。例如：RS 服务器分别为 A、B 和 C，它们分别有权重
+4、3 和 2，那么一个比较理想的调度序列会是 AABABCABC，可以看到在三次轮询过
+程中，不同权重的 RS 被分配了不同的连接数，但是整个过程中各自总的处理连接比
+例接近 4:3:2(A 处理了 4 次，B 处理了 3 次，C 处理了 2 次)。
+
+在加权轮询调度的实现中，在管理员修改 VS 的服务器调度策略后，会根据具体的配
+置权重来生成调度序列。基于该序列以轮询调度方式将不同的网络连接定向到后端不
+同的 RS 服务器。
+
+当后端 RS 服务器的处理性能不一时，此算法是比单纯的轮询调度算法优异的。但是，
+如果有不间断的高负载的请求到来时，可能造成各服务器的动态负载严重不均衡。
+也就是说，可能会有很大部分的高负载请求都被调度到相同的 RS 上。此时，该 RS
+的复制将会很高。
+
+而实际上，轮询是加权轮询策略的特例，即是加权轮询的权重值都为 1 的情况。
+
+#### 3.2.1.3 Destination Hashing Scheduling
+
+目标地址哈希调度：该调度策略是根据目标 IP 地址来查找静态分配的哈希表，将网
+络连接分配给相应的服务器。第一次轮询调度至 RS，后续将发往同一个目标地址的
+请求始终转发至第一次挑中的 RS。该调度策略的典型使用场景是正向代理缓存场景
+中的负载均衡，如：宽带运营商
+
+#### 3.2.1.4 Source Hashing Scheduling
+
+源地址哈希调度算法：该调度策略查找由源 IP 地址静态分配的哈希表，将网络连接
+分配给服务器。其将来自于同一个 IP 地址的请求始终发往第一次挑中的 RS，从而实
+现会话绑定。
+
 ### 3.2.2 动态调度算法
+
+#### 3.2.2.1 Least-Connection Scheduling
+
+最少连接调度算法：该调度策略将网络连接调度给建立连接数量最少的 RS 服务器。
+该调度算法会动态的记录各服务器的活动连接数。如果后端的一群 RS 服务器的处理
+性能相近，那么最少连接调度策略有助于在请求的负载有大幅变化时平滑分配负载。
+VS 将把请求定向到有最少的活动连接的 RS。
+乍一看，该调度策略应该可以在服务器的处理性能各不相同的情况下表现良好，因为
+处理性能高的服务器会接到更多的请求并处理。然而由于 TCP 协议的`TIME_WAIT`
+状态导致了其表现并不好。TCP 定义的`TIME_WAIT`状态为 2 分钟，在这两分钟内
+某个繁忙的站点可能已经收到了好几千个请求。例如：RS-A 的处理性能是 RS-B 的
+两倍，RS-A 可能已经按照正常的速度完成了这些请求并将它们保持在了`TIME_WAIT`
+状态(也就是在 2 分钟内完成了分配的请求)，而 RS-B 正挣扎着完成分配到自己的
+好几千的请求，在这种情况下就没法均衡负载了。
+
+#### 3.2.2.1 Weighted Least-Connection Scheduling
+
+加权的最少连接调度算法：该调度策略允许为每个 RS 服务器分配一个性能权重值。
+具有较高权重值的服务器在任何时候都将接收到较大百分比的活动连接。VS 管理员
+可以给每个 RS 服务器分配一个权重值，网络连接会被调度到每个 RS 服务器并且
+每个服务器的当前活动连接数的百分比与其权重成比例。
+
+加权的最少连接调度算法相比最少连接算法需要额外的除法来区分不同比例。为了
+在服务器处理能力接近相同的情况下最小化调度工作的开销，才有了非加权和加权
+的最少连接算法。
+
+#### 3.2.2.1 Locality-Based Least-Connection Scheduling
+
+居于位置的最少连接调度算法：该调度策略专用于目标 IP 的负载均衡。一般被用于
+缓存集群。该算法通常会将到某个 IP 地址的数据包定向到负责处理其的服务器，前
+提是该服务器是活动的并且负载不足。如果该服务过载(活动连接数大于其权重)并且
+有一个服务器目前只有一半的负载，那就会将加权的最少连接服务器分配给该 IP。
+
+#### 3.2.2.1 Locality-Based Least-Connection with Replication Scheduling
+
+#### 3.2.2.1 Shortest Expected Delay Scheduling
+
+#### 3.2.2.1 Never Queue Scheduling
 
 ### 3.2.3 内核版本 4.15 版本后新增调度算法：FO 和 OVF
 
