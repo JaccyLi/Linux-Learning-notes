@@ -40,7 +40,7 @@
 实现集群服务需要两种关键技术:
 
 **Cluster address**:集群地址，客服端通过访问集群的地址来获取集群内部各服务器
-提供的服务，集群对外是只有一个地址的。复制维护整个集群地址的服务器称为负载均衡
+提供的服务，集群对外是只有一个地址的。负责维护整个集群地址的服务器称为负载均衡
 器，在客户端访问集群时，其负责将集群的地址转换为集群内部某个计算机的地址，具体
 转换到哪个服务器的地址根据调度算法定。
 **Internal communication**: 为了协同工作，实现负载均衡和错误恢复，集群实体间
@@ -54,7 +54,7 @@
 
 集群一般分为三种类型：
 : LB：Load Balancing，负载均衡集群
-: HA：High Availiablity，高可用集群，避免 SPOF(single Point Of failure)
+: HA：High Availiablity，高可用集群，避免单点故障 SPOF(single Point Of failure)
 : HPC：High-performance computing 高性能集群
 [全球 TOP500 计算机](www.top500.org)
 
@@ -163,15 +163,18 @@
 : `perlbal`：Perl 编写
 : `pound`
 
-负载均衡的会话保持
+这里的七层和四层指的是网络协议栈的层，比如：nginx 能够调度 http 协议
+请求，二 http 为应用层在网络协议栈 ISO 模型的第七层；而 LVS 只能调度
+TCP 等请求，TCP 在 ISO 模型的第四层传输层。
 
-1. session sticky：同一用户调度固定服务器
-   Source IP：LVS sh 算法（对某一特定服务而言）
-   Cookie
-2. session replication：每台服务器拥有全部 session
-   session multicast cluster
-3. session server：专门的 session 服务器
-   Memcached，Redis
+负载均衡的会话保持
+: session sticky：同一用户调度固定服务器
+Source IP：LVS sh 算法（对某一特定服务而言）
+Cookie
+: session replication：每台服务器拥有全部 session
+session multicast cluster
+: session server：专门的 session 服务器
+Memcached，Redis
 
 ## 1.5 HA--高可用集群
 
@@ -673,39 +676,504 @@ VS 将把请求定向到有最少的活动连接的 RS。
 
 #### 3.2.2.1 Locality-Based Least-Connection Scheduling
 
-居于位置的最少连接调度算法：该调度策略专用于目标 IP 的负载均衡。一般被用于
+基于位置的最少连接调度算法：该调度策略专用于目的 IP 的负载均衡。一般被用于
 缓存集群。该算法通常会将到某个 IP 地址的数据包定向到负责处理其的服务器，前
-提是该服务器是活动的并且负载不足。如果该服务过载(活动连接数大于其权重)并且
-有一个服务器目前只有一半的负载，那就会将加权的最少连接服务器分配给该 IP。
+提是该服务器是活动的并且负载不高。如果该服务过载(活动连接数大于其权重)并且
+有一个服务器目前只有一半的负载，那就会将加权的最少连接服务器(一般负载的服
+务器)分配给该 IP。
 
 #### 3.2.2.1 Locality-Based Least-Connection with Replication Scheduling
 
+基于位置的带复制的最少连接调度算法：该调度策略也用于目的 IP 的负载均衡。一般
+用于缓存集群。在以下方面其和 LBLC 调度策略不同：调度服务器 LVS 会维护某个目
+的 IP 到可能为其提供服务的服务器节点的映射。发往目标 IP 的请求将被调度到该目
+标 IP 对应的服务器节点集中拥有最少连接的节点。如果该服务器集的节点均过载，那
+么 LVS 会在整个集群中挑选一个最少连接的节点加入到这个服务器集(可能为该目标
+IP 服务的节点集合)。
+
 #### 3.2.2.1 Shortest Expected Delay Scheduling
+
+最短期望时延调度算法：该算法将网络连接调度分配给预期最小时延的服务器。发送到
+集群中的第 i 个节点最小时延可表示为：(Ci + 1)/Ui。Ci 是第 i 个服务器的连接数，
+Ui 是第 i 个服务器的权重。
 
 #### 3.2.2.1 Never Queue Scheduling
 
+不排队算法： 该调度策略在有空闲的服务器时将请求调度到该空闲服务器。如果没有空
+闲服务器，请求将被调度到最少期望时延的节点(SED)。
+
 ### 3.2.3 内核版本 4.15 版本后新增调度算法：FO 和 OVF
+
+FO(Weighted Fail Over)调度算法，在此 FO 算法中，会遍历虚拟服务所关联的真实服务
+器链表，找到还未过载(未设置 IP_VS_DEST_F_OVERLOAD 标志)的且权重最高的真实服务器，
+进行调度
+OVF(Overflow-connection)调度算法，基于真实服务器的活动连接数量和权重值实现。
+将新连接调度到权重值最高的真实服务器，直到其活动连接数量超过权重值位置，之后调
+度到下一个权重值最高的真实服务器,在此 OVF 算法中，遍历虚拟服务相关联的真实服务器
+链表，找到权重值最高的可用真实服务器。一个可用的真实服务器需要同时满足以下条件：
+
+- 未过载（未设置 IP_VS_DEST_F_OVERLOAD 标志）
+- 真实服务器当前的活动连接数量小于其权重值
+- 其权重值不为零
 
 # 3.3 LVS 调度规则管理
 
 ## 3.3.1 管理规则的程序包
 
+管理调度规则和调度策略选择的用户空间工具为`ipvsadm`，相关的工具如下
+
+: Unit File: /usr/lib/systemd/system/ipvsadm.service
+: 主程序: /usr/sbin/ipvsadm
+: 规则保存工具: /usr/sbin/ipvsadm-save
+: 规则重载工具: /usr/sbin/ipvsadm-restore
+: 配置文件: /etc/sysconfig/ipvsadm-config
+
 ## 3.3.2 ipvsadm 命令使用
+
+ipvsadm 核心功能
+
+- 集群服务管理：增、删、改
+- 集群服务的 RS 管理：增、删、改
+- 查看规则
+
+ipvsadm 工具用法
+
+```bash
+# 管理集群服务
+ipvsadm -A|E -t|u|f service-address [-s scheduler] [-p [timeout]] [-M netmask]
+[--pe persistence_engine] [-b sched-flags]
+ipvsadm -D -t|u|f service-address # 删除
+ipvsadm –C # 清空
+ipvsadm –R # 重载
+ipvsadm -S [-n]  # 保存
+# 管理集群中的RS
+ipvsadm -a|e -t|u|f service-address -r server-address [options]
+ipvsadm -d -t|u|f service-address -r server-address
+ipvsadm -L|l [options]
+ipvsadm -Z [-t|u|f service-address]
+```
+
+管理集群服务：增、改、删
+
+1. 增、修改
+   `ipvsadm -A|E -t|u|f service-address [-s scheduler] [-p [timeout]]`
+2. 删除
+   `ipvsadm -D -t|u|f service-address`
+   service-address：
+
+- -t|u|f：
+  - -t: TCP 协议的端口，VIP:TCP_PORT
+  - -u: UDP 协议的端口，VIP:UDP_PORT
+  - -f：firewall MARK，标记，一个数字
+  - [-s scheduler]：指定集群的调度算法，默认为 WLC
+
+管理集群上的 RS：增、改、删
+
+1. 增、改：
+   `ipvsadm -a|e -t|u|f service-address -r server-address [-g|i|m] [-w weight]`
+2. 删除
+   `ipvsadm -d -t|u|f service-address -r server-address`
+
+server-address：
+
+- rip[:port] 如省略 port，不作端口映射
+- 选项：
+  - lvs 类型：
+    -g: gateway, dr 类型，默认
+    -i: ipip, tun 类型
+    -m: masquerade, nat 类型  
+     -w weight：权重
+
+清空定义的所有内容
+`ipvsadm -C`
+清空计数器
+`ipvsadm -Z [-t|u|f service-address]`
+查看
+`ipvsadm -L|l [options]`
+
+- --numeric, -n：以数字形式输出地址和端口号
+- --exact：扩展信息，精确值
+- --connection，-c：当前 IPVS 连接输出
+- --stats：统计信息
+- --rate ：输出速率信息
+
+ipvs 规则
+`/proc/net/ip_vs`
+
+ipvs 连接
+`/proc/net/ip_vs_conn`
+
+保存规则：建议保存至/etc/sysconfig/ipvsadm
+
+```bash
+ipvsadm-save > /PATH/TO/IPVSADM_FILE
+ipvsadm -S > /PATH/TO/IPVSADM_FILE
+systemctl stop ipvsadm.service
+```
+
+重新载入
+
+```bash
+ipvsadm-restore < /PATH/FROM/IPVSADM_FILE
+systemctl restart ipvsadm.service
+```
 
 ## 3.4 防火墙标记概念
 
+WM：FireWall Mark
+MARK target 用于给特定的报文打标记
+其中：value 可为 0xffff 格式，表示十六进制数字
+借助于防火墙标记来分类报文，而后基于标记定义集群服务；可将多个不同的应用使用同
+一个集群服务进行调度
+实现方法：
+
+1. 在 Director 主机打标记：
+   `iptables -t mangle -A PREROUTING -d $vip -p $proto -m multiport --dports $port1,$port2,… -j MARK --set-mark NUMBER`
+2. 在 Director 主机基于标记定义集群服务：
+   `ipvsadm -A -f NUMBER [options]`
+
+例如：
+
+```bash
+[root@lvs ~]#ipvsadm -A -f 10
+[root@lvs ~]#ipvsadm -a -f 10  -r  192.168.39.17 -g
+[root@lvs ~]#ipvsadm -a -f 10  -r  192.168.39.7 -g
+[root@lvs ~]#ipvsadm -Ln
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+FWM  10 wlc
+  -> 192.168.39.7:0               Route   1      0          0        
+  -> 192.168.39.17:0              Route   1      0          0
+```
+
 ## 3.5 LVS 持久连接
+
+session 绑定：对共享同一组 RS 的多个集群服务，需要统一进行绑定，lvs 的 SH
+算法无法实现持久连接( lvs persistence )
+模板：实现无论使用任何调度算法，在一段时间内(默认 360s )，能够实现将来自同
+一个地址的请求始终发往同一个 RS
+`ipvsadm -A|E -t|u|f service-address [-s scheduler] [-p [timeout]]`
+
+持久连接实现方式：
+: 每端口持久（PPC）：每个端口定义为一个集群服务，每集群服务单独调度
+: 每防火墙标记持久（PFWMC）：基于防火墙标记定义集群服务；可实现将多个端口
+上的应用统一调度，即所谓的 port Affinity
+: 每客户端持久（PCC）：基于 0 端口（表示所有服务）定义集群服务，即将客户
+端对所有应用的请求都调度至后端主机，必须定义为持久模式
+
+例如
+
+```bash
+[root@lvs ~]#ipvsadm -E -f 10 -p
+[root@lvs ~]#ipvsadm -Ln
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+FWM  10 wlc persistent 360
+  -> 192.168.39.7:0               Route   1      0          15        
+  -> 192.168.39.17:0              Route   1      0          7        
+[root@lvs ~]#ipvsadm -E -f 10 -p 3600
+[root@lvs ~]#ipvsadm -Ln
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+FWM  10 wlc persistent 3600
+  -> 192.168.39.7:0               Route   1      0          79        
+  -> 192.168.39.17:0              Route   1      0          7
+```
 
 # 四.LVS 案例
 
 ## 4.1 LVS----NAT 模式
 
+实验准备
+: centos7.7 系统，VMware 15 pro
+: DIRECTOR 即 LVS 使用双网卡，eth0 为桥接网卡，ip：172.20.2.43/16
+eth1 为仅主机模式，ip：192.168.10.200/24
+: WEB 服务器即对外提供服务的 RS 服务器使用仅主机模式
+: WEB 服务器的网关指向 LVS 仅主机地址：192.168.10.200
+
+各主机 IP
+| 主机 | IP |
+| ------ | ---------------------- |
+| Client | eth0:172.20.2.37/16 |
+| LVS | eth0:172.20.2.43/16 |
+| | eth1:192.168.10.200/24 |
+| RS-A | eth0:192.168.10.201/24 |
+| RS-B | eth0:192.168.10.202/24 |
+
+大致结构如下，本次实验略去中间的路由器和防火墙，客户端和 LVS 在同一网段
+![](png/LVS-NAT.png)
+
+操作过程
+
+```bash
+# 1. 在LVS上
+~$ vim /etc/sysctl.conf
+net.ipv4.ip_forward = 1
+...
+~$ sysctl -p
+# 增加集群调度规则
+~$ ipvsadm -A -t 172.20.2.43:80 -s rr
+# 增加被调度的RS，-m表示使用NAT模式
+~$ ipvsadm -a -t 172.20.2.43:80 -r 192.168.10.201 -m
+~$ ipvsadm -a -t 172.20.2.43:80 -r 192.168.10.202 -m
+
+# 2.在RS-A和RS-B上
+~$ yum install httpd -y
+~$ echo "This is RS-A." > /var/www/html/index.html
+~$ systemctl start httpd
+
+# 3.在客户端访问测试
+~$ while : ; do curl -connect-timeout 3 172.20.2.43 ; sleep 1 ; done
+```
+
 ## 4.2 LVS----DR 模式
+
+实验准备
+: 修改各 RS 内核参数，限制 arp 响应和通告级别
+: DIRECTOR 服务器使用双网卡，均为桥接，一个为 VIP，一个为 DIP
+: WEB 服务器使用和 DIP 相同的网段和 DIRECTOR 连接
+: 在每个 WEB 服务器配置 VIP
+: 每个 WEB 服务器可以访问外网
+
+限制响应级别：arp_ignore
+
+- 0：默认值，表示可使用本地任意接口上配置的任意地址进行响应
+- 1：仅在请求的目标 IP 配置在本地主机的接收到请求报文的接口上时，才给予响应
+
+限制通告级别：arp_announce
+
+- 0：默认值，把本机所有接口的所有信息向每个接口的网络进行通告
+- 1：尽量避免将接口信息向非直接连接网络进行通告
+- 2：必须避免将接口信息向非本网络进行通告
+
+各主机 IP
+
+| 主机   | IP                     |
+| ------ | ---------------------- |
+| Client | eth0:172.20.2.37/16    |
+| Router | eth0:172.20.2.43/16    |
+|        | eth1:192.168.10.200/24 |
+| LVS    | eth0:192.168.10.100/24 |
+|        | lo:1 192.168.10.101/32 |
+| RS-A   | eth0:192.168.10.201/24 |
+|        | lo:1 192.168.10.101/32 |
+| RS-B   | eth0:192.168.10.202/24 |
+|        | lo:1 192.168.10.101/32 |
+
+大致结构如下，客户端和 LVS 在不同网段
+![](png/LVS-DR.png)
+
+配置过程
+
+```bash
+# 1. 修改RS-A和RS-B内核参数
+# RS-A
+~$ echo 1 > /proc/sys/net/ipv4/all/arp_ignore
+~$ echo 1 > /proc/sys/net/ipv4/lo/arp_ignore
+~$ echo 2 > /proc/sys/net/ipv4/all/arp_announce
+~$ echo 2 > /proc/sys/net/ipv4/lo/arp_announce
+
+# RS-B
+~$ echo 1 > /proc/sys/net/ipv4/all/arp_ignore
+~$ echo 1 > /proc/sys/net/ipv4/lo/arp_ignore
+~$ echo 2 > /proc/sys/net/ipv4/all/arp_announce
+~$ echo 2 > /proc/sys/net/ipv4/lo/arp_announce
+
+# 2. 将client:172.20.2.37的网关指向路由器eth0口
+~$ route add -net 0 gw 172.10.2.43
+
+# 3. 将RS-A:192.168.10.201和RS-B:192.168.10.202的网关指向路由器eth1口
+# RS-A
+~$ route add -net 0 gw 192.168.10.200
+# RS-B
+~$ route add -net 0 gw 192.168.10.200
+
+# 4. 在LVS和RS的本地环回网卡添加VIP
+# LVS
+~$ ifconfig lo:1 192.168.10.101/32
+# RS-A 和 RS-B
+~$ ifconfig lo:1 192.168.10.101/32
+
+# 5. 在LVS: 192.168.10.100上添加调度规则和被调度主机
+~$ ipvsadm -A -t 192.168.10.101:80 -r wlc
+~$ ipvsadm -a -t 192.168.10.101:80 -r 192.168.10.201 -g
+~$ ipvsadm -a -t 192.168.10.101:80 -r 192.168.10.202 -g
+
+# 6. 在客户端172.20.2.37测试
+~$ while : ; do curl --connect-timeout 3 192.168.10.101 ; sleep 2 ;done
+```
 
 ## 4.3 LVS----DR 多网段模式
 
+- RS 配置脚本
+
+```bash
+#!/bin/bash
+vip=10.0.0.100
+mask='255.255.255.255'
+dev=lo:1
+case $1 in
+start)
+     echo 1 > /proc/sys/net/ipv4/conf/all/arp_ignore
+     echo 1 > /proc/sys/net/ipv4/conf/lo/arp_ignore
+     echo 2 > /proc/sys/net/ipv4/conf/all/arp_announce
+     echo 2 > /proc/sys/net/ipv4/conf/lo/arp_announce
+     ifconfig $dev $vip netmask $You can't use 'macro parameter character #' in
+math modemask #broadcast $vip up
+     #route add -host $vip dev $dev
+     ;;
+stop)
+     ifconfig $dev down
+     echo 0 > /proc/sys/net/ipv4/conf/all/arp_ignore
+     echo 0 > /proc/sys/net/ipv4/conf/lo/arp_ignore
+     echo 0 > /proc/sys/net/ipv4/conf/all/arp_announce
+     echo 0 > /proc/sys/net/ipv4/conf/lo/arp_announce
+     ;;
+*)
+     echo "Usage: $(basename $0) start|stop"
+     exit 1
+     ;;
+esac
+```
+
+- VS 配置脚本
+
+```bash
+#!/bin/bash
+vip='10.0.0.100'
+iface='lo:1'
+mask='255.255.255.255'
+port='80'
+rs1='192.168.8.101'
+rs2='192.168.8.102'
+scheduler='wrr'
+type='-g'
+case $1 in
+start)
+    ifconfig $iface $vip netmask $mask #broadcast $vip up
+    iptables -F
+    ipvsadm -A -t ${vip}:${port} -s $scheduler
+    ipvsadm -a -t ${vip}:${port} -r ${rs1} $type -w 1
+    ipvsadm -a -t ${vip}:${port} -r ${rs2} $type -w 1
+    ;;
+stop)
+    ipvsadm -C
+    ifconfig $iface down
+    ;;
+*)
+    echo "Usage $(basename $0) start|stop“
+    exit 1
+esac
+```
+
 # 五.LVS 借助三方软件实现高可用
+
+如果 LVS 服务器宕机时，整个集群的服务将终止
+: 当整个集群的调度由一台 LVS 主机负负责时，Director 不可用时，整个集群的服务
+将会终止，这是常见的 SPOF 单点故障，所以在生产中不会只用一台 LVS，而是使用其它
+技术实现 LVS 调度器的高可用，比如：keepalived heartbeat 或者 corosync
+
+当某 RS 宕机时，Director 还会往其调度请求
+: 如果只使用 LVS 进行调度，当某 RS 宕机时，Director 还会往其调度请求。这回造成部分请
+求未被处理，还会使得 LVS 付出额外无用的开销。
+: 解决方案：通过某些方法使得 Director 可以对各个 RS 进行健康状态监测，失败时自动禁用，
+恢复后自动添加到集群。
+
+常用的高可用解决方案
+: keepalived
+: heartbeat/corosync
+: ldirectord
+
+检测 RS 的方式
+: 网络层检测，icmp
+: 传输层检测，端口探测
+: 应用层检测，请求某关键资源
+
+RS 全部宕机或者是维护时：可以使用 LVS 调度器来响应客户，告知大致情况，此时的服务称为：
+sorry server(道歉服务)
 
 ## 5.1 ldirectord 软件
 
+ldirectord：监控和控制 LVS 守护进程，可管理 LVS 规则
+包名：ldirectord-3.9.6-0rc1.1.2.x86_64.rpm
+[下载地址](http://download.opensuse.org/repositories/network:/ha-clustering:/Stable/CentOS_CentOS-7/x86_64/)
+
+安装
+
+```bash
+[root@LVS data]#wget http://download.opensuse.org/repositories/network:/ha-clustering:/Stable/CentOS_CentOS-7/x86_64/ldirectord-3.9.6-0rc1.1.2.x86_64.rpm
+[root@LVS data]#yum localindtall ldirectord-3.9.6-0rc1.1.2.x86_64.rpm -y
+[root@LVS data]# rpm -ql ldirectord
+/etc/ha.d
+/etc/ha.d/resource.d
+/etc/ha.d/resource.d/ldirectord
+/etc/logrotate.d/ldirectord
+/usr/lib/ocf/resource.d/heartbeat/ldirectord
+/usr/lib/systemd/system/ldirectord.service
+/usr/sbin/ldirectord
+/usr/share/doc/ldirectord-3.9.6
+/usr/share/doc/ldirectord-3.9.6/COPYING
+/usr/share/doc/ldirectord-3.9.6/ldirectord.cf
+/usr/share/man/man8/ldirectord.8.gz
+```
+
 ## 5.2 ldirectord 配置示例
+
+配置 ldirectord 支持 ipvs 的 DR 模型
+
+```bash
+[root@LVS data]# cat /etc/ha.d/ldirectord.cf
+checktimeout=3
+checkinterval=1
+autoreload=yes
+logfile="/var/log/ldirectord.log"
+quiescent=no                    # 当RS down时 yes将修改权重为0,此配置有bug ，no为从调度列表中删除RS
+virtual=192.168.10.101:80
+    real=192.168.10.201 gate 1  # gate 表示DR模式，1 表示weight
+    real=192.168.10.202 gate 2
+    fallback=127.0.0.1:80 gate
+    service=http
+    scheduler=wrr
+    # persistent=600
+    # netmask=255.255.255.255
+    protocol=tcp
+    checktype=negotiate
+    checkport=80
+[root@LVS data]# systemctl status ldirectord
+● ldirectord.service - Monitor and administer real servers in a LVS cluster of load balanced virtual servers
+   Loaded: loaded (/usr/lib/systemd/system/ldirectord.service; disabled; vendor preset: disabled)
+   Active: inactive (dead)
+[root@LVS data]# systemctl start ldirectord
+[root@LVS data]# ipvsadm -Ln
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+TCP  192.168.10.101:80 wrr
+  -> 192.168.10.201:80            Route   1      0          11
+  -> 192.168.10.202:80            Route   2      0          9
+```
+
+配置 ldirectord 支持 ipvs 的 DR 模型并且具有 Firewall Mark
+
+```bash
+[root@LVS data]# /etc/ha.d/ldirectord.cf
+checktimeout=3
+checkinterval=1
+autoreload=yes
+logfile="/var/log/ldirectord.log"     # 日志文件
+quiescent=no            # 当RS down时 yes将修改权重为0,此配置有bug ，no为从调度列表中删除RS
+virtual=5               # 指定VS的FWM 或 IP:PORT
+    real=192.168.10.201:80 gate 2    # DR模型，权重为 2
+    real=192.168.10.202:80 gate 1
+    fallback=127.0.0.1:80 gate   # sorry server
+    service=http
+    scheduler=wrr
+    # protocol=tcp     # 如果FWM模式，此行必须注释掉
+    checktype=negotiate
+    checkport=80
+    request="index.html"
+    receive=“Test Ldirectord"
+```
