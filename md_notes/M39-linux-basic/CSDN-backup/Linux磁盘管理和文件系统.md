@@ -1,4 +1,8 @@
-﻿@[TOC](<center> <font face="黑体" size=7 color=grey>Linux磁盘管理和文件系统详细笔记</center>)
+
+<center> <font face="黑体" size=7 color=grey>Linux磁盘管理和文件系统详细笔记</center>
+
+<center><font face="黑体" size=4 color=grey> </center>
+
 # 一.linux磁盘设备概述
 
 - 在linux中一切皆为文件，设备也不例外；linux使用/dev/文件夹下的设备文件来与相关的设备建立联系，访问某个设备文件就是访问该设备。
@@ -36,7 +40,7 @@ SCSI, SATA, SAS, IDE,USB: /dev/sd
     cylinder：柱面 
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/2019101716543573.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+![](png/2019-10-14-20-52-01.png)
 
 ```bash
 比如：
@@ -90,7 +94,8 @@ MBR分区中一块硬盘最多有4个主分区，也可以3主分区+1扩展(N�
 ```
 
 ## 2.MBR分区结构组织
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165510899.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-16-20-01-40.png)
 
 ```bash
 硬盘主引导记录MBR由4个部分组成 
@@ -101,10 +106,11 @@ MBR分区中一块硬盘最多有4个主分区，也可以3主分区+1扩展(N�
 ```
 
 - 各个区所对应的16位地址
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165535904.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-16-20-04-26.png)
 
 - MBR主分区表中的分区表项具体含义
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165555840.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+![](png/2019-10-16-20-06-56.png)
 
 ## 3.GPT分区 
 
@@ -113,7 +119,8 @@ MBR分区中一块硬盘最多有4个主分区，也可以3主分区+1扩展(N�
 2.使用128位UUID(Universally Unique Identifier) 表示磁盘和分区 GPT分区表 自动备份在头和尾两份，并有CRC校验位 
 3.UEFI (Unified Extensible Firmware Interface 统一可扩展固件接口)硬件支持 GPT，使操作系统启动
 ```
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165614255.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-16-20-10-04.png)
 
 ## 4.BIOS和UEFI 
 
@@ -129,7 +136,8 @@ MBR分区中一块硬盘最多有4个主分区，也可以3主分区+1扩展(N�
 ```
 
 ## 5.BIOS+MBR与UEFI+GPT 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165627870.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-16-20-27-43.png)
 
 # 三.分区管理
 
@@ -189,7 +197,7 @@ v  校验分区
 u  转换单位 
 w  保存并退出 
 q  不保存并退出 
-```
+``` 
  
 - 也可以使用非交互式的方式来创建分区，这种方法适合用在脚本中
 
@@ -280,7 +288,8 @@ Linux的虚拟文件系统：VFS
 ```
 
 ## 4.linux的VFS
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165652243.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-16-20-52-13.png)
 
 ## 5.linux文件系统的选择
 
@@ -396,7 +405,8 @@ options:
     xfs_info mountpoint
 
 - 超级块和INODE TABLE在磁盘中的大致组织结构
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165713960.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-17-10-08-43.png)
 
 ## 8.文件系统检测和修复 
 
@@ -689,7 +699,7 @@ swap 空间会造成存储设备处于分配状态但闲置，造成浪费，过
 间还会掩盖内存泄露
 
 - 推荐的不同情况下系统swap空间大小
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165830281.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+![](png/2019-10-17-10-16-40.png)
 
 ## 2.挂载交换分区 
 
@@ -798,6 +808,7 @@ dr-xr-xr-x 2 root root 571392 Jun 30  2018 Packages
 -r--r--r-- 1 root root   1730 Nov 27  2013 RPM-GPG-KEY-CentOS-Security-6
 -r--r--r-- 1 root root   1734 Nov 27  2013 RPM-GPG-KEY-CentOS-Testing-6
 -r--r--r-- 1 root root   2056 Jun 30  2018 TRANS.TBL
+
 cp /mnt/cd/Packages/*rpm cd3/Packages/
 cat /mnt/cd/Packages/TRANS.TBL >> /mnt/cd3/Packages/TRANS.TBL 
 mv /mnt/cd3/Packages/{TRANS.TBL,TRANS.TBL.BAK} 
@@ -835,7 +846,7 @@ RAID：Redundant Arrays of Inexpensive（Independent） Disks
 1988年由加利福尼亚大学伯克利分校（University of California-
 Berkeley） “A Case for Redundant Arrays of Inexpensive Disks” 
 多个磁盘合成一个“阵列”来提供更好的性能、冗余，或者两者都提供 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165812902.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+![](png/2019-10-17-14-54-42.png)
 
 - RAID的作用
 
@@ -875,7 +886,8 @@ RAID-01
 无容错能力 
 最少磁盘数：2, 2+ 
 ```
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165759268.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-17-15-00-51.png)
 
 ### RAID-1
 
@@ -887,7 +899,8 @@ RAID-01
 有冗余能力 
 最少磁盘数：2, 2N 
 ```
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165846668.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-17-15-12-52.png)
 
 
 ### RAID-5
@@ -898,7 +911,8 @@ RAID-01
 有容错能力：允许最多1块磁盘损坏 
 最少磁盘数：3, 3+
 ```
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165920686.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-17-15-14-23.png)
 
 ### RAID-6
 
@@ -908,7 +922,8 @@ RAID-01
 有容错能力：允许最多2块磁盘损坏 
 最少磁盘数：4, 4+ 
 ```
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165937780.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-17-15-15-46.png)
 
 ### RAID-10
 
@@ -918,18 +933,21 @@ RAID-01
 有容错能力：每组镜像最多只能坏一块 
 最少磁盘数：4, 4+ 
 ```
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017165948926.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-17-15-16-49.png) 
 
 ### RAID-01 
  
 多块磁盘先实现RAID0,再组合成RAID1 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017170002576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-17-15-17-26.png)
+
 
 ### RAID-50 
  
 多块磁盘先实现RAID5,再组合成RAID0 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017170049115.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
 
+![](png/2019-10-17-15-17-53.png)
 
 ### JBOD：Just a Bunch Of Disks 
 
@@ -937,7 +955,8 @@ RAID-01
 功能：将多块磁盘的空间合并一个大的连续空间使用 
 可用空间：sum(S1,S2,...) 
 ```
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017170019381.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-17-15-18-18.png)
 
 ### RAID7 
 
@@ -969,19 +988,18 @@ mdadm：模式化的工具
     管理：-f, -r, -a 
     <raiddevice>: /dev/md# 
     <component-devices>: 任意块设备 
-
--C: 创建模式 
--n #: 使用#个块设备来创建此RAID 
--l #：指明要创建的RAID的级别 
--a {yes|no}：自动创建目标RAID设备的设备文件 
--c CHUNK_SIZE: 指明块大小,单位k 
--x #: 指明空闲盘的个数 
--D：显示raid的详细信息  
+    -C: 创建模式 
+    -n #: 使用#个块设备来创建此RAID 
+    -l #：指明要创建的RAID的级别 
+    -a {yes|no}：自动创建目标RAID设备的设备文件 
+    -c CHUNK_SIZE: 指明块大小,单位k 
+    -x #: 指明空闲盘的个数 
+    -D：显示raid的详细信息 
 mdadm -D /dev/md# 
 管理模式： 
--f: 标记指定磁盘为损坏 
--a: 添加磁盘 
--r: 移除磁盘 
+    -f: 标记指定磁盘为损坏 
+    -a: 添加磁盘 
+    -r: 移除磁盘 
 观察md的状态： cat /proc/mdstat 
 ```
 
@@ -1033,7 +1051,8 @@ mdadm、/proc/mdstat及系统日志信息
 - 物理卷是用固定大小的物理区域（Physical Extent，PE）来定义的 
 - 在物理卷上创建的逻辑卷是由物理区域（PE）组成的
 - 可以在逻辑卷上创建文件系统
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017170110334.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+
+![](png/2019-10-17-15-39-37.png)
 
 - LVM: Logical Volume Manager， Version 2 
 - dm: device mapper，linux中将一个或多个底层块设备组织成一个逻辑设备的模块 
@@ -1050,7 +1069,7 @@ mdadm、/proc/mdstat及系统日志信息
 - LVM可以弹性的更改LVM的容量 
 
 - 通过交换PE来进行资料的转换，将原来LV内的PE转移到其他的 设备中以降低LV的容量，或将其他设备中的PE加到LV中以容量 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017170130563.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+![](png/2019-10-17-15-42-45.png)
 
 ## 2.逻辑卷管理工具
 
@@ -1162,7 +1181,7 @@ mdadm、/proc/mdstat及系统日志信息
 - 快照就是将当时的系统信息记录下来，就好像照相一般，若将来有任何数据
 改动了，则原始数据会被移动到快照区，没有改动的区域则由快照区和文件
 系统
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20191017170147216.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1lvdU9vcHM=,size_16,color_FFFFFF,t_70)
+![](png/2019-10-17-15-47-26.png)
 由于快照区与原本的LV共用很多PE的区块，因此快照与被快照的LV必须在同
 一个VG中.系统恢复的时候的文件数量不能高于快照区的实际容量 共享 
  
@@ -1222,10 +1241,4 @@ mount /dev/vg0/testlv /users
 lvcreate -L 1G -s -n snap1 /dev/vg0/testlv1 
 umount /users 
 lvconvert --merge /dev/vg0/snap1
-v/vg0/data-snapshot 
-    umount /dev/vg0/data 
-    lvconvert --merge /dev/vg0/data-snapshot  
-删除快照 
-    umount  /mnt/databackup 
-    lvremove  /dev/vg0/databackup 
 ```

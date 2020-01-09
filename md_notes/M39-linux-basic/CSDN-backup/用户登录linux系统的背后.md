@@ -1,4 +1,4 @@
-﻿<center><font size=214 face=黑体 color=grey> Linux用户登录流程介绍</font></center>
+<center><font size=214 face=黑体 color=grey> Linux用户登录流程介绍</font></center>
 
 > ## 1.在Linux系统，用户登录流程是怎样的呢？
 

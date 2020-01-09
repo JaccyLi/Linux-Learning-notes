@@ -1,4 +1,4 @@
-﻿@[TOC](<center> <font face="黑体" size=6 color=grey>文本三剑客之AWK-详细介绍</font></center>)
+<center> <font face="黑体" size=6 color=grey>文本三剑客之AWK-详细介绍</font></center>
 
 # awk介绍
 
@@ -69,7 +69,7 @@ awk –F:  ‘{print $1”\t”$3}’  /etc/passwd
 grep “ÛUID”/etc/fstab  |  awk ‘{print $2,$4}’ 
 ```
 
-## 2.awk变量
+## awk变量
 
 - 可以使用内置变量也可以自定义变量
 
@@ -124,7 +124,7 @@ cat awkscript
 awk  -F: -f awkscript script="awk" /etc/passwd 
 ```
 
-## 3.awk格式化
+## awk格式化
 
 - printf 命令
 - 格式化输出：`printf "FORMAT", item1, item2, ...` 
@@ -168,7 +168,7 @@ awk -F:   '{printf "Username: %15s,UID:%d\n",$1,$3}' /etc/passwd
 awk -F:   '{printf "Username: %-15s,UID:%d\n",$1,$3}'  /etc/passwd 
 ```
 
-## 4.awk操作符 
+## awk操作符 
 
 - 算术操作符： 
 
@@ -278,7 +278,7 @@ seq 10 | awk   ‘!(i=!i)'
 seq 10 | awk       -v  i=1 'i=!i' 
 ```
 
-## 5.awk控制语句
+## awk控制语句
 
 ```py
 { statements;… } 组合语句 
@@ -294,7 +294,7 @@ delete array
 exit 
 ```
 
-## 6.awk条件判断 
+## awk条件判断 
 
 - 语法：`if(condition1){statement1}else if(condition2){statement2}else{statement3}`
 - 使用场景：对awk取得的整行或某个字段做条件判断 
@@ -311,7 +311,7 @@ awk 'BEGIN{ test=100;if(test>90){print "very good"}
 else if(test>60){ print "good"}else{print "no pass"}}' 
 ```
 
-## 7.awk循环 
+## awk循环 
 
 ### while循环 
 
@@ -403,7 +403,7 @@ sys     0m0.203s
   - 示例:
 `awk -F: '{if($3%2!=0) next; print $1,$3}' /etc/passwd` 
 
-## 8.awk数组 
+## awk数组 
 
 - awk直接使用关联数组：array[index-expression] 
 - index-expression:索引表达式
@@ -435,7 +435,7 @@ netstat -tan | awk '/^tcp/{state[$NF]++}END{for(i in state) { print i,state[i]}}
 awk  '{ip[$1]++}END{for(i in ip) {print i,ip[i]}}'   /var/log/httpd/access_log 
 ```
 
-## 9.awk函数 
+## awk函数 
 
 - rand()：返回0和1之间一个随机数 
 `awk  'BEGIN{srand(); for (i=1;i<=10;i++)print int(rand()*100) }'` 
@@ -470,7 +470,7 @@ function max(x,y) {
 awk -f fun.awk  
 ```
 
-## 10.调用系统命令
+## 调用系统命令
 
 ### 使用system命令调用shell命令
 

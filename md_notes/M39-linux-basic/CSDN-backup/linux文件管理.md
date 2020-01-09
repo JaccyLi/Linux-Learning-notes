@@ -1,10 +1,10 @@
-﻿@[TOC](<center><font size=214 face=黑体 color=grey> linux文件管理 </font></center>)
+@[TOC](<center><font size=214 face=黑体 color=grey> linux文件管理 </font></center>)
 
 > # 一.文件系统结构及组织细节
 
 ## 1.linux文件目录结构(centos7)
 
-[外链图片转存失败(img-haSR4gvG-1569418869362)(png/2019-09-24-10-06-37.png)]
+![linux文件目录结构](png/2019-09-24-10-06-37.png)
 
 ## 2.linux文件系统简述
 
@@ -301,7 +301,7 @@ cp SRC DEST
 - cp命令常用选项
 
 选项|功能
-|:---|:---|
+|---|---|
 -i | 覆盖前提示 
 -n | 不覆盖，注意两者顺序 
 -r, -R |递归复制目录及内部的所有内容 
@@ -400,7 +400,7 @@ rmdir 删除空目录
 - inode数据结构被存储在inode表中：由于每个inode代表某个文件的所有属性信息，所以inode表就记录了整个文件系统上的所有文件的信息（元数据）
 - linux文件系统中每个目录下的文件被存储成目录项，每一项对应其inode号，通过inode号就可以访问到inode表的某一项，该项就记录了该文件的元数据。如下图：
 
-[外链图片转存失败(img-MBC0TnJO-1569418869363)(png/2019-09-25-21-00-49.png)]
+![](png/2019-09-25-21-00-49.png)
 
 <center><font size=4 face=黑体 color=grey> 目录项和inode表及inode表某项所指向的数据交互图 </font></center>
 
@@ -410,10 +410,10 @@ rmdir 删除空目录
 144 my_file_1.txt                          # 144就是文件my_file_1.txt的inode号
 ```
 - 如下图，左边的表格是文件名和inode表格，右边是inode表项和inode号码的对应表格，通过ref.cnt就可以找到inode项
-[外链图片转存失败(img-Od3t3oj7-1569418869364)(png/Simplified_illustration_of_hard_links_on_typical_UN_X_filesystem.png)]
+![](png/Simplified_illustration_of_hard_links_on_typical_UN_X_filesystem.png)
 
 - 找到inode项后，该项存储有下图的元数据和指向文件实际数据的指针（箭头的起点所在的数据块就存储了指针：其中有12个一级指针，当指针不够用时，会使用间接指针和三次间接及更多次的间接指针）
-[外链图片转存失败(img-BGI9Fgl8-1569418869364)(png/2019-09-25-20-54-42.png)]
+![](png/2019-09-25-20-54-42.png)
 
 ## 2. cp、rm、mv等命令都和inode紧密相关
 
@@ -451,32 +451,6 @@ rmdir 删除空目录
 
 
 >    为文件创建硬链接语法:  
->>    ln filename [linkname ]  
-
-## 2.符号（或软）链接
-
->一个符号链接指向另一个文件  
->ls - l的 显示链接的名称和引用的文件  
->一个符号链接的内容是它引用文件的名称  
->可以对目录进行  
->可以跨分区  
->指向的是另一个文件的路径；其大小为指向的路径字符串的长度；不增加或减少目标文件inode的引用计数  
->语法：
->>ln -s filename [linkname]
-
-
-## 3.确定文件内容
-
->文件可以包含多种类型的数据  
->检查文件的类型，然后确定适当的打开命令或应用程序使用  
-> > file [options] \<filename\>... 
->  
->常用选项:  
->>-b 列出文件辨识结果时，不显示文件名称  
->>-f filelist 列出文件filelist中文件名的文件类型  
->>-F 使用指定分隔符号替换输出文件名后默认的”:”分隔符  
->>-L 查看对应软链接对应文件的文件类型  
-:  
 >>    ln filename [linkname ]  
 
 ## 2.符号（或软）链接

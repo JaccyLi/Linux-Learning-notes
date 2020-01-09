@@ -1,4 +1,4 @@
-﻿@[TOC](<center><font size=214 face=黑体 color=grey>Linux软件包管理</font></center>)
+<center><font size=214 face=黑体 color=grey>Linux软件包管理</font></center>
 
 # 一.软件运行环境基础 
 
@@ -7,13 +7,13 @@
 - gcc 编译程序主要经过四个过程： 
 
 ```bash
-    预处理（Pre-Processing） 
-    编译 （Compiling） 
-    汇编 （Assembling） 
-    链接 （Linking） 
+    处理（Pre-Processing） 
+    译 （Compiling） 
+    编 （Assembling） 
+    接 （Linking） 
 ```
 
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-r9bfgXpA-1571053790456)(png/2019-10-11-11-51-23.png)]
+![](png/2019-10-11-11-51-23.png)
 
 - 如上图gcc编译过程 
 
@@ -33,7 +33,7 @@ gcc hello.c -o hello
 
 ## 2.C程序编译过程
 
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-cUuyMMN3-1571053790458)(png/2019-10-11-12-03-13.png)]
+![](png/2019-10-11-12-03-13.png)
 
 
 
@@ -60,10 +60,10 @@ libxxx.so
 ```
 
 - 静态链接和动态链接示意
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-C0AVpJro-1571053790458)(png/2019-10-11-11-52-49.png)]
+![](png/2019-10-11-11-52-49.png)
 
 - Java程序运行示意
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-NGBYhgCR-1571053790459)(png/2019-10-11-19-46-56.png)]
+![](png/2019-10-11-19-46-56.png)
 
 
 
@@ -367,7 +367,7 @@ yum的repo配置文件中可用的变量：
     http://server/centos/$releasever/$basearch/ 
     http://server/centos/7/x86_64 
     http://server/centos/6/i386
-```
+``` 
 
 ## 3.yum源 
 
@@ -437,7 +437,7 @@ yum [options] [command] [package ...]
     yum history info 6 
     yum history undo 6  
 日志 ：/var/log/yum.log 
-```
+``` 
 
 
 ```bash
@@ -594,7 +594,7 @@ c/c++编译器: gcc (GNU C Complier)
 
 ```bash
 yum install gcc gcc-c++ glibc glibc-devel pcre pcre-devel openssl  openssl-devel systemd-devel zlib-devel  vim lrzsz tree screen  lsof tcpdump wget  ntpdate net-tools iotop bc  bzip2 zip unzip nfs-utils 
-```
+``` 
 
 
 - 编译安装三步详细讲解
@@ -670,7 +670,7 @@ java-1.8.0-openjdk-headless-1.8.0.201.b09-2.el8.x86_64
 
 3、编写系统初始化脚本 reset.sh，包括别名，提示符颜色，yum仓库配置文件, 安装tree,ftp,lftp,telnet等包  
 
-> [见这篇文章末尾](https://blog.csdn.net/YouOops/article/details/102491465)
+> [见之前的文章末尾](https://blog.csdn.net/YouOops/article/details/102491465)
 
 4、在CentOS 7上编译安装 apache 2.4.25 源码包,并启动此服务
 
@@ -687,3 +687,22 @@ java-1.8.0-openjdk-headless-1.8.0.201.b09-2.el8.x86_64
 8.ooooooooooooooook
 ```
 
+> [Centos7/8一键编译安装httpd脚本移步](http://suosuoli.cn/suo/scripts/install_httpd02.sh)
+
+```bash
+5.破坏MBR分区，恢复之
+
+1.dd if=/dev/sda of=./mbr bs=1 skip=446                 #备份分区表
+2.scp ./mbr root@172.20.1.164:/data/                    #将备份拷贝到远程机器备用
+3.dd if=/dev/zero of=/dev/sda bs=1 seek=446 count=66    #破坏
+4.reboot
+5.此时无法识别系统引导分区，光盘启动，进入:Troubeshooting
+6.Rescue a istalled system
+7.3) skip to a shell
+8.此时进入一个shell中，lsblk查看一下硬盘
+9.ip a 发现无地址，scp远程拷贝用不了
+10.ip a a 172.20.1.254/24 dev ens33                     #临时配个地址
+11.scp root@172.20.1.164:/data/mbr .                    #从远程机器拷贝原来的备份 
+12.dd if=/dev/sda of=./mbr bs=1 seek=446
+13.reboot
+```

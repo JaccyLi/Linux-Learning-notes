@@ -1,4 +1,3 @@
-﻿@[TOC]
 <center><font size=214 face=黑体 color=grey> Linux标准I/O和管道 </font></center>
 
 ---

@@ -1,8 +1,8 @@
-﻿@[TOC](<center><font size=214 face=黑体 color=grey>文本处理三剑客之SED</font></center>)
+<center><font size=214 face=黑体 color=grey>文本处理三剑客之SED</font></center>
 
-# 一.Sed介绍
+# 一.Sed 介绍
 
-- sed是linux下出名的行编辑器(Stream EDitor)
+- sed 是 linux 下出名的行编辑器(Stream EDitor)
 
 ```bash
     简介：sed是一种流编辑器，它一次处理一行内容。处理时，把当前处理的行存储在临时
@@ -14,13 +14,13 @@
     sed主要用来自动编辑一个或多个文件,简化对文件的反复操作,编写转换程序等
 ```
 
-[sed详细参考手册](http://www.gnu.org/software/sed/manual/sed.html)
+[sed 详细参考手册](http://www.gnu.org/software/sed/manual/sed.html)
 
-# 二.Sed用法 
+# 二.Sed 用法
 
 ## 1.基本选项功能和用法
 
-```bash 
+```bash
 sed [option]... 'script' inputfile...
     -n  不输出模式空间内容到屏幕，即不自动打印
     -e  多点编辑
@@ -68,7 +68,7 @@ sed [option]... 'script' inputfile...
 ## 3.搜索替换
 
 ```bash
-s///  
+s///
 查找替换,支持使用其它分隔符，s@@@，s###
 替换标记：
     g 行内全局替换
@@ -76,7 +76,7 @@ s///
     w   /PATH/FILE 将替换成功的行保存至文件中
 ```
 
-## 4.sed示例 
+## 4.sed 示例
 
 ```bash
     sed ‘2p’  /etc/passwd
@@ -100,7 +100,7 @@ s///
     sed –i.bak  ‘s/dog/cat/g’ pets
 ```
 
-# 三.Sed高级用法
+# 三.Sed 高级用法
 
 - 高级编辑命令
 
@@ -126,7 +126,7 @@ s///
     sed ‘G’ FILE
     sed ‘g’ FILE
     sed ‘/^$/d;G’ FILE
-    sed 'n;d' FILE  
+    sed 'n;d' FILE
     sed -n '1!G;h;$p' FILE
 ```
 
@@ -138,13 +138,15 @@ s///
 
 2、删除/etc/fstab文件中所有以#开头，后面至少跟一个空白字符的行的行首的#
 和空白字符
-    sed -inr 's#^# +(.*)#\1#p' /etc/grub2.cfg
+    sed -inr 's#^\# +(.*)#\1#p' /etc/grub2.cfg
+    sed -inr 's@^# +(.*)@\1@p' /etc/grub2.cfg
 
 3、在centos6系统/root/install.log每一行行首增加#号
-    sed -inr 's#.*#\#&#p' /etc/grub2.cfg
+    sed -inr 's#.*#\#&#p' /etc/install.log
 
 4、在/etc/fstab文件中不以#开头的行的行首增加#号
-    sed -inr 's#^[^#](.*)#\#\1#p' /etc/grub2.cfg
+    sed -inr 's#^([^#].*)#\#\1#p' /etc/grub2.cfg
+    sed -nr 's@^([^#].*)@#\1@p'  /etc/grub2.cfg
 
 5、处理/etc/fstab路径,使用sed命令取出其目录名和基名
     echo /etc/fstab/ | sed -nr 's#(.*/)([^/]+)/?#\1#p'
@@ -164,6 +166,6 @@ sed两种方法分别实现）
     sed -r "s/[^[:alpha:]]/\n/g" /etc/init.d/functions| sort | uniq -c | sort -nr
 
 9、将文本文件的n和n+1行合并为一行，n为奇数行
-    seq 10 | sed -nr '1~2N;s/\n/ /p' 
+    seq 10 | sed -nr '1~2N;s/\n/ /p'
 
 ```
