@@ -1,14 +1,11 @@
-> 1.nginx和apache的区别?
+> 1.nginx 和 apache 的区别?
 
-> 2.LVS三种模式的工作过程?
-> 3.mysql数据库备份的方法?
-> 4.列举知道的负载均衡
-> 5.源码编译安装apache,要求为:安装目录为/usr/local/apache,需有压缩模块，
-rewrite,worker模式;并说明在apache的worker MPM中，为什么ServerLimit要
-放到配置段最前面?
-> 6.
-> 7.
-> 8.hellodb_innodb.sql内容如下，使用其生成的表来完成以下查询。
+> 2.LVS 三种模式的工作过程?
+> 3.mysql 数据库备份的方法? 4.列举知道的负载均衡 5.源码编译安装 apache,要求为:安装目录为/usr/local/apache,需有压缩模块，
+> rewrite,worker 模式;并说明在 apache 的 worker MPM 中，为什么 ServerLimit 要
+> 放到配置段最前面? 6. 7.
+> 8.hellodb_innodb.sql 内容如下，使用其生成的表来完成以下查询。
+
 ```sql
 -- MySQL dump 10.13  Distrib 5.5.33, for Linux (x86_64)
 --
@@ -308,16 +305,26 @@ select * from students where Age > (select avg(Age) from students where classID 
 
 ```
 
-> 9.存储引擎InnoDB和MyISAM的区别
+> 9.存储引擎 InnoDB 和 MyISAM 的区别
 
-|Feature|InnoDB|MyISAM|
-|---|---|---|
-|MVCC|支持|不支持|
-|Transactions|支持|不支持|
-|Data caches|支持|不支持|
-|Foreign key|支持|不支持|
-|Clustered indexes|支持|不支持|
-|锁机制粒度|行级锁|表级锁|
-|全文索引|mysql5.5版本后支持|支持|
-|文件|两种:.ibd/.frm|三种:.frm/.MYD/.MYI|
-- MyISAM读取数据较快，占用资源少，崩溃恢复性差；Innodb崩溃后恢复性更好。
+| Feature           | InnoDB              | MyISAM              |
+| ----------------- | ------------------- | ------------------- |
+| MVCC              | 支持                | 不支持              |
+| Transactions      | 支持                | 不支持              |
+| Data caches       | 支持                | 不支持              |
+| Foreign key       | 支持                | 不支持              |
+| Clustered indexes | 支持                | 不支持              |
+| 锁机制粒度        | 行级锁              | 表级锁              |
+| 全文索引          | mysql5.5 版本后支持 | 支持                |
+| 文件              | 两种:.ibd/.frm      | 三种:.frm/.MYD/.MYI |
+
+- MyISAM 读取数据较快，占用资源少，崩溃恢复性差；Innodb 崩溃后恢复性更好。
+
+> 10.使用 iptables 实现跨网段地址转换
+
+```bash
+# 请求报文目标地址转换
+iptables -t nat -A PREROUTING -d 192.168.7.101 -p tcp --dport 3389 -j DNAT --to-destination 172.18.139.20:3389
+# 响应报文返回转换
+iptables -t nat -A POSTROUTING -s 192.168.0.0/21 -j SNAT --to-source  192.168.7.101
+```

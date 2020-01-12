@@ -554,7 +554,7 @@ backend web_prot_http_nodes
     server node4 172.20.2.45:80 check inter 3000 fall 3 rise 5
 ```
 
-上面的配置会将 http 请求轮询的方式代理到后端四台服务器，示例
+上面的配置会将 http 请求以轮询的方式代理到后端四台服务器，示例
 
 ```bash
 root@ubuntu-suosuoli-node1:~# while : ; do curl http://172.20.2.189:8080/ ; sleep 1 ; done
@@ -569,7 +569,7 @@ node1 172.20.2.37
 ^C
 ```
 
-访问`http://172.20.2.189:9999/haproxy_status`查看个服务器状态
+访问`http://172.20.2.189:9999/haproxy_status`查看各个服务器状态
 ![](png/2020-01-11-19-40-48.png)
 
 ### 2.3.2 基础配置详解
@@ -582,13 +582,13 @@ node1 172.20.2.37
 Debug参数
 ```
 
-`proxies`代理配置段
+`proxies`代理配置块
 
 ```bash
-defaults：为frontend, backend, listen提供默认配置
-frontend：前端，相当于nginx中的server {}
-backend： 后端，相当于nginx中的upstream {}
-listen：  同时拥有前端和后端配置
+defaults [<name>] # 默认配置项，针对以下的frontend、backend和lsiten生效，可以多个name也可以没有name
+frontend <name>   # 前端servername，类似于Nginx的一个虚拟主机 server。
+backend  <name>   # 后端服务器组，等于nginx的upstream
+listen   <name>   # 将frontend和backend合并在一起配置
 ```
 
 #### 2.3.2.1 global 配置参数
@@ -619,12 +619,12 @@ log 127.0.0.1  local3 info # 定义全局的syslog服务器；最多可以定义
 
 Proxies 配置涉及四个关键字
 
-```bash
-defaults [<name>] # 默认配置项，针对以下的frontend、backend和lsiten生效，可以多个name也可以没有name
-frontend <name>   # 前端servername，类似于Nginx的一个虚拟主机 server。
-backend  <name>   # 后端服务器组，等于nginx的upstream
-listen   <name>   # 将frontend和backend合并在一起配置
-```
+| 关键字              | 说明                                                                                                                                                           |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| defaults [\<name\>] | 默认配置项，针对定义在其后的 frontend、backend 和 lsiten 生效，可以多个 name 也可以没有 name。这些默认的参数会在遇到下一个"defaults"配置关键字时被该默认值重置 |
+| frontend \<name\>   | 前端 servername，用于描述一个接受客户端请求的套接字集合，类似于 Nginx 的一个虚拟主机 server。                                                                  |
+| backend \<name\>    | 该配置关键字用于描述 HAProxy 转发请求的一组后端服务器，相当于 nginx 的 upstream                                                                                |
+| listen   \<name\>   | listen 关键字则是定义了一个完整的代理，该配置块包含了 frontend 和 backend。这种配置方式在只转发 TCP 流量时比较有用。                                           |
 
 **注：name 字段只能使用"-" "\_" "." 和 ":"，并且严格区分大小写，例如：Web 和 web 是**
 **完全不同的两组服务器。**
@@ -638,23 +638,27 @@ case-sensitive, which means that "www" and "WWW" are two different proxies.
 ##### 2.3.2.2.1 Proxies 配置-defaults
 
 ```bash
-option redispatch      # 当server Id对应的服务器挂掉后，强制定向到其他健康的服务器，重新派发
-option abortonclose    # 当服务器负载很高的时候，自动结束掉当前队列处理比较久的链接，关闭
-option http-keep-alive # 开启与客户端的会话保持
-option  forwardfor     # 透传客户端真实IP至后端web服务器
-mode http              # 设置默认工作类型
-timeout http-keep-alive 120s # session 会话保持超时时间，范围内会转发到相同的后端服务器
-timeout connect 120s  # 客户端请求从haproxy到后端server的最长连接等待时间(TCP之前)
-timeout server  600s  # 客户端请求从haproxy到后端服务端的请求处理超时时长(TCP之后)
-timeout client  600s  # 设置haproxy与客户端的最长非活动时间
-timeout  check   5s   # 对后端服务器的默认检测超时时间
+defaults name
+  option redispatch      # 当server Id对应的服务器挂掉后，强制定向到其他健康的服务器，重新派发
+  option abortonclose    # 当服务器负载很高的时候，自动结束掉当前队列处理比较久的链接，关闭
+  option http-keep-alive # 开启与客户端的会话保持
+  option  forwardfor     # 透传客户端真实IP至后端web服务器
+  mode http              # 设置默认工作类型
+  timeout http-keep-alive 120s # session 会话保持超时时间，范围内会转发到相同的后端服务器
+  timeout connect 120s  # 客户端请求从haproxy到后端server的最长连接等待时间(TCP之前)
+  timeout server  600s  # 客户端请求从haproxy到后端服务端的请求处理超时时长(TCP之后)
+  timeout client  600s  # 设置haproxy与客户端的最长非活动时间
+  timeout  check   5s   # 对后端服务器的默认检测超时时间
 ```
 
 ##### 2.3.2.2.2 Proxies 配置-frontend
 
 ```bash
-bind           # 指定HAProxy的监听地址，可以是IPV4或IPV6，可以同时监听多个IP或端口，可同时用于listen字段中
-bind [<address>]:<port_range> [, ...] [param*]
+frontend frontend_name
+  mode mode_name
+  bind <...> # 指定HAProxy的监听地址，可以是IPV4或IPV6，可以同时监听多个IP或端口，可同时用于listen字段中
+  bind [<address>]:<port_range> [, ...] [param*]
+  use_backend backend_name
 
 listen http_proxy # 监听http的多个IP的多个端口和sock文件
     bind :80,:443,:8801-8810
@@ -686,9 +690,11 @@ frontend  WEB_PORT
 backend 关键字用于定义一组后端服务器，backend 服务器将被 frontend 进行调用。
 
 ```bash
-mode  http/tcp     #  指定负载协议类型
-option             #  配置选项
-server             #  定义后端real server
+backend backend_name
+  mode  http/tcp     #  指定负载协议类型
+  option             #  配置选项
+  balance <algorithm> [<arguments>] # 定义在后端服务器使用的调度算法
+  server  server_name server:port check <...>      #  定义后端real server
 ```
 
 **注意：option 后面加 httpchk，smtpchk,mysql-check,pgsql-check，ssl-hello-chk 方法**
