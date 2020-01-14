@@ -1004,17 +1004,12 @@ log_format  main  '"$http_x_forwarded_For" - $remote_user [$time_local] "$reques
 
 ```bash
 # 172.20.1.1为客户端地址
-[root@node1 html]# tail -f /apps/nginx/logs/access.log
-"172.20.1.1" - - [12/Jan/2020:22:16:51 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-"172.20.1.1" - - [12/Jan/2020:22:16:51 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-"172.20.1.1" - - [12/Jan/2020:22:16:52 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-"172.20.1.1" - - [12/Jan/2020:22:16:52 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-"172.20.1.1" - - [12/Jan/2020:22:16:52 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-"172.20.1.1" - - [12/Jan/2020:22:16:52 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-"172.20.1.1" - - [12/Jan/2020:22:16:52 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-"172.20.1.1" - - [12/Jan/2020:22:16:53 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-"172.20.1.1" - - [12/Jan/2020:22:16:53 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-"172.20.1.1" - - [12/Jan/2020:22:16:53 +0800] "GET / HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
+[root@node1 ~]# tail -f /apps/nginx/logs/access.log
+"172.20.2.195" - - [13/Jan/2020:19:01:38 +0800] "GET / HTTP/1.1" 200 18 "-" "curl/7.29.0"
+"172.20.1.1" - - [13/Jan/2020:19:01:49 +0800] "GET /index1.html HTTP/1.1" 200 26 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
+"172.20.1.1" - - [13/Jan/2020:19:01:52 +0800] "GET /index1.html HTTP/1.1" 200 26 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
+"172.20.1.1" - - [13/Jan/2020:19:01:55 +0800] "GET /index1.html HTTP/1.1" 200 26 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
+"172.20.1.1" - - [13/Jan/2020:19:02:22 +0800] "GET /index1.html HTTP/1.1" 304 0 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
 ......
 ```
 
