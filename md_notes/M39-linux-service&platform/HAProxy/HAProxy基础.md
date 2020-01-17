@@ -147,7 +147,7 @@ compilation terminated.
 # 安装依赖
 root@ubuntu-suosuoli-node1:/usr/local/src/lua-5.3.5# sudo apt-get install libreadline-dev
 
-# 再次编译，成功
+# 再次编译lua，成功
 root@ubuntu-suosuoli-node1:/usr/local/src/lua-5.3.5# make linux
 cd src && make linux
 make[1]: Entering directory '/usr/local/src/lua-5.3.5/src'
@@ -210,6 +210,10 @@ collect2: error: ld returned 1 exit status
 Makefile:825: recipe for target 'haproxy' failed
 make: *** [haproxy] Error 1
 ......
+
+
+# 再安装依赖
+
 略略略略略略略略路嗯嗯撸恶露额略略
 ```
 
