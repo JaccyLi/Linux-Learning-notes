@@ -145,7 +145,7 @@ JVM:Java Virtual Machine，指将 java 源码翻译为机器码的引擎。下�
 
 ![JVM_architecture](png/2020-01-17-14-10-51.png)
 
-图中被类加载子系统加载的`.class`类文件是由 javac 编译器编译而成。类加载
+图中被`类加载子系统加载的` `.class`类文件是由 javac 编译器编译而成。类加载
 子系统除了加载类文件外还进行连接和初始化，之后类文件被加载进 java 运行数据
 内存区，之后被执行引擎执行。执行引擎实质是一个即时编译器(JIT Compiler:
 just-in-time compiler)，在这里类文件被转换成中间语言，经过代码优化器后
@@ -186,7 +186,8 @@ public class HelloWorld extends HttpServlet {
 
 jsp(Java Server Pages)
 
-提供一个 HTML，把它变成一个模板，也就是在网页中预留以后填充的空，以后就变成了填空了。
+提供一个 HTML，把它变成一个模板，也就是在网页中预留以后填充的空，
+以后就变成了填空了。
 
 ```html
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -215,8 +216,8 @@ JSP 是基于 Servlet 实现，JSP 将表现和逻辑分离，这样页面开发
 
 ## 2.1 简介
 
-Tomcat 是由一系列可配置的组件组成的容器。各个组件各司其职，各个组件之间松耦合。
-由于各个组件之间的松耦合使得整体架构具有很强的可伸缩性和可扩展性。
+Tomcat 是由一系列可配置的组件组成的容器。各个组件各司其职，各个组件之间松
+耦合。由于各个组件之间的松耦合使得整体架构具有很强的可伸缩性和可扩展性。
 
 Tomcat 起始于 SUN 的一个 Servlet 的参考实现项目 Java Web Server，作者是
 James Duncan Davidson，后将项目贡献给了 ASF。和 ASF 现有的项目合并，并开
@@ -224,7 +225,7 @@ James Duncan Davidson，后将项目贡献给了 ASF。和 ASF 现有的项目�
 
 Tomcat 仅仅实现了 Java EE 规范中与 Servlet、JSP 相关的类库，是 JavaEE
 不完整实现。著名图书出版商 O'Reilly 约稿该项目成员，出一本关于 Tomcat 的
-书籍，书名为：`Tomca The Definitive Guide`，中文也叫 Tomcat 权威指南。
+书籍，书名为：`Tomca The Definitive Guide`，中文也叫 `Tomcat 权威指南`。
 Davidson 希望使用一个公猫作为封面，但是公猫已经被另一本书使用，书出版后
 封面是一只雪豹。
 
@@ -772,23 +773,45 @@ projects/
 
 #### server.xml
 
-server.xml 配置文件
+server.xml 是 tomcat 服务器的核心配置文件，包含了 tomcat 的 Servlet 容器(Catalina)
+的所有配置。Server 是 server.xml 的根元素，用于创建一个 Server 实例，默认使用的实现
+类为`org.apache.catalina.core.StandardServer`
+
+Server 元素
+
+```xml
+<Server port="8005" shutdown="SHUTDOWN">
+...
+</Server>
+
+```
+
+server.xml 的典型配置
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Server port="8005" shutdown="SHUTDOWN">
-  <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
-  <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
-  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
-  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
-  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
 
-    <Resource name="UserDatabase" auth="Container"
+   <!-- 下面的5个Listener的作用：-->
+  <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
+  <!-- 用于以日志的形式输出服务器、操作系统、JVM的版本信息 -->
+  <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+  <!-- 用于加载和销毁APR，如果找不到APR库，则会输出日志，并不影响Tomcat启动 -->
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <!-- 用于避免JRE内存泄露问题 -->
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <!-- 用于加载和销毁全局命名服务 -->
+  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+  <!-- 用于在Context停止是重建Executor池中的线程，以避免ThreadLocal相关的内存泄露 -->
+
+
+    <GlobalNamingResource name="UserDatabase" auth="Container"
               type="org.apache.catalina.UserDatabase"
               description="User database that can be updated and saved"
               factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
               pathname="conf/tomcat-users.xml" />
   </GlobalNamingResources>
+  <!-- GlobalNamingResources中定义了全局命名服务 -->
 
   <Service name="Catalina">
 
@@ -853,15 +876,128 @@ LISTEN      0      128                       [::]:111                           
 LISTEN      0      128                       [::]:22                                    [::]:*
 ```
 
+建议将该口令改为比较复杂的 hash 值
+
+`<Server port="8005" shutdown="44ba3c71d57f494992641b258b965f28">`
+
 #### 用户认证配置
 
 #### Service
 
+该元素用于创建 Service 实例，默认使用类`org.apache.catalina.core.StandardService`
+默认情况下，Tomcat 仅指定了 Service 的名称，值为`Catalina`。Service 可以内嵌的
+元素为：Listener、Executor、Connector 和 Engine，其中：Listener 为 Service 添
+加生命周期的监听器，Executor 用于配置 Service 共享线程池，Connector 用于配置
+Service 包含的连接器，Engine 用于配置 Service 中连接器对应的 Servlet 容器引擎。
+一个 Server 服务器可以包含多个 Service 服务，一般只配一个。
+
+```xml
+<Service name="Catalina">
+...
+</Service>
+```
+
+#### Executor
+
+默认情况下，Service 并未添加共享线程池配置。如果想人为的添加一个线程池，
+可以在 Service 元素内添加如下的配置：
+
+```xml
+ <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+    namePrefix="catalina-exec-"
+    maxThreads="150"
+    minSpareThreads="100"
+    maxIdleTime="60000"
+    maxQueueSize="Integer.MAX_VALUE"
+    prestartminSpareThreads="false"
+    threadPriority="5"
+    className="org.apache.catalina.StandardThreadExecutor"/>
+```
+
+属性说明
+
+| 属性                    | 说明                                                                                                                                                      |
+| :---------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name                    | 线程池名称，用于 Connector 中指定。                                                                                                                       |
+| namePrefix              | 所创建的每个线程的名称前缀，一个单独的线程名称为 namePrefix+threadNumber                                                                                  |
+| maxThreads              | 池中最大的线程数                                                                                                                                          |
+| minSpareThreads         | 活跃线程数，就是核心线程池数，这些线程不会被销毁，一直存在                                                                                                |
+| maxIdleTime             | 线程空闲时间，超过该时间后，空闲线程会被销毁，默认值为 6000(1 分钟)                                                                                       |
+| maxQueueSize            | 在被执行前最大线程排队数目，默认为 Int 的最大值，也就是广义的无限大。除非特殊情况，这个值需要更改，否则会有请求不会被处理的情况发生。                     |
+| prestartminSpareThreads | 启动线程时是否启动 minSpareThreads 部分线程。默认为 false，即不启动                                                                                       |
+| threadPriority          | 线程池中线程优先级，默认值为 5，值范围为 1~10                                                                                                             |
+| className               | 线程池实现类，未指定情况下，默认实现类为 org.apache.catalina.StandardThreadExecutor，如果想使用自定义线程池首先需要实现 org.apache.catelina.Executor 接口 |
+
 #### Connector
+
+Connector 用于创建连接器实例。默认情况下，server.xml 配置了两个连接器，
+一个支持 HTTP 协议，一个支持和 apache 通讯的 AJP 协议。因此大多数情况下，
+并不需新增连接器配置，只是根据需要对已有的连接器进行优化。
+
+```xml
+<Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="8443" />
+<Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />
+```
+
+属性说明：
+
+1. port:端口号，Connector 用于创建服务器端 Socket 并进行监听，以等待客户请求。
+   如果该属性设置为 0，Tomcat 将会随机选择一个端口号给当前 Connector 使用。
+2. protocol:当前 Connector 支持的访问协议。默认为 HTTP/1.1，并采用自动切换机制
+   选择一个基于 JAVA NIO 的连接器或者基于本地的 APR 的连接器(由本地是否有 Tomcat
+   本地库决定)。
+
+如果不想使用默认的切换机制，而是明确指定协议，可以使用：
+
+```ruby
+org.apache.coyote.http11.Http11NioProtocol,非阻塞式JAVA NIO连接器
+org.apache.coyote.http11.Http11Nio2Protocol,非阻塞式JAVA NIO2连接器
+org.apache.coyote.http11.Http11AprProtocol,非阻塞式APR连接器
+```
+
+3. connectionTimeOut: Connector 接收连接后的等待超时时间，单位为毫秒，
+   -1 表示不超时。
+
+4. redirectPort: 当前的 Connector 不支持 SSL 请求时，收到请求，并且也符合
+   security-constraint 约束，需要 SSL 传输，Catalina 自动将请求重定向到
+   指定的端口。
+
+5. executor: 指定共享线程池的名称，也可以通过 maxThreads、minSpareThreads
+   等属性配置内部线程池。
+
+6. URLEncoding: 用于指定编码 URI 的字符编码，Tomcat8.x 版本默认的编码为 UTF-8
 
 #### Engine
 
+Engine 作为 Servlet 引擎的顶级元素，内部可以嵌入:Cluster、Listener、Realm、
+Valve 和 Host。
+
+```xml
+    <Engine name="Catalina" defaultHost="localhost">
+    ...
+    </Engine>
+```
+
+属性说明：
+
+1. name: 用于指定 Engine 的名称，默认 Catalina。该名称会影响部分 Tomcat 的存储
+   路径(如临时文件)。
+2. defaultHost: 默认使用的虚拟主机名称，当客户端请求指向主机无效时，将交由默认
+   虚拟主机处理，默认为 localhost
+
 #### 虚拟主机 Host
+
+Host 元素可以配置一个虚拟主机，它支持以下嵌入元素：Alias、Cluster、Listener、
+Valve、Realm 和 Context。如果在 Engine 下配置了 Realm，那么此配置将在当前
+Engine 下的所有 Host 中共享。同样，如果在 Host 中配置 Realm，则在当前 Host
+下的所有 Context 中共享。`Context 中的 Realm 优先级 > Host 中的 Realm 优先级`
+`> Engine 中的 Realm 优先级`。
+
+```xml
+<Host name="localhost"  appBase="webapps" unpackWARs="true" autoDeploy="true">
+...
+</Host>
+```
 
 ### 2.6.5 虚拟主机配置示例
 
