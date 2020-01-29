@@ -769,7 +769,7 @@ projects/
 
 #### 测试
 
-### 2.6.4 部分配置说明
+### 2.6.4 Tomcat 服务器配置说明
 
 #### server.xml
 
@@ -802,7 +802,7 @@ server.xml 的典型配置
   <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
   <!-- 用于加载和销毁全局命名服务 -->
   <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
-  <!-- 用于在Context停止是重建Executor池中的线程，以避免ThreadLocal相关的内存泄露 -->
+  <!-- 用于在Context停止时重建Executor池中的线程，以避免ThreadLocal相关的内存泄露 -->
 
 
     <GlobalNamingResource name="UserDatabase" auth="Container"
@@ -882,6 +882,8 @@ LISTEN      0      128                       [::]:22                            
 
 #### 用户认证配置
 
+用户认证配置文件为：`conf/tomcat-users.xml`
+
 #### Service
 
 该元素用于创建 Service 实例，默认使用类`org.apache.catalina.core.StandardService`
@@ -903,7 +905,7 @@ Service 包含的连接器，Engine 用于配置 Service 中连接器对应的 S
 可以在 Service 元素内添加如下的配置：
 
 ```xml
- <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+ <Executor name="tomcatThreadPool"
     namePrefix="catalina-exec-"
     maxThreads="150"
     minSpareThreads="100"
@@ -999,14 +1001,136 @@ Engine 下的所有 Host 中共享。同样，如果在 Host 中配置 Realm，�
 </Host>
 ```
 
-### 2.6.5 虚拟主机配置示例
+参数说明：
 
-### 2.6.6 Context 配置
+1. name:当前的 Host 通用的网络名称，必须与 DNS 服务器上的注册信息一致。
+   Engine 中包含的 Host 必须存在一个名称与 Engine 的 defaultHost 设置
+   一致。
+2. appBase:当前 Host 的应用基础目录，当前 Host 上部署的 web 应用均在该
+   目录下(可以是绝对目录或相对目录)。默认为 webapps。
+3. unpackWARs:设置为 true，Host 在启动时会将 appBase 目录下的 war 包解
+   压缩为目录。设置为 false，Host 直接从 war 文件启动。
+4. autoDeploy: 控制 tomcat 是否在运行时定期检查并自动部署新增或变更的
+   web 应用。
+
+通过给 Host 添加别名，可以实现同一个 Host 用于多个网络名词，配置如下：
+
+```xml
+<Host name="blogs.suosuoli.cn"  appBase="webapps" unpackWARs="true" autoDeploy="true">
+    <Alias>www.suosuoli.cn</Alias>
+</Host>
+```
+
+此时可以通过两个域名，来访问同一个 Host 配置的应用
+
+### 2.6.5 Context 配置
+
+Context 元素用于配置一个 Web 应用，其支持的内嵌元素有：
+CookieProcessor,Loader,Manager,Realm,Resource,WatchedResource,
+JarScanner,Valve.
+默认配置如下：
+
+```xml
+<Context docBase="myApp" path="/myApp">
+    ...
+</Context>
+```
+
+属性说明：
+
+1. docBase:Web 应用目录或者 war 包的部署路径。可有是绝对路径，也可以
+   是相对于 Host appBase 的相对路径。
+2. path:web 应用的 Context 路径。如果 Host 名为 localhost，则该 web
+   应用访问的根路径为`http://localhost:8080/myApp`
 
 # 三.Tomcat 常见配置方式
 
 ## 3.1 Tomcat 和 Nginx 配置
 
-## 3.2 应用管理
+Nginx 代理配置：
 
-## 3.3 Tomcat 和 HTTPD
+- 全部请求都代理
+
+```xml
+location / {
+    # proxy_pass http://127.0.0.1:8080; # 不管什么请求，都会访问后面的localhost虚拟主机
+    proxy_pass http://www.suosuoli.cn:8080; # 记得修改服务器的/etc/hosts
+}
+```
+
+- tomcat 虚拟主机管理配置：
+
+```xml
+<tomcat-users xmlns="http://tomcat.apache.org/xml"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://tomcat.apache.org/xml tomcat-users.xsd"
+              version="1.0">
+    <role rolename="manager-gui"/>
+    <role rolename="admin-gui" />
+    <user username="wayne" password="wayne" roles="manager-gui,admin-gui"/>
+</tomcat-users>
+```
+
+## 3.2 Tomcat 和 HTTPD
+
+- HTTPD 配置
+
+1. 模块准备
+
+```bash
+# yum install httpd -y
+# httpd -M
+# httpd -M | grep proxy
+ proxy_module (shared)
+ proxy_ajp_module (shared)
+ proxy_balancer_module (shared)
+ proxy_http_module (shared)
+```
+
+2. `proxy_http_module`模块代理配置
+
+```ruby
+<VirtualHost *:80>
+    ServerName        www.suosuoli.cn
+    ProxyRequests     Off
+    ProxyVia          On
+    ProxyPreserveHost On
+    ProxyPass        / http://127.0.0.1:8080/
+    ProxyPassReverse / http://127.0.0.1:8080/
+</VirtualHost>
+```
+
+说明
+
+- ProxyRequests：Off 关闭正向代理。
+- ProxyPass：反向代理指令
+- ProxyPassReverse：保留代理的 response 头不重写（个别除外）
+- ProxyPreserveHost：On 开启。让代理保留原请求的 Host 首部
+- ProxyVia：On 开启。代理的请求响应时提供一个 response 的 via 首部
+
+```bash
+# vim /etc/httpd/conf.d/http-tomcat.conf
+# httpd -t
+# systemctl start httpd
+# /usr/local/tomcat/bin/startup.sh
+```
+
+分别访问
+`http://ip/`
+`http://www.suosuoli.cn/`
+`http://www.suosuoli.cn/index.jsp`
+返回不同的页面，说明`ProxyPreserveHost On`配置生效。
+
+proxy_ajp_module 模块代理配置
+
+```bash
+<VirtualHost *:80>
+    ServerName        www.suosuoli.cn
+    ProxyRequests     Off
+    ProxyVia          On
+    ProxyPreserveHost On
+    ProxyPass        / ajp://127.0.0.1:8009/
+</VirtualHost>
+```
+
+相对来讲，AJP 协议基于二进制比使用 HTTP 协议的连接器效率高些。
