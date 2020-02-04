@@ -311,6 +311,119 @@ LVS CONFIGURATION # LVS配置
     Virtual server(s) # ipvs集群的vs和rs
 ```
 
+#### 3.2.1.2 配置文件概览
+
+```ruby
+$ vim /etc/keepalived/keepalived.conf
+
+! Configuration File for keepalived
+global_defs {   # 全局配置
+    notification_email {   # 邮件通知，keepalived故障时，发通知邮件
+       root@localhost      # 邮箱地址
+    }
+    notification_email_from keepalived@localhost  # 邮件从哪发出去
+    smtp_server 127.0.0.1    # 邮件服务器stmp地址
+    smtp_connect_timeout 30  # 超时时间
+    router_id ka1  # 主机名
+    #vrrp_skip_check_adv_addr
+    #vrrp_strict    # 严格遵守vrrp协议，没有vip，单播地址，ipv6将无法启动
+    #vrrp_iptables  # 不生成iptables规则
+    vrrp_mcast_group4 224.100.100.100   # 组播,默认发224.0.0.18
+    #vrrp_garp_interval 0   # arp报文发送延迟
+    #vrrp_gna_interval 0    # 消息发送延迟
+}
+
+# 定义vrrp虚拟路由器实例。一个配置文件中可以实现多实例，但不同主机上互为master<-->backup的实例名需相同
+
+vrrp_instance VI_1 {      # 配置实例的名称
+    nopreempt             # 定义工作模式为非抢占模式
+    preempt_delay 300     # 抢占式模式，节点上线后触发新选举操作的延迟时长，默认模式
+    state MASTER          # 主MASTER，从BACKUP
+    interface eth0        # 绑定为当前虚拟路由器使用的物理接口:即接收或发送心跳通告的接口，即HA监测接口
+    virtual_router_id 66  # 虚拟路由标识(VRID)，同一实例该数值必须相同，即master和backup中该值相同
+                          # 同一网卡上的不同vrrp实例，该值必须不能相同。取值范围0-255
+    priority 100          # 优先级，范围1-254
+                          # 高于state选项，即若state指定的是backup，但这里设置的值最高，则仍为master
+    advert_int 1          # vrrp通告的时间间隔，默认1s
+    authentication {      # 认证方式，同一实例中这个配置必须完全一样才可通过认证。只建议使用PASS认证
+        auth_type PASS    # {AH|PASS},设置密码类型，
+        auth_pass 123     # 最多支持8字符，超过8字符将只取前8字符
+    }
+    virtual_ipaddress {   # 设置的VIP。只有master节点才会设置。master出现故障后，VIP会故障转移到backup。
+                          # 这些vip默认配置在interface指定的接口别名上，可使用dev选项来指定配置接口
+                          # 使用ip add的方式添加。若要被ifconfig查看，在IP地址后加上label即可
+                          # <IPADDR>/<MASK> brd <IPADDR> dev <STRING> scope <SCOPE> label <LABEL>
+
+        192.168.99.99/24 dev eth0 label eth0:1  #设置虚拟网卡
+    }
+    track_interface {  # 配置监控网络接口，一旦出现故障，则转为FAULT状态 实现地址转移
+        eth0
+    }
+}
+
+# 定义虚拟服务器部分
+virtual_server 192.168.200.100 443 { # 虚拟服务地址和端口，使用空格分隔，其中地址为VIP
+    delay_loop 6                     # 健康检查时间间隔
+    lb_algo rr                       # 定义负载均衡LB的算法，这里使用的是rr调度算法
+    lb_kind NAT                      # lvs的模型，有NAT/DR/TUN三种
+    nat_mask 255.255.255.0
+    persistence_timeout 50           # 持久会话保持时长
+    protocol TCP                     # 监控服务的协议类型，1.3.0版本之前只支持tcp，之后还支持udp
+
+    real_server 192.168.201.100 443 {   # 定义real_server部分，地址和端口使用空格分隔
+        weight 1       # LVS权重
+        SSL_GET {      # 健康状况检查的检查方式，常见的有HTTP_GET|SSL_GET|TCP_CHECK|MISC_CHECK。
+            url {
+              path /   # 指定ssl_get健康状况检查的路径，例如检查index.html是否正常
+              digest ff20ad2481f97b1754ef3e12ecd3a9cc
+                                # 健康状况需要状态码，可以是status_code、digest或digest+status_code
+                                # digest值用keepalived的genhash命令生成，一般使用status_code即可
+              status_code 200
+            }
+            url {
+              path /mrtg/
+              digest 9b3a0c85a887a256d6939da88aabd8cd
+            }
+            connect_timeout 3           # 表示3秒无响应就超时，即此realserver不健康，需重试连接
+            nb_get_retry 3              # 表示重试3次，3次之后都超时就是宕机，防止误伤(nb=number)
+            delay_before_retry 3        # 重试的时间间隔
+                                        # 上述配置需12秒才能判断节点故障，时间太久，应改小
+        }
+    }
+}
+virtual_server 10.10.10.2 1358 {
+    delay_loop 6
+    lb_algo rr
+    lb_kind NAT
+    persistence_timeout 50
+    protocol TCP
+
+    sorry_server 192.168.200.200 1358    # 定义当所有Real server都宕机的时候，由哪台服务器继续提供服务
+                                         # 一般在keepalived本机给定一个web页面，提示网站正在维护的信息
+
+    real_server 192.168.200.2 1358 {
+        weight 1
+        HTTP_GET {
+            url {
+              path /testurl/test.jsp
+              digest 640205b7b0fc66c1ea91c463fac6334d
+            }
+            url {
+              path /testurl2/test.jsp
+              digest 640205b7b0fc66c1ea91c463fac6334d
+            }
+            url {
+              path /testurl3/test.jsp
+              digest 640205b7b0fc66c1ea91c463fac6334d
+            }
+            connect_timeout 3
+            nb_get_retry 3
+            delay_before_retry 3
+        }
+    }
+}
+```
+
 #### 3.2.1.2 配置语法
 
 **配置虚拟路由器**
@@ -366,36 +479,532 @@ eth1
 
 ### 4.1.1 MASTER 配置
 
+master 配置如下：
+
+```ruby
+global_defs {
+    notification_email {
+    root@localhost
+    # keepalived 发生故障切换时邮件发送的对象，可以按行区分写多个主机
+    }
+notification_email_from keepalived@localhost
+smtp_server 127.0.0.1
+smtp_connect_timeout 30
+router_id ha1.example.com
+
+# 所有报文都检查比较消耗性能，此配置为如果收到的报文和上一个报文是同一个路由器则跳过检查报文中的源地址
+vrrp_skip_check_adv_addr
+
+# 严格遵守VRRP协议,不允许状况:1,没有VIP地址,2.配置了单播邻居,3.在VRRP版本2中有IPv6地址
+vrrp_strict
+
+vrrp_garp_interval 0 # ARP报文发送延迟
+vrrp_gna_interval 0 # 消息发送延迟
+
+# 默认组播IP地址，224.0.0.0到239.255.255.255
+vrrp_mcast_group4 224.0.0.18
+#vrrp_iptables
+}
+
+vrrp_instance VI_1 {
+state MASTER
+interface eth0
+virtual_router_id 80
+priority 100
+advert_int 1
+authentication {
+auth_type PASS
+auth_pass stevenux
+}
+virtual_ipaddress {
+    192.168.7.248 dev eth0 label eth0:0
+}
+}
+```
+
 ### 4.1.2 BACKUP 配置
 
-### 4.1.3 VIP 单播配置
+```ruby
+global_defs {
+    notification_email {
+    root@localhost
+    }
+notification_email_from keepalived@localhost
+smtp_server 127.0.0.1
+smtp_connect_timeout 30
+router_id ha2.example.com
+vrrp_skip_check_adv_addr
+vrrp_strict # 严格遵守VRRP协议
+vrrp_garp_interval 0 #ARP报文发送延迟
+vrrp_gna_interval 0 #消息发送延迟
+vrrp_mcast_group4 224.0.0.18 # 组播IP地址，224.0.0.0到239.255.255.255
+# vrrp_iptables
+}
+
+vrrp_instance VI_1 {
+state BACKUP
+interface eth0
+virtual_router_id 80
+priority 90
+advert_int 1
+authentication {
+auth_type PASS
+auth_pass stevenux
+}
+    virtual_ipaddress {
+    192.168.7.248 dev eth0 label eth0:0
+}
+}
+```
+
+## 4.2 VIP 单播配置
+
+假设两台主机情况如下:
+
+| 主机        | 主机名 |
+| :---------- | :----- |
+| 10.20.0.100 | node1  |
+| 10.20.0.200 | node2  |
+
+node1
+
+```ruby
+[root@keep1 ~]# cat /etc/keepalived/keepalived.conf
+! Configuration File for keepalived
+
+global_defs {
+   notification_email {
+     acassen@firewall.loc
+     failover@firewall.loc
+     sysadmin@firewall.loc
+   }
+   notification_email_from Alexandre.Cassen@firewall.loc
+   smtp_server 192.168.200.1
+   smtp_connect_timeout 30
+   router_id LVS_DEVEL
+   vrrp_skip_check_adv_addr
+   #vrrp_strict                             # 关闭组播功能
+   #vrrp_mcast_group4 224.100.100.100
+   vrrp_garp_interval 0
+   vrrp_gna_interval 0
+   vrrp_iptables                            # 关闭生成防火墙规则
+
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth0
+    virtual_router_id 66
+    priority 100
+    advert_int 1
+    #nopreempt              #非抢占模式，当优先级更高的主机上线时，不会抢占为主服务器
+    authentication {
+        auth_type PASS
+        auth_pass stevenux
+    }
+    unicast_src_ip 10.20.0.100                # 单播的源地址，写本机上的ip即可
+    unicast_peer {                          # 如果有多个主机组成集群，把其它主机ip都写上
+        10.20.0.200
+    }
+    virtual_ipaddress {
+        192.168.200.100 dev eth0 label eth0:1
+    }
+}
+```
+
+node2
+
+```ruby
+[root@keep2 ~]# cat /etc/keepalived/keepalived.conf
+! Configuration File for keepalived
+
+global_defs {
+   notification_email {
+     acassen@firewall.loc
+     failover@firewall.loc
+     sysadmin@firewall.loc
+   }
+   notification_email_from Alexandre.Cassen@firewall.loc
+   smtp_server 192.168.200.1
+   smtp_connect_timeout 30
+   router_id LVS_DEVEL
+   vrrp_skip_check_adv_addr
+   #vrrp_strict
+   #vrrp_mcast_group4 224.100.100.100
+   vrrp_garp_interval 0
+   vrrp_gna_interval 0
+   vrrp_iptables
+
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface eth0
+    virtual_router_id 66
+    priority 80
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass stevenux
+    }
+    unicast_src_ip 10.20.0.200                # 单播的源地址，写本机上的ip即可
+    unicast_peer {
+        10.20.0.100                       # 如果有多个主机组成集群，把其它主机ip都写上
+    }
+    virtual_ipaddress {
+        192.168.200.100 dev eth0 label eth0:1
+    }
+}
+```
+
+使用 tcpdump 抓包分析
+`tcpdump -i eth0 host -nn 172.18.200.101 and host 172.18.200.102`
 
 ## 4.2 抢占和非抢占
 
 ### 4.2.1 配置为非抢占
 
+使用`nopreempt`指令关闭 VIP 抢占，需要各 keepalived 服务器 state 为 BACKUP
+
+```ruby
+vrrp_instance VI_1 {
+state BACKUP
+interface eth0
+virtual_router_id 88
+priority 100
+advert_int 1
+nopreempt
+...
+}
+```
+
+```ruby
+vrrp_instance VI_1 {
+state BACKUP
+interface eth0
+virtual_router_id 88
+priority 80
+advert_int 1
+nopreempt
+...
+}
+```
+
 ### 4.2.2 配置抢占延迟
 
+`preempt_delay 60s`
+抢占延迟模式，默认延迟 300s，需要各 keepalived 服务器 state 为 BACKUP
+
+```ruby
+vrrp_instanceVI_1 {
+state BACKUP
+interface eth0
+virtual_router_id88
+priority 100
+advert_int1
+preempt_delay 60s # 抢占延迟模式，默认延迟300s
+...
+}
+```
+
+```ruby
+vrrp_instanceVI_1 {
+state BACKUP
+interface eth0
+virtual_router_id88
+priority 80
+advert_int1
+...
+}
+```
+
 ## 4.3 双主模式配置
+
+双主模式即是互为主备的意思，将两个或两个以上的 VIP 分别运行在不同的
+keepalived 服务器，以实现服务器并行提供 web 访问的目的，提高服务器
+资源利用率。
+
+假设两台主机情况如下:
+
+| 主机        | 主机名 |
+| :---------- | :----- |
+| 10.20.0.100 | node1  |
+| 10.20.0.200 | node2  |
+
+node1 配置
+
+```ruby
+[root@node1 ~]# cat /etc/keepalived/keepalived.conf
+! Configuration File for keepalived
+
+global_defs {
+   notification_email {
+     acassen@firewall.loc
+     failover@firewall.loc
+     sysadmin@firewall.loc
+   }
+   notification_email_from Alexandre.Cassen@firewall.loc
+   smtp_server 192.168.200.1
+   smtp_connect_timeout 30
+   router_id LVS_DEVEL
+   vrrp_skip_check_adv_addr
+   #vrrp_strict
+   vrrp_garp_interval 0
+   vrrp_gna_interval 0
+   vrrp_iptables
+   #vrrp_mcast_group4 224.100.100.100
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth0
+    virtual_router_id 66
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass stevenux
+    }
+    unicast_src_ip 10.20.0.100
+    unicast_peer {
+        10.20.0.200
+    }
+    virtual_ipaddress {
+        192.168.100.100 dev eth0 label eth0:1
+        192.168.100.200 dev eth0 label eth0:2
+    }
+}
+
+vrrp_instance VI_2{
+    state BACKUP
+    interface eth0
+    virtual_router_id 77
+    priority 80
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass stevenux
+    }
+    unicast_src_ip 10.20.0.100
+    unicast_peer {
+        10.20.0.200
+    }
+    virtual_ipaddress {
+        192.168.200.100 dev eth0 label eth0:3
+        192.168.200.200 dev eth0 label eth0:4
+    }
+}
+```
+
+node2 配置
+
+```ruby
+[root@node2 ~]# cat /etc/keepalived/keepalived.conf
+! Configuration File for keepalived
+
+global_defs {
+   notification_email {
+     acassen@firewall.loc
+     failover@firewall.loc
+     sysadmin@firewall.loc
+   }
+   notification_email_from Alexandre.Cassen@firewall.loc
+   smtp_server 192.168.200.1
+   smtp_connect_timeout 30
+   router_id LVS_DEVEL
+   vrrp_skip_check_adv_addr
+  #vrrp_strict
+   vrrp_garp_interval 0
+   vrrp_gna_interval 0
+   vrrp_iptables
+  #vrrp_mcast_group4 224.100.100.100
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface eth0
+    virtual_router_id 66
+    priority 80
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass stevenux
+    }
+    unicast_src_ip 10.20.0.200
+    unicast_peer {
+        10.20.0.100
+    }
+    virtual_ipaddress {
+        192.168.100.100 dev eth0 label eth0:1
+        192.168.100.200 dev eth0 label eth0:2
+    }
+}
+
+vrrp_instance VI_2 {
+    state MASTER
+    interface eth0
+    virtual_router_id 77
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass stevenux
+    }
+    unicast_src_ip 10.20.0.200
+    unicast_peer {
+        10.20.0.100
+    }
+    virtual_ipaddress {
+        192.168.200.100 dev eth0 label eth0:3
+        192.168.200.200 dev eth0 label eth0:4
+    }
+}
+```
 
 ## 4.4 Keepalived 开启通知
 
 ### 4.4.1 开启通知配置
 
+邮件设置
+
+```ruby
+$ yum install mailx -y
+$ vim ~/.mailrc 或 /etc/mail.rc
+
+set from=12345678@qq.com
+set smtp=smtp.qq.com
+set smtp-auth-user=12345678@qq.com
+set smtp-auth-password=lzhdjmtznbftbiai
+set smtp-auth=login
+set ssl-verify=ignore
+```
+
 ### 4.4.2 编写通知脚本
+
+通知脚本示例
+
+```ruby
+#!/bin/bash
+#
+contact='root@localhost'
+notify() {
+    mailsubject="$(hostname) to be $1, vip  transferd."
+    mailbody="$(date +'%F %T'): vrrp transition, $(hostname) changed to $1"
+    echo "$mailbody" | mail -s "$mailsubject" $contact
+}
+case $1 in
+    master)
+        notify master
+        ;;
+    backup)
+        notify backup
+        ;;
+    fault)
+        notify fault
+        ;;
+    *)
+        echo "Usage: $(basename $0) {master|backup|fault}"
+        exit 1
+        ;;
+esac
+```
+
+### 4.4.3 脚本调用
+
+调用格式约定：
+
+```ruby
+notify_master <STRING>|<QUOTED-STRING>：
+#当前节点成为主节点时触发的脚本
+
+notify_backup <STRING>|<QUOTED-STRING>：
+#当前节点转为备节点时触发的脚本
+
+notify_fault <STRING>|<QUOTED-STRING>：
+#当前节点转为“失败”状态时触发的脚本
+
+notify <STRING>|<QUOTED-STRING>：
+#通用格式的通知触发机制，一个脚本可完成以上三种状态的转换时的通知
+```
+
+调用脚本的具体配置:
+
+```ruby
+vim /etc/keepalived/keepalived.conf
+
+# 在vrrp_instance VI_1 语句块最后面加下面行
+notify_master "/etc/keepalived/notify.sh master"
+notify_backup "/etc/keepalived/notify.sh backup"
+notify_fault "/etc/keepalived/notify.sh fault"
+```
+
+Keepalived 通知验证:
+停止 keepalived 服务，验证 IP 切换后是否收到通知邮件
 
 ## 4.5 Keepalived 与 IPVS
 
-# 五.Keepalived 案例
+虚拟服务器配置参数
 
-## 5.1 实现 LVS-DR 模式
+```ruby
+virtual server (虚拟服务)的定义：
+virtual_server IP port # 定义虚拟主机IP地址及其端口
+virtual_server fwmark int # ipvs的防火墙打标，实现基于防火墙的负载均衡集群
+virtual_server group string # 将多个虚拟服务器定义成组，将组定义成虚拟服务
+virtual_server IP port
+{
+...
+    real_server {
+    ...
+    }
+...
+}
 
-## 5.2 实现 HAProxy 高可用
+delay_loop <INT> # 检查后端服务器的时间间隔
+lb_algo rr|wrr|lc|wlc|lblc|sh|dh # 定义调度方法
+lb_kind NAT|DR|TUN # 集群的类型
+persistence_timeout <INT> # 持久连接时长
+protocol TCP|UDP|SCTP # 指定服务协议
+sorry_server <IPADDR> <PORT> # 所有RS故障时，备用服务器地址
+real_server <IPADDR> <PORT>
+{
+    weight <INT>     # RS权重
+    notify_up <STRING>|<QUOTED-STRING>   # RS上线通知脚本
+    notify_down <STRING>|<QUOTED-STRING> # RS下线通知脚本
+    HTTP_GET|SSL_GET|TCP_CHECK|SMTP_CHECK|MISC_CHEC K { ... } # 定义当前主机的健康状态检测方法
+}
+```
 
-## 5.3 实现 Nginx 高可用
+## 4.6 状态监测
 
-## 实现 keepalived(20+vip)+nginx 双主高可用
+### 4.6.1 应用层检测
 
-## 实现 keepalived(60+vip)+haproxy 三服务器高可用
+```ruby
+HTTP_GET|SSL_GET # 应用层检测
+HTTP_GET|SSL_GET {
+    url {
+        path <URL_PATH>    # 定义要监控的URL
+        status_code <INT>  # 判断上述检测机制为健康状态的响应码
+    }
+connect_timeout <INTEGER> # 客户端请求的超时时长, 等于haproxy的timeout server
+nb_get_retry  <INT> # 重试次数
+delay_before_retry <INT> # 重试之前的延迟时长
+connect_ip <IP ADDRESS> # 向当前RS哪个IP地址发起健康状态检测请求
+connect_port <PORT> # 向当前RS的哪个PORT发起健康状态检测请求
+bindto <IP ADDRESS> # 发出健康状态检测请求时使用的源地址
+bind_port <PORT> # 发出健康状态检测请求时使用的源端口
+}
+```
 
-## 实现 keepalived(100+vip)+LVS 高可用、real server 状态监测及规则管理
+### 4.6.2 TCP 层检测
+
+传输层检测 `TCP_CHECK`
+
+```ruby
+TCP_CHECK {
+connect_ip<IP ADDRESS> # 向当前RS的哪个IP地址发起健康状态检测请求
+connect_port<PORT>     # 向当前RS的哪个PORT发起健康状态检测请求
+bindto<IP ADDRESS>     # 发出健康状态检测请求时使用的源地址
+bind_port<PORT>        # 发出健康状态检测请求时使用的源端口
+connect_timeout<INTEGER> # 客户端请求的超时时长, 等于haproxy的timeout server
+}
+```
