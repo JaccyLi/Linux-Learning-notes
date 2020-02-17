@@ -883,9 +883,11 @@ lua-time-limit 5000
     # 默认是10
 
 # cluster-migration-barrier 1
-    # "集群迁移屏障"---在Redis集群中，某个主节点发生故障时至少需要有一定数量的正常工作的
-    # slave节点，此时Redis集群的复制实例(slave)才会转移为Master。该数量就叫"集群迁移屏障"
-    # 该值反映了在Redis集群中你想要你的每个Master有几个slave。
+    # "集群迁移屏障"---在Redis集群中，某个主节点(MasterA)没有任何Slave时集群可以将另外的
+    # 某个主库(MasterB)的Slave转移到MasterA下，该主库(MasterB)至少需要有一定数量的正常工
+    # 作的slave节点，此时MasterB的从库(slave)才会转移到MasterA下做为MasterA的从库。
+    # MasterB至少可用的slave数量就叫"集群迁移屏障"。该值反映了在Redis集群中你想要你的每个
+    # Master有几个slave。该功能可以增强集群的健壮性。
 
 # cluster-require-full-coverage yes
     # 集群处理请求需要槽位全部覆盖(可用)，如果一个主库宕机且没有备库就会出现集群槽位不全，
