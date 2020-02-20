@@ -229,19 +229,31 @@ Linux Namespace 是 Linux 系统的底层概念，其由内核实现。Linux 命
 
 ### 1.4.1 MNT Namespace
 
+[参考:ma7.org-mount_namespaces](http://man7.org/linux/man-pages/man7/mount_namespaces.7@@man-pages.html)
+
 ### 1.4.2 IPC Namespace
+
+[参考:ma7.org-ipc_namespaces](http://man7.org/linux/man-pages/man7/ipc_namespaces.7@@man-pages.html)
 
 ### 1.4.3 UTS Namespace
 
+[参考:ma7.org-uts_namespaces](http://man7.org/linux/man-pages/man7/uts_namespaces.7@@man-pages.html)
+
 ### 1.4.4 PID Namespace
+
+[参考:ma7.org-pid_namespaces](http://man7.org/linux/man-pages/man7/pid_namespaces.7@@man-pages.html)
 
 ### 1.4.5 Net Namespace
 
+[参考:ma7.org-network_namespaces](http://man7.org/linux/man-pages/man7/network_namespaces.7@@man-pages.html)
+
 ### 1.4.6 User Namespace
+
+[参考:ma7.org-user_namespaces](http://man7.org/linux/man-pages/man7/user_namespaces.7@@man-pages.html)
 
 ## 1.5 Linux Control Groups
 
-[Linux Cgroups 文档 manpage](http://man7.org/linux/man-pages/man7/cgroups.7@@man-pages.html)
+[Linux Cgroups manpage 文档](http://man7.org/linux/man-pages/man7/cgroups.7@@man-pages.html)
 
 ### 1.5.1 Cgroups 介绍
 
@@ -692,7 +704,7 @@ docker 版本，避免出现不兼容等未知的及不可预估的问题发生�
 ## 2.2 Centos 包管理器安装
 
 yum 仓库配置:http://mirrors.aliyun.com/repo/Centos-7.repo
-http://mirrors.aliyun.com/repo/epel-7.repo
+aliyun-epel:http://mirrors.aliyun.com/repo/epel-7.repo
 
 ```bash
 [root@redis-server-node1 ~]# wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
@@ -986,69 +998,1251 @@ root@docker-server-node1:~# docker info | grep  type
 可以使用 UML 图来表达各进程大致的信息交互:
 ![](png/docker-process-conn.png)
 
+### 2.5.2 gRPC 简介
+
+gRPC 是 Google 开发的一款高性能、开源和通用的 RPC 框架，支持众多语言客户端。
+
+gRPC (gRPC 远程过程调用)是一个开源远程过程调用(RPC)系统，最初在 2015 年由谷歌
+开发。它使用 HTTP/2 进行传输，协议缓冲区作为接口描述语言，并提供诸如身份验证、
+双向流和流控制、阻塞或非阻塞绑定、取消和超时等功能。它为多种语言生成跨平台的客
+户机和服务器绑定。最常见的使用场景包括在微服务风格的架构中连接服务，并将移动设
+备、浏览器客户端连接到后端服务。
+
+[gRPC-官网](https://www.grpc.io/)
+
 ## 2.6 Docker 镜像下载加速配置
+
+使用 Docker 时，在国内网络环境下载国外的镜像有时候会很慢，因此可以更改 docker
+配置文件来添加一个加速网址，可以通过加速器达到加速下载镜像的目的。
+
+### 2.6.1 获取加速地址
+
+首先注册一个阿里云账户:https://account.aliyun.com/login/login.htm
+打开这个链接获取加速地址:https://cr.console.aliyun.com
+
+![](png/2020-02-17-21-55-25.png)
+![](png/2020-02-17-21-56-44.png)
+![](png/2020-02-17-21-57-00.png)
+![](png/2020-02-17-21-57-52.png)
+
+```bash
+root@ubuntu-suosuoli-node1:~# mkdir -p /etc/docker
+root@ubuntu-suosuoli-node1:~# vim /etc/docker/daemon.json
+{
+        "registry-mirrors":["https://2xf72gsm.mirror.aliyuncs.com"]
+}
+...
+root@ubuntu-suosuoli-node1:~# systemctl systemctl daemon-reload
+root@ubuntu-suosuoli-node1:~# systemctl restart docker.service
+```
+
+当然了，这个加速地址谁都可以用，Ubuntu 和 Centos 配置过程相同。
+https://2xf72gsm.mirror.aliyuncs.com
+
+### 2.6.2 配置编辑
+
+看 2.6.1
+
+### 2.6.3 重启 Docker
+
+看 2.6.1
 
 # 三.Docker 镜像和容器管理
 
 ## 3.1 镜像管理
 
+Docker 镜像含有启动容器所需要的文件系统及所需要的内容，因此镜像主要用于创建
+并启动 docker 容器。Docker 镜像含里面是一层层文件系统,叫做 Union FS(联合文
+件系统),联合文件系统，可以将几层目录挂载到一起，形成一个虚拟文件系统,虚拟文
+件系统的目录结构就像普通 linux 的目录结构一样，docker 通过这些文件再加上宿
+主机的内核提供了一个 linux 的虚拟环境,每一层文件系统我们叫做一层 layer，联
+合文件系统可以对每一层文件系统设置三种权限，只读(readonly)、读写(readwrite)
+和写出(whiteout-able)，但是 docker 镜像中每一层文件系统都是只读的,构建镜像
+的时候,从一个最基本的操作系统开始,每个构建的操作都相当于做一层的修改,增加了
+一层文件系统,一层层往上叠加,上层的修改会覆盖底层该位置的可见性，这也很容易理
+解，就像上层把底层遮住了一样,当使用镜像的时候，我们只会看到一个完全的整体，
+不知道里面有几层也不需要知道里面有几层，结构如下：
+
+![](png/2020-02-16-17-12-38.png)
+
+一个典型的 Linux 文件系统由 bootfs 和 rootfs 两部分组成，bootfs(boot file
+system) 主要包含 bootloader 和 kernel，bootloader 主要用于引导加载 kernel，
+当 kernel 被加载到内存中后 bootfs 会被 umount 掉，rootfs (root file system)
+包含的就是典型 Linux 系统中的/dev，/proc，/bin，/etc 等标准目录和文件，下图
+就是 docker image 中最基础的两层结构，不同的 linux 发行版(如 ubuntu 和 CentOS
+) 在 rootfs 这一层会有所区别。但是对于 docker 镜像通常都比较小，官方提供的
+centos 基础镜像在 200MB 左右，一些其他版本的镜像甚至只有几 MB，docker 镜像
+直接调用宿主机的内核，镜像中只提供 rootfs，也就是只需要包括最基本的命令、工具
+和程序库就可以了，比如 alpine 镜像，在 5M 左右。下图就是有两个不同的镜像在一
+个宿主机内核上实现不同的 rootfs。
+
+![](png/2020-02-17-23-08-13.png)
+
+在不同的层代表了镜像不同的变更，如下图:
+Apache 所在的镜像层引用了 emacs 所在层表示的镜像，而 emacs 所在镜像又是基于
+Debian 基础镜像创建来的。在使用 Dockerfile 创建镜像时，更能体现下面的分层结构。
+![](png/2020-02-17-23-08-58.png)
+
+Docker 镜像存在的各个阶段和状态可以从下图看出:
+![](png/docker-stages.png)
+
 ### 3.1.1 搜索镜像
+
+在使用 docker 命令时，可以很方便的使用命令和子命令的帮助:
+
+```bash
+# 使用<docker 子命令 --help>来获取帮助
+~$ docker --help
+~$ docker image --help
+~$ docker container --help  # container是docker的子命令
+~$ docker container logs --help  # logs是container的子命令
+~$ docker search --help
+~$ docker save --help
+~$ docker exec --help
+```
+
+在官方的 docker 仓库中搜索指定名称的 docker 镜像:
+
+```bash
+~$ docker search IMAGE_NAME:TAG
+~$ docker search --help
+```
+
+例如
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker search alpine
+NAME                                   DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED
+alpine                                 A minimal Docker image based on Alpine Linux…   6137                [OK]
+mhart/alpine-node                      Minimal Node.js built on Alpine Linux           455
+anapsix/alpine-java                    Oracle Java 8 (and 7) with GLIBC 2.28 over A…   439                                     [OK]
+frolvlad/alpine-glibc                  Alpine Docker image with glibc (~12MB)          233                                     [OK]
+gliderlabs/alpine                      Image based on Alpine Linux will help you wi…   181
+alpine/git                             A  simple git container running in alpine li…   115                                     [OK]
+mvertes/alpine-mongo                   light MongoDB container                         109                                     [OK]
+yobasystems/alpine-mariadb             MariaDB running on Alpine Linux [docker] [am…   58                                      [OK]
+alpine/socat                           Run socat command in alpine container           47                                      [OK]
+kiasaki/alpine-postgres                PostgreSQL docker image based on Alpine Linux   45                                      [OK]
+davidcaste/alpine-tomcat               Apache Tomcat 7/8 using Oracle Java 7/8 with…   40                                      [OK]
+zzrot/alpine-caddy                     Caddy Server Docker Container running on Alp…   35                                      [OK]
+jfloff/alpine-python                   A small, more complete, Python Docker image …   33                                      [OK]
+...
+```
 
 ### 3.1.2 下载镜像
 
+从 docker 仓库将镜像下载到本地，命令格式如下:
+
+```bash
+~$ docker pull hub.docker.com/nginx/nginx:1.16.1
+~$ docker pull 仓库服务器:端口/项目名称/镜像名称:tag(版本)号
+```
+
+例如
+
+```bash
+[root@redis-server-node1 ~]# docker pull nginx:1.16.1
+1.16.1: Pulling from library/nginx
+bc51dd8edc1b: Pull complete
+60041be5685b: Pull complete
+5ad6baa9b36b: Pull complete
+Digest: sha256:66c5029339141ea9d0df346d5b86d55176d54c7e15825f95dd7fe7fc5973ca52
+Status: Downloaded newer image for nginx:1.16.1
+docker.io/library/nginx:1.16.1
+```
+
 ### 3.1.3 查看本地镜像
+
+下载完成的镜像比下载的大，因为下载完成后会解压。使用以下命令查看:
+
+```bash
+~$ docker images
+```
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+centos-nginx        1.16.1              3f834ef5596b        7 hours ago         148MB
+nginx               1.16.1              55c440ba1ecb        2 weeks ago         127MB
+alpine              latest              e7d92cdc71fe        4 weeks ago         5.59MB
+ubuntu              latest              ccc6e87d482b        4 weeks ago         64.2MB
+
+REPOSITORY            # 镜像所属的仓库名称
+TAG                   # 镜像版本号（标识符），默认为latest
+IMAGE ID              # 镜像唯一ID标示
+CREATED               # 镜像创建时间
+VIRTUAL SIZE          # 镜像的大小
+```
 
 ### 3.1.4 镜像导出
 
+可以将镜像从本地导出问为一个压缩文件，然后复制到其他服务器进行导入使用
+
+镜像导出使用 `docker save` 命令：
+
+```bash
+~$ docker [image] save nginx -o /opt/nginx-1.16.1.tar.gz
+或者不指定-o选项，直接使用标准输出重定向:
+~$ docker [image] save nginx > /opt/nginx-1.16.1.tar.gz
+```
+
+例如:
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+centos-nginx        1.16.1              3f834ef5596b        18 hours ago        148MB
+nginx               1.16.1              55c440ba1ecb        2 weeks ago         127MB
+alpine              latest              e7d92cdc71fe        4 weeks ago         5.59MB
+ubuntu              latest              ccc6e87d482b        4 weeks ago         64.2MB
+root@ubuntu-suosuoli-node1:~# docker save nginx -o /opt/nginx-1.16.1.tar.gz
+root@ubuntu-suosuoli-node1:~# docker save nginx > /opt/nginx-1.16.1-stdi.tar.gz
+root@ubuntu-suosuoli-node1:~# ll /opt/
+total 325724
+drwxr-xr-x  4 root root      4096 Feb 18 10:22 ./
+drwxr-xr-x 24 root root      4096 Jan  5 15:59 ../
+-rw-r--r--  1 root root 130526208 Feb 18 10:22 nginx-1.16.1-stdi.tar.gz
+-rw-------  1 root root 130526208 Feb 18 10:19 nginx-1.16.1.tar.gz
+```
+
+**查看镜像内容**
+
+```bash
+root@ubuntu-suosuoli-node1:/opt# mkdir nginx
+root@ubuntu-suosuoli-node1:/opt# tar xf nginx-1.16.1.tar.gz -C nginx/
+root@ubuntu-suosuoli-node1:/opt# cd nginx/
+root@ubuntu-suosuoli-node1:/opt/nginx# ll
+total 36
+drwxr-xr-x 5 root root 4096 Feb 18 10:28 ./
+drwxr-xr-x 5 root root 4096 Feb 18 10:28 ../
+-rw-r--r-- 1 root root 6649 Feb  2 16:08 55c440ba1ecbc2d762462d11bd214c7b50c6a5a8e8e949c073923a9786e9167e.json
+drwxr-xr-x 2 root root 4096 Feb  2 16:08 a32776b9621e916e8714389b1037bf47253a2d3d1c806ad515623d2150c92485/
+drwxr-xr-x 2 root root 4096 Feb  2 16:08 e31cb3f26f0ba3c9dfa2dc178a60e42dca4393fe3b9f96bc6d6ae516e4a84e33/
+drwxr-xr-x 2 root root 4096 Feb  2 16:08 fbb8d40a9ceca4645bee0b723931672ed9ccad6d87e6808d0ec0eacd231bab8e/
+-rw-r--r-- 1 root root  355 Jan  1  1970 manifest.json
+-rw-r--r-- 1 root root   88 Jan  1  1970 repositories
+
+root@ubuntu-suosuoli-node1:/opt/nginx# cat manifest.json
+[{
+   "Config":"55c440ba1ecbc2d762462d11bd214c7b50c6a5a8e8e949c073923a9786e9167e.json",         # 该镜像的详细配置
+   "RepoTags":["nginx:1.16.1"],                                                              # 仓库和镜像tag名称
+   "Layers":["a32776b9621e916e8714389b1037bf47253a2d3d1c806ad515623d2150c92485/layer.tar",   # 键Layers记录了目前该镜像的分层情况
+             "e31cb3f26f0ba3c9dfa2dc178a60e42dca4393fe3b9f96bc6d6ae516e4a84e33/layer.tar",
+             "fbb8d40a9ceca4645bee0b723931672ed9ccad6d87e6808d0ec0eacd231bab8e/layer.tar"]
+}]
+
+root@ubuntu-suosuoli-node1:/opt/nginx# cat repositories    # repositories使用json格式记录了镜像的仓库信息和tag名称
+{
+   "nginx":{"1.16.1":"fbb8d40a9ceca4645bee0b723931672ed9ccad6d87e6808d0ec0eacd231bab8e"}
+}
+```
+
+**查看镜像的详细配置和构建历史**
+
+```json
+root@ubuntu-suosuoli-node1:/opt/nginx# cat 55c440ba1ecbc2d762462d11bd214c7b50c6a5a8e8e949c073923a9786e9167e.json
+
+{"architecture":"amd64",
+ "config":{"Hostname":"",
+                 "Domainname":"",
+                 "User":"",
+                 "AttachStdin":false,
+                 "AttachStdout":false,
+                 "AttachStderr":false,
+                 "ExposedPorts":{"80/tcp":{}},
+                 "Tty":false,
+                 "OpenStdin":false,
+                 "StdinOnce":false,
+                 "Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","NGINX_VERSION=1.16.1","NJS_VERSION=0.3.8","PKG_RELEASE=1~buster"],
+                 "Cmd":["nginx","-g","daemon off;"],
+                 "ArgsEscaped":true,
+                 "Image":"sha256:97cda35ae9ca05d9c9f791a63ad72933874d083231f060bdb9967a87fd38a1ca",
+                 "Volumes":null,
+                 "WorkingDir":"",
+                 "Entrypoint":null,
+                 "OnBuild":null,
+                 "Labels":{"maintainer":"NGINX Docker Maintainers \u003cdocker-maint@nginx.com\u003e"},
+                 "StopSignal":"SIGTERM"
+                 },
+        "container":"7d61e9b055a484c97248a5cfb727ab9d950320e10b10bd98e2902cd90275b5dd",
+ "container_config":{"Hostname":"7d61e9b055a4",  # 运行为容器时的默认配置
+                     "Domainname":"",
+                     "User":"",
+                     "AttachStdin":false,
+                     "AttachStdout":false,
+                     "AttachStderr":false,
+                     "ExposedPorts":{"80/tcp":{}},
+                     "Tty":false,
+                     "OpenStdin":false,
+                     "StdinOnce":false,
+                     "Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                            "NGINX_VERSION=1.16.1",
+                            "NJS_VERSION=0.3.8",
+                            "PKG_RELEASE=1~buster"],
+                     "Cmd":["/bin/sh",
+                            "-c",
+                            "#(nop) ",
+                            "CMD [\"nginx\" \"-g\" \"daemon off;\"]"],
+                     "ArgsEscaped":true,
+                     "Image":"sha256:97cda35ae9ca05d9c9f791a63ad72933874d083231f060bdb9967a87fd38a1ca",
+                     "Volumes":null,
+                     "WorkingDir":"",
+                     "Entrypoint":null,
+                     "OnBuild":null,
+                     "Labels":{"maintainer":"NGINX Docker Maintainers \u003cdocker-maint@nginx.com\u003e"},  # \u003c 表示 < ; \u003e 表示 >
+                     "StopSignal":"SIGTERM"
+                     },
+ "created":"2020-02-02T08:08:18.490542767Z",
+ "docker_version":"18.09.7",
+ "history":[  # 镜像构建历史
+     {"created":"2020-02-01T17:20:54.180868987Z",
+      "created_by":"/bin/sh -c #(nop) ADD file:ba0c39345ccc4a882289d473ae8a67087056aa4475a26f3492fff75933d707de in / "},
+     {"created":"2020-02-01T17:20:54.430828407Z",
+      "created_by":"/bin/sh -c #(nop)  CMD [\"bash\"]",
+      "empty_layer":true},  # 未更改内容，所以该层作为空层构建
+     {"created":"2020-02-02T08:06:03.111300657Z",
+      "created_by":"/bin/sh -c #(nop)  LABEL maintainer=NGINX Docker Maintainers \u003cdocker-maint@nginx.com\u003e",
+      "empty_layer":true},
+     {"created":"2020-02-02T08:07:42.736126208Z",
+      "created_by":"/bin/sh -c #(nop)  ENV NGINX_VERSION=1.16.1",
+      "empty_layer":true},
+     {"created":"2020-02-02T08:07:43.003403586Z",
+      "created_by":"/bin/sh -c #(nop)  ENV NJS_VERSION=0.3.8",
+      "empty_layer":true},
+     {"created":"2020-02-02T08:07:43.296025562Z",
+      "created_by":"/bin/sh -c #(nop)  ENV PKG_RELEASE=1~buster",
+      "empty_layer":true},
+     {"created":"2020-02-02T08:08:16.090560236Z",  # 构建过程
+      "created_by":"/bin/sh -c set -x  \u0026\u0026 addgroup --system --gid 101 nginx  \u0026\u0026 "   # \u0026 是 & 的Unicode码表示形式
+                   "adduser --system --disabled-login --ingroup nginx --no-create-home --home /nonexistent "
+                   "--gecos \"nginx user\" --shell /bin/false --uid 101 nginx     \u0026\u0026 "
+                   "apt-get update     \u0026\u0026 "
+                   "apt-get install --no-install-recommends --no-install-suggests -y gnupg1 ca-certificates     \u0026\u0026    "
+                   "NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62;"
+                   "     found='';     "
+                   "for server in ha.pool.sks-keyservers.net hkp://keyserver.ubuntu.com:80 hkp://p80.pool.sks-keyservers.net:80 pgp.mit.edu; "
+                   "do echo \"Fetching GPG key $NGINX_GPGKEY from $server\";"
+                   "apt-key adv --keyserver \"$server\" --keyserver-options timeout=10 --recv-keys \"$NGINX_GPGKEY\" \u0026\u0026 found=yes \u0026\u0026 break;"
+                   "done;"
+                   "test -z \"$found\" \u0026\u0026 echo \u003e\u00262 \"error: failed to fetch GPG key $NGINX_GPGKEY\" \u0026\u0026 exit 1;"
+                   "apt-get remove --purge --auto-remove -y gnupg1 \u0026\u0026 rm -rf /var/lib/apt/lists/*     \u0026\u0026 "
+                   "dpkgArch=\"$(dpkg --print-architecture)\" \u0026\u0026 nginxPackages=\" nginx=${NGINX_VERSION}-${PKG_RELEASE}"
+                   "nginx-module-xslt=${NGINX_VERSION}-${PKG_RELEASE}"
+                   "nginx-module-geoip=${NGINX_VERSION}-${PKG_RELEASE}"
+                   "nginx-module-image-filter=${NGINX_VERSION}-${PKG_RELEASE}         "
+                   "nginx-module-njs=${NGINX_VERSION}.${NJS_VERSION}-${PKG_RELEASE} \"     \u0026\u0026 "
+                   "case \"$dpkgArch\" in  amd64|i386)"
+                   "echo \"deb https://nginx.org/packages/debian/ buster nginx\" \u003e\u003e /etc/apt/sources.list.d/nginx.list  \u0026\u0026 apt-get update;; "
+                   "                                *)"
+                   "echo \"deb-src https://nginx.org/packages/debian/ buster nginx\" \u003e\u003e /etc/apt/sources.list.d/nginx.list \u0026\u0026 "
+                   "tempDir=\"$(mktemp -d)\" \u0026\u0026 chmod 777 \"$tempDir\" \u0026\u0026 savedAptMark=\"$(apt-mark showmanual)\"  \u0026\u0026 "
+                   "apt-get update \u0026\u0026 "
+                   "apt-get build-dep -y $nginxPackages \u0026\u0026 (cd \"$tempDir\" \u0026\u0026 DEB_BUILD_OPTIONS=\"nocheck parallel=$(nproc)\" "
+                   "apt-get source --compile $nginxPackages)                         \u0026\u0026 "
+                   "apt-mark showmanual | xargs apt-mark auto \u003e /dev/null \u0026\u0026 "
+                   "{ [ -z \"$savedAptMark\" ] || apt-mark manual $savedAptMark; } \u0026\u0026 "
+                   "ls -lAFh \"$tempDir\" \u0026\u0026 ( cd \"$tempDir\" \u0026\u0026 dpkg-scanpackages . \u003e Packages )\u0026\u0026"
+                   "grep '^Package: ' \"$tempDir/Packages\" \u0026\u0026 echo \"deb [ trusted=yes ] file://$tempDir ./\" \u003e /etc/apt/sources.list.d/temp.list \u0026\u0026 "
+                   "apt-get -o Acquire::GzipIndexes=false update ;;     "
+                   "esac \u0026\u0026 "
+                   "apt-get install --no-install-recommends --no-install-suggests -y "
+                   "$nginxPackages gettext-base \u0026\u0026 "
+                   "apt-get remove --purge --auto-remove -y ca-certificates \u0026\u0026 "
+                   "rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/nginx.list \u0026\u0026 "
+                   "if [ -n \"$tempDir\" ]; then"
+                   "    apt-get purge -y --auto-remove  \u0026\u0026 "
+                   "    rm -rf \"$tempDir\" /etc/apt/sources.list.d/temp.list;     fi"},
+     {"created":"2020-02-02T08:08:17.567442501Z",
+      "created_by":"/bin/sh -c ln -sf /dev/stdout /var/log/nginx/access.log \u0026\u0026 ln -sf /dev/stderr /var/log/nginx/error.log"},   # 可以看出，只有更改的部分才重新创建
+     {"created":"2020-02-02T08:08:17.866036122Z",
+      "created_by":"/bin/sh -c #(nop)  EXPOSE 80",
+      "empty_layer":true},
+     {"created":"2020-02-02T08:08:18.178736789Z",
+      "created_by":"/bin/sh -c #(nop)  STOPSIGNAL SIGTERM",
+      "empty_layer":true},
+     {"created":"2020-02-02T08:08:18.490542767Z",
+      "created_by":"/bin/sh -c #(nop)  CMD [\"nginx\" \"-g\" \"daemon off;\"]","empty_layer":true}  # 可以看出，只有更改的部分才重新创建
+        ],
+ "os":"linux",
+ "rootfs":{"type":"layers",
+           "diff_ids":["sha256:488dfecc21b1bc607e09368d2791cb784cf8c4ec5c05d2952b045b3e0f8cc01e",
+                       "sha256:5675380163289a424f4d0229badf3e05eff40472ac2a0df4c66e0faf37302057",
+                       "sha256:37ec257a56ed6d6880b428feaf32394661bad32b48b3009b992027b58297910b"]
+           }
+ }
+```
+
 ### 3.1.5 镜像导入
+
+将其他容器导出的镜像，导入到 Docker 生成另一个镜像，使用`docker load`命令
+
+```bash
+~$ docker [image] load -i /path/to/image.tar.gz
+~$ docker [image] load < /path/to/image.tar.gz
+```
+
+例如:
+
+```bash
+root@ubuntu-suosuoli-node1:/opt# scp nginx-1.16.1.tar.gz 192.168.100.10:/opt/
+nginx-1.16.1.tar.gz                              100%  124MB 112.6MB/s   00:01
+
+# 在192.168.100.10
+[root@docker-server-node1 ~]# cd /opt/
+[root@docker-server-node1 opt]# ll
+-rw------- 1 root root 130526208 Feb 18 11:12 nginx-1.16.1.tar.gz
+...
+
+[root@docker-server-node1 opt]# docker load -i nginx-1.16.1.tar.gz  # 导入
+488dfecc21b1: Loading layer [==================================================>]  72.48MB/72.48MB
+567538016328: Loading layer [==================================================>]  58.02MB/58.02MB
+37ec257a56ed: Loading layer [==================================================>]  3.584kB/3.584kB
+Loaded image: nginx:1.16.1
+[root@docker-server-node1 opt]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               1.16.1              55c440ba1ecb        2 weeks ago         127MB  # 导入OK
+alpine              latest              e7d92cdc71fe        4 weeks ago         5.59MB
+ubuntu              latest              ccc6e87d482b        4 weeks ago         64.2MB
+```
 
 ### 3.1.6 删除镜像
 
+从 Docker 当前已有的镜像列表中删除镜像
+
+```bash
+~$ docker image rm ID
+~$ docker rmi ID
+```
+
+例如
+
+```bash
+[root@docker-server-node1 opt]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               1.16.1              55c440ba1ecb        2 weeks ago         127MB
+alpine              latest              e7d92cdc71fe        4 weeks ago         5.59MB
+ubuntu              latest              ccc6e87d482b        4 weeks ago         64.2MB
+[root@docker-server-node1 opt]# docker image rm 55c440ba1ecb   # 删除nginx镜像
+Untagged: nginx:1.16.1
+Deleted: sha256:55c440ba1ecbc2d762462d11bd214c7b50c6a5a8e8e949c073923a9786e9167e
+Deleted: sha256:c238c7ae406de1f724d59247d22e6fb9d3b0a76e05a06805d70a45d747e5e42e
+Deleted: sha256:8ab6f71f7413a425844b4bba4ac765ce191f2ae5b2efaa5dd65aa3b88fb2e4ee
+Deleted: sha256:488dfecc21b1bc607e09368d2791cb784cf8c4ec5c05d2952b045b3e0f8cc01e
+[root@docker-server-node1 opt]# docker rmi ccc6e87d482b    # 删除ubuntu镜像
+Untagged: ubuntu:latest
+Deleted: sha256:ccc6e87d482b79dd1645affd958479139486e47191dfe7a997c862d89cd8b4c0
+Deleted: sha256:d1b7fedd4314279a7c28d01177ff56bcff65300f6d41655394bf5d8b788567f6
+Deleted: sha256:340bed96497252624f5e4b0f42accfe7edbb7a01047e2bb5a8142b2464008e73
+Deleted: sha256:6357c335cdfcc3a120e288bbd203bf4c861a14245ce5094634ee097e5217085b
+Deleted: sha256:43c67172d1d182ca5460fc962f8f053f33028e0a3a1d423e05d91b532429e73d
+[root@docker-server-node1 opt]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+alpine              latest              e7d92cdc71fe        4 weeks ago         5.59MB
+```
+
+### 3.1.7 镜像管理命令总结
+
+```bash
+~$ docker [image] pull
+~$ docker search IMAGE[:TAG]
+~$ docker images
+~$ docker [image] save IMAGE -o /path/to/IMAGE.tar.gz
+~$ docker [image] save IMAGE > /path/to/IMAGE.tar.gz
+~$ docker [image] load -i /path/to/IMAGE.tar.gz
+~$ docker [image] load < /path/to/IMAGE.tar.gz
+~$ docker [image] rm ID
+~$ docker rmi ID
+```
+
+**注意:**删除指定 ID 的镜像时，通过镜像启动容器的时候该镜像不能被删除，除非
+将容器全部关闭。删除镜像时可以是镜像 ID 也可以是镜像名称。
+
 ## 3.2 容器基础管理命令
+
+Docker 容器根据对其不同的操作和不同的情况其可以处于多种状态，这些状态组成了容器
+的生命周期，主要的状态如下图所示：
+
+![](png/docker_events.png)
+
+容器管理主要涉及从镜像启动容器、暂停或停止容器、恢复暂停或停止的容器、删除正在
+运行的容器及显示相应状态的容器等操作。命令格式:
+
+```bash
+~$ docker run --help # 获取帮助
+~$ docker run [OPT] IMAGE [CMD] [ARG...] # 运行容器
+~$ docker ps [OPT] # 显示运行的容器
+```
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker run --help
+
+Usage:	docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Run a command in a new container
+
+Options:
+      --add-host list                  Add a custom host-to-IP mapping (host:ip)
+  -a, --attach list                    Attach to STDIN, STDOUT or STDERR
+      --blkio-weight uint16            Block IO (relative weight), between 10 and 1000, or 0 to disable (default 0)
+      --blkio-weight-device list       Block IO weight (relative device weight) (default [])
+      ......
+```
 
 ### 3.2.1 从镜像启动容器
 
+从镜像启动一个容器后会直接进入到该容器，并随机生成容器 ID 和名称
+
+```bash
+[root@docker-server-node1 opt]# docker run --help
+...
+-i, --interactive                    Keep STDIN open even if not attached
+   # 保持标准输入开启，使得容器可以接受命令行的命令，即使用交互式创建容器。
+
+-t, --tty                            Allocate a pseudo-TTY
+   # 给创建的容器分配一个伪终端
+...
+```
+
+所以可以使用`docker run -i -t`来创建容器，并进入 Docker 为其分配的终端
+
+```bash
+[root@docker-server-node1 opt]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+alpine              latest              e7d92cdc71fe        4 weeks ago         5.59MB
+[root@docker-server-node1 opt]# docker run -i -t alpine sh
+/ # exit   # 退出交互式运行的容器，其将不再在后台运行
+[root@docker-server-node1 opt]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+[root@docker-server-node1 opt]# docker ps -a  # 可以看到容器alpine已经退出，-a选项显示所有状态容器
+CONTAINER ID  IMAGE  COMMAND  CREATED       STATUS                   PORTS        NAMES
+28cd19a9a131 alpine  "sh"     9 seconds ago Exited (0) 5 seconds ago         gallant_babbage
+
+# ctrl+p+q 退出容器，容器任然在后台运行
+[root@docker-server-node1 opt]# tty
+/dev/pts/0
+[root@docker-server-node1 opt]# docker restart 28cd19a9a131  # 重启退出的容器
+[root@docker-server-node1 opt]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+28cd19a9a131        alpine              "sh"                2 minutes ago       Up 39 seconds                           gallant_babbage
+[root@docker-server-node1 opt]# docker exec -it 28cd19a9a131 sh # 进入容器
+/ # tty
+/dev/pts/1  # docker为alpine容器分配的tty为/dev/pts/1
+/ # read escape sequence  #  ctrl+p+q 剥离当前终端的容器
+[root@docker-server-node1 opt]# docker ps # alpine容器还在
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+28cd19a9a131        alpine              "sh"                3 hours ago         Up 3 hours                              gallant_babbage
+```
+
 ### 3.2.2 显示容器
+
+显示当前正在运行的容器
+
+```bash
+~$ docker ps
+~$ docker ps --help
+
+# 以名字过滤容器
+[root@docker-server-node1 opt]# docker ps -f name=gallant_babbage
+# 或者使用 docker ps -f name=勇敢的_巴贝奇...? 哈哈哈哈啊哈哈嗝...
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+28cd19a9a131        alpine              "sh"                3 hours ago         Up 3 hours                              gallant_babbage
+```
+
+显示当前所有的容器，包括运行的和退出的容器
+
+```bash
+~$ docker ps -a
+```
+
+例如
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker run  -it -d nginx:1.16.1
+43ca807906f8d6a08c7f2f64df58f8c70886920af51e13f8ecdb2fe19ab35d6d
+root@ubuntu-suosuoli-node1:~# docker run  -it -d alpine:latest
+91fa3b07c4be681f1b368b6b52963d48a5b834626d4c06f8446c8c53933df00e
+root@ubuntu-suosuoli-node1:~# docker run -i -t -d ubuntu:latest
+40e0c7499f659c2d97fc29e555b8fda4ca2d50b7c57ca16d5208b2f497ca4acc
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+40e0c7499f65        ubuntu:latest       "/bin/bash"              4 seconds ago       Up 4 seconds                            thirsty_matsumoto
+91fa3b07c4be        alpine              "/bin/sh"                33 seconds ago      Up 32 seconds                           gracious_poitras
+43ca807906f8        nginx:1.16.1        "nginx -g 'daemon of…"   45 seconds ago      Up 44 seconds       80/tcp              keen_lederberg
+root@ubuntu-suosuoli-node1:~# docker container stop 40e0c7499f65 # 把ubunt容器听了
+40e0c7499f65
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS               NAMES
+91fa3b07c4be        alpine              "/bin/sh"                50 seconds ago       Up 49 seconds                           gracious_poitras
+43ca807906f8        nginx:1.16.1        "nginx -g 'daemon of…"   About a minute ago   Up About a minute   80/tcp              keen_lederberg
+root@ubuntu-suosuoli-node1:~# docker ps -a  # 可以看到已经停了的ubuntu镜像
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS                     PORTS               NAMES
+40e0c7499f65        ubuntu:latest       "/bin/bash"              22 seconds ago       Exited (0) 4 seconds ago                       thirsty_matsumoto
+91fa3b07c4be        alpine              "/bin/sh"                51 seconds ago       Up 50 seconds                                  gracious_poitras
+43ca807906f8        nginx:1.16.1        "nginx -g 'daemon of…"   About a minute ago   Up About a minute          80/tcp              keen_lederberg
+```
 
 ### 3.2.3 删除运行中的容器
 
+删除容器使用`docker rm`命令
+
+```bash
+~$ docker [container] rm ID
+~$ docker [container] rm -f ID
+```
+
+**注意:**在执行删除容器操作时，指定 `-f` 选项即使容正在运行当中，也会被强制删除掉
+
+例如:
+
+```bash
+[root@docker-server-node1 ~]# docker ps  # alpine容器在运行
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+28cd19a9a131        alpine              "sh"                3 hours ago         Up 3 hours                              gallant_babbage
+[root@docker-server-node1 ~]# docker rm 28cd19a9a131  # 提示无法删除运行的容器
+Error response from daemon: You cannot remove a running container 28cd19a9a1311a98641765e627d1b91bc2bf7a59e51496170c0b94941e19c12a. Stop the container before attempting removal or force remove
+[root@docker-server-node1 ~]# docker stop  28cd19a9a131  # 停止容器
+28cd19a9a131
+[root@docker-server-node1 ~]# docker rm  28cd19a9a131  # 删除
+28cd19a9a131
+[root@docker-server-node1 ~]# docker ps # 已经删除
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
+[root@docker-server-node1 ~]# docker run -i -t -d alpine:latest  # 再起一个容器
+352ddd011e095da2bc2642ce17e014a67177f80ebf32ab20a8b28a58f29b6e7a
+[root@docker-server-node1 ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+352ddd011e09        alpine:latest       "/bin/sh"           3 seconds ago       Up 2 seconds                            vigorous_vaughan
+[root@docker-server-node1 ~]# docker rm -f 352ddd011e09  # 强制删除，未提示
+352ddd011e09
+[root@docker-server-node1 ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+```
+
 ### 3.2.4 端口映射
+
+```bash
+~$ docker run --help
+...
+-p, --publish list      Publish a container\'s port(s) to the host
+   # -p，小写的-p选项用来将容器的端口映射到主机的某端口
+-P, --publish-all       Publish all exposed ports to random ports
+   # -P，大写的-P选项用来将容器的端口映射到主机的随机端口
+...
+
+# 例如：
+~$ docker run -it -d -p 主机端口:容器端口 <...>
+```
+
+#### 3.2.4.1 随机端口映射
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+centos-nginx        1.16.1              3f834ef5596b        23 hours ago        148MB
+nginx               1.16.1              55c440ba1ecb        2 weeks ago         127MB
+alpine              latest              e7d92cdc71fe        4 weeks ago         5.59MB
+ubuntu              latest              ccc6e87d482b        4 weeks ago         64.2MB
+root@ubuntu-suosuoli-node1:~# docker run -it -d -P nginx:1.16.1
+7147325451c89a9e903a41850f856b5f88c22f71ab879752c9ef158ad3f7283c
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                   NAMES
+7147325451c8        nginx:1.16.1        "nginx -g 'daemon of…"   57 seconds ago      Up 56 seconds       0.0.0.0:10001->80/tcp   sad_agnesi
+# 可以看到，nginx的默认80端口被映射到主机的随机端口10001
+root@ubuntu-suosuoli-node1:~# ss -ntl  # 主机上也监听了10001端口
+...
+LISTEN    0      20480     *:10001     *:*      users:(("docker-proxy",pid=15512,fd=4))
+...
+
+root@ubuntu-suosuoli-node1:~# docker run -it -d -P --name=gallant_lisuo nginx:1.16.1  # 再起一个容器
+7ff437de1849fd2bb963f43b4b05e9ecf21144c5d1580e927e1b71366c7e6b65
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                   NAMES
+7ff437de1849        nginx:1.16.1        "nginx -g 'daemon of…"   4 seconds ago       Up 3 seconds        0.0.0.0:10003->80/tcp   gallant_lisuo
+# 再起一个容器后，可以看到nginx的80端口被映射到主机的10003端口
+7147325451c8        nginx:1.16.1        "nginx -g 'daemon of…"   5 minutes ago       Up 5 minutes        0.0.0.0:10001->80/tcp   sad_agnesi
+
+root@ubuntu-suosuoli-node1:~# lsof -i:10001 # 查看是谁在占用端口10001
+COMMAND     PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+docker-pr 15512 root    4u  IPv6 251299      0t0  TCP *:10001 (LISTEN)
+root@ubuntu-suosuoli-node1:~# lsof -i:10003
+COMMAND     PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+docker-pr 15791 root    4u  IPv6 254234      0t0  TCP *:10003 (LISTEN)
+```
+
+可以访问端口试试
+
+![](png/2020-02-18-15-27-09.png)
+
+![](png/2020-02-18-15-27-35.png)
+
+#### 3.2.4.2 指定端口映射
+
+1. 将主机端口 80 映射到容器端口 80("-p 主机端口:容器端口")
+
+`~$ docker run -it -d -p 主机端口:容器端口 <...>`
+
+```bash
+[root@docker-server-node1 ~]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+nginx               latest              2073e0bcb60e        2 weeks ago         127MB
+alpine              latest              e7d92cdc71fe        4 weeks ago         5.59MB
+
+# 将主机端口80映射到容器端口80("-p 主机端口:容器端口")
+[root@docker-server-node1 ~]# docker run -it -d -p 80:80 --name=brillant_ports nginx
+71b9aaabd2c0cf28325a028684366d769ff7d7e69f896f7096efd3c14009a073
+[root@docker-server-node1 ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                NAMES
+71b9aaabd2c0        nginx               "nginx -g 'daemon of…"   3 seconds ago       Up 2 seconds        0.0.0.0:80->80/tcp   brillant_ports
+[root@docker-server-node1 ~]# ss -ntl
+State      Recv-Q Send-Q    Local Address:Port           Peer Address:Port
+LISTEN     0      100           127.0.0.1:25                  *:*
+LISTEN     0      1024         [::]:80                       [::]:*
+LISTEN     0      128          [::]:22                       [::]:*
+...
+[root@docker-server-node1 ~]# lsof -i:80
+COMMAND     PID USER   FD   TYPE  DEVICE SIZE/OFF NODE NAME
+docker-pr 32452 root    4u  IPv6 1413770      0t0  TCP *:http (LISTEN)
+```
+
+2. 将主机的 IP 加端口映射到容器的某端口(主机 IP:本地端口:容器端口)
+
+`~$ docker run -it -d -p IP:PORT:PORT <...>`
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker run -it -d -p 192.168.100.18:81:80 --name=ip_port_port_mapping nginx:latest
+93856a071cc2ba4863e8ee44ca738e9957d7b295ba248b4da2a3eb694c11914e
+
+```
+
+3. 将主机 IP 和随机端口映射到容器的某端口(主机 IP::PORT)
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker run -it -d -p 192.168.100.18::80 --name=ip_random-port_port_mapping nginx:latest
+934ff74e51d36bcfe9981de175db653ee95009809e97f6589c0a2d27179af2b0
+```
+
+4. 将主机的 IP 加端口映射到容器的某端口并指定协议(主机 IP:本地端口:容器端口/协议)
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker run -it -d -p 192.168.100.18:82:80/udp --name=ip_port_port_protocol_mapping nginx:latest
+29358eae0dc639f69518fcae4969768f9a5e0b6dbda6089ed50d679d2c754c90
+```
+
+5. 映射多个端口
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker run -it -d -p 192.168.100.18:83:80/udp -p 443:443/tcp -p 50:50/udp --name=port_mapping_multi nginx:latest
+f641583332d2cb2142bfcb80d3de5e241229122d2b68f81c41c07c2b8e30de00
+```
+
+查看端口映射情况
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                                         NAMES
+f641583332d2        nginx:latest        "nginx -g 'daemon of…"   3 minutes ago       Up 3 minutes        0.0.0.0:50->50/udp, 80/tcp, 0.0.0.0:443->443/tcp, 192.168.100.18:83->80/udp   port_mapping_multi
+29358eae0dc6        nginx:latest        "nginx -g 'daemon of…"   4 minutes ago       Up 4 minutes        80/tcp, 192.168.100.18:82->80/udp                                             ip_port_port_protocol_mapping
+934ff74e51d3        nginx:latest        "nginx -g 'daemon of…"   6 minutes ago       Up 6 minutes        192.168.100.18:10001->80/tcp                                                  ip_random-port_port_mapping
+93856a071cc2        nginx:latest        "nginx -g 'daemon of…"   9 minutes ago       Up 9 minutes        192.168.100.18:81->80/tcp                                                     ip_port_port_mapping
+```
+
+**查看 nginx 容器的访问日志**
+
+```bash
+~$ docker logs NAME/ID
+~$ docker logs -f NAME/ID
+```
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker logs ip_port_port_mapping
+192.168.100.1 - - [18/Feb/2020:07:55:45 +0000] "GET / HTTP/1.1" 200 612 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0" "-"
+2020/02/18 07:55:45 [error] 6#6: *1 open() "/usr/share/nginx/html/favicon.ico" failed (2: No such file or directory), client: 192.168.100.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "192.168.100.18:81"
+192.168.100.1 - - [18/Feb/2020:07:55:45 +0000] "GET /favicon.ico HTTP/1.1" 404 153 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0" "-"
+
+root@ubuntu-suosuoli-node1:~# docker logs -f ip_port_port_mapping
+192.168.100.1 - - [18/Feb/2020:07:55:45 +0000] "GET / HTTP/1.1" 200 612 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0" "-"
+2020/02/18 07:55:45 [error] 6#6: *1 open() "/usr/share/nginx/html/favicon.ico" failed (2: No such file or directory), client: 192.168.100.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "192.168.100.18:81"
+192.168.100.1 - - [18/Feb/2020:07:55:45 +0000] "GET /favicon.ico HTTP/1.1" 404 153 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0" "-"
+
+root@ubuntu-suosuoli-node1:~# docker logs -f 93856a071cc2
+192.168.100.1 - - [18/Feb/2020:07:55:45 +0000] "GET / HTTP/1.1" 200 612 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0" "-"
+2020/02/18 07:55:45 [error] 6#6: *1 open() "/usr/share/nginx/html/favicon.ico" failed (2: No such file or directory), client: 192.168.100.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "192.168.100.18:81"
+192.168.100.1 - - [18/Feb/2020:07:55:45 +0000] "GET /favicon.ico HTTP/1.1" 404 153 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0" "-"
+```
 
 ### 3.2.5 查看容器映射的端口
 
+```bash
+~$ docker port NAME/ID
+```
+
+```bash
+# 该命令的输出是以容器的角度来看端口映射关系
+# 即:容器端口 -> 主机端口
+
+root@ubuntu-suosuoli-node1:~# docker port  93856a071cc2
+80/tcp -> 192.168.100.18:81
+root@ubuntu-suosuoli-node1:~# docker port  ip_port_port_mapping
+80/tcp -> 192.168.100.18:81
+root@ubuntu-suosuoli-node1:~# docker port  port_mapping_multi
+443/tcp -> 0.0.0.0:443
+50/udp -> 0.0.0.0:50
+80/udp -> 192.168.100.18:83
+```
+
 ### 3.2.6 自定义容器名称
+
+```bash
+~$ docker run -it -d --name=cus_name IMAGE/ID
+```
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker run -it -d -p 80:80 --name=nginx_v0 nginx:1.16.1
+81d02459d016fa08c25a027836c54d142f33d683967eb7627cfd3fb672998a2d
+root@ubuntu-suosuoli-node1:~# docker run -it -d -p 81:80 --name=nginx_v1 nginx:1.16.1
+470ece4802fc2cb6cca8ec699a66fcd89012aa883baea5f7c7d55e4eca85c3f5
+root@ubuntu-suosuoli-node1:~# docker run -it -d -p 82:80 --name=nginx_v2 nginx:1.16.1
+435c5207feacae328a261cf85a3aeb001a528069f7e1344e87204613d782e618
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                NAMES
+435c5207feac        nginx:1.16.1        "nginx -g 'daemon of…"   3 seconds ago       Up 2 seconds        0.0.0.0:82->80/tcp   nginx_v2
+470ece4802fc        nginx:1.16.1        "nginx -g 'daemon of…"   9 seconds ago       Up 8 seconds        0.0.0.0:81->80/tcp   nginx_v1
+81d02459d016        nginx:1.16.1        "nginx -g 'daemon of…"   16 seconds ago      Up 15 seconds       0.0.0.0:80->80/tcp   nginx_v0
+```
 
 ### 3.2.7 后台启动容器
 
+从镜像运行容器时指定`-d`选项，可以让容器后台运行， `-i -t`打卡 STDI 并分配 tty 给容器
+
+```bash
+[root@docker-server-node1 ~]# docker run -i -t -d --name=little_alpine alpine
+b87a870a6138e02ec4c659ca0593110ccd575d8bef160702442724612ed8c54f
+[root@docker-server-node1 ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+b87a870a6138        alpine              "/bin/sh"           4 seconds ago       Up 2 seconds                            little_alpine
+```
+
 ### 3.2.8 创建并进入容器
+
+从镜像创建并运行容器时，可以在命令最后指定需要容器运行的命令。这样可以创建容器后
+直接进入容器，执行 exit 退出后容器并关闭容器。使用`ctrl + p + q`可以不退出容器
+将其剥离终端在后台运行。
+
+```bash
+[root@docker-server-node1 ~]# docker run -i -t --name=run_sh_ra alpine  # 不指定-d选项
+/ # ls  # 直接进入运行shell的容器
+bin    dev    etc    home   lib    media  mnt    opt    proc   root   run    sbin   srv    sys    tmp    usr    var
+/ # pwd
+/
+/ # ps aux
+PID   USER     TIME  COMMAND
+    1 root      0:00 /bin/sh  # 容器中第一个进程
+    7 root      0:00 ps aux
+/ # exit # bye
+```
 
 ### 3.2.9 单次运行
 
+单词运行容器可以用来测试容器是否可以正常创建并运行，使用`--rm`选项可以
+让容器单次运行，在容器退出后会被自动删除。
+
+```bash
+[root@docker-server-node1 ~]# tty
+/dev/pts/0
+[root@docker-server-node1 ~]# docker run -it --rm --name=rm_first_time alpine
+/ # exit  # 退出后自动删除
+
+# 在新终端/dev/pts/1查看
+[root@docker-server-node1 ~]# tty
+/dev/pts/1
+[root@docker-server-node1 ~]# docker ps # 未退出时在/dev/pts/1可以看到其运行
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+2933c078d403        alpine              "/bin/sh"           45 seconds ago      Up 44 seconds                           rm_first_time
+[root@docker-server-node1 ~]# docker ps # 退出后自动删除
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+```
+
 ### 3.2.10 传递运行命令
+
+容器需要有一个前台运行的进程才能保持容器的运行，通过传递运行参数是一种方式，
+另外也可以在构建镜像的时候指定容器启动时运行的前台命令。
+
+```bash
+# 尝试不给alpine容器分配tty和打开标准输入
+[root@docker-server-node1 ~]# docker run -d alpine
+0fb8f32414fe122907a68591d757aa8fff0ccc1a57c2f62c3913aeda22142315
+[root@docker-server-node1 ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+[root@docker-server-node1 ~]# docker ps -a  # 创建后运行了一下/bin/sh就退出了
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                     PORTS               NAMES
+0fb8f32414fe        alpine              "/bin/sh"           9 seconds ago       Exited (0) 8 seconds ago                       friendly_visvesvaraya
+
+# 给alpine容器传一个前台运行的命令(依附于tty和标准输入)
+[root@docker-server-node1 ~]# docker run -d alpine /usr/bin/tail -f '/etc/issue'
+a51eab80adad573c3580b26ba0910f2bb8da7881ab0cc626ecb627bb032578c0
+[root@docker-server-node1 ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+a51eab80adad        alpine              "/usr/bin/tail -f /e…"   6 seconds ago       Up 5 seconds                            nifty_benz
+# 这回俏皮的本次运行了
+```
 
 ### 3.2.11 容器的启动和关闭
 
+```bash
+~$ docker stop ID/NAMES
+~$ docker start ID/NAMES
+```
+
+```bash
+[root@docker-server-node1 ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+a51eab80adad        alpine              "/usr/bin/tail -f /e…"   2 minutes ago       Up 2 minutes                            nifty_benz
+[root@docker-server-node1 ~]# docker stop nifty_benz
+nifty_benz
+[root@docker-server-node1 ~]# docker start nifty_benz
+nifty_benz
+[root@docker-server-node1 ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+a51eab80adad        alpine              "/usr/bin/tail -f /e…"   3 minutes ago       Up 2 seconds                            nifty_benz
+```
+
 ### 3.2.12 进入运行的容器
+
+在单机运行容器时，有的时候涉及到进入容器查看或者修改内容。有几种不同的方式
+可以进入运行中的容器，比较推荐使用 nsenter 命令进入容器(name space enter)
 
 #### 3.2.12.1 使用 attach
 
+使用命令 `docker attach NAME`进入运行的容器，attach 类似于 vnc，在容器中
+的每个操作会在各个终端显示，所有使用此方式进入容器的操作都是同步显示的且
+使用 `exit` 命令退出后容器将被关闭，不推荐使用，其要求需要进入到有 shell
+环境的容器，比如 centos 为例:
+
+![](png/2020-02-18-16-51-19.png)
+
+在上图可以看出，在不同的主机终端进入 ubuntu 容器后，操作都是同步的，在容器
+中都分配了同一个终端。一边退出后，其它的终端也退出了，退出后容器也关闭了。
+下面就无法再 attach 回去了:
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker attach attach_in
+You cannot attach to a stopped container, start it first  # 提示容器已经停止
+root@ubuntu-suosuoli-node1:~# docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                       PORTS               NAMES
+f2ed6259be3b        ubuntu              "/bin/bash"         5 minutes ago       Exited (127) 2 minutes ago                       attach_in
+```
+
 #### 3.2.12.2 使用 exec
+
+可以使用 `docker exec` 命令在容器中执行单次命令或是进入容器，不大推荐此方式，
+使用`docker exec` 命令进入容器后 exit 退出容器其并不会停止。
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker exec -it attach_in /bin/bash
+root@f2ed6259be3b:/# echo $SHELLS
+
+root@f2ed6259be3b:/# echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+root@f2ed6259be3b:/# exit
+exit
+root@ubuntu-suosuoli-node1:~# docker ps  # 容器未退出
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+f2ed6259be3b        ubuntu              "/bin/bash"         10 minutes ago      Up About a minute                       attach_i
+```
 
 #### 3.2.12.3 使用 nsenter
 
+推荐使用 nsenter 命令进入容器，该命令需要通过容器的 PID 进入到容器内部，比较麻烦。
+不过可以使用`docker inspect` 命令获取到容器的 PID。
+
+安装 nsenter 工具，包名 Ubuntu 和 CentOS 一样豆角 util-linux
+
+```bash
+root@ubuntu-suosuoli-node1:~# apt install util-linux
+[root@docker-server-node1 ~]# yum install util-linux
+
+root@ubuntu-suosuoli-node1:~# man nsenter
+NAME
+       nsenter - run program with namespaces of other processes # 使用其他进程的名称空间运行程序
+
+SYNOPSIS
+       nsenter [options] [program [arguments]]
+       ...
+```
+
+`docker inspect NAME/ID` 命令使用，该命令用来获取当前运行的容器的底层对象信息，以 JSON
+格式返回到标准输出。
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+f2ed6259be3b        ubuntu              "/bin/bash"         17 minutes ago      Up 7 minutes                            attach_in
+root@ubuntu-suosuoli-node1:~# docker inspect attach_in
+[
+    {
+        "Id": "f2ed6259be3bdda51cfad5aaa89ad2716219542fd4ac133b70a38ae2863eca4d",
+        "Created": "2020-02-18T08:47:41.627566286Z",
+        "Path": "/bin/bash",
+        "Args": [],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 18471,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2020-02-18T08:57:23.404169974Z",
+            "FinishedAt": "2020-02-18T08:50:30.555628462Z"
+        },
+        "Image": "sha256:ccc6e87d482b79dd1645affd958479139486e47191dfe7a997c862d89cd8b4c0",
+        "ResolvConfPath": "/var/lib/docker/containers/f2ed6259be3bdda51cfad5aaa89ad2716219542fd4ac133b70a38ae2863eca4d/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/f2ed6259be3bdda51cfad5aaa89ad2716219542fd4ac133b70a38ae2863eca4d/hostname",
+        "HostsPath": "/var/lib/docker/containers/f2ed6259be3bdda51cfad5aaa89ad2716219542fd4ac133b70a38ae2863eca4d/hosts",
+        "LogPath": "/var/lib/docker/containers/f2ed6259be3bdda51cfad5aaa89ad2716219542fd4ac133b70a38ae2863eca4d/f2ed6259be3bdda51cfad5aaa89ad2716219542fd4ac133b70a38ae2863eca4d-json.log",
+        "Name": "/attach_in",
+        ......
+        省略一大堆
+```
+
+可以使用该命令返回的 JSON 格式中的键来获取特定的信息，这样就可以获取当前运行的
+容器的任何信息如:
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker inspect -f "{{.NetworkSettings.IPAddress}}" attach_in
+172.17.0.2
+   # -f 选项指定模板，模板是go语言风格的模板
+```
+
+`docker inspect -f "{{.State.Pid}}" NAME/ID` 获取容器的 PID。获取到 docker 容
+器的 PID，就可以使用 nsenter 命令通过 PID 进入到容器内。
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker inspect -f "{{.State.Pid}}" attach_in
+18471
+# 获取到docker容器的PID，就可以使用nsenter命令通过PID进入到容器内
+root@ubuntu-suosuoli-node1:~# nsenter -t 18471 -m -u -i -n -p  # -t 指定一个目标进程，-m -u -i -n -p表示进入相应的命名空间
+mesg: ttyname failed: No such device
+root@f2ed6259be3b:/# tty  # 未分配终端
+not a tty
+root@f2ed6259be3b:/# ls
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+root@f2ed6259be3b:/# pwd
+/
+root@f2ed6259be3b:/# echo "hello docker"
+hello docker
+root@f2ed6259be3b:/# exit
+logout
+root@ubuntu-suosuoli-node1:~# docker ps  # 退出容器后，容器任然运行
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+f2ed6259be3b        ubuntu              "/bin/bash"         29 minutes ago      Up 19 minutes                           attach_in
+```
+
 #### 3.2.12.4 使用脚本
+
+由于使用 nsenter 命令进入容器需要提前使用`docker inspect -f "{{.State.Pid}}"`
+来获取容器 PID，比较麻烦，一个折中的方案是将 nsenter 命令和`docker inspect`
+命令写入脚本，进入某个容器时，通过脚本和容器名称就可以进入。
+
+脚本可以这样写:将容器名作为参数传给脚本
+
+```bash
+#!/bin/bash
+if [[ $# -eq 0 ]]; then
+    echo "Usage: `basename $0` CONTAINER_NAME"
+    exit 80;
+fi
+
+enter(){
+    local C_NAME=$1
+    PID=`docker inspect -f "{{.State.Pid}}" ${C_NAME}`
+    nsenter -t ${PID} -m -u -n -i -p
+}
+
+enter $1
+```
+
+测试脚本是否可以使用:
+
+```bash
+root@ubuntu-suosuoli-node1:/data# chmod u+x enter_container.sh
+root@ubuntu-suosuoli-node1:/data# ./enter_container.sh
+Usage: enter_container.sh CONTAINER_NAME
+root@ubuntu-suosuoli-node1:/data# echo $?
+80
+
+root@ubuntu-suosuoli-node1:/data# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+f2ed6259be3b        ubuntu              "/bin/bash"         45 minutes ago      Up 35 minutes                           attach_in
+root@ubuntu-suosuoli-node1:/data# ./enter_container.sh attach_in  # 进入容器
+mesg: ttyname failed: No such device
+root@f2ed6259be3b:/# echo "hey, I'm in..."
+hey, I'm in...
+root@f2ed6259be3b:/# echo "I'm leaving now..."
+I'm leaving now...
+root@f2ed6259be3b:/# exit
+logout
+```
 
 ### 3.2.13 查看容器内部 hosts 文件
 
+在 Docker 容器实例中，默认容器会将自己的 ID 添加到 hosts 文件中。
+这样容器可以将自己的 ID 解析为自己的 IP。
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker run -it -p 80:80 --name=nginx_ins_host nginx:1.16.1 /bin/bash
+root@e8367bba0dc2:/# cat /etc/hosts
+127.0.0.1	localhost
+::1	localhost ip6-localhost ip6-loopback
+fe00::0	ip6-localnet
+ff00::0	ip6-mcastprefix
+ff02::1	ip6-allnodes
+ff02::2	ip6-allrouters
+172.17.0.3	e8367bba0dc2  # 默认容器会将自己的ID添加到hosts文件中
+root@e8367bba0dc2:/# ping  3e8367bba0dc2
+bash: ping: command not found
+root@e8367bba0dc2:/# apt update
+...
+root@e8367bba0dc2:/# apt install iputils-ping
+...
+
+root@e8367bba0dc2:/# ping e8367bba0dc2  # ping此容器ID后其将ID解析为自己的IP
+PING e8367bba0dc2 (172.17.0.3) 56(84) bytes of data.
+64 bytes from e8367bba0dc2 (172.17.0.3): icmp_seq=1 ttl=64 time=0.013 ms
+64 bytes from e8367bba0dc2 (172.17.0.3): icmp_seq=2 ttl=64 time=0.026 ms
+64 bytes from e8367bba0dc2 (172.17.0.3): icmp_seq=3 ttl=64 time=0.025 ms
+64 bytes from e8367bba0dc2 (172.17.0.3): icmp_seq=4 ttl=64 time=0.064 ms
+^C
+--- e8367bba0dc2 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 34ms
+rtt min/avg/max/mdev = 0.013/0.032/0.064/0.019 ms
+```
+
 ### 3.2.14 批量关闭正在运行的容器
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+1b407ff67f0e        ubuntu              "/bin/bash"              5 seconds ago       Up 4 seconds                            youthful_dijkstra
+142ab9254159        alpine              "/bin/sh"                11 seconds ago      Up 9 seconds                            festive_elion
+26410489f4ec        nginx               "nginx -g 'daemon of…"   15 seconds ago      Up 14 seconds       80/tcp              priceless_snyder
+f2ed6259be3b        ubuntu              "/bin/bash"              59 minutes ago      Up About an hour                        attach_in
+root@ubuntu-suosuoli-node1:~# docker ps -a -q
+1b407ff67f0e
+142ab9254159
+26410489f4ec
+f2ed6259be3b
+
+# 关闭所有容器
+root@ubuntu-suosuoli-node1:~# docker stop `docker ps -a -q`
+1b407ff67f0e
+142ab9254159
+26410489f4ec
+f2ed6259be3b
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+```
 
 ### 3.2.15 批量强制关闭正在运行的容器
 
+```bash
+root@ubuntu-suosuoli-node1:~# docker start `docker ps -a -q`
+1b407ff67f0e
+142ab9254159
+26410489f4ec
+f2ed6259be3b
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+1b407ff67f0e        ubuntu              "/bin/bash"              4 minutes ago       Up 12 seconds                           youthful_dijkstra
+142ab9254159        alpine              "/bin/sh"                4 minutes ago       Up 12 seconds                           festive_elion
+26410489f4ec        nginx               "nginx -g 'daemon of…"   4 minutes ago       Up 12 seconds       80/tcp              priceless_snyder
+f2ed6259be3b        ubuntu              "/bin/bash"              About an hour ago   Up 11 seconds                           attach_in
+root@ubuntu-suosuoli-node1:~# docker kill `docker ps -a -q`
+1b407ff67f0e
+142ab9254159
+26410489f4ec
+f2ed6259be3b
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+```
+
 ### 3.2.16 批量删除已经退出的容器
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+142ab9254159        alpine              "/bin/sh"           6 minutes ago       Up 29 seconds                           festive_elion
+f2ed6259be3b        ubuntu              "/bin/bash"         About an hour ago   Up 28 seconds                           attach_in
+root@ubuntu-suosuoli-node1:~# docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                            PORTS               NAMES
+1b407ff67f0e        ubuntu              "/bin/bash"              6 minutes ago       Exited (0) 4 seconds ago                              youthful_dijkstra
+142ab9254159        alpine              "/bin/sh"                6 minutes ago       Up 31 seconds                                         festive_elion
+26410489f4ec        nginx               "nginx -g 'daemon of…"   6 minutes ago       Exited (137) About a minute ago                       priceless_snyder
+f2ed6259be3b        ubuntu              "/bin/bash"              About an hour ago   Up 31 seconds                                         attach_in
+
+root@ubuntu-suosuoli-node1:~# docker rm -f `docker ps -a -q -f status=exited`  # -f 选项指定过滤条件
+1b407ff67f0e
+26410489f4ec
+root@ubuntu-suosuoli-node1:~# docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+142ab9254159        alpine              "/bin/sh"           7 minutes ago       Up About a minute                       festive_elion
+f2ed6259be3b        ubuntu              "/bin/bash"         About an hour ago   Up About a minute                       attach_in
+```
+
+`docker ps`命令使用`-f`选项可以选择性的过滤容器，可以基于容器名称和状态
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker ps -a -f name=attach_in
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+f2ed6259be3b        ubuntu              "/bin/bash"         About an hour ago   Up 2 minutes                            attach_in
+```
 
 ### 3.2.17 删除所有容器
 
+使用`docker ps`命令的`-q`选项和`-a`选项就可以获取所有的容器 ID，再使用
+`docker rm IDs`命令批量删除容器。
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker rm -f `docker ps -a -q`
+142ab9254159
+f2ed6259be3b
+...
+```
+
 ### 3.2.18 指定容器 DNS
+
+Docker 容器采用的 Dns 服务默认采用宿主机的 dns 地址，也可以在创建和
+启动容器时指定 dns。
+
+默认的 DNS
+
+```bash
+# 查看主机DNS
+root@ubuntu-suosuoli-node1:~# systemd-resolve --status
+ DNSSEC supported: no
+         DNS Servers: 192.168.100.2
+          DNS Domain: localdomain
+          ...
+
+# 创建容器并查看默认的DNS
+root@ubuntu-suosuoli-node1:~# docker run -it --name=dns_ins ubuntu /bin/bash
+root@d21948937807:/# cat /etc/resolv.conf
+...
+nameserver 192.168.100.2
+search localdomain
+```
+
+指定 DNS
+
+```bash
+root@ubuntu-suosuoli-node1:~# docker run -it --name=specify_dns --rm --dns=223.6.6.6 ubuntu /bin/bash
+root@9a3c5b54dc77:/# cat /etc/resolv.conf   # 查看容器中的DNS为指定的DNS
+search localdomain
+nameserver 223.6.6.6
+root@9a3c5b54dc77:/#
+```
 
 # Reference
 
