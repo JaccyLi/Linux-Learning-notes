@@ -805,8 +805,25 @@ root@ubuntu-suosuoli-node1:/opt/dockerfile/web/jdk# vim Dockerfile
 
 FROM centos-base:v1
 
+LABEL author="lisuo" \
+      personal_site="www.suosuoli.cn" \
+      contact="stvobs@163.com"
 
+ADD jdk-8u241-linux-x64.tar.gz /usr/local/src
 
+RUN ln -sv /usr/local/src/jdk1.8.0_241 /usr/local/jdk
+
+ADD profile /etc/profile
+
+ENV JAVA_HOME /usr/local/jdk
+ENV JRE_HOME $JAVA_HOME/jre
+ENV CLASSPATH $JAVA_HOME/lib:$JRE_HOME/lib
+ENV PATH $PATH:$JAVA_HOME/bin
+	# set java related env var
+
+RUN rm -rf /etc/localtime && ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+     && echo "Asia/Shanghai" > /etc/timezone
+	# set time zone to Shanghai
 ```
 
 #### 准备 JDK 和 profile 文件
@@ -815,6 +832,39 @@ FROM centos-base:v1
 root@ubuntu-suosuoli-node1:/opt/dockerfile/web/jdk# cp /etc/profile .
 oot@ubuntu-suosuoli-node1:/opt/dockerfile/web/jdk# rz
 
+root@ubuntu-suosuoli-node1:/opt/dockerfile/web/jdk# vim profile
+# /etc/profile: system-wide .profile file for the Bourne shell (sh(1))
+# and Bourne compatible shells (bash(1), ksh(1), ash(1), ...).
+
+if [ "${PS1-}" ]; then
+  if [ "${BASH-}" ] && [ "$BASH" != "/bin/sh" ]; then
+    # The file bash.bashrc already sets the default PS1.
+    # PS1='\h:\w\$ '
+    if [ -f /etc/bash.bashrc ]; then
+      . /etc/bash.bashrc
+    fi
+  else
+    if [ "`id -u`" -eq 0 ]; then
+      PS1='# '
+    else
+      PS1='$ '
+    fi
+  fi
+fi
+
+if [ -d /etc/profile.d ]; then
+  for i in /etc/profile.d/*.sh; do
+    if [ -r $i ]; then
+      . $i
+    fi
+  done
+  unset i
+fi
+
+export JAVA_HOME="/usr/local/jdk"
+export JRE_HOME="$JAVA_HOME/jre"
+export CLASSPATH="$JAVA_HOME/lib:$JRE_HOME/lib"
+export PATH="$PATH:$JAVA_HOME/bin"
 ```
 
 #### 准备构建脚本
