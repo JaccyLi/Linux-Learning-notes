@@ -143,6 +143,23 @@ https://api.aliyun.com/new#/market
 
 https://www.yunpian.com/official/document/sms/zh_CN/domestic/single_send
 
+### 2.3.3 编写短信发送脚本
+
+```bash
+#!/bin/bash
+
+PHONE=$1
+SUBJECT=$2
+MESSAGE=$3
+/usr/bin/curl -X "POST" "https://sms.yunpian.com/v2/sms/single_send.json" 	-H "content-type: application/x-www-form-urlencoded"  -d "apikey=API-KEY" -d "mobile=${PHONE}" 	-d "text=${MESSAGE}"
+
+#echo $? >> /tmp/magedu_zabbix_sms.txt
+#echo $1  $3 >> /tmp/magedu_zabbix_sms.txt
+
+
+#【阿里bb】北京业务故障服务器:{HOST.NAME},IP:{HOSTNAME1},详情:{ITEM.NAME},{ITEM.VALUE}
+```
+
 ## 2.4 zabbix web 添加短信报警媒介
 
 ![](png/2020-03-05-16-51-17.png)
