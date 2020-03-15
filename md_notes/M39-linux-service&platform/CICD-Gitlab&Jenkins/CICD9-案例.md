@@ -748,18 +748,18 @@ main(){
 case $1 in
     deploy)
         get_ip_list_and_remove_from_loadbalancer;
-	clone_code;
-	scan_code;
-	archive_code;
-        downTom_scpArchive_upTom
+        clone_code;
+        scan_code;
+        archive_code;
+        downTom_scpArchive_upTom;
         is_web_alive;
-	del_old_ver;
-	;;
+        del_old_ver;
+    ;;
     roll_back)
         get_ip_list_and_remove_from_loadbalancer;
         roll_back ${ROLL_BACK_NU};
         is_web_alive;
-	;;
+    ;;
 esac
 }
 
@@ -993,8 +993,333 @@ Finished: SUCCESS
 
 ## 4.5 部署到正式环境
 
-### 4.5.1 Build with Parameters
+### 4.5.1 部署前效果
+
+![](png/2020-03-15-18-19-49.png)
+
+![](png/2020-03-15-18-20-06.png)
+
+### 4.5.2 修改正式版代码提交
+
+修改:
+
+![](png/2020-03-15-18-21-30.png)
+
+提交:
+
+![](png/2020-03-15-18-21-58.png)
+
+### 4.5.3 Build with Parameters
+
+确定好参数后，开始构建：
+
+![](png/2020-03-15-18-23-28.png)
+
+### 4.5.4 Jenkins 控制台输出
+
+```bash
+Started by user jenkinsadmin
+Running as SYSTEM
+Building on master in workspace /var/lib/jenkins/workspace/deploy-demo
+using credential 4bdb7583-344e-4b23-a037-52180ef6b2cc
+ > git rev-parse --is-inside-work-tree # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url git@192.168.100.146:root/deploy-demo.git # timeout=10
+Fetching upstream changes from git@192.168.100.146:root/deploy-demo.git
+ > git --version # timeout=10
+using GIT_SSH to set credentials Private key of root.
+ > git fetch --tags --progress -- git@192.168.100.146:root/deploy-demo.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+ > git rev-parse refs/remotes/origin/origin/master^{commit} # timeout=10
+Checking out Revision 6a6c313fbf2cbc5f6550ca802c0fe12a6af1e0bc (refs/remotes/origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 6a6c313fbf2cbc5f6550ca802c0fe12a6af1e0bc # timeout=10
+Commit message: "Update deploy-demo.html to v5"
+ > git rev-list --no-walk a4e1160af389a6c9d6de3db594b7db3ce02de5e5 # timeout=10
+[deploy-demo] $ /bin/sh -xe /tmp/jenkins7027578224477998860.sh
++ bash /data/scripts/deploy-demo-new.sh deploy master SRV_G3
+deploy
+master
+SRV_G3
+Project: deploy-demo
+
+#### Removing host from loadbalancer... ####
+
+
+Product server 192.168.100.160 192.168.100.162 has removed from load balancer 192.168.100.154.
+
+
+Product server 192.168.100.160 192.168.100.162 has removed from load balancer 192.168.100.156.
+
+
+Product server 192.168.100.160 192.168.100.162 has removed from load balancer 192.168.100.154.
+
+
+Product server 192.168.100.160 192.168.100.162 has removed from load balancer 192.168.100.156.
+
+#### Code cloning...####
+Cloning into 'deploy-demo'...
+
+Code cloned.
+
+#### Code scanning...####
+INFO: Scanner configuration file: /usr/local/src/sonar-scanner-4.0.0.1744-linux/conf/sonar-scanner.properties
+INFO: Project root configuration file: /data/git/sonar-project.properties
+INFO: SonarQube Scanner 4.0.0.1744
+INFO: Java 11.0.3 AdoptOpenJDK (64-bit)
+INFO: Linux 4.15.0-55-generic amd64
+
+INFO: User cache: /var/lib/jenkins/.sonar/cache
+INFO: SonarQube server 7.9.2
+INFO: Default locale: "en_US", source code encoding: "UTF-8"
+INFO: Load global settings
+INFO: Load global settings (done) | time=84ms
+INFO: Server id: D72AF6F9-AXDYUdGLymInxHwGB3RI
+INFO: User cache: /var/lib/jenkins/.sonar/cache
+INFO: Load/download plugins
+INFO: Load plugins index
+INFO: Load plugins index (done) | time=48ms
+INFO: Load/download plugins (done) | time=97ms
+
+INFO: Process project properties
+INFO: Execute project builders
+INFO: Execute project builders (done) | time=4ms
+INFO: Project key: org.sonarqube:js-simple-sq-scanner
+INFO: Base dir: /data/git
+INFO: Working dir: /data/git/.scannerwork
+INFO: Load project settings for component key: 'org.sonarqube:js-simple-sq-scanner'
+INFO: Load project settings for component key: 'org.sonarqube:js-simple-sq-scanner' (done) | time=18ms
+INFO: Load quality profiles
+INFO: Load quality profiles (done) | time=47ms
+INFO: Detected Jenkins
+INFO: Load active rules
+
+INFO: Load active rules (done) | time=714ms
+WARN: SCM provider autodetection failed. Please use "sonar.scm.provider" to define SCM of your project, or disable the SCM Sensor in the project settings.
+INFO: Indexing files...
+INFO: Project configuration:
+INFO: 2 files indexed
+INFO: Quality profile for web: Sonar way
+INFO: ------------- Run sensors on module deploy-demo
+INFO: Load metrics repository
+INFO: Load metrics repository (done) | time=38ms
+
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by net.sf.cglib.core.ReflectUtils$1 (file:/var/lib/jenkins/.sonar/cache/866bb1adbf016ea515620f1aaa15ec53/sonar-javascript-plugin.jar) to method java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)
+WARNING: Please consider reporting this to the maintainers of net.sf.cglib.core.ReflectUtils$1
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+
+INFO: Sensor JaCoCo XML Report Importer [jacoco]
+INFO: Sensor JaCoCo XML Report Importer [jacoco] (done) | time=4ms
+INFO: Sensor JavaXmlSensor [java]
+INFO: Sensor JavaXmlSensor [java] (done) | time=1ms
+INFO: Sensor HTML [web]
+INFO: Load project repositories
+INFO: Load project repositories (done) | time=21ms
+INFO: Sensor HTML [web] (done) | time=185ms
+INFO: ------------- Run sensors on project
+INFO: Sensor Zero Coverage Sensor
+INFO: Sensor Zero Coverage Sensor (done) | time=1ms
+INFO: No SCM system was detected. You can use the 'sonar.scm.provider' property to explicitly specify it.
+INFO: Calculating CPD for 1 file
+INFO: CPD calculation finished
+INFO: Analysis report generated in 125ms, dir size=74 KB
+INFO: Analysis report compressed in 12ms, zip size=11 KB
+INFO: Analysis report uploaded in 28ms
+INFO: ANALYSIS SUCCESSFUL, you can browse http://192.168.100.158:9000/dashboard?id=org.sonarqube%3Ajs-simple-sq-scanner
+INFO: Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
+INFO: More about the report processing at http://192.168.100.158:9000/api/ce/task?id=AXDduNzLymInxHwGB5aS
+INFO: Analysis total time: 3.602 s
+INFO: ------------------------------------------------------------------------
+INFO: EXECUTION SUCCESS
+INFO: ------------------------------------------------------------------------
+INFO: Total time: 4.791s
+INFO: Final Memory: 6M/27M
+INFO: ------------------------------------------------------------------------
+Code scann finished.
+
+#### Code archiving...####
+  adding: deploy-demo.html (deflated 58%)
+  adding: README.md (deflated 27%)
+Code archived.
+
+#### Stop tomcat... ####
+
+Tomcat is running, now stop...
+
+Tomcat stop done.
+Tomcat on 192.168.100.160 has stopped.
+
+#### Deploy code to tomcat server... ####
+
+Archive:  /data/tomcat/appdir/app-2020-03-15_18-23-58.zip
+  inflating: /data/tomcat/webdir/app-2020-03-15_18-23-58/deploy-demo.html
+  inflating: /data/tomcat/webdir/app-2020-03-15_18-23-58/README.md
+'/data/tomcat/webapps/app' -> '/data/tomcat/webdir/app-2020-03-15_18-23-58'
+zipped code transfered.
+
+#### Start tomcat... ####
+
+Tomcat is dead. Now start Tomcat...
+
+Done. Tomcat now is running. PID=104583
+Tomcat on 192.168.100.160 has started.
+
+#### Stop tomcat... ####
+
+Tomcat is running, now stop...
+
+Tomcat stop done.
+Tomcat on 192.168.100.162 has stopped.
+
+#### Deploy code to tomcat server... ####
+
+Archive:  /data/tomcat/appdir/app-2020-03-15_18-23-58.zip
+  inflating: /data/tomcat/webdir/app-2020-03-15_18-23-58/deploy-demo.html
+  inflating: /data/tomcat/webdir/app-2020-03-15_18-23-58/README.md
+'/data/tomcat/webapps/app' -> '/data/tomcat/webdir/app-2020-03-15_18-23-58'
+
+zipped code transfered.
+
+#### Start tomcat... ####
+Tomcat is dead. Now start Tomcat...
+
+Done. Tomcat now is running. PID=103696
+Tomcat on 192.168.100.162 has started.
+
+#### Test if the web is alive... ####
+The WEB of 192.168.100.160 is alive, adding to loadbalancer...
+
+
+Server 192.168.100.160 has added to load balancer 192.168.100.154.
+
+Server 192.168.100.160 has added to load balancer 192.168.100.156.
+
+#### Test if the web is alive... ####
+The WEB of 192.168.100.162 is alive, adding to loadbalancer...
+
+
+Server 192.168.100.162 has added to load balancer 192.168.100.154.
+
+Server 192.168.100.162 has added to load balancer 192.168.100.156.
+
+Delete the old version of 192.168.100.160.
+You got 6 versions
+
+OLD_VER is /data/tomcat/webdir/app-2020-03-15_15-10-27
+OLD_VER is deleted.
+Delete the old version of 192.168.100.162.
+
+You got 6 versions
+
+OLD_VER is /data/tomcat/webdir/app-2020-03-15_15-10-27
+OLD_VER is deleted.
+Finished: SUCCESS
+
+```
+
+### 4.5.5 SonarQube 代码扫描报告
+
+![](png/2020-03-15-18-25-59.png)
+
+![](png/2020-03-15-18-26-24.png)
+
+### 4.5.6 部署后效果
+
+![](png/2020-03-15-18-26-45.png)
+
+![](png/2020-03-15-18-27-03.png)
 
 ## 4.6 回滚到上个版本
 
-### 4.6.1 Build with Parameters
+### 4.6.1 回滚前效果
+
+![](png/2020-03-15-18-26-45.png)
+
+![](png/2020-03-15-18-27-03.png)
+
+### 4.6.2 Build with Parameters
+
+![](png/2020-03-15-18-41-51.png)
+
+### 4.6.3 Jenkins 控制台输出
+
+```bash
+roll_back
+master
+SRV_G3
+ROLL_BACK_NU is 1
+Project: deploy-demo
+
+#### Removing host from loadbalancer... ####
+
+
+Product server 192.168.100.160 192.168.100.162 has removed from load balancer 192.168.100.154.
+
+
+Product server 192.168.100.160 192.168.100.162 has removed from load balancer 192.168.100.156.
+
+
+Product server 192.168.100.160 192.168.100.162 has removed from load balancer 192.168.100.154.
+
+
+Product server 192.168.100.160 192.168.100.162 has removed from load balancer 192.168.100.156.
+
+#### Roll back to last version... ####
+in func ROLL_BACK_NU is 1
+ROLL_BACK_TO is 2
+'/data/tomcat/webapps/app' -> '/data/tomcat/webdir/app-2020-03-15_18-09-02'
+#### Stop tomcat... ####
+Tomcat is running, now stop...
+Tomcat stop done.
+Tomcat on 192.168.100.160 has stopped.
+
+#### Start tomcat... ####
+Tomcat is dead. Now start Tomcat...
+Done. Tomcat now is running. PID=44008
+Tomcat on 192.168.100.160 has started.
+
+#### Roll back finished. ####
+'/data/tomcat/webapps/app' -> '/data/tomcat/webdir/app-2020-03-15_18-09-02'
+#### Stop tomcat... ####
+Tomcat is running, now stop...
+Tomcat stop done.
+Tomcat on 192.168.100.162 has stopped.
+
+#### Start tomcat... ####
+Tomcat is dead. Now start Tomcat...
+Done. Tomcat now is running. PID=42833
+Tomcat on 192.168.100.162 has started.
+
+#### Roll back finished. ####
+#### Test if the web is alive... ####
+The WEB of 192.168.100.160 is alive, adding to loadbalancer...
+
+
+Server 192.168.100.160 has added to load balancer 192.168.100.154.
+
+Server 192.168.100.160 has added to load balancer 192.168.100.156.
+
+#### Test if the web is alive... ####
+The WEB of 192.168.100.162 is alive, adding to loadbalancer...
+
+
+Server 192.168.100.162 has added to load balancer 192.168.100.154.
+
+Server 192.168.100.162 has added to load balancer 192.168.100.156.
+```
+
+### 4.6.4 回滚后效果
+
+tomcat-server-node3
+
+![](png/2020-03-15-19-39-21.png)
+
+![](png/2020-03-15-19-36-52.png)
+
+tomcat-server-node4
+
+![](png/2020-03-15-19-40-04.png)
+
+![](png/2020-03-15-19-37-13.png)
