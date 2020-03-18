@@ -492,6 +492,17 @@ print("集群中的所有分片数：{}".format(act_shard))
 print("集群状态中存在而找不到的分片：{}".format(unassigned_shard))
 ```
 
-## 5.3 添加到 zabbix 监控
+## 5.3 运行获取数据
+
+```bash
+root@es-server-node1:/data/elk/esdata# python3 get_cluster_info.py
+                   集群状态：green
+                 集群节点数：3
+          集群中的主分片数量：8
+          集群中的所有分片数：16
+集群状态中存在而找不到的分片：0
+```
+
+## 5.4 添加到 zabbix 监控
 
 略

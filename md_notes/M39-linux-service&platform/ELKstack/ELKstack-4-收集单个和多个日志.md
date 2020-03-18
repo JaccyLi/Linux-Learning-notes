@@ -1,3 +1,11 @@
+环境：
+
+| 主机名          | IP              | 运行的服务                   |
+| :-------------- | :-------------- | :--------------------------- |
+| es-server-node1 | 192.168.100.142 | Elasticsearch、Head、Cerebro |
+| es-server-node2 | 192.168.100.144 | Elasticsearch 、Logstash     |
+| es-server-node3 | 192.168.100.146 | Elasticsearch 、Kibana       |
+
 # 一. 通过 logstash 收集单个日志
 
 通过 logstash 收集单个系统日志，并输出至文件
