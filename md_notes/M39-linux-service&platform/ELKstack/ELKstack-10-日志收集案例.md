@@ -443,12 +443,955 @@ java 数据库连接器，是一种用于执行 SQL 语句的 Java API，可以�
 统一访问，它由一组用 Java 语言编写的类和接口组成。
 
 [JDBC 官方下载地址-各种语言](https://dev.mysql.com/downloads/connector/)
+[此实验使用的 jar 包](https://downloads.mysql.com/archives/c-j/)
 
+![](png/2020-03-22-15-04-13.png)
+
+### 4.3.1 下载驱动 jar 包
+
+```bash
+root@redis-server:/usr/local/src# pwd
+/usr/local/src
+root@redis-server:/usr/local/src# wget https://downloads.mysql.com/archives/get/p/3/file/mysql-connector-java-5.1.42.zip
+```
+
+### 4.3.2 安装 jar 包到 logstash
+
+```bash
+# 解压zip包
+root@redis-server:/usr/local/src# unzip mysql-connector-java-5.1.42.zip
+root@redis-server:/usr/local/src# ll mysql-connector-java-5.1.42
+total 1468
+drwxr-xr-x 4 root root   4096 Apr 17  2017 ./
+drwxr-xr-x 5 root root   4096 Mar 22 15:05 ../
+-rw-r--r-- 1 root root  91463 Apr 17  2017 build.xml
+-rw-r--r-- 1 root root 244278 Apr 17  2017 CHANGES
+-rw-r--r-- 1 root root  18122 Apr 17  2017 COPYING
+drwxr-xr-x 2 root root   4096 Apr 17  2017 docs/
+-rw-r--r-- 1 root root 996444 Apr 17  2017 mysql-connector-java-5.1.42-bin.jar
+-rw-r--r-- 1 root root  61407 Apr 17  2017 README
+-rw-r--r-- 1 root root  63658 Apr 17  2017 README.txt
+drwxr-xr-x 8 root root   4096 Apr 17  2017 src/
+
+# 安装logstash的要求创建目录
+root@redis-server:/usr/local/src# mkdir -pv /usr/share/logstash/vendor/jar/jdbc
+mkdir: created directory '/usr/share/logstash/vendor/jar'
+mkdir: created directory '/usr/share/logstash/vendor/jar/jdbc'
+
+# 将jar包拷贝过去
+root@redis-server:/usr/local/src# cp mysql-connector-java-5.1.42/mysql-connector-java-5.1.42-bin.jar /usr/share/logstash/vendor/jar/jdbc/
+
+# 更改权限
+root@redis-server:/usr/local/src# chown logstash.logstash /usr/share/logstash/vendor/jar -R
+root@redis-server:/usr/local/src# ll /usr/share/logstash/vendor/jar/
+total 12
+drwxr-xr-x 3 logstash logstash 4096 Mar 22 15:07 ./
+drwxrwxr-x 5 logstash logstash 4096 Mar 22 15:07 ../
+drwxr-xr-x 2 logstash logstash 4096 Mar 22 15:09 jdbc/
+root@redis-server:/usr/local/src# ll /usr/share/logstash/vendor/jar/jdbc/
+total 984
+drwxr-xr-x 2 logstash logstash   4096 Mar 22 15:09 ./
+drwxr-xr-x 3 logstash logstash   4096 Mar 22 15:07 ../
+-rw-r--r-- 1 logstash logstash 996444 Mar 22 15:09 mysql-connector-java-5.1.42-bin.jar
+```
+
+## 4.4 配置 logstash 的输出插件
+
+### 4.4.1 配置 gem 源
+
+logstash 的输出到 SQL 的插件为`logstash-output-jdbc`，该插件使用了 shell
+脚本和 ruby 脚本写成，所以需要使用 ruby 的包管理器 gem 和 gem 源。
+
+国外的 gem 源由于网络原因，从国内访问太慢而且不稳定，还经常安装不成功，因此
+之前一段时间很多人都是使用国内淘宝的 gem 源https://ruby.taobao.org/，现在
+淘宝的 gem 源虽然还可以使用，但是已经停止维护更新。[其官方介绍](https://gems.ruby-china.com/)
+
+```bash
+root@redis-server:/usr/local/src# snap install ruby
+root@redis-server:/usr/local/src# apt install gem
+
+# 更改源
+root@redis-server:/usr/local/src# gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/
+https://gems.ruby-china.com/ added to sources
+https://rubygems.org/ removed from sources
+
+# 查看源
+root@redis-server:/usr/local/src# gem sources -l
+*** CURRENT SOURCES ***
+
+https://gems.ruby-china.com/   # 确认只有ruby-china
+```
+
+### 4.4.2 安装配置 logstash-output-jdbc 插件
+
+该插件可以将 logstash 的数据通过 JDBC 输出到 SQL 数据库。使用 logstash 自带的
+`/usr/share/logstash/bin/logstash-plugin`工具安装该插件。
+
+[Github: logstash-output-jdbc](https://github.com/theangryangel/logstash-output-jdbc)
+[logstash 使用该插件配置示例](https://github.com/theangryangel/logstash-output-jdbc/blob/master/examples/mysql.md)
+
+```bash
+# 查看已安装的插件
+root@redis-server:~# /usr/share/logstash/bin/logstash-plugin list
+...
+logstash-codec-avro
+logstash-codec-cef
+logstash-codec-collectd
+logstash-codec-dots
+logstash-codec-edn
+logstash-codec-edn_lines
+logstash-codec-es_bulk
+logstash-codec-fluent
+logstash-codec-graphite
+logstash-codec-json
+...
+
+# 安装logstash-output-jdbc
+root@redis-server:~# /usr/share/logstash/bin/logstash-plugin install logstash-output-jdbc
+...
+Validating logstash-output-jdbc
+Installing logstash-output-jdbc
+Installation successful  # 安装完成
+```
+
+## 4.5 事先在数据库创建表结构
+
+收集 tomcat 的访问日志中的 clientip,status,AgentVersion,method 和
+访问时间等字段值。时间字段使用系统时间。
+
+```bash
+root@redis-server:~# mysql -ulogstash -p
+Enter password:
+...
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| log_data           |
++--------------------+
+2 rows in set (0.00 sec)
+
+mysql> select CURRENT_TIMESTAMP;
++---------------------+
+| CURRENT_TIMESTAMP   |
++---------------------+
+| 2020-03-22 16:36:33 |
++---------------------+
+1 row in set (0.00 sec)
+
+mysql> USE log_data;
+Database changed
+mysql> CREATE TABLE tom_log (host varchar(128), status int(32), clientip varchar(50), AgentVersion varchar(512), time timestamp default current_timestamp);
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> show tables;
++--------------------+
+| Tables_in_log_data |
++--------------------+
+| tom_log            |
++--------------------+
+1 row in set (0.00 sec)
+
+mysql> desc tom_log;
++--------------+--------------+------+-----+-------------------+-------+
+| Field        | Type         | Null | Key | Default           | Extra |
++--------------+--------------+------+-----+-------------------+-------+
+| host         | varchar(128) | YES  |     | NULL              |       |
+| status       | int(32)      | YES  |     | NULL              |       |
+| clientip     | varchar(50)  | YES  |     | NULL              |       |
+| AgentVersion | varchar(512) | YES  |     | NULL              |       |
+| time         | timestamp    | NO   |     | CURRENT_TIMESTAMP |       |  # 时间字段
++--------------+--------------+------+-----+-------------------+-------+
+5 rows in set (0.02 sec)
+```
+
+## 4.6 syslog 更改为手机 tomcat 访问日志
+
+### 4.6.1 保证 tomcat 的日志格式为 json
+
+```bash
+root@tomcat-server-node1:~# cat /usr/local/tomcat/conf/server.xml
+...
+<Server>
+...
+  <Service>
+  ...
+    <Engine>
+    ...
+      <Host>
+      ...
+          <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+               prefix="tomcat_access_log" suffix=".log"
+	       pattern="{&quot;clientip&quot;:&quot;%h&quot;,&quot;ClientUser&quot;:&quot;%l&quot;,&quot;authenticated&quot;:&quot;%u&quot;,&quot;AccessTime&quot;:&quot;%t&quot;,&quot;method&quot;:&quot;%r&quot;,&quot;status&quot;:&quot;%s&quot;,&quot;SendBytes&quot;:&quot;%b&quot;,&quot;Query?string&quot;:&quot;%q&quot;,&quot;partner&quot;:&quot;%{Referer}i&quot;,&quot;AgentVersion&quot;:&quot;%{User-Agent}i&quot;}" />
+
+      </Host>
+    </Engine>
+  </Service>
+</Server>
+```
+
+### 4.6.2 filebeat 配置
+
+**tomcat-server-node1**
+
+```bash
+root@tomcat-server-node1:~# cat /etc/filebeat/filebeat.yml
+...
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/syslog
+  document_type: system-log
+  exclude_lines: ['^DBG']
+  #include_lines: ['^ERR', '^WARN']
+  fields:
+    name: syslog_from_filebeat_150  # 自定义条目
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /usr/local/tomcat/logs/tomcat_access_log.2020-03-22.log
+  document_type: tomcat-log
+  exclude_lines: ['^DBG']
+  fields:
+    name: tom_from_filebeat_150
+# logstash输出
+output.logstash:
+  hosts: ["192.168.100.150:5044"]
+```
+
+**tomcat-server-node2**
+
+```bash
+root@tomcat-server-node2:~# cat /etc/filebeat/filebeat.yml
+...
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/syslog
+  document_type: system-log
+  exclude_lines: ['^DBG']
+  fields:
+    name: syslog_from_filebeat_152  # 自定义字段
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /usr/local/tomcat/logs/tomcat_access_log.2020-03-22.log
+  document_type: tomcat-log
+  exclude_lines: ['^DBG']
+  fields:
+    name: tom_from_filebeat_152
+
+# logstash输出
+output.logstash:
+  hosts: ["192.168.100.152:5044"]
+```
+
+### 4.6.3 logstash 配置
+
+**tomcat-server-node1**
+
+```bash
+root@tomcat-server-node1:~# cat /etc/logstash/conf.d/tom_from_filebeat.conf
+input {
+  beats {
+    host => "192.168.100.150"
+    port => "5044"
+  }
+}
+
+output {
+  if [fields][name] == "tom_from_filebeat_150" {
+    redis {
+      host => "192.168.100.154"
+      port => "6379"
+      db   => "1"
+      key  => "tomlog_150"
+      data_type => "list"
+      password  => "stevenux"
+    }
+  }
+}
+```
+
+**tomcat-server-node2**
+
+```bash
+root@tomcat-server-node2:~# cat /etc/logstash/conf.d/tomlog_from_filebeat.conf
+input {
+  beats {
+    host => "192.168.100.152"
+    port => "5044"
+  }
+}
+
+output {
+  if [fields][name] == "tom_from_filebeat_152" {
+    redis {
+      host => "192.168.100.154"
+      port => "6379"
+      db   => "1"
+      key  => "tomlog_152"
+      data_type => "list"
+      password  => "stevenux"
+    }
+  }
+}
+```
+
+### 4.6.4 查看 redis 数据
+
+```bash
+root@redis-server:/etc/logstash/conf.d# redis-cli
+127.0.0.1:6379> auth stevenux
+OK
+127.0.0.1:6379> select 1
+OK
+127.0.0.1:6379[12]> KEYS *
+(empty list or set)
+127.0.0.1:6379[1]> KEYS *
+(empty list or set)
+127.0.0.1:6379[1]> KEYS *
+(empty list or set)
+1) "tomlog_150"
+127.0.0.1:6379[1]> KEYS *
+1) "tomlog_150"
+127.0.0.1:6379[1]> KEYS *
+1) "tomlog_150"
+127.0.0.1:6379[1]> KEYS *
+1) "tomlog_150"
+127.0.0.1:6379[1]> KEYS *
+1) "tomlog_150"
+.....
+127.0.0.1:6379[1]>
+127.0.0.1:6379[1]>
+127.0.0.1:6379[1]>127.0.0.1:6379[1]> KEYS *
+1) "tomlog_150"
+2) "tomlog_152"
+127.0.0.1:6379[1]>
+
+```
+
+## 4.6 配置 logstash 输出到 MySQL
+
+日志数据流动：
+`redis-server:redis --> redis-server: logstash --> redis-server: MySQL`
+
+[logstash 使用该插件配置示例:](https://github.com/theangryangel/logstash-output-jdbc/blob/master/examples/mysql.md)
+
+```bash
+input
+{
+	stdin { }
+}
+output {
+	jdbc {
+        driver_class => "com.mysql.jdbc.Driver"
+		connection_string => "jdbc:mysql://HOSTNAME/DATABASE?user=USER&password=PASSWORD"
+		statement => [ "INSERT INTO log (host, timestamp, message) VALUES(?, CAST(? AS timestamp), ?)", "host", "@timestamp", "message" ]
+	}
+}
+```
+
+数据库连接出错解决：
+
+```bash
+~# mysql -ulogstash -h192.168.100.154 -pstevenux
+mysql: [Warning] Using a password on the command line interface can be insecure.
+# 出现以下错误，则更改一下监听地址为所有地址
+ERROR 2003 (HY000): Can\'t connect to MySQL server on '192.168.100.154' (111)
+
+~# vim /etc/logstash/conf.d# vim /etc/mysql/mysql.conf.d/mysqld.cnf
+...
+bind-address            = 0.0.0.0
+...
+
+# 重启
+root@redis-server:/etc/logstash/conf.d# systemctl restart mysql
+
+# 连接试试
+root@redis-server:/etc/logstash/conf.d# mysql -ulogstash -h192.168.100.154 -p
+Enter password:
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| log_data           |
++--------------------+
+2 rows in set (0.01 sec)
+```
+
+确保 logstash 已经安装插件：
+
+```bash
+root@redis-server:/etc/logstash/conf.d# /usr/share/logstash/bin/logstash-plugin list | grep jdbc
+...
+logstash-integration-jdbc
+ ├── logstash-input-jdbc
+ ├── logstash-filter-jdbc_streaming
+ └── logstash-filter-jdbc_static
+logstash-output-jdbc
+
+root@redis-server:~# ll /usr/share/logstash/vendor/jar/jdbc/mysql-connector-java-5.1.42-bin.jar
+-rw-r--r-- 1 logstash logstash 996444 Mar 22 15:09 /usr/share/logstash/vendor/jar/jdbc/mysql-connector-java-5.1.42-bin.jar
+```
+
+配置 logstash：
+
+```bash
+root@redis-server:~# cat /etc/logstash/conf.d/tomlog_from_redis_to_mysql.conf
+input {
+  redis {
+    host => "192.168.100.154"
+    port => "6379"
+    db   => "1"
+    data_type => "list"
+    key       => "tomlog_150"
+    password  => "stevenux"
+  }
+  redis {
+    host => "192.168.100.154"
+    port => "6379"
+    db   => "1"
+    data_type => "list"
+    key       => "tomlog_152"
+    password  => "stevenux"
+  }
+}
+
+output {
+  jdbc {
+      driver_class => "com.mysql.jdbc.Driver"
+      connection_string => "jdbc:mysql://192.168.100.154/log_data?user=logstash&password=stevenux"
+      statement => [ "INSERT INTO tom_log (host, status, clientip, AgentVersion, time) VALUES(?, ?, ?, ?, ?)", "host", "status", "clientip", "AgentVersion","time" ]
+    }
+}
+```
+
+检查语法：
+
+```bash
+root@redis-server:~# /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/tomlog_from_redis_to_mysql.conf -t
+...
+[INFO ] 2020-03-22 17:13:34.157 [LogStash::Runner] Reflections - Reflections took 41 ms to scan 1 urls, producing 20 keys and 40 values
+Configuration OK
+[INFO ] 2020-03-22 17:13:34.593 [LogStash::Runner] runner - Using config.test_and_exit mode. Config Validation Result: OK. Exiting Logstash
+```
+
+## 4.7 测试
+
+### 4.7.1 访问一下
+
+```bash
+root@es-server-node2:~# curl 192.168.100.152:8080
+root@es-server-node2:~# curl 192.168.100.152:8080/not_exists
+root@es-server-node3:~# curl 192.168.100.152:8080
+root@es-server-node3:~# curl 192.168.100.152:8080/not_exists
+```
+
+![](png/2020-03-22-17-28-05.png)
+
+![](png/2020-03-22-17-28-21.png)
+
+### 4.7.2 查看数据
+
+```bash
+root@redis-server:/etc/logstash/conf.d# mysql -ulogstash -h192.168.100.154 -p
+Enter password:
+...
+mysql> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| log_data           |
++--------------------+
+2 rows in set (0.00 sec)
+
+mysql> USE log_data;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> SHOW TABLES;
++--------------------+
+| Tables_in_log_data |
++--------------------+
+| tom_log            |
++--------------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT COUNT(*) FROM tom_log;
++----------+
+| COUNT(*) |
++----------+
+|     2072 |
++----------+
+1 row in set (0.00 sec)
+
+mysql> SELECT * FROM tom_log ORDER BY time DESC LIMIT 5 \G
+*************************** 1. row ***************************
+        host: tomcat-server-node2
+      status: 200
+    clientip: 192.168.100.146
+AgentVersion: curl/7.58.0
+        time: 2020-03-22 21:05:42
+*************************** 2. row ***************************
+        host: tomcat-server-node2
+      status: 200
+    clientip: 192.168.100.152
+AgentVersion: curl/7.58.0
+        time: 2020-03-22 21:05:42
+*************************** 3. row ***************************
+        host: tomcat-server-node2
+      status: 200
+    clientip: 192.168.100.150
+AgentVersion: curl/7.58.0
+        time: 2020-03-22 21:05:42
+*************************** 4. row ***************************
+        host: tomcat-server-node2
+      status: 200
+    clientip: 192.168.100.144
+AgentVersion: curl/7.58.0
+        time: 2020-03-22 21:05:42
+*************************** 5. row ***************************
+        host: tomcat-server-node2
+      status: 200
+    clientip: 192.168.100.150
+AgentVersion: curl/7.58.0
+        time: 2020-03-22 21:05:42
+5 rows in set (0.01 sec)
+
+```
+
+### 4.7.3 写 MySQL 的 logstash 日志
+
+```bash
+root@redis-server:/etc/logstash/conf.d# tail /var/log/logstash/logstash-plain.log -n12
+[2020-03-22T20:48:54,555][INFO ][logstash.runner          ] Starting Logstash {"logstash.version"=>"7.6.1"}
+[2020-03-22T20:48:56,366][INFO ][org.reflections.Reflections] Reflections took 33 ms to scan 1 urls, producing 20 keys and 40 values
+[2020-03-22T20:48:56,825][INFO ][logstash.outputs.jdbc    ][main] JDBC - Starting up
+[2020-03-22T20:48:56,892][INFO ][com.zaxxer.hikari.HikariDataSource][main] HikariPool-1 - Starting...
+[2020-03-22T20:48:57,242][INFO ][com.zaxxer.hikari.HikariDataSource][main] HikariPool-1 - Start completed.
+[2020-03-22T20:48:57,326][WARN ][org.logstash.instrument.metrics.gauge.LazyDelegatingGauge][main] A gauge metric of an unknown type (org.jruby.RubyArray) has been create for key: cluster_uuids. This may result in invalid serialization.  It is recommended to log an issue to the responsible developer/development team.
+[2020-03-22T20:48:57,331][INFO ][logstash.javapipeline    ][main] Starting pipeline {:pipeline_id=>"main", "pipeline.workers"=>2, "pipeline.batch.size"=>125, "pipeline.batch.delay"=>50, "pipeline.max_inflight"=>250, "pipeline.sources"=>["/etc/logstash/conf.d/tomlog_from_redis_to_mysql.conf"], :thread=>"#<Thread:0x752a3c2 run>"}
+[2020-03-22T20:48:58,173][INFO ][logstash.inputs.redis    ][main] Registering Redis {:identity=>"redis://<password>@192.168.100.154:6379/1 list:tomlog_150"}
+[2020-03-22T20:48:58,178][INFO ][logstash.inputs.redis    ][main] Registering Redis {:identity=>"redis://<password>@192.168.100.154:6379/1 list:tomlog_152"}
+[2020-03-22T20:48:58,193][INFO ][logstash.javapipeline    ][main] Pipeline started {"pipeline.id"=>"main"}
+[2020-03-22T20:48:58,313][INFO ][logstash.agent           ] Pipelines running {:count=>1, :running_pipelines=>[:main], :non_running_pipelines=>[]}
+[2020-03-22T20:48:58,813][INFO ][logstash.agent           ] Successfully started Logstash API endpoint {:port=>9600}
+
+```
 
 # 五. 通过 HAProxy 代理 Kibana
 
+## 5.1 部署 Kibana
+
+### 5.1.1 es-server-node1
+
+```bash
+# 安装
+root@es-server-node1:/usr/local/src# dpkg -i kibana-7.6.1-amd64.deb
+Selecting previously unselected package kibana.
+(Reading database ... 85899 files and directories currently installed.)
+Preparing to unpack kibana-7.6.1-amd64.deb ...
+Unpacking kibana (7.6.1) ...
+Setting up kibana (7.6.1) ...
+Processing triggers for ureadahead (0.100.0-21) ...
+Processing triggers for systemd (237-3ubuntu10.24) ...
+
+# 配置文件
+root@es-server-node1:/usr/local/src# grep "^[a-Z]" /etc/kibana/kibana.yml
+server.port: 5601
+server.host: "0.0.0.0"
+server.name: "kibana-demo-node1"
+elasticsearch.hosts: ["http://192.168.100.144:9200"]
+```
+
+### 5.1.2 es-server-node2
+
+```bash
+# 安装
+root@es-server-node1:/usr/local/src# dpkg -i kibana-7.6.1-amd64.deb
+Selecting previously unselected package kibana.
+(Reading database ... 85899 files and directories currently installed.)
+Preparing to unpack kibana-7.6.1-amd64.deb ...
+Unpacking kibana (7.6.1) ...
+Setting up kibana (7.6.1) ...
+Processing triggers for ureadahead (0.100.0-21) ...
+Processing triggers for systemd (237-3ubuntu10.24) ...
+
+# 配置文件
+root@es-server-node1:/usr/local/src# grep "^[a-Z]" /etc/kibana/kibana.yml
+server.port: 5601
+server.host: "0.0.0.0"
+server.name: "kibana-demo-node2"
+elasticsearch.hosts: ["http://192.168.100.144:9200"]
+```
+
+### 5.1.3 es-server-node3
+
+将之前安装好的 kibana 配置文件分发给 node1 和 node2
+
+```bash
+root@es-server-node3:~# scp  /etc/kibana/kibana.yml  192.168.100.142:/etc/kibana/
+root@es-server-node3:~# scp  /etc/kibana/kibana.yml  192.168.100.144:/etc/kibana/
+```
+
+### 5.2.4 查看 kibana 主界面
+
+![](png/2020-03-22-22-04-53.png)
+
+![](png/2020-03-22-22-05-06.png)
+
+![](png/2020-03-22-22-05-17.png)
+
+## 5.2 HAProxy 和 keepalived 配置
+
+### 5.2.1 Keepalived 配置
+
+**tomcat-server-node1**
+
+```bash
+~# apt install  keepalived -y
+~# vim /etc/keepalived/keepalived.conf
+root@tomcat-server-node1:~# cat /etc/keepalived/keepalived.conf
+global_defs {
+    notification_email {
+    root@localhost
+    }
+notification_email_from keepalived@localhost
+smtp_server 127.0.0.1
+smtp_connect_timeout 30
+router_id ha1.example.com
+vrrp_skip_check_adv_addr
+vrrp_strict
+vrrp_garp_interval 0
+vrrp_gna_interval 0
+
+vrrp_mcast_group4 224.0.0.18
+#vrrp_iptables
+}
+
+vrrp_instance VI_1 {
+state MASTER
+interface eth0
+virtual_router_id 80
+priority 100
+advert_int 1
+authentication {
+auth_type PASS
+auth_pass stevenux
+}
+virtual_ipaddress {
+    192.168.100.200 dev eth0 label eth0:0
+}
+}
+
+root@tomcat-server-node1:~# systemctl start keepalived
+
+root@tomcat-server-node1:~# ip addr show eth0 | grep inet
+    inet 192.168.100.150/24 brd 192.168.100.255 scope global eth0
+    inet 192.168.100.200/32 scope global eth0:0
+    inet6 fe80::20c:29ff:fe64:9fdf/64 scope link
+```
+
+**tomcat-server-node2**
+
+```bash
+~# apt install  keepalived -y
+~# vim /etc/keepalived/keepalived.conf
+
+root@tomcat-server-node2:/etc/logstash/conf.d# cat /etc/keepalived/keepalived.conf
+global_defs {
+    notification_email {
+    root@localhost
+    }
+notification_email_from keepalived@localhost
+smtp_server 127.0.0.1
+smtp_connect_timeout 30
+router_id ha1.example.com
+vrrp_skip_check_adv_addr
+vrrp_strict
+vrrp_garp_interval 0
+vrrp_gna_interval 0
+
+vrrp_mcast_group4 224.0.0.18
+#vrrp_iptables
+}
+
+vrrp_instance VI_1 {
+state BACKUP
+interface eth0
+virtual_router_id 80
+priority 80
+advert_int 1
+authentication {
+auth_type PASS
+auth_pass stevenux
+}
+virtual_ipaddress {
+    192.168.100.200 dev eth0 label eth0:0
+}
+}
+
+root@tomcat-server-node1:~# systemctl start keepalived
+
+root@tomcat-server-node2:/etc/logstash/conf.d# ip addr show eth0 | grep eth0
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    inet 192.168.100.152/24 brd 192.168.100.255 scope global eth0
+```
+
+### 5.2.2 HAProxy 配置
+
+**tomcat-server-node1**
+
+```bash
+root@tomcat-server-node1:~# cat /etc/haproxy/haproxy.cfg
+global
+	log /dev/log	local0
+	log /dev/log	local1 notice
+	chroot /var/lib/haproxy
+	stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+	stats timeout 30s
+	user haproxy
+	group haproxy
+	daemon
+	log 127.0.0.1 local6 info
+	ca-base /etc/ssl/certs
+	crt-base /etc/ssl/private
+
+	ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS
+	ssl-default-bind-options no-sslv3
+
+defaults
+	log	global
+	mode	http
+	option	httplog
+	option	dontlognull
+        timeout connect 5000
+        timeout client  50000
+        timeout server  50000
+	errorfile 400 /etc/haproxy/errors/400.http
+	errorfile 403 /etc/haproxy/errors/403.http
+	errorfile 408 /etc/haproxy/errors/408.http
+	errorfile 500 /etc/haproxy/errors/500.http
+	errorfile 502 /etc/haproxy/errors/502.http
+	errorfile 503 /etc/haproxy/errors/503.http
+	errorfile 504 /etc/haproxy/errors/504.http
+
+listen stats
+ 	mode http
+ 	bind 0.0.0.0:9999
+ 	stats enable
+ 	log global
+ 	stats uri     /haproxy-status
+ 	stats auth    haadmin:stevenux
+
+listen elasticsearch_cluster
+  mode http
+  balance roundrobin
+  bind 192.168.100.200:80
+  server 192.168.100.142 192.168.100.142:5601 check inter 3s fall 3 rise 5
+  server 192.168.100.144 192.168.100.144:5601 check inter 3s fall 3 rise 5
+  server 192.168.100.146 192.168.100.146:5601 check inter 3s fall 3 rise 5
+
+root@tomcat-server-node1:~# systemctl restart haproxy
+```
+
+**tomcat-server-node2**
+
+```bash
+root@tomcat-server-node2:~# cat /etc/haproxy/haproxy.cfg
+global
+	log /dev/log	local0
+	log /dev/log	local1 notice
+	chroot /var/lib/haproxy
+	stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+	stats timeout 30s
+	user haproxy
+	group haproxy
+	daemon
+	log 127.0.0.1 local6 info
+	ca-base /etc/ssl/certs
+	crt-base /etc/ssl/private
+
+	ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS
+	ssl-default-bind-options no-sslv3
+
+defaults
+	log	global
+	mode	http
+	option	httplog
+	option	dontlognull
+        timeout connect 5000
+        timeout client  50000
+        timeout server  50000
+	errorfile 400 /etc/haproxy/errors/400.http
+	errorfile 403 /etc/haproxy/errors/403.http
+	errorfile 408 /etc/haproxy/errors/408.http
+	errorfile 500 /etc/haproxy/errors/500.http
+	errorfile 502 /etc/haproxy/errors/502.http
+	errorfile 503 /etc/haproxy/errors/503.http
+	errorfile 504 /etc/haproxy/errors/504.http
+
+listen stats
+ 	mode http
+ 	bind 0.0.0.0:9999
+ 	stats enable
+ 	log global
+ 	stats uri     /haproxy-status
+ 	stats auth    haadmin:stevenux
+
+listen elasticsearch_cluster
+  mode http
+  balance roundrobin
+  bind 192.168.100.200:80
+  server 192.168.100.142 192.168.100.142:5601 check inter 3s fall 3 rise 5
+  server 192.168.100.144 192.168.100.144:5601 check inter 3s fall 3 rise 5
+  server 192.168.100.146 192.168.100.146:5601 check inter 3s fall 3 rise 5
+
+root@tomcat-server-node2:~# systemctl restart haproxy.service
+```
+
+## 5.3 访问效果
+
+### 5.3.1 访问一下 HAProxy 状态页
+
+![](png/2020-03-22-22-38-49.png)
+
+![](png/2020-03-22-22-37-50.png)
+
+### 5.3.2 访问 VIP 查看 Kibana
+
+![](png/2020-03-22-22-33-12.png)
+
+![](png/2020-03-22-22-47-25.png)
+
 # 六. 通过 nginx 代理 Kibana
 
+将 nginx 作为反向代理服务器，增加登录用户认证功能，有效避免无关人员随意访问 kibana 页面。
+
+## 6.1 nginx 配置
+
+```bash
+root@tomcat-server-node1:~# cat /apps/nginx/conf/nginx.conf
+
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    log_format  access_json  '{"@timestamp":"$time_iso8601",'
+        		     '"host":"$server_addr",'
+        		     '"clientip":"$remote_addr",'
+        		     '"size":$body_bytes_sent,'
+        		     '"responsetime":$request_time,'
+        		     '"upstreamtime":"$upstream_response_time",'
+        		     '"upstreamhost":"$upstream_addr",'
+        		     '"http_host":"$host",'
+        		     '"url":"$uri",'
+        		     '"domain":"$host",'
+        		     '"xff":"$http_x_forwarded_for",'
+        		     '"referer":"$http_referer",'
+        		     '"status":"$status"}';
+
+    access_log  logs/access.log  access_json;
+
+    sendfile        on;
+    keepalive_timeout  65;
+    upstream kibana_server {
+        server  192.168.100.142:5601 weight=1 max_fails=3 fail_timeout=60;
+    }
+    server {
+        listen 80;
+        server_name 192.168.100.150;
+        location / {
+        proxy_pass http://kibana_server;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        }
+       }
+    }
+
+root@tomcat-server-node1:~# nginx -t
+nginx: the configuration file /apps/nginx/conf/nginx.conf syntax is ok
+nginx: configuration file /apps/nginx/conf/nginx.conf test is successful
+root@tomcat-server-node1:~# nginx -s reload
 ```
 
+## 6.2 访问试试
+
+![](png/2020-03-22-22-55-51.png)
+
+## 6.3 登录认证配置
+
+### 6.3.1 创建认证文件
+
+```bash
+# Centos
+~# yum install httpd-tools
+
+# Ubuntu
+root@tomcat-server-node1:~# apt install apache-utils
+
+root@tomcat-server-node1:~# htpasswd -bc  /apps/nginx/conf/htpasswd.users stevenux stevenux
+Adding password for user stevenux
+root@tomcat-server-node1:~# cat /apps/nginx/conf/htpasswd.users
+stevenux:$apr1$xYOszdHs$b2GX4zCBNv6tuNj427WoT1
+root@tomcat-server-node1:~# htpasswd -b  /apps/nginx/conf/htpasswd.users jack stevenux
+Adding password for user jack
+root@tomcat-server-node1:~# cat /apps/nginx/conf/htpasswd.users
+stevenux:$apr1$xYOszdHs$b2GX4zCBNv6tuNj427WoT1
+jack:$apr1$hfqwuymq$J4G86iNOyjUA08yMPhVU8.
 ```
+
+### 6.3.2 nginx 配置
+
+```bash
+root@tomcat-server-node1:~# vim /apps/nginx/conf/nginx.conf
+...
+server {
+        listen 80;
+        server_name 192.168.100.150;
+        auth_basic "Restricted Access";  # 添加这两翰
+        auth_basic_user_file /apps/nginx/conf/htpasswd.users;
+        location / {
+        proxy_pass http://kibana_server;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        }
+...
+
+root@tomcat-server-node1:~# nginx -t
+nginx: the configuration file /apps/nginx/conf/nginx.conf syntax is ok
+nginx: configuration file /apps/nginx/conf/nginx.conf test is successful
+root@tomcat-server-node1:~# nginx -s reload
+```
+
+## 6.4 访问试试
+
+![](png/2020-03-22-23-07-53.png)
+
+![](png/2020-03-22-23-08-04.png)
+
+![](png/2020-03-22-23-08-12.png)
