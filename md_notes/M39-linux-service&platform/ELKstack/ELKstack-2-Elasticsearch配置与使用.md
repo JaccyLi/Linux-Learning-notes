@@ -110,6 +110,16 @@ vm.max_map_count = 262144
 ...
 ```
 
+更改`/etc/systemd/system.sconf`进行默认的资源限制调整:
+
+```bash
+~# vim /etc/systemd/system.conf
+...
+DefaultLimitNOFILE=65536
+DefaultLimitNPROC=32000
+DefaultLimitMEMLOCK=infinity
+```
+
 更改上面的配置后，重启系统：
 
 ```bash
