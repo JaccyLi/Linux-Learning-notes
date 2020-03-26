@@ -159,6 +159,20 @@ web 端。
 
 ### 3.1.2 dubbo-admin 部署
 
+1. 到 github 下载 dubbo-admin 源码，并解压
+   https://github.com/apache/dubbo-admin
+
+2. 使用 IntelliJ IEAD 作为工程打开，打开工程配置，新增一个 Artifacts
+   ![](png/2020-03-26-16-46-18.png)
+
+3. 点击构建，构建 Artifacts
+   ![](png/2020-03-26-16-47-49.png)
+
+![](png/2020-03-26-16-49-14.png)
+
+4. 部署：
+   将`dubboadmin.war`包上传到服务器，部署在 tomcat 的`webapps/`下：
+
 ```bash
 root@tomcat-server-node1:~# cd /usr/local/src/
 root@tomcat-server-node1:/usr/local/src# rz -E
