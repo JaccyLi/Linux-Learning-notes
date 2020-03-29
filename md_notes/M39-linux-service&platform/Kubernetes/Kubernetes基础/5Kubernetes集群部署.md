@@ -38,6 +38,20 @@ kubeadm 结合 apt-get/yum 安装必要软件安装，以守护进程的方式�
 
 ## 1.1 系统版本及 Kubernetes 组件版本
 
+部署该集群使用的操作系统、容器引擎、etcd 及 Kubernetes 版本信息：
+
+- OS: Ubuntu 18.04.3 LTS
+- CRI: Docker 19.03.8
+- Kubernetes: 1.17.2
+- kubeadm: v1.17.2
+
+运行试验虚拟机的外部环境：
+
+- 宿主机系统: Windows 10 Pro 1709
+- VMware workstation: Version 15 Pro
+- VMnet 网段: 192.168.100.0/24
+- VMnet 给虚拟机分配的网关: 192.168.100.2
+
 ## 1.2 主机名解析
 
 在个主机设置集群的 IP 和主机名解析：
@@ -48,6 +62,24 @@ kubeadm 结合 apt-get/yum 安装必要软件安装，以守护进程的方式�
 192.168.100.142 cube-master1 cube-master1.suosuoli.cn
 192.168.100.144 cube-master2 cube-master2.suosuoli.cn
 192.168.100.146 cube-master3 cube-master3.suosuoli.cn
+
+192.168.100.160 node1 node1.suosuoli.cn
+192.168.100.162 node2 node2.suosuoli.cn
+192.168.100.164 node3 node3.suosuoli.cn
+
+192.168.100.150 ha1 ha1.suosuoli.cn
+192.168.100.152 ha2 ha2.suosuoli.cn
+192.168.100.154 harbor harbor.suosuoli.cn
+```
+
+在 VMware 的宿主机，也就是自己的物理主机 windows 上添加 hosts 解析：
+
+![](png/2020-03-29-13-49-13.png)
+
+```bash
+192.168.100.142 kube-master1 kube-master1.suosuoli.cn
+192.168.100.144 kube-master2 kube-master2.suosuoli.cn
+192.168.100.146 kube-master3 kube-master3.suosuoli.cn
 
 192.168.100.160 node1 node1.suosuoli.cn
 192.168.100.162 node2 node2.suosuoli.cn
@@ -108,7 +140,9 @@ Ubuntu：
 5. 在各 Node 上使用`kubeadm join`命令加入初始化完成的集群。
 6. 在集群上部署网络组件，如 flannel 或者 calico 等来提供 service 网络和 pod 网络。
 
-## 2.2 在各 master 节点安装 kubeadm-kubelet-kubectl
+## 2.2 在各 master 节点安装 kubeadm-kubelet-kubectl-Docker
+
+[安装 Docker 参考](https://developer.aliyun.com/mirror/docker-ce?spm=a2c6h.13651102.0.0.3e221b11wMUfBy)
 
 ### 2.2.1 在阿里云配置 K8s 镜像源
 
@@ -316,10 +350,101 @@ docker pull egistry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.6.5
 
 #### 2.4.5.2 基于高可用方式初始化集群
 
+| IP              | 主机名              | 角色                                   |
+| :-------------- | :------------------ | :------------------------------------- |
+| 192.168.100.150 | ha1,ha1.suosuoli.cn | K8s 控制端访问入口 1(高可用及负载均衡) |
+| 192.168.100.152 | ha2,ha2.suosuoli.cn | K8s 控制端访问入口 1(高可用及负载均衡) |
+
 HAProxy 和 Keepalived 配置：
 
-```bash
+- HAProxy
 
+```bash
+root@ha1:~# cat /etc/haproxy/haproxy.cfg
+global
+	log /dev/log	local0
+	log /dev/log	local1 notice
+	chroot /var/lib/haproxy
+	stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+	stats timeout 30s
+	user haproxy
+	group haproxy
+	daemon
+	log 127.0.0.1 local6 info
+	ca-base /etc/ssl/certs
+	crt-base /etc/ssl/private
+
+	ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS
+	ssl-default-bind-options no-sslv3
+
+defaults
+	log	global
+	mode	http
+	option	httplog
+	option	dontlognull
+        timeout connect 5000
+        timeout client  50000
+        timeout server  50000
+	errorfile 400 /etc/haproxy/errors/400.http
+	errorfile 403 /etc/haproxy/errors/403.http
+	errorfile 408 /etc/haproxy/errors/408.http
+	errorfile 500 /etc/haproxy/errors/500.http
+	errorfile 502 /etc/haproxy/errors/502.http
+	errorfile 503 /etc/haproxy/errors/503.http
+	errorfile 504 /etc/haproxy/errors/504.http
+
+listen stats
+ 	mode http
+ 	bind 0.0.0.0:9999
+ 	stats enable
+ 	log global
+ 	stats uri     /haproxy-status
+ 	stats auth    haadmin:stevenux
+
+listen elasticsearch_cluster
+  mode tcp
+  balance roundrobin
+  bind 192.168.100.200:6443
+  server 192.168.100.142 192.168.100.142:6443 check inter 3s fall 3 rise 5
+  server 192.168.100.144 192.168.100.144:6443 check inter 3s fall 3 rise 5
+  server 192.168.100.146 192.168.100.146:6443 check inter 3s fall 3 rise 5
+```
+
+- Keepalived
+
+```bash
+root@ha1:~# cat /etc/keepalived/keepalived.conf
+global_defs {
+    notification_email {
+    root@localhost
+    }
+notification_email_from keepalived@localhost
+smtp_server 127.0.0.1
+smtp_connect_timeout 30
+router_id ha1.example.com
+vrrp_skip_check_adv_addr
+vrrp_strict
+vrrp_garp_interval 0
+vrrp_gna_interval 0
+
+vrrp_mcast_group4 224.0.0.18
+vrrp_iptables
+}
+
+vrrp_instance VI_1 {
+state MASTER
+interface eth0
+virtual_router_id 80
+priority 100  # 另一台keepalived配置为80
+advert_int 1
+authentication {
+auth_type PASS
+auth_pass stevenux
+}
+virtual_ipaddress {
+    192.168.100.200 dev eth0 label eth0:0
+}
+}
 ```
 
 **集群初始化：**
@@ -431,6 +556,19 @@ scheduler: {}
 
 ```bash
 ~# wget https://github.com/coreos/flannel/blob/master/Documentation/kube-flannel.yml
+
+# 编辑一下网段
+~# vim kube-flannel.yml
+...
+126   net-conf.json: |
+127     {
+128       "Network": "10.20.0.0/16",
+129       "Backend": {
+130         "Type": "vxlan"
+131       }
+132     }
+...
+
 ~# kubectl apply -f kube-flannel.yml
 ```
 
@@ -607,4 +745,404 @@ round-trip min/avg/max = 30.981/32.275/33.570 ms
 
 # 五. 部署 Dashboard
 
-## 5.1
+## 5.1 获取部署 dashboard 的 yaml 文件
+
+[Dashboard 项目地址](https://github.com/kubernetes/dashboard)
+[dashboard 2.0.0-rc6 部署 yaml 文件](https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc6/aio/deploy/recommended.yaml)
+
+修改 dashboard 的 yaml 部署文件，新增一项： `nodePort: 30003`， 新增该端口，
+作为外界访问 dashboard 的端口：
+
+```yaml
+root@kube-master1:~# cat recommended.yaml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubernetes-dashboard
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+spec:
+  type: NodePort
+  ports:
+    - port: 443
+      targetPort: 8443
+      nodePort: 30003 ########### 新增该端口，作为外界访问入口的端口
+  selector:
+    k8s-app: kubernetes-dashboard
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-certs
+  namespace: kubernetes-dashboard
+type: Opaque
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-csrf
+  namespace: kubernetes-dashboard
+type: Opaque
+data:
+  csrf: ""
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-key-holder
+  namespace: kubernetes-dashboard
+type: Opaque
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-settings
+  namespace: kubernetes-dashboard
+
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+rules:
+  # Allow Dashboard to get, update and delete Dashboard exclusive secrets.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      [
+        "kubernetes-dashboard-key-holder",
+        "kubernetes-dashboard-certs",
+        "kubernetes-dashboard-csrf",
+      ]
+    verbs: ["get", "update", "delete"]
+    # Allow Dashboard to get and update 'kubernetes-dashboard-settings' config map.
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["kubernetes-dashboard-settings"]
+    verbs: ["get", "update"]
+    # Allow Dashboard to get metrics.
+  - apiGroups: [""]
+    resources: ["services"]
+    resourceNames: ["heapster", "dashboard-metrics-scraper"]
+    verbs: ["proxy"]
+  - apiGroups: [""]
+    resources: ["services/proxy"]
+    resourceNames:
+      [
+        "heapster",
+        "http:heapster:",
+        "https:heapster:",
+        "dashboard-metrics-scraper",
+        "http:dashboard-metrics-scraper",
+      ]
+    verbs: ["get"]
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+rules:
+  # Allow Metrics Scraper to get metrics from the Metrics server
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kubernetes-dashboard
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-dashboard
+    namespace: kubernetes-dashboard
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubernetes-dashboard
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-dashboard
+    namespace: kubernetes-dashboard
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: kubernetes-dashboard
+  template:
+    metadata:
+      labels:
+        k8s-app: kubernetes-dashboard
+    spec:
+      containers:
+        - name: kubernetes-dashboard
+          image: kubernetesui/dashboard:v2.0.0-rc6
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8443
+              protocol: TCP
+          args:
+            - --auto-generate-certificates
+            - --namespace=kubernetes-dashboard
+            # Uncomment the following line to manually specify Kubernetes API server Host
+            # If not specified, Dashboard will attempt to auto discover the API server and connect
+            # to it. Uncomment only if the default does not work.
+            # - --apiserver-host=http://my-address:port
+          volumeMounts:
+            - name: kubernetes-dashboard-certs
+              mountPath: /certs
+              # Create on-disk volume to store exec logs
+            - mountPath: /tmp
+              name: tmp-volume
+          livenessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /
+              port: 8443
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 1001
+            runAsGroup: 2001
+      volumes:
+        - name: kubernetes-dashboard-certs
+          secret:
+            secretName: kubernetes-dashboard-certs
+        - name: tmp-volume
+          emptyDir: {}
+      serviceAccountName: kubernetes-dashboard
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      # Comment the following tolerations if Dashboard must not be deployed on master
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: dashboard-metrics-scraper
+  name: dashboard-metrics-scraper
+  namespace: kubernetes-dashboard
+spec:
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    k8s-app: dashboard-metrics-scraper
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    k8s-app: dashboard-metrics-scraper
+  name: dashboard-metrics-scraper
+  namespace: kubernetes-dashboard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: dashboard-metrics-scraper
+  template:
+    metadata:
+      labels:
+        k8s-app: dashboard-metrics-scraper
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
+    spec:
+      containers:
+        - name: dashboard-metrics-scraper
+          image: kubernetesui/metrics-scraper:v1.0.3
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /
+              port: 8000
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-volume
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 1001
+            runAsGroup: 2001
+      serviceAccountName: kubernetes-dashboard
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      # Comment the following tolerations if Dashboard must not be deployed on master
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+```
+
+编辑另一个 yaml 文件，添加 dashboard 访问权限:
+
+```bash
+root@kube-master1:~# cat admin-user.yml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+```
+
+## 5.2 部署 dashboard
+
+部署：
+
+```bash
+root@kube-master1:~# kubectl apply -f recommended.yaml
+root@kube-master1:~# kubectl apply -f admin-user.yml
+```
+
+查看 dashboard 的 pod 是否启动：
+
+```bah
+root@kube-master1:~# kubectl get pod -A | grep dashboard
+kubernetes-dashboard   dashboard-metrics-scraper-7b8b58dc8b-vnf8s   1/1     Running   0          15h
+kubernetes-dashboard   kubernetes-dashboard-5f5f847d57-tc6fw        1/1     Running   0          15h
+
+root@kube-master1:~# lsof -i:30003
+COMMAND     PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+kube-prox 47649 root    8u  IPv6 649811      0t0  TCP *:30003 (LISTEN)
+```
+
+## 5.3 获取登录 token
+
+```bash
+root@kube-master1:~# kubectl get secret -A | grep admin
+kubernetes-dashboard   admin-user-token-mkgkn                           kubernetes.io/service-account-token   3      15h
+root@kube-master1:~# kubectl describe secret admin-user-token-mkgkn -n kubernetes-dashboard
+Name:         admin-user-token-mkgkn
+Namespace:    kubernetes-dashboard
+Labels:       <none>
+Annotations:  kubernetes.io/service-account.name: admin-user
+              kubernetes.io/service-account.uid: 2aee056a-7092-449f-a45a-008438fca84d
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     1025 bytes
+namespace:  20 bytes
+token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IlJLZV9IcWxZQnQyVlZqQnd6TWVLUEtGcDBrTzVWWlU3TEh0ckdQV0RKN3MifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLW1rZ2tuIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiIyYWVlMDU2YS03MDkyLTQ0OWYtYTQ1YS0wMDg0MzhmY2E4NGQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.ZLLJP1Fq8Tqz-lIzaf-W6zZ9r1p4O2A9eMlqBuZ-nkJ9f_6lHg_269iowj9qLLuSgeQ97AidB888XMU9lSNJCVUmB6INSXheJzIR6FGto6_twDY659fHWXNUJK3xdy3SS-v9GYizeo3NA5aBXd0JQFXumw_cTwtg44ZrxWugVsBAsxy4ehIgD1cvWu77Lc3Tyr5mpNmp7S538GHgJ8ZP1MGSGPk6SZL4TBFDayTu7WYp8iFJjP-fSdyr_tmgkjuhoF6re3j_g0cjSUwAlXeZ4eg1txwVVs-Z6DOkCBxn8RVBpbR-l-3zyQ2JpytLmXvSk4L537OmiUa5r_fTCF9vPg
+# 使用该token登录dashboard
+```
+
+## 5.3 查看 dashboard 的端口
+
+访问 dashboard 的端口，也就是在`recommanded.yaml`部署文件中新加的`NodePort`
+
+```bash
+root@kube-master1:~# kubectl get service -A | grep dashboard
+kubernetes-dashboard   dashboard-metrics-scraper   ClusterIP   172.20.5.237   <none>        8000/TCP                 15h
+kubernetes-dashboard   kubernetes-dashboard        NodePort    172.20.4.238   <none>        443:30003/TCP            15h
+```
+
+## 5.4 登录 dashboard
+
+访问:`https://192.168.100.142:30003/#/login`
+
+![](png/2020-03-29-13-51-31.png)
+
+设置了宿主机 hosts 解析，则可以访问:
+`https://kube-master1.suosuoli.cn:30003/#/login`
+
+![](png/2020-03-29-13-51-55.png)
+
+使用`kube-master1`上得到的 token 登录：
+
+![](png/2020-03-29-13-55-44.png)
+
+## 5.5 登录主界面
+
+![](png/2020-03-29-13-57-55.png)
+
+查看全部命名空间的资源情况：
+![](png/2020-03-29-13-58-33.png)
