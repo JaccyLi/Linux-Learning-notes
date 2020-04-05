@@ -146,7 +146,9 @@ Kubernetes 的 API 以层级结构组织在一起，常用的 API 群组可以�
 - **核心群组(core group)：**REST 路径为`/api/v1`，在资源的配置信息`apiVersion`字段中
   引用时可以不用指定路径，如:"apiVersion: v1"
 
-- **命名的群组(named group)：**
+- **命名的群组(named group)：** REST 路径为`/api/$GROUP_NAME/$VERSION`，例如
+  `/apis/apps/v1`，其在 apiVersion 字段中引用的格式为:"apiVersion: $GROUP_NAME/$VERSION"，
+  如："apiVersion: apps/v1"
 
 - 获取名为 apps 的 API 群组信息：
 
