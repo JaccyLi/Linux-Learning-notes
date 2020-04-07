@@ -1,10 +1,17 @@
 > 1.nginx 和 apache 的区别?
 
 > 2.LVS 三种模式的工作过程?
-> 3.mysql 数据库备份的方法? 4.列举知道的负载均衡 5.源码编译安装 apache,要求为:安装目录为/usr/local/apache,需有压缩模块，
+> 3.mysql 数据库备份的方法? 
+>
+> 4.列举知道的负载均衡 
+>
+> 5.源码编译安装 apache,要求为:安装目录为/usr/local/apache,需有压缩模块，
 > rewrite,worker 模式;并说明在 apache 的 worker MPM 中，为什么 ServerLimit 要
-> 放到配置段最前面? 6. 7.
-> 8.hellodb_innodb.sql 内容如下，使用其生成的表来完成以下查询。
+> 放到配置段最前面? 
+>
+> 6. 
+> 7. 
+> 8. 8.hellodb_innodb.sql 内容如下，使用其生成的表来完成以下查询。
 
 ```sql
 -- MySQL dump 10.13  Distrib 5.5.33, for Linux (x86_64)
