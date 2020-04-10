@@ -1,5 +1,5 @@
 #!/bin/bash 
-# Edited by suosuoli.cn on 2020.03.15
+# Created by suosuoli.cn on 2020.03.15
 # A script for deploy automation.
 # The script can only work with ubuntu and Jenkins.
 # Run it manully via root also works.
