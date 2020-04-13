@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>蒙特卡洛运维面试题解答.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="%E7%AC%AC%E4%B8%80%E9%A2%98%E7%AD%94%E6%A1%88">第一题答案:</h1>
+<pre class="hljs"><code><div>[root@lab-server2 ~]<span class="hljs-comment"># cat access.log </span>
+2019/03/12 21:23:25 [info] client: 118.124.94.110 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=4e8227b63&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+2019/03/12 21:23:25 [error] client: 118.124.94.110 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=4e8227b63&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+2019/03/12 21:23:25 [error] client: 118.124.94.110 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=4e8227b63&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+2019/03/12 21:23:25 [info] client: 118.124.94.110 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=4e8227b63&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+2019/03/12 21:23:25 [error] client: 118.124.94.110 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=4e8227b63&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+2019/03/12 21:23:25 [error] client: 118.124.94.173 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=2d20b53c5&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+2019/03/12 21:23:25 [error] client: 118.124.94.173 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=2d20b53c5&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+2019/03/12 21:23:25 [error] client: 118.124.94.27 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=fa7c727f0&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+2019/03/12 21:23:25 [error] client: 118.124.94.75 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=e7c5fbd34&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+2019/03/12 21:23:25 [info] client: 118.124.94.29 server: www.minerbabe.com, request: <span class="hljs-string">"GET /keys/ssh/pb?device_id=d4b3050af&amp;need_update=0 HTTP/1.1"</span>, host: <span class="hljs-string">"www.minerbabe.com"</span> 
+</div></code></pre>
+<pre class="hljs"><code><div>[root@lab-server2 ~]<span class="hljs-comment"># echo " IP                 error_cnt" ; awk '/error/{ip[$5]++}END{for(i in ip){printf("%s %6s\n",i ,ip[i])}}' access.log | sort -k2 -nr </span>
+IP                  error_cnt
+118.124.94.110      3
+118.124.94.173      2
+118.124.94.75       1
+118.124.94.27       1
+</div></code></pre>
+<h1 id="%E7%AC%AC%E4%BA%8C%E9%A2%98%E7%AD%94%E6%A1%88">第二题答案:</h1>
+<p>脚本思路：</p>
+<ol>
+<li>批量分发秘钥到各主机</li>
+<li>使用ssh连到远程主机取到磁盘占用最高者</li>
+<li>取到的值与阈值90%比较，大于90%则记录该主机和对应的占用数值</li>
+<li>将统计日志存放到本机</li>
+</ol>
+<p>脚本</p>
+<pre class="hljs"><code><div>[root@lab-server2 ~]<span class="hljs-comment"># cat mass_check_disk.sh </span>
+<span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># script to get a list of hosts' disk usage.</span>
+<span class="hljs-comment">#</span>
+
+PASS=<span class="hljs-string">"stevenux"</span>
+IP_LIST=<span class="hljs-string">"
+192.168.100.150
+192.168.100.152
+192.168.100.40
+"</span>
+
+<span class="hljs-keyword">if</span> [ ! -e /root/.ssh/id_rsa ]; <span class="hljs-keyword">then</span>
+  ssh-keygen -P <span class="hljs-string">""</span> -f <span class="hljs-string">"/root/.ssh/id_rsa"</span> 2&gt; /dev/null
+<span class="hljs-keyword">fi</span>
+rpm -q sshpass &amp;&gt; /dev/null || yum -y install sshpass
+
+<span class="hljs-keyword">if</span> [ -f /opt/disk_full_host.log ]; <span class="hljs-keyword">then</span>
+  cp /opt/disk_full_host.{<span class="hljs-built_in">log</span>,bak-`date +%F-%T`}
+  rm -f /opt/disk_full_host.log
+<span class="hljs-keyword">fi</span>
+
+<span class="hljs-keyword">for</span> host <span class="hljs-keyword">in</span> <span class="hljs-variable">${IP_LIST}</span>; <span class="hljs-keyword">do</span> 
+    sshpass -p <span class="hljs-variable">${PASS}</span> ssh-copy-id <span class="hljs-variable">${host}</span> -o StrictHostKeyChecking=no
+    <span class="hljs-keyword">if</span> [ $? -eq 0 ]; <span class="hljs-keyword">then</span>
+        <span class="hljs-built_in">echo</span> <span class="hljs-string">"copy pubkey to <span class="hljs-variable">${host}</span> done."</span>
+    <span class="hljs-keyword">else</span>
+        <span class="hljs-built_in">echo</span> <span class="hljs-string">"copy pubkey to <span class="hljs-variable">${host}</span> failed."</span>
+    <span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">done</span>
+
+
+<span class="hljs-keyword">for</span> host <span class="hljs-keyword">in</span> <span class="hljs-variable">${IP_LIST}</span>; <span class="hljs-keyword">do</span> 
+    NUM=`ssh root@<span class="hljs-variable">${host}</span> <span class="hljs-string">"df -h|awk -F '[ %]+'  '/\/$/{print <span class="hljs-variable">$5</span>}'"</span> | awk <span class="hljs-string">'{print $5}'</span> |cut -d% -f1`
+    <span class="hljs-keyword">if</span> [ <span class="hljs-variable">$NUM</span> -gt 5 ];<span class="hljs-keyword">then</span>
+      <span class="hljs-built_in">echo</span> <span class="hljs-string">"Host:<span class="hljs-variable">${host}</span>  Disk usage:<span class="hljs-variable">${NUM}</span>"</span> &gt;&gt; /opt/disk_full_host.log
+    <span class="hljs-keyword">fi</span>
+<span class="hljs-keyword">done</span>
+</div></code></pre>
+<p>运行结果：</p>
+<pre class="hljs"><code><div>[root@lab-server2 ~]<span class="hljs-comment"># cat /opt/disk_full_host.log </span>
+Host:192.168.100.150  Disk usage:15
+Host:192.168.100.152  Disk usage:17
+Host:192.168.100.40  Disk usage:11
+</div></code></pre>
+<p>说明：为了看见效果，此处将阈值调为5%，三台主机的最大磁盘占用分别为15%、%17和%11
+如果每台主机的密码不一样，可以将密码和ip使用某种格式保存在存文本中，使用循环读取
+密码和ip进行秘钥分发和管理。</p>
+<h1 id="%E7%AC%AC%E4%B8%89%E9%A2%98%E7%AD%94%E6%A1%88">第三题答案:</h1>
+<h2 id="1-xmr%E5%B8%81%E6%83%85%E5%86%B5%E4%BB%8B%E7%BB%8D">1. XMR币情况介绍</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">信息</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">英文名</td>
+<td style="text-align:left">Monero或者XMR</td>
+</tr>
+<tr>
+<td style="text-align:left">中文名</td>
+<td style="text-align:left">门罗币</td>
+</tr>
+<tr>
+<td style="text-align:left">区块时间</td>
+<td style="text-align:left">1 Minute</td>
+</tr>
+<tr>
+<td style="text-align:left">总发行量</td>
+<td style="text-align:left">1500 0000</td>
+</tr>
+<tr>
+<td style="text-align:left">币发行时间</td>
+<td style="text-align:left">2014-04-18</td>
+</tr>
+<tr>
+<td style="text-align:left">官网</td>
+<td style="text-align:left">getmonero.org</td>
+</tr>
+<tr>
+<td style="text-align:left">项目地址</td>
+<td style="text-align:left">https://github.com/monero-project</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-%E6%80%BB%E7%BB%93">2. 总结</h2>
+<p>门罗币/XMR是一种数字货币，XMR 是暗网市场的主流支付货币之一，其基于CryptoNote协议，可以有效对抗使用
+专用集成电路开发的矿机的算力垄断，并且相对于其它的币种其对使用CPU挖矿较友好。另外，其和比特币以及其
+他数字货币的区别是在于其保密性。在XMR币的发行体系中，所有的交易都做了加密处理，任何人无法查到其他人
+的交易记录以及账户余额，不像比特币或者以太坊那样是的公开透明，保护了账户拥有者的信息安全。所以，门
+罗币被黑客和暗网交易所青睐。同时，门罗币的挖矿算法和比特币等也不同，它使用CryptoNight算法。这个算
+法是AES密集型算法，很耗内存，这显著降低了GPU对CPU的优势。所以，用CPU挖矿比GPU挖矿效率还高，这样普
+通的PC机也可以进行挖矿了。</p>
+<p><strong>XMR强调隐私技术</strong>：没有任何办法可以公开查看门罗的链上交易信息。替代方案是, 用户可以公开自己的
+查看密钥（view key）给特定人关联有限的交易信息。披露的交易范围和信息，用户可以自由界定。</p>
+<p>首先门罗使用一次性地址把全部地址隐藏起来，用户接收加密货币的地址相当于一个一次性的保险柜，只有使用
+者可以打开，没有人知道这些保险柜归属于谁，有多少被谁掌握，里面有没有可用的门罗币。</p>
+<p>同样，门罗币通过隐藏资金来源来隐藏发出人。环形签名在区块链中隐藏了真正的发送方。此外，由于这些输出
+未与特定地址相关联，因此观察者无法分辨这些输出与哪个地址相关联。另一面，节点看到交易是从可用的资金
+来源发送的，而资金去向却无从考证。隐身地址和环签名一起工作从而有效地隐藏交易信息。</p>
+<p>最后，门罗币通过环型机密交易（RingCT）隐藏交易金额。RingCT是基于比特币的机密交易。尽管该技术仅能隐
+藏交易金额，而不是全部交易明细。幸运的是，门罗币的另外两个功能可以帮助掩藏接受者和发送者。</p>
+<p><strong>XMR具有公平的工作量证明挖掘算法</strong>：XMR可在CPU和GPU上进行挖掘。它具有自适应的块大小，以适应交易量
+中的大峰值，而不会不必要地增长或陷入任意约束中（没有扩容问题，译者注）。门罗币（Monero）支持全节点
+修剪功能，可以将旧事务减少到其大小的五分之二（全节点未经裁剪70G）。门罗币的隐私，安全性和扩展性一直
+在提高。</p>
+<p>门罗币使用场景：暗网交易、日常消费（目前很少），电竞虚拟产品等。</p>
+<h2 id="3-%E6%B3%A8%E5%86%8C%E5%92%8C%E4%BD%BF%E7%94%A8wallets">3. 注册和使用Wallets</h2>
+<p><img src="png/2020-04-13-14-14-06.png" alt="">
+<img src="png/2020-04-13-14-16-07.png" alt="">
+<img src="png/2020-04-13-14-16-49.png" alt="">
+<img src="png/2020-04-13-14-21-34.png" alt=""></p>
+<p>下载速度很慢，可以使用<code>Internet Download Manager</code>通过火狐浏览器下载：
+<img src="png/2020-04-13-14-26-01.png" alt=""></p>
+<p>安装Monero GUI：
+<img src="png/2020-04-13-14-28-29.png" alt="">
+<img src="png/2020-04-13-14-28-48.png" alt="">
+<img src="png/2020-04-13-14-29-23.png" alt=""></p>
+<p>界面：
+<img src="png/2020-04-13-14-30-10.png" alt=""></p>
+<p>这里我选简单模式，没下载区块到本地：
+<img src="png/2020-04-13-14-31-04.png" alt=""></p>
+<p><img src="png/2020-04-13-14-32-02.png" alt=""></p>
+<p><img src="png/2020-04-13-14-32-31.png" alt=""></p>
+<p><img src="png/2020-04-13-14-33-33.png" alt=""></p>
+<p><img src="png/2020-04-13-14-34-08.png" alt=""></p>
+<p><img src="png/2020-04-13-14-34-18.png" alt=""></p>
+<p><img src="png/2020-04-13-14-34-38.png" alt=""></p>
+<p><img src="png/2020-04-13-14-35-03.png" alt=""></p>
+<p><a href="https://github.com/xmrig/xmrig/releases">下载xmrig-v5.10.0release</a>
+启动参数修改：
+<img src="png/2020-04-13-15-19-48.png" alt=""></p>
+<p>显示挖矿进程连接成功：
+<img src="png/2020-04-13-15-16-46.png" alt=""></p>
+<ol start="4">
+<li>使用结论</li>
+</ol>
+<ul>
+<li>
+<p>挖币需要用到的几个参数：
+1、交易账号
+2、钱包地址
+3、Payment ID
+4、Worker ID
+5、邮箱地址
+1和2必须，后面的可以不使用。</p>
+</li>
+<li>
+<p>使用Linux来挖矿时可以拉取官方代码，使用cmake编译</p>
+</li>
+<li>
+<p>挖矿参数使用json文件保存，修改该json就可以定义挖矿细节</p>
+</li>
+</ul>
+<h3 id="%E7%9F%BF%E6%B1%A0%E6%AF%94%E8%BE%83">矿池比较</h3>
+<ul>
+<li>哈鱼矿池</li>
+</ul>
+<p>2018年新成立的公司，致力于推广区块链的使用。
+<img src="png/2020-04-13-15-23-31.png" alt=""></p>
+<ul>
+<li>鱼池
+综合性矿池，支持众多的币种，教程全面，性能发挥占比高。
+<img src="png/2020-04-13-15-26-13.png" alt=""></li>
+</ul>
+<p>矿池比较也可以参考：http://moneropools.com/</p>
+<h3 id="%E6%8C%96%E7%9F%BF%E6%94%B6%E7%9B%8A">挖矿收益</h3>
+<p>查看地址：https://www.f2pool.com/xmr/47fvmWgT8DASrzqDS7S4f8MXVbV3Kwxu1akxvPatF8H5QamtNUkYkRqck4u27QAwkoeRrfY8HK5KZdkd1EocJH4iNsXXTDL</p>
+<h3 id="%E6%8C%96%E7%9F%BF%E6%94%B6%E7%9B%8A%E8%AE%A1%E7%AE%97">挖矿收益计算</h3>
+<p>此处使用本机的I7 9750H CPU 进行挖矿，未启用N卡，可以从OPENCL和CUDA核心处的<code>disable</code>值看出:</p>
+<p><img src="png/2020-04-13-15-32-36.png" alt=""></p>
+<p>算力大概在：1512.8H/s - 1848.8 H/s 之间，本机还运行有虚拟机和其他任务，会出现波动。</p>
+<p><img src="png/2020-04-13-15-42-24.png" alt=""></p>
+
+</body>
+</html>
