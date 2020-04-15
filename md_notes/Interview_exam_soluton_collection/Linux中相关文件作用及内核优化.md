@@ -1,11 +1,18 @@
 # Linux文件及作用
 
-| 文件                                     | 作用                                                     | 备注                          |
-| :--------------------------------------- | :------------------------------------------------------- | :---------------------------- |
-| CentOS                                   |                                                          |                               |
-| /etc/sysctl.conf                         | 修改和存放内核参数                                       | 使用`sysctl -p`让内核参数生效 |
-| /proc/net/nf_conntrack                   | iptables 的 state 扩展模块已经追踪到并记录下来的连接信息 |                               |
-| /proc/sys/net/netfilter/nf_conntrack_max | 调整连接追踪功能所能够容纳的最大连接数量                 |                               |
+| 文件                                     | 作用                                                         | 备注                          |
+| :--------------------------------------- | :----------------------------------------------------------- | :---------------------------- |
+| CentOS                                   |                                                              |                               |
+| /etc/sysctl.conf                         | 修改和存放内核参数                                           | 使用`sysctl -p`让内核参数生效 |
+| /proc/net/nf_conntrack                   | iptables 的 state 扩展模块已经追踪到并记录下来的连接信息     |                               |
+| /proc/sys/net/netfilter/nf_conntrack_max | 调整连接追踪功能所能够容纳的最大连接数量                     |                               |
+| /etc/mtab                                | mount读取该文件来显示挂载详细信息                            |                               |
+| /proc/partitions                         | 系统分区信息                                                 |                               |
+| /etc/issue                               | 登录系统提示                                                 |                               |
+| /etc/fstab                               | 该文件每行定义一个要挂载的文件系统                           |                               |
+| /proc/swaps                              | 查看系统中当前已激活交换区域的信息                           |                               |
+| /proc/filesystems                        | 从Linux的专有文件/proc/filesystems中可以查看当前为内核所知的文件系统类型。 |                               |
+|                                          |                                                              |                               |
 
 
 
